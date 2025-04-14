@@ -16,13 +16,15 @@ async function bootstrap() {
   // global pipe to transform field types into their needed types
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
-  startSwagger(app);
-
   // access environment variables
   const configService = app.get(ConfigService);
-  const port = configService.get('PORT', 8000);
+
+  // start swagger in dev mode
+  const isDev = configService.get('NODE_ENV') === 'development';
+  isDev && startSwagger(app);
 
   // start server
+  const port = configService.get('PORT', 8000);
   await app.listen(port);
 }
 bootstrap();
