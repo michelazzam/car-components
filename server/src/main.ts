@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { MainModule } from './modules/main.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { startSwagger } from './config/swagger';
 import { ConfigService } from '@nestjs/config';
 
@@ -15,6 +15,10 @@ async function bootstrap() {
 
   // global pipe to transform field types into their needed types
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   // access environment variables
   const configService = app.get(ConfigService);

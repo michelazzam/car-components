@@ -10,7 +10,7 @@ export function startSwagger(app: INestApplication) {
       .addSecurityRequirements('bearer')
       .setTitle('API Documentation')
       .setDescription('Use this documentation to interact with the API')
-      .setVersion('1.0')
+      .setVersion('1')
       .build(),
     {
       // add Modules here
