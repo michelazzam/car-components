@@ -1,0 +1,31 @@
+{
+  "name": "car-components",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
+    "client": "cd client && npm run dev",
+    "build:client": "cd client && npm run build",
+    "client:prod": "cd client && npm start",
+    "server": "cd server && npm run dev",
+    "build:server": "cd server && npm run build",
+    "server:prod": "cd server && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michelazzam/Car-Components.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/michelazzam/Car-Components/issues"
+  },
+  "homepage": "https://github.com/michelazzam/Car-Components#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
