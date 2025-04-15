@@ -79,7 +79,7 @@ export class UserService implements OnModuleInit {
   }
 
   async findAll() {
-    return await this.userModel.find();
+    return await this.userModel.find().select('-password');
   }
 
   async findOne(id: string) {

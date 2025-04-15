@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,11 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../user.schema';
 import { UserService } from '../user.service';
 import { JwtGeneratorService } from '../services/jwt-generator.service';
+import {
+  PermissionModuleAction,
+  PermissionModuleName,
+} from '../interfaces/user.permissions';
+import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -53,16 +59,48 @@ export class AuthGuard implements CanActivate {
           ],
         );
 
-        // no roles specified, allow access
-        if (!contextRoles) {
+        // Checking for permission-based authorization
+        const requiredPermissions = this.reflector.getAllAndOverride<{
+          moduleName: PermissionModuleName;
+          moduleAction: PermissionModuleAction;
+        }>(PERMISSIONS_KEY, [
+          context.getHandler(), // to handle methods
+          context.getClass(), // to handle classes
+        ]);
+
+        // No roles or permissions specified, allow access
+        if (!contextRoles && !requiredPermissions) {
           return true;
         }
 
-        // check if the user has the required role
-        return contextRoles.includes(user.role);
+        // Check if the user has the required role
+        if (contextRoles && !contextRoles.includes(user.role)) {
+          throw new ForbiddenException();
+        }
+
+        // Check if the user has the required permission
+        if (requiredPermissions) {
+          const { moduleName, moduleAction } = requiredPermissions;
+          const userPermissions = user.permissions;
+
+          // Check if the user has the required permission for the given module and action
+          if (
+            !userPermissions?.[moduleName] ||
+            !userPermissions?.[moduleName]?.[moduleAction]
+          ) {
+            throw new ForbiddenException(
+              `Insufficient permission: ${moduleName}:${moduleAction}`,
+            );
+          }
+        }
+
+        return true;
       } catch (error) {
         if (!isPublic) {
-          throw new UnauthorizedException('Invalid access token');
+          if (error?.status === 403)
+            throw new ForbiddenException(error?.message);
+
+          throw new UnauthorizedException(error?.message);
         } else {
           return true;
         }
