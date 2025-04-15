@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './user/guards/auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from 'src/cron-jobs/cron.service';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -27,6 +28,8 @@ import { CronService } from 'src/cron-jobs/cron.service';
     ScheduleModule.forRoot(),
 
     UserModule,
+
+    OrganizationModule,
   ],
   controllers: [],
   providers: [

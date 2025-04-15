@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { UserModule } from '../modules/user/user.module';
+import { OrganizationModule } from 'src/modules/organization/organization.module';
 
 export function startSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(
@@ -14,7 +15,7 @@ export function startSwagger(app: INestApplication) {
       .build(),
     {
       // add Modules here
-      include: [UserModule],
+      include: [UserModule, OrganizationModule],
     },
   );
 
