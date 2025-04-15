@@ -14,5 +14,7 @@ import { JwtService } from '@nestjs/jwt';
   ],
   controllers: [UserController],
   providers: [UserService, HashingService, JwtService, JwtGeneratorService],
+  // in this way, when other modules import this module they will have access to these services
+  exports: [UserService, JwtService, JwtGeneratorService],
 })
 export class UserModule {}

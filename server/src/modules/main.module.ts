@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvConfigService, validateEnv } from 'src/config/env.validation';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './user/guards/auth.guard';
 
 @Module({
   imports: [
@@ -22,7 +24,13 @@ import { EnvConfigService, validateEnv } from 'src/config/env.validation';
     UserModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    // provide guard to the whole app -> will protect all routes
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class MainModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

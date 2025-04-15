@@ -81,4 +81,8 @@ export class UserService implements OnModuleInit {
   async findAll() {
     return await this.userModel.find();
   }
+
+  async findOne(id: string) {
+    return this.userModel.findById(id).select('-password');
+  }
 }
