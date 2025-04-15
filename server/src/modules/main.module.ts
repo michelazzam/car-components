@@ -9,6 +9,7 @@ import { AuthGuard } from './user/guards/auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from 'src/cron-jobs/cron.service';
 import { OrganizationModule } from './organization/organization.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -27,9 +28,10 @@ import { OrganizationModule } from './organization/organization.module';
     // enable registering cron jobs
     ScheduleModule.forRoot(),
 
+    // APIs
     UserModule,
-
     OrganizationModule,
+    CustomerModule,
   ],
   controllers: [],
   providers: [
