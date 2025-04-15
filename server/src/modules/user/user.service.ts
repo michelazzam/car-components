@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { LoginDto } from './dto/login.dto';
 import { HashingService } from './services/hashing.service';
 import { JwtGeneratorService } from './services/jwt-generator.service';
+import { RateLimiterService } from './services/rate-limiter.service';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -12,6 +13,7 @@ export class UserService implements OnModuleInit {
     @InjectModel(User.name) private userModel: Model<IUser>,
     private readonly hashingService: HashingService,
     private readonly jwtGeneratorService: JwtGeneratorService,
+    private readonly rateLimiterService: RateLimiterService,
   ) {}
 
   // on server start
@@ -39,7 +41,7 @@ export class UserService implements OnModuleInit {
     }
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, ip: string) {
     const { username, password } = dto;
 
     // find user using username + should be active
@@ -49,15 +51,23 @@ export class UserService implements OnModuleInit {
         isActive: true,
       })
       .lean();
-    if (!user || !user.password)
+    if (!user || !user.password) {
+      this.rateLimiterService.registerFailedAttempt(ip);
       throw new BadRequestException('Invalid credentials');
+    }
 
     // compare password
     const validPassword = await this.hashingService.comparePassword({
       hashedPassword: user.password,
       password,
     });
-    if (!validPassword) throw new BadRequestException('Invalid credentials');
+    if (!validPassword) {
+      this.rateLimiterService.registerFailedAttempt(ip);
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    // If login is successful, reset failed attempts
+    this.rateLimiterService.resetFailedAttempts(ip);
 
     const userId = user._id?.toString();
 
