@@ -43,10 +43,12 @@ export class UserService implements OnModuleInit {
     const { username, password } = dto;
 
     // find user using username + should be active
-    const user = await this.userModel.findOne({
-      username,
-      isActive: true,
-    });
+    const user = await this.userModel
+      .findOne({
+        username,
+        isActive: true,
+      })
+      .lean();
     if (!user || !user.password)
       throw new BadRequestException('Invalid credentials');
 
@@ -64,10 +66,14 @@ export class UserService implements OnModuleInit {
         id: userId,
       });
 
+    // send the user data so the frontend save it in localstorage since this is a local system
+    const { password: _, ...userData } = user;
+
     return {
       data: {
         accessToken,
         refreshToken,
+        userData,
       },
     };
   }
