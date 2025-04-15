@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IUser, User } from './user.schema';
 import { Model } from 'mongoose';
@@ -6,6 +11,9 @@ import { LoginDto } from './dto/login.dto';
 import { HashingService } from './services/hashing.service';
 import { JwtGeneratorService } from './services/jwt-generator.service';
 import { RateLimiterService } from './services/rate-limiter.service';
+import { AddUserDto } from './dto/add-user.dto';
+import { EditUserDto } from './dto/edit-user.dto';
+import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -86,6 +94,63 @@ export class UserService implements OnModuleInit {
         userData,
       },
     };
+  }
+
+  async addUser(dto: AddUserDto) {
+    const { username, email, role, salary, password } = dto;
+
+    let hashedPassword = password
+      ? await this.hashingService.hashPassword(password)
+      : null;
+
+    await this.userModel.create({
+      username,
+      email,
+      role,
+      salary,
+      password: hashedPassword,
+    });
+  }
+
+  async editUser(userId: string, dto: EditUserDto) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const { username, email, role, salary, password } = dto;
+
+    // TODO: validate roles
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (role) user.role = role;
+    if (salary) user.salary = salary;
+    if (password) {
+      const hashedPassword = await this.hashingService.hashPassword(password);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+  }
+
+  async editUserPermissions(userId: string, dto: EditUserPermissionsDto) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const { permissions } = dto;
+    user.permissions = permissions;
+
+    await user.save();
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      isActive: false,
+      username: `${user.username}-${userId}`,
+      email: `${user.email}-${userId}`,
+    });
   }
 
   async findAll() {
