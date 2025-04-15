@@ -6,6 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvConfigService, validateEnv } from 'src/config/env.validation';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './user/guards/auth.guard';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronService } from 'src/cron-jobs/cron.service';
 
 @Module({
   imports: [
@@ -21,6 +23,9 @@ import { AuthGuard } from './user/guards/auth.guard';
       inject: [ConfigService],
     }),
 
+    // enable registering cron jobs
+    ScheduleModule.forRoot(),
+
     UserModule,
   ],
   controllers: [],
@@ -30,6 +35,9 @@ import { AuthGuard } from './user/guards/auth.guard';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+
+    // register cron jobs
+    CronService,
   ],
 })
 export class MainModule implements NestModule {

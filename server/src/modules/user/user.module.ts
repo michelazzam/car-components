@@ -22,6 +22,6 @@ import { RateLimiterService } from './services/rate-limiter.service';
     RateLimiterService,
   ],
   // in this way, when other modules import this module they will have access to these services
-  exports: [UserService, JwtService, JwtGeneratorService],
+  exports: [UserService, JwtService, JwtGeneratorService, RateLimiterService],
 })
 export class UserModule {}
