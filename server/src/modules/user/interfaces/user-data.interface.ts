@@ -1,6 +1,3 @@
 export interface UserData {
-  userId: number;
-  type: UserType;
+  id: string;
 }
-
-export type UserType = 'admin' | 'user';

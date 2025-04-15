@@ -3,6 +3,9 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User, UserSchema } from './user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HashingService } from './services/hashing.service';
+import { JwtGeneratorService } from './services/jwt-generator.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -10,6 +13,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, HashingService, JwtService, JwtGeneratorService],
 })
 export class UserModule {}
