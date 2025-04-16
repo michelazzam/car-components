@@ -3,6 +3,10 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User, UserSchema } from './user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HashingService } from './services/hashing.service';
+import { JwtGeneratorService } from './services/jwt-generator.service';
+import { JwtService } from '@nestjs/jwt';
+import { RateLimiterService } from './services/rate-limiter.service';
 
 @Module({
   imports: [
@@ -10,6 +14,14 @@ import { MongooseModule } from '@nestjs/mongoose';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [
+    UserService,
+    HashingService,
+    JwtService,
+    JwtGeneratorService,
+    RateLimiterService,
+  ],
+  // in this way, when other modules import this module they will have access to these services
+  exports: [UserService, JwtService, JwtGeneratorService, RateLimiterService],
 })
 export class UserModule {}
