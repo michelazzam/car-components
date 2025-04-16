@@ -35,16 +35,20 @@ export class UserController {
 
   @Roles('admin', 'superAmsAdmin')
   @Post('add')
-  async addUser(@Body() addUserDto: AddUserDto) {
-    await this.userService.addUser(addUserDto);
+  async addUser(@Body() addUserDto: AddUserDto, @User() reqUser: ReqUserData) {
+    await this.userService.addUser(addUserDto, reqUser);
 
     return { message: 'User added successfully' };
   }
 
   @Roles('admin', 'superAmsAdmin')
   @Put('edit/:id')
-  async editUser(@Body() editUserDto: EditUserDto, @Param('id') id: string) {
-    await this.userService.editUser(id, editUserDto);
+  async editUser(
+    @Body() editUserDto: EditUserDto,
+    @Param('id') id: string,
+    @User() reqUser: ReqUserData,
+  ) {
+    await this.userService.editUser(id, editUserDto, reqUser);
 
     return { message: 'User updated successfully' };
   }
@@ -62,8 +66,8 @@ export class UserController {
 
   @Roles('admin', 'superAmsAdmin')
   @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string) {
-    await this.userService.deleteUser(id);
+  async deleteUser(@Param('id') id: string, @User() user: ReqUserData) {
+    await this.userService.deleteUser(id, user);
 
     return { message: 'User deleted successfully' };
   }

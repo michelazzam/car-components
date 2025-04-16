@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   OnModuleInit,
@@ -14,6 +15,7 @@ import { RateLimiterService } from './services/rate-limiter.service';
 import { AddUserDto } from './dto/add-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
+import { ReqUserData } from './interfaces/req-user-data.interface';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -79,10 +81,9 @@ export class UserService implements OnModuleInit {
 
     const userId = user._id?.toString();
 
-    const { accessToken, refreshToken } =
-      await this.jwtGeneratorService.generateTokens({
-        id: userId,
-      });
+    const { accessToken } = await this.jwtGeneratorService.generateTokens({
+      id: userId,
+    });
 
     // send the user data so the frontend save it in localstorage since this is a local system
     const { password: _, ...userData } = user;
@@ -90,14 +91,18 @@ export class UserService implements OnModuleInit {
     return {
       data: {
         accessToken,
-        refreshToken,
         userData,
       },
     };
   }
 
-  async addUser(dto: AddUserDto) {
+  async addUser(dto: AddUserDto, reqUser: ReqUserData) {
     const { username, email, role, salary, password } = dto;
+
+    // admin cannot put superAmsAdmin
+    if (role === 'superAmsAdmin' && reqUser.role === 'admin') {
+      throw new ForbiddenException('Forbidden');
+    }
 
     let hashedPassword = password
       ? await this.hashingService.hashPassword(password)
@@ -112,13 +117,16 @@ export class UserService implements OnModuleInit {
     });
   }
 
-  async editUser(userId: string, dto: EditUserDto) {
+  async editUser(userId: string, dto: EditUserDto, reqUser: ReqUserData) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     const { username, email, role, salary, password } = dto;
 
-    // TODO: validate roles
+    // admin cannot put superAmsAdmin
+    if (role === 'superAmsAdmin' && reqUser.role === 'admin') {
+      throw new ForbiddenException('Forbidden');
+    }
 
     if (username) user.username = username;
     if (email) user.email = email;
@@ -142,7 +150,10 @@ export class UserService implements OnModuleInit {
     await user.save();
   }
 
-  async deleteUser(userId: string) {
+  async deleteUser(userId: string, reqUser: ReqUserData) {
+    if (reqUser._id.toString() === userId)
+      throw new BadRequestException('You cannot delete yourself!');
+
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
