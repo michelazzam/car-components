@@ -11,6 +11,7 @@ import { CronService } from 'src/cron-jobs/cron.service';
 import { OrganizationModule } from './organization/organization.module';
 import { CustomerModule } from './customer/customer.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { ServiceModule } from './service/service.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SupplierModule } from './supplier/supplier.module';
     OrganizationModule,
     CustomerModule,
     SupplierModule,
+    ServiceModule,
   ],
   controllers: [],
   providers: [

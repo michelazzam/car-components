@@ -30,24 +30,21 @@ export class SupplierController {
   }
 
   @Post()
-  async create(@Body() createCustomerDto: AddSupplierDto) {
-    await this.supplierService.create(createCustomerDto);
+  async create(@Body() dto: AddSupplierDto) {
+    await this.supplierService.create(dto);
 
     return { message: 'Supplier added successfully' };
   }
 
   @Put(':id')
-  async editCustomer(
-    @Param('id') id: string,
-    @Body() editCustomerDto: EditSupplierDto,
-  ) {
-    await this.supplierService.editSupplier(id, editCustomerDto);
+  async editSupplier(@Param('id') id: string, @Body() dto: EditSupplierDto) {
+    await this.supplierService.editSupplier(id, dto);
 
     return { message: 'Supplier updated successfully' };
   }
 
   @Delete(':id')
-  async deleteCustomer(@Param('id') id: string) {
+  async deleteSupplier(@Param('id') id: string) {
     await this.supplierService.deleteSupplier(id);
 
     return { message: 'Supplier deleted successfully' };

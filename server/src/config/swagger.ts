@@ -4,6 +4,7 @@ import { UserModule } from '../modules/user/user.module';
 import { OrganizationModule } from 'src/modules/organization/organization.module';
 import { CustomerModule } from 'src/modules/customer/customer.module';
 import { SupplierModule } from 'src/modules/supplier/supplier.module';
+import { ServiceModule } from 'src/modules/service/service.module';
 
 export function startSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(
@@ -17,7 +18,13 @@ export function startSwagger(app: INestApplication) {
       .build(),
     {
       // add Modules here
-      include: [UserModule, OrganizationModule, CustomerModule, SupplierModule],
+      include: [
+        UserModule,
+        OrganizationModule,
+        CustomerModule,
+        SupplierModule,
+        ServiceModule,
+      ],
     },
   );
 
