@@ -10,6 +10,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from 'src/cron-jobs/cron.service';
 import { OrganizationModule } from './organization/organization.module';
 import { CustomerModule } from './customer/customer.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { ServiceModule } from './service/service.module';
+import { ExpenseTypeModule } from './expense-type/expense-type.module';
+import { ExpenseModule } from './expense/expense.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { CustomerModule } from './customer/customer.module';
     UserModule,
     OrganizationModule,
     CustomerModule,
+    SupplierModule,
+    ServiceModule,
+    ExpenseTypeModule,
+    ExpenseModule,
   ],
   controllers: [],
   providers: [
