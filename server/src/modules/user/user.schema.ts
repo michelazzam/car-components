@@ -6,7 +6,12 @@ import {
   userPermissions,
 } from './interfaces/user.permissions';
 
-export const userRoles = ['user', 'admin', 'superAmsAdmin'] as const;
+export const userRoles = [
+  'user',
+  'admin',
+  'specialAccess',
+  'superAmsAdmin',
+] as const;
 export type UserRole = (typeof userRoles)[number];
 
 @Schema()
