@@ -13,6 +13,7 @@ import { CustomerModule } from './customer/customer.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { ServiceModule } from './service/service.module';
 import { ExpenseTypeModule } from './expense-type/expense-type.module';
+import { ExpenseModule } from './expense/expense.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ExpenseTypeModule } from './expense-type/expense-type.module';
     SupplierModule,
     ServiceModule,
     ExpenseTypeModule,
+    ExpenseModule,
   ],
   controllers: [],
   providers: [
