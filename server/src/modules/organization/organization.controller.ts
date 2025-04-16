@@ -1,4 +1,4 @@
-import { Body, Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Put } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -13,7 +13,7 @@ export class OrganizationController {
     return await this.organizationService.findOrganization();
   }
 
-  @Get('update')
+  @Put('update')
   async updateOrganization(@Body() dto: UpdateOrganizationDto) {
     await this.organizationService.updateOrganization(dto);
 
