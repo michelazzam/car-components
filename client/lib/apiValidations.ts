@@ -1,0 +1,265 @@
+import { z } from "zod";
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Required"),
+  password: z.string().min(5, "Length > 5"),
+});
+
+const UserSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  username: z.string().min(1, "Username is required"),
+  role: z.string().min(1, "Role is required"),
+  password: z.string().optional(),
+  phoneNumber: z
+    .string()
+    .min(11, "Phone number must be at least 11 characters long")
+    .optional()
+    .or(z.literal("")),
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters long")
+    .optional()
+    .or(z.literal("")),
+});
+const ProfileSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  username: z.string().min(1, "Username is required"),
+  phoneNumber: z
+    .string()
+    .min(11, "Phone number must be at least 11 characters long")
+    .optional()
+    .or(z.literal("")),
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters long")
+    .optional()
+    .or(z.literal("")),
+});
+export type ProfileSchema = z.infer<typeof ProfileSchema>;
+
+const ChangePassword = z.object({
+  currentPassword: z
+    .string()
+    .min(5, "Current password must be greater than 5 characters"),
+  //current password should be different than new password
+  newPassword: z
+    .string()
+    .min(5, "New password must be greater than 5 characters"),
+});
+
+export type ChangePassword = z.infer<typeof ChangePassword>;
+
+export type AddUserSchema = z.infer<typeof UserSchema>;
+
+const ProductSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  brand: z.string().min(1, "Name is required"),
+  price: z.number().min(1, "Price is required"),
+  cost: z.number(),
+  stock: z.number(),
+  note: z.string().optional(),
+});
+export type ProductSchema = z.infer<typeof ProductSchema>;
+
+const PrinterSchema = z.object({
+  name: z.string().min(1, "Name must be at least 3 characters"),
+  ipAddress: z.string().ip("IP Address must be in the format of xxx.xxx.x.x"),
+});
+export type PrinterSchema = z.infer<typeof PrinterSchema>;
+
+const CategorySchema = z.object({
+  name: z.string().min(1, "Name must be at least 3 characters"),
+});
+export type CategorySchema = z.infer<typeof CategorySchema>;
+const SupplierSchema = z.object({
+  name: z.string().min(1, "Supplier Name is required"),
+  phoneNumber: z.string().min(1, "Phone Number is required"),
+  address: z.string().optional(),
+  loans:z.number().optional(),
+})
+export type SupplierSchema = z.infer<typeof SupplierSchema>;
+
+// Organization
+const OrganizationSchema = z.object({
+  name: z.string().min(1, "Name must be at least 3 characters"),
+  address: z.string().min(1, "Address must be at least 3 characters"),
+  email: z.string().email("Email is invalid"),
+  phoneNumber: z.string().min(11, "Phone number must be at least 3 characters"),
+  tvaNumber: z.string().min(1, "TVA number must be at least 3 characters"),
+  tvaPercentage: z
+    .number()
+    .min(0, "TVA percentage must be at least 0")
+    .max(100, "TVA percentage must be less than 100"),
+});
+export type OrganizationSchema = z.infer<typeof OrganizationSchema>;
+
+const IncreaseStockSchema = z.object({
+  amount: z.number().min(1, "Amount should be greater than 0"),
+});
+export type IncreaseStockSchema = z.infer<typeof IncreaseStockSchema>;
+
+const ExpenseSchema = z.object({
+  expenseTypeId: z.string().min(1, "Expense type is required"),
+  amount: z.number().min(0, "Amount is required"),
+  date: z.date(),
+  note: z.string().optional(),
+});
+
+const ExpenseTypeSchema = z.object({
+  title: z.string().min(1, "title is required"),
+});
+
+const VehicleSchema = z.object({
+  customerId: z.string().min(1, "please choose a customer"),
+  model: z.string().min(1, "model is required"),
+  gasTypeId: z.string().min(1, "gas type is required"),
+  vehicleNb: z.string().min(1, "vehicle number is required"),
+});
+export type VehicleSchema = z.infer<typeof VehicleSchema>;
+
+const CustomerSchema = z.object({
+  name: z.string().min(1, "name is required"),
+  phone: z.string().min(11, "phone number is required"),
+  address: z.string().optional(),
+  email: z.string().optional(),
+  note: z.string().optional(),
+  tvaNumber: z.string().optional(),
+});
+
+const AddPaymentSchema = z
+  .object({
+    amountPaidUsd: z.number().min(0, "Amount paid in USD is required"),
+    amountPaidLbp: z.number().min(0, "Amount paid in LBP is required"),
+  })
+  .refine((data) => data.amountPaidUsd > 0 || data.amountPaidLbp > 0, {
+    path: ["payment"], // Custom path that you will check in your component
+    message: "Either Amount paid in USD or LBP must be greater than 0",
+  });
+
+export type AddPaymentSchema = z.infer<typeof AddPaymentSchema>;
+export type CustomerSchema = z.infer<typeof CustomerSchema>;
+// Add Invoice Schema
+const AddInvoiceSchema = z
+  .object({
+    invoiceNumber: z.number().optional(),
+    driverName: z.string().optional(),
+    discount: z.object({
+      amount: z.number().min(0, "Discount amount cannot be negative"),
+      type: z.string().min(1, "Discount type is required"),
+    }),
+    amountPaidUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
+    amountPaidLbp: z.number().min(0, "Amount paid in LBP cannot be negative"),
+    customerId: z.string().min(1, "Customer ID is required"),
+    customer: z
+      .object({
+        label: z.string().optional(),
+        phone: z.string().optional(),
+        address: z.string().optional(),
+        tvaNumber: z.string().optional(),
+      })
+      .optional(),
+    vehicle: z
+      .object({
+        vehicleNb: z.string().optional(),
+        model: z.string().optional(),
+      })
+      .optional(),
+
+    isPaid: z.boolean(),
+    hasVehicle: z.boolean(),
+    vehicleId: z.string().optional(),
+    products: z
+      .array(
+        z.object({
+          productId: z.string().min(1, "Product ID is required"),
+          quantity: z.number().min(1, "Quantity must be at least 1"),
+          price: z.number().min(0, "Price must be non-negative"),
+        })
+      )
+      .optional(),
+    services: z
+      .array(
+        z.object({
+          name: z.string().min(1, "Service name is required"),
+          quantity: z.number().min(1, "Quantity must be at least 1"),
+          price: z.number().min(0, "Price must be non-negative"),
+        })
+      )
+      .optional(),
+    generalNote: z.string().optional(),
+    customerNote: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.hasVehicle && !data.vehicleId) {
+        return false; // Fail validation if vehicle is required but not provided
+      }
+      return true;
+    },
+    {
+      message: "Vehicle ID is required.",
+      path: ["vehicleId"],
+    }
+  )
+  .refine(
+    (data) => {
+      console.log("Data:", data);
+
+      // Calculate the sum of products (quantity * price)
+      const productTotal =
+        data.products?.reduce(
+          (sum, product) => sum + product.quantity * product.price,
+          0
+        ) || 0;
+
+      console.log("Product Total:", productTotal);
+
+      // Calculate the sum of services (quantity * price)
+      const serviceTotal =
+        data.services?.reduce(
+          (sum, service) => sum + service.quantity * service.price,
+          0
+        ) || 0;
+
+      console.log("Service Total:", serviceTotal);
+
+      const total = productTotal + serviceTotal;
+      console.log("Total:", total);
+
+      if (data.discount.type === "fixed") {
+        return data.discount.amount <= total; // This should return false if invalid
+      } else {
+        return data.discount.amount >= 0 && data.discount.amount <= 100;
+      }
+    },
+    {
+      message: `Discount amount is not valid`,
+      path: ["discount", "amount"],
+    }
+  );
+export type AddInvoiceSchema = z.infer<typeof AddInvoiceSchema>;
+
+const DBBackupPath = z.object({
+  path: z.string().min(1, "Path is required"),
+});
+export type DBBackupPath = z.infer<typeof DBBackupPath>;
+
+export const apiValidations = {
+  Login: loginSchema,
+  AddUser: UserSchema,
+  AddEditProduct: ProductSchema,
+  AddEditPrinter: PrinterSchema,
+  AddEditCategory: CategorySchema,
+  changePassword: ChangePassword,
+  EditOrganization: OrganizationSchema,
+  IncreaseStock: IncreaseStockSchema,
+  AddExpense: ExpenseSchema,
+  VehicleSchema: VehicleSchema,
+  CustomerSchema: CustomerSchema,
+  AddPaymentSchema: AddPaymentSchema,
+  ProfileSchema: ProfileSchema,
+  AddInvoiceSchema: AddInvoiceSchema,
+  AddExpenseType: ExpenseTypeSchema,
+  DBBackupPath,
+  AddEditSupplier:SupplierSchema
+};

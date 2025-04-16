@@ -1,0 +1,89 @@
+import React from "react";
+import { Product } from "@/api-hooks/products/use-list-products";
+import { Item, usePosStore } from "@/shared/store/usePosStore";
+import { cn } from "@/utils/cn";
+
+function ItemCard({ product }: { product: Product }) {
+  //----------------Storage----------------------------
+  const { cart, addToCart, setQuantity } = usePosStore();
+
+  //------------------Functions--------------------
+  const handleInc = (item: Item) => {
+    setQuantity(item.name || "", item.price || 0, Number(item.quantity) + 1);
+  };
+
+  const addItemToCart = () => {
+    const isInCart = cart.find(
+      (element) =>
+        element.name === product?.name && element.price === product?.price
+    );
+
+    // If product is in the cart and there's stock left, increment quantity
+    if (isInCart) {
+      if (product?.stock > Number(isInCart.quantity)) {
+        handleInc(isInCart); // Increment quantity in the cart
+      }
+    } else {
+      // If product is not in the cart, add it to the cart
+      addToCart("product", product);
+    }
+  };
+
+  const isInCart = cart.find(
+    (item) => item.name === product?.name && item.price === product?.price
+  );
+  const itemCartQuantity = cart.reduce((acc, item) => {
+    if (item.name === product?.name && item.price === product?.price) {
+      return item.quantity || 0;
+    }
+    return acc;
+  }, 0);
+
+  const outOfStock = product?.stock < 1;
+
+  return (
+    <button
+      disabled={outOfStock}
+      onClick={addItemToCart}
+      className={cn(
+        "flex flex-col justify-between w-full h-full bg-white py-10 relative rounded-sm border disabled:opacity-80 disabled:cursor-not-allowed",
+        outOfStock
+          ? "border-danger"
+          : "hover:border-success/80 shadow-[0_0_4px_0_rgba(0,0,0,0.1)]",
+        isInCart ? "border-success" : ""
+      )}
+    >
+      {/* product stock top left*/}
+      <span
+        className={cn(
+          "absolute top-1 left-1 text-xs",
+          outOfStock ? "text-danger" : "text-gray-600"
+        )}
+      >
+        Stock: {product?.stock}
+      </span>
+
+      {/* in cart count top right*/}
+      {itemCartQuantity > 0 && (
+        <span
+          className={cn(
+            "absolute top-1 right-1",
+            product?.stock > 0
+              ? "text-white rounded-lg bg-success px-2"
+              : "text-danger"
+          )}
+        >
+          {itemCartQuantity}
+        </span>
+      )}
+      <div className="flex-grow flex flex-col justify-center items-center w-full text-center p-2">
+        <h3 className="font-semibold text-[.875rem] block text-truncate">
+          {product?.name}
+        </h3>
+        <div className="text-success text-lg font-bold">$ {product?.price}</div>
+      </div>
+    </button>
+  );
+}
+
+export default ItemCard;
