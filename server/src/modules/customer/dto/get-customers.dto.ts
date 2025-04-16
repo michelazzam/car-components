@@ -3,11 +3,11 @@ import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 
 export class GetCustomersDto {
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: true, type: Number })
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
   pageIndex: number = 0;
 
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: true, type: Number })
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
   pageSize: number = 10;
 

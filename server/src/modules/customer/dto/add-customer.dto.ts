@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsOptional, IsString } from 'class-validator';
 
-export class CustomerDto {
+export class AddCustomerDto {
   @ApiProperty({
     required: true,
     type: String,

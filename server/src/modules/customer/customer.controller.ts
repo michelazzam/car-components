@@ -10,9 +10,10 @@ import {
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CustomerDto } from './dto/customer.dto';
+import { AddCustomerDto } from './dto/add-customer.dto';
 import { EditCustomerDto } from './dto/edit-customer.dto';
 import { GetCustomersDto } from './dto/get-customers.dto';
+import { AddVehicleDto } from './dto/add-vehicle.dto';
 
 @ApiTags('Customer')
 @Controller({ version: '1', path: 'customers' })
@@ -21,17 +22,19 @@ export class CustomerController {
 
   @Get()
   async getAll(@Query() dto: GetCustomersDto) {
-    return await this.customerService.getAll(dto);
+    return this.customerService.getAll(dto);
   }
 
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return await this.customerService.getOne(id);
+    return this.customerService.getOne(id);
   }
 
   @Post()
-  async create(@Body() createCustomerDto: CustomerDto) {
-    return await this.customerService.create(createCustomerDto);
+  async create(@Body() createCustomerDto: AddCustomerDto) {
+    await this.customerService.create(createCustomerDto);
+
+    return { message: 'Customer added successfully' };
   }
 
   @Put(':id')
@@ -39,11 +42,32 @@ export class CustomerController {
     @Param('id') id: string,
     @Body() editCustomerDto: EditCustomerDto,
   ) {
-    return await this.customerService.editCustomer(id, editCustomerDto);
+    await this.customerService.editCustomer(id, editCustomerDto);
+
+    return { message: 'Customer updated successfully' };
   }
 
   @Delete(':id')
   async deleteCustomer(@Param('id') id: string) {
-    return await this.customerService.deleteCustomer(id);
+    await this.customerService.deleteCustomer(id);
+
+    return { message: 'Customer deleted successfully' };
+  }
+
+  @Post(':id/vehicle')
+  async addVehicle(@Param('id') id: string, @Body() dto: AddVehicleDto) {
+    await this.customerService.addVehicle(id, dto);
+
+    return { message: 'Vehicle added successfully' };
+  }
+
+  @Delete(':id/vehicle/:vehicleId')
+  async deleteVehicle(
+    @Param('id') id: string,
+    @Param('vehicleId') vehicleId: string,
+  ) {
+    await this.customerService.deleteVehicle(id, vehicleId);
+
+    return { message: 'Vehicle deleted successfully' };
   }
 }
