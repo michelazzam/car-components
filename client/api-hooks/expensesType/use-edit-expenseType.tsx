@@ -1,7 +1,6 @@
 import { API } from "@/constants/apiEndpoints";
 import { useUpdateData } from "@/api-service/useUpdateData";
 
-
 const useEditExpenseType = ({
   id,
   callBackOnSuccess,
@@ -9,7 +8,7 @@ const useEditExpenseType = ({
   id: string;
   callBackOnSuccess?: () => void;
 }) => {
-  return useUpdateData<{title:string}>({
+  return useUpdateData<{ name: string }>({
     queryKeysToInvalidate: [["expenses-type"]],
     endpoint: API.editExpenseType(id),
     callBackOnSuccess: callBackOnSuccess,

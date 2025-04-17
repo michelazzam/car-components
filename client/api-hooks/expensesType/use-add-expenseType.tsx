@@ -6,7 +6,7 @@ const useAddExpenseType = ({
 }: {
   callBackOnSuccess?: (resp: any) => void;
 }) => {
-  return usePostData<{ title: string }>({
+  return usePostData<{ name: string }>({
     queryKeysToInvalidate: [["expenses-type"]],
     endpoint: API.addExpenseType,
     callBackOnSuccess: callBackOnSuccess,

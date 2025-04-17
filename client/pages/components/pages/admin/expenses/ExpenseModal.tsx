@@ -39,7 +39,7 @@ function ExpenseModal({
   const { data: expenseType } = useListExpensesType();
   const expenseTypeOptions = expenseType?.map((exp) => {
     return {
-      label: exp?.title,
+      label: exp?.name,
       value: exp?._id,
     };
   });
@@ -86,12 +86,16 @@ function ExpenseModal({
     data: AddEditExpenseBodyParam
   ) => {
     if (expense) editProduct(data);
-    else addProduct(data);
+    else
+      addProduct({
+        ...data,
+        date: "2025-04-17",
+      });
   };
 
   const handleCreateOption = (data: string) => {
     mutation.mutate({
-      title: data,
+      name: data,
     });
   };
 

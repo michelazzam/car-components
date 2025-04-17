@@ -28,7 +28,7 @@ const ExpensesType = () => {
     if (expensesTypesData) {
       if (search) {
         const filtered = expensesTypesData.filter((item: ExpenseType) =>
-          item?.title.toLowerCase().includes(search.toLowerCase())
+          item?.name.toLowerCase().includes(search.toLowerCase())
         );
         setFilteredData(filtered);
       } else {

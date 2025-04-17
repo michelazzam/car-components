@@ -6,20 +6,22 @@ const loginSchema = z.object({
 });
 
 const UserSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
   username: z.string().min(1, "Username is required"),
-  role: z.string().min(1, "Role is required"),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        val === undefined ||
+        val === "" ||
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      {
+        message: "Invalid email format",
+      }
+    ),
   password: z.string().optional(),
-  phoneNumber: z
-    .string()
-    .min(11, "Phone number must be at least 11 characters long")
-    .optional()
-    .or(z.literal("")),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters long")
-    .optional()
-    .or(z.literal("")),
+  salary: z.number(),
+  role: z.string().min(1, "Role is required"),
 });
 const ProfileSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -75,8 +77,8 @@ const SupplierSchema = z.object({
   name: z.string().min(1, "Supplier Name is required"),
   phoneNumber: z.string().min(1, "Phone Number is required"),
   address: z.string().optional(),
-  loans:z.number().optional(),
-})
+  loans: z.number().optional(),
+});
 export type SupplierSchema = z.infer<typeof SupplierSchema>;
 
 // Organization
@@ -106,7 +108,7 @@ const ExpenseSchema = z.object({
 });
 
 const ExpenseTypeSchema = z.object({
-  title: z.string().min(1, "title is required"),
+  name: z.string().min(1, "title is required"),
 });
 
 const VehicleSchema = z.object({
@@ -119,9 +121,20 @@ export type VehicleSchema = z.infer<typeof VehicleSchema>;
 
 const CustomerSchema = z.object({
   name: z.string().min(1, "name is required"),
-  phone: z.string().min(11, "phone number is required"),
+  phoneNumber: z.string().min(11, "phone number is required"),
   address: z.string().optional(),
-  email: z.string().optional(),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        val === undefined ||
+        val === "" ||
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      {
+        message: "Invalid email format",
+      }
+    ),
   note: z.string().optional(),
   tvaNumber: z.string().optional(),
 });
@@ -261,5 +274,5 @@ export const apiValidations = {
   AddInvoiceSchema: AddInvoiceSchema,
   AddExpenseType: ExpenseTypeSchema,
   DBBackupPath,
-  AddEditSupplier:SupplierSchema
+  AddEditSupplier: SupplierSchema,
 };

@@ -1,4 +1,4 @@
-const AUTH_TOKEN_KEY = "THERMOBOX_AUTH_TOKEN";
+const AUTH_TOKEN_KEY = "CAR_COMPONENTS_AUTH_TOKEN";
 import { jwtDecode } from "jwt-decode";
 
 export function setAccessToken(token: string) {

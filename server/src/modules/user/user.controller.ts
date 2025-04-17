@@ -74,7 +74,9 @@ export class UserController {
 
   @Get('authenticate')
   authenticate(@User() user: ReqUserData) {
-    return user;
+    return {
+      user: user,
+    };
   }
 
   @Roles('admin', 'superAmsAdmin')

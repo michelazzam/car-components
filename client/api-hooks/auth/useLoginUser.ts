@@ -12,7 +12,7 @@ const useLoginUser = ({
     endpoint: "/users/login",
     callBackOnSuccess: (data) => {
       callBackOnSuccess && callBackOnSuccess();
-      setAccessToken(data.token); // This is now safe to call
+      setAccessToken(data.accessToken); // This is now safe to call
     },
   });
 };
@@ -27,6 +27,6 @@ type LoginUserData = {
 // Define the type for permissions in each category
 
 type ResponseData = {
-  token: string;
-  user: User;
+  accessToken: string;
+  userData: User;
 };

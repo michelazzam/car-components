@@ -5,17 +5,20 @@ import React, { Fragment, useEffect } from "react";
 
 const Main = () => {
   // const [loading, setLoading] = useState(true);
-  const { user } = UseAuth();
+  const { user, isLoading } = UseAuth();
   const router = useRouter();
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (user) {
+        console.log("I AM A USER");
         if (user.role === "employee") {
           router.push("/add-invoice");
         } else {
           router.push("/admin/balance");
         }
       } else {
+        console.log("I AM NOT A USER");
+        console.log("IS LOADING ", isLoading);
         router.push("/sign-in");
       }
       // setLoading(false);
