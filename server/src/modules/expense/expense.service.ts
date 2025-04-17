@@ -63,7 +63,8 @@ export class ExpenseService {
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
-        .limit(pageSize),
+        .limit(pageSize)
+        .populate('expenseType'),
       this.expenseModel.countDocuments(filter),
     ]);
 
@@ -96,7 +97,15 @@ export class ExpenseService {
   }
 
   async edit(id: string, dto: EditExpenseDto) {
-    const expense = await this.expenseModel.findOneAndUpdate({ _id: id }, dto);
+    const expense = await this.expenseModel.findOneAndUpdate(
+      { _id: id },
+      {
+        expenseType: dto.expenseTypeId,
+        amount: dto.amount,
+        date: dto.date,
+        note: dto.note,
+      },
+    );
     // TODO: update accounting
 
     if (!expense) throw new NotFoundException('Expense not found');

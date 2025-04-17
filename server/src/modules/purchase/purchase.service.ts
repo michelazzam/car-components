@@ -52,9 +52,9 @@ export class PurchaseService {
 
       product.quantity += item.quantity;
 
-      // calc cost
-      const totalQuantity = product.quantity + item.quantityFree;
-      product.cost = totalQuantity / item.totalPrice;
+      // calc new cost
+      const totalQuantityBought = product.quantity + item.quantityFree;
+      product.cost = item.totalPrice / totalQuantityBought;
       await product.save();
     }
 
