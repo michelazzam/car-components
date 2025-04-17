@@ -82,8 +82,13 @@ export class ExpenseService {
     return this.expenseModel.find().sort({ createdAt: -1 });
   }
 
-  async create(expense: AddExpenseDto) {
-    await this.expenseModel.create(expense);
+  async create(dto: AddExpenseDto) {
+    await this.expenseModel.create({
+      expenseType: dto.expenseTypeId,
+      amount: dto.amount,
+      date: dto.date,
+      note: dto.note,
+    });
 
     // Events:
     // TODO: subtract supplier loan
