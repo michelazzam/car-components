@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsMongoId,
   IsNumber,
   IsOptional,
@@ -65,6 +66,7 @@ class Item {
   @ApiProperty({
     required: false,
   })
+  @IsNumber()
   totalPrice: number;
 }
 
@@ -130,7 +132,9 @@ export class AddPurchaseDto {
   @ApiProperty({
     required: true,
     type: Item,
+    isArray: true,
   })
+  @IsArray()
   @ValidateNested()
   @Type(() => Item)
   items: Item[];

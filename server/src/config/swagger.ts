@@ -8,6 +8,7 @@ import { ServiceModule } from 'src/modules/service/service.module';
 import { ExpenseTypeModule } from 'src/modules/expense-type/expense-type.module';
 import { ExpenseModule } from 'src/modules/expense/expense.module';
 import { ItemModule } from 'src/modules/item/item.module';
+import { PurchaseModule } from 'src/modules/purchase/purchase.module';
 
 export function startSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(
@@ -30,6 +31,7 @@ export function startSwagger(app: INestApplication) {
         ExpenseTypeModule,
         ExpenseModule,
         ItemModule,
+        PurchaseModule,
       ],
     },
   );

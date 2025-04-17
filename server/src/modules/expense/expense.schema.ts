@@ -13,7 +13,7 @@ export class Expense {
   @Prop()
   note: string;
 
-  @Prop({ type: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseType' } })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseType' })
   expenseType: mongoose.Types.ObjectId;
 
   @Prop({ default: Date.now })

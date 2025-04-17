@@ -28,7 +28,8 @@ export class ItemService {
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
-        .limit(pageSize),
+        .limit(pageSize)
+        .populate('supplier', 'name'),
       this.itemModel.countDocuments(filter),
     ]);
 
@@ -46,11 +47,25 @@ export class ItemService {
   }
 
   async create(dto: AddItemDto) {
-    await this.itemModel.create(dto);
+    await this.itemModel.create({
+      supplier: dto.supplierId,
+      cost: dto.cost,
+      price: dto.price,
+      quantity: dto.quantity,
+      name: dto.name,
+      status: dto.status,
+    });
   }
 
   async edit(id: string, dto: EditItemDto) {
-    const item = await this.itemModel.findByIdAndUpdate(id, dto);
+    const item = await this.itemModel.findByIdAndUpdate(id, {
+      supplier: dto.supplierId,
+      cost: dto.cost,
+      price: dto.price,
+      quantity: dto.quantity,
+      name: dto.name,
+      status: dto.status,
+    });
 
     if (!item) throw new NotFoundException(`Item with id ${id} not found`);
     return item;

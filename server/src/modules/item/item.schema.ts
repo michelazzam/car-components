@@ -21,7 +21,7 @@ export class Item {
   @Prop({ enum: itemStatuses, required: true })
   status: ItemStatus;
 
-  @Prop({ type: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' } })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
   supplier: mongoose.Types.ObjectId;
 
   @Prop({ default: Date.now })
