@@ -26,18 +26,18 @@ import { formatNumber } from "@/lib/helpers/formatNumber";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 
 const Expenses = () => {
-    const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
-    const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
-    const [selectedExpenseType, setSelectedExpenseType] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [search, setSearch] = useState("");
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
-    const debouncedSearch = useDebounce(search);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
+  const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
+  const [selectedExpenseType, setSelectedExpenseType] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const debouncedSearch = useDebounce(search);
 
-//-----------------API Calls--------------------
+  //-----------------API Calls--------------------
   const {
     data: expensesData,
     isFetching,
@@ -59,12 +59,12 @@ const Expenses = () => {
   //-------------Options-------------------
   const expensesTypesOptions: SelectOption[] = expensesTypesData
     ? expensesTypesData.map((item) => ({
-        label: item.title ?? "", // Handle cases where item.title might be undefined
+        label: item.name ?? "", // Handle cases where item.title might be undefined
         value: item._id,
       }))
     : [];
 
-  //--------------Select rows--------------------  
+  //--------------Select rows--------------------
 
   const areAllSelected =
     selectedExpenses.length === expensesData?.expenses?.length;
@@ -78,7 +78,7 @@ const Expenses = () => {
     }
   };
 
-//---------------Create Columns--------------------
+  //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Expense>();
   const tanstackColumns = [
     columnHelper.display({
@@ -116,7 +116,7 @@ const Expenses = () => {
       },
     }),
 
-    columnHelper.accessor("expenseType.title", {
+    columnHelper.accessor("expenseType.name", {
       header: "Type",
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
@@ -171,7 +171,7 @@ const Expenses = () => {
       ),
     }),
   ];
-  
+
   // Calculate the total amount for all invoices or selectedExpenses
   useEffect(() => {
     const calculateTotalAmount = () => {
@@ -179,11 +179,11 @@ const Expenses = () => {
         (acc, expense) => acc + (expense.amount || 0),
         0
       );
-      if(selectedExpenses.length !== 0){
+      if (selectedExpenses.length !== 0) {
         total = selectedExpenses.reduce(
-            (acc, expense) => acc + (expense.amount || 0),
-            0
-          );
+          (acc, expense) => acc + (expense.amount || 0),
+          0
+        );
       }
       setTotalAmount(total || 0);
     };
@@ -273,7 +273,7 @@ const Expenses = () => {
                 paginating={isFetching}
                 hidePagination
                 totalRows={expensesData?.totalCount || 0}
-                totalAmount={formatNumber(totalAmount,2) + "$"}
+                totalAmount={formatNumber(totalAmount, 2) + "$"}
               />
               <Pagination
                 pageSize={pageSize}

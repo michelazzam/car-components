@@ -24,9 +24,12 @@ export class ExpenseTypeController {
 
   @Post()
   async create(@Body() dto: AddExpenseTypeDto) {
-    await this.expenseTypeService.create(dto);
+    const createdExpenseType = await this.expenseTypeService.create(dto);
 
-    return { message: 'Expense type added successfully' };
+    return {
+      message: 'Expense type added successfully',
+      data: createdExpenseType,
+    };
   }
 
   @Put(':id')

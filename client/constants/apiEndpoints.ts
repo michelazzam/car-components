@@ -20,16 +20,16 @@ export const API = {
   increaseStock: (id: string) => `/products/${id}/stock`, // PUT
 
   //Expenses
-  listExpenses: "/expenses", //GET
-  addExpense: "/expenses", // POST
-  editExpense: (id: string) => `/expenses/${id}`,
-  deleteExpense: (id: string) => `/expenses/${id} `, //DELETE
+  listExpenses: "/expense", //GET
+  addExpense: "/expense", // POST
+  editExpense: (id: string) => `/expense/${id}`,
+  deleteExpense: (id: string) => `/expense/${id} `, //DELETE
 
   // Expenses Type
-  listExpensesType: "/expenseType", //GET
-  addExpenseType: "/expenseType", //POST
-  editExpenseType: (id: string) => `/expenseType/${id}`, //PUT
-  deleteExpenseType: (id: string) => `/expenseType/${id}`, //DELETE
+  listExpensesType: "/expense-type", //GET
+  addExpenseType: "/expense-type", //POST
+  editExpenseType: (id: string) => `/expense-type/${id}`, //PUT
+  deleteExpenseType: (id: string) => `/expense-type/${id}`, //DELETE
 
   // Gas Type
   listGasType: "/gasType",

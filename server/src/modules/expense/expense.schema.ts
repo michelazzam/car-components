@@ -5,9 +5,6 @@ import mongoose, { HydratedDocument } from 'mongoose';
 @Schema()
 export class Expense {
   @Prop({ required: true })
-  name: string;
-
-  @Prop({ required: true })
   date: string; // YYYY/MM/DD
 
   @Prop({ required: true })

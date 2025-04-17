@@ -4,7 +4,7 @@ import { API } from "@/constants/apiEndpoints";
 export interface AddEditExpenseBodyParam {
   expenseType?: string;
   amount: number;
-  date: Date;
+  date: string;
   note: string;
 }
 

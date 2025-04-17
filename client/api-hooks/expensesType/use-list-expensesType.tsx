@@ -3,7 +3,7 @@ import { API } from "@/constants/apiEndpoints";
 
 export interface ExpenseType {
   _id: string;
-  title: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
   __v: number;

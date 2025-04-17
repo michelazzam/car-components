@@ -27,7 +27,7 @@ function ExpenseTypeModal({
   const { handleSubmit, control, reset } = useForm({
     resolver: zodResolver(apiValidations.AddExpenseType),
     defaultValues: {
-      title: "",
+      name: "",
     },
   });
 
@@ -52,7 +52,7 @@ function ExpenseTypeModal({
     },
   });
 
-  const onSubmit = (data: { title: string }) => {
+  const onSubmit = (data: { name: string }) => {
     if (expenseType) editExpenseType(data);
     else addExpenseType(data);
   };
@@ -62,12 +62,12 @@ function ExpenseTypeModal({
     if (expenseType) {
       // Reset the form with existing expense data
       reset({
-        title: expenseType.title,
+        name: expenseType.name,
       });
     } else {
       // Reset the form to default values if there's no expense (e.g., for creating a new expense)
       reset({
-        title: "",
+        name: "",
       });
     }
   }, [expenseType]);
