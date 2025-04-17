@@ -14,6 +14,8 @@ import { SupplierModule } from './supplier/supplier.module';
 import { ServiceModule } from './service/service.module';
 import { ExpenseTypeModule } from './expense-type/expense-type.module';
 import { ExpenseModule } from './expense/expense.module';
+import { ItemModule } from './item/item.module';
+import { PurchaseModule } from './purchase/purchase.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { ExpenseModule } from './expense/expense.module';
     ServiceModule,
     ExpenseTypeModule,
     ExpenseModule,
+    ItemModule,
+    PurchaseModule,
   ],
   controllers: [],
   providers: [
