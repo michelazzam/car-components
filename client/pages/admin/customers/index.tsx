@@ -112,7 +112,7 @@ const Customers = () => {
               query: {
                 customerId: rowData._id,
                 cN: rowData.name,
-                cP: rowData.phone,
+                cP: rowData.phoneNumber,
                 cE: rowData.email,
               },
             });
