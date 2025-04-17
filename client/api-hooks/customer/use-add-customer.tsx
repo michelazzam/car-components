@@ -3,7 +3,7 @@ import { API } from "@/constants/apiEndpoints";
 
 export interface AddEditCustomerBodyParam {
   name: string;
-  phone: string;
+  phoneNumber: string;
   email?: string;
   address?: string;
   tvaNumber?: string;

@@ -22,7 +22,6 @@ export class AddCustomerDto {
     type: String,
   })
   @IsString()
-  @IsOptional()
   phoneNumber: string;
 
   @ApiProperty({ required: false })

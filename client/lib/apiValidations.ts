@@ -75,8 +75,8 @@ const SupplierSchema = z.object({
   name: z.string().min(1, "Supplier Name is required"),
   phoneNumber: z.string().min(1, "Phone Number is required"),
   address: z.string().optional(),
-  loans:z.number().optional(),
-})
+  loans: z.number().optional(),
+});
 export type SupplierSchema = z.infer<typeof SupplierSchema>;
 
 // Organization
@@ -119,9 +119,20 @@ export type VehicleSchema = z.infer<typeof VehicleSchema>;
 
 const CustomerSchema = z.object({
   name: z.string().min(1, "name is required"),
-  phone: z.string().min(11, "phone number is required"),
+  phoneNumber: z.string().min(11, "phone number is required"),
   address: z.string().optional(),
-  email: z.string().optional(),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        val === undefined ||
+        val === "" ||
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      {
+        message: "Invalid email format",
+      }
+    ),
   note: z.string().optional(),
   tvaNumber: z.string().optional(),
 });
@@ -261,5 +272,5 @@ export const apiValidations = {
   AddInvoiceSchema: AddInvoiceSchema,
   AddExpenseType: ExpenseTypeSchema,
   DBBackupPath,
-  AddEditSupplier:SupplierSchema
+  AddEditSupplier: SupplierSchema,
 };

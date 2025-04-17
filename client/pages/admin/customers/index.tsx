@@ -20,13 +20,13 @@ import { formatNumber } from "@/lib/helpers/formatNumber";
 
 const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize , setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
 
   const { data: customers } = useListCustomers({
-    pageSize:pageSize,
+    pageSize: pageSize,
     pageIndex: currentPage - 1,
     search: debouncedSearch,
   });
@@ -180,12 +180,12 @@ const Customers = () => {
       />
       {/* Add Payment Modal */}
 
-      {selectedCustomer && (
+      {
         <DeleteRecord
-          endpoint={API.deleteCustomer(selectedCustomer._id)}
+          endpoint={API.deleteCustomer(selectedCustomer?._id || "")}
           queryKeysToInvalidate={[["customers"]]}
         />
-      )}
+      }
     </div>
   );
 };

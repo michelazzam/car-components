@@ -1,10 +1,11 @@
 import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
+import { Vehicle } from "../vehicles/use_list_vehicles";
 
 export interface Customer {
   _id: string;
   name: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
   address: string;
   tvaNumber: string;
@@ -12,6 +13,8 @@ export interface Customer {
   loan: number;
   createdAt: string;
   updatedAt: string;
+  vehicles: Vehicle[];
+
   __v: number;
 }
 
@@ -27,15 +30,15 @@ const useListCustomers = ({
   pageIndex = 0,
   search,
 }: {
-  pageSize?:number;
+  pageSize?: number;
   pageIndex?: number;
   search?: string;
 }) => {
   return useReadData<CustomerResponse>({
-    queryKey: ["customers", {pageSize, pageIndex, search }],
+    queryKey: ["customers", { pageSize, pageIndex, search }],
     endpoint: API.listCustomers,
     keepPreviousData: true,
-    params: {pageSize, pageIndex, search },
+    params: { pageSize, pageIndex, search },
   });
 };
 

@@ -26,7 +26,7 @@ function CustomerModal({
 
   //---------------------------API----------------------------------
 
-  const { mutate: addVehicle, isPending: isAdding } = useAddCustomer({
+  const { mutate: addCustomer, isPending: isAdding } = useAddCustomer({
     callBackOnSuccess: () => {
       reset();
       setTimeout(() => {
@@ -51,7 +51,7 @@ function CustomerModal({
     resolver: zodResolver(apiValidations.CustomerSchema),
     defaultValues: {
       name: "",
-      phone: "",
+      phoneNumber: "",
       email: "",
       address: "",
       tvaNumber: "",
@@ -59,21 +59,13 @@ function CustomerModal({
     },
   });
 
-  // const [ingredients, setIngredients] = useState<
-  //   {
-  //     label: string;
-  //     value: string;
-  //   }[]
-  // >(
-  //   product?.ingredients.map((ingredient) => ({
-  //     label: ingredient,
-  //     value: uuid4(),
-  //   })) || []
-  // );
-
   const onSubmit = (data: CustomerSchema) => {
-    if (customer) editCustomer(data);
-    else addVehicle(data);
+    const dataToSend: CustomerSchema = {
+      ...data,
+      email: data.email && data.email.length > 0 ? data.email : undefined,
+    };
+    if (customer) editCustomer(dataToSend);
+    else addCustomer(dataToSend);
   };
 
   // when clicking edit in the table, for the first ms, the state is not initialized, so we need to reset the form state
@@ -81,7 +73,7 @@ function CustomerModal({
     if (customer) {
       reset({
         name: customer?.name,
-        phone: customer?.phone,
+        phoneNumber: customer?.phoneNumber,
         email: customer?.email,
         address: customer?.address,
         tvaNumber: customer?.tvaNumber,
@@ -90,7 +82,7 @@ function CustomerModal({
     } else {
       reset({
         name: "",
-        phone: "",
+        phoneNumber: "",
         email: "",
         address: "",
         tvaNumber: "",
@@ -130,10 +122,11 @@ function CustomerModal({
             label="Email"
             placeholder="customer@gmail.com"
             colSpan={4}
+            dontCapitalize
           />
           <PhoneCodePicker
             control={control}
-            name="phone"
+            name="phoneNumber"
             label="Phone Number"
             colSpan={4}
           />
