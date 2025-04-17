@@ -8,6 +8,8 @@ export interface User {
   permissions: Permissions;
   username: string;
   role: UserRole | "superAmsAdmin";
+  salary: number;
+  email: string;
   phoneNumber?: string;
   address?: string;
   createdAt: string;
@@ -30,8 +32,12 @@ type Permissions = {
   Expenses: PermissionAction;
 };
 
-export const userRoles = ["employee", "admin"] as const;
-
+export const userRoles = [
+  "user",
+  "admin",
+  "specialAccess",
+  "superAmsAdmin",
+] as const;
 export type UserRole = (typeof userRoles)[number];
 
 const useListUsers = () => {

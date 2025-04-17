@@ -3,7 +3,7 @@ export const API = {
   login: "/users/login", // POST
   listUsers: "/users", // GET
   userAuth: "/users/authenticate", // GET
-  addUser: "/users",
+  addUser: "/users/add", // POST
   editUsers: (id: string) => `/users/${id}`, // PUT
   deleteUser: (id: string) => `/users/${id}`, // DELETE
   editUserPermissions: (id: string) => `/users/edit-permissions/${id}`, // PUT

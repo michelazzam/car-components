@@ -6,20 +6,22 @@ const loginSchema = z.object({
 });
 
 const UserSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
   username: z.string().min(1, "Username is required"),
-  role: z.string().min(1, "Role is required"),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        val === undefined ||
+        val === "" ||
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      {
+        message: "Invalid email format",
+      }
+    ),
   password: z.string().optional(),
-  phoneNumber: z
-    .string()
-    .min(11, "Phone number must be at least 11 characters long")
-    .optional()
-    .or(z.literal("")),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters long")
-    .optional()
-    .or(z.literal("")),
+  salary: z.number(),
+  role: z.string().min(1, "Role is required"),
 });
 const ProfileSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),

@@ -18,11 +18,11 @@ const Users = () => {
   const columns: any = [
     {
       title: "User",
-      field: "fullName",
+      field: "username",
       sorter: "string",
       headerSort: false,
     },
-    { title: "Phone Number", field: "phoneNumber", sorter: "string" },
+    { title: "Email", field: "email", sorter: "string" },
     { title: "Role", field: "role", sorter: "string" },
     {
       title: "Created Date",

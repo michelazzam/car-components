@@ -5,11 +5,11 @@ import { useForm } from "react-hook-form";
 import { AddUserSchema, apiValidations } from "@/lib/apiValidations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddUser } from "@/api-hooks/users/use-add-user";
-import PhoneCodePicker from "../../../../components/admin/FormFields/PhoneCodePicker";
 import PasswordField from "../../../../components/admin/FormFields/PasswordField";
 import SelectField from "../../../../components/admin/FormFields/SelectField";
 import { useEditUser } from "@/api-hooks/users/use-edit-user";
 import { User, userRoles } from "@/api-hooks/users/use-list-users";
+import NumberField from "@/pages/components/admin/FormFields/NumberField";
 
 const UserModal = ({
   triggerModalId,
@@ -49,22 +49,21 @@ const UserModal = ({
   const { control, handleSubmit, reset } = useForm<AddUserSchema>({
     resolver: zodResolver(apiValidations.AddUser),
     defaultValues: {
-      fullName: "",
       username: "",
+      email: "",
+      salary: 0,
       role: "",
       password: "",
-      phoneNumber: "",
-      address: "",
     },
   });
 
   useEffect(() => {
     if (userEditing) {
       reset({
-        fullName: userEditing.fullName,
         username: userEditing.username,
-        address: userEditing.address,
-        phoneNumber: userEditing.phoneNumber,
+        email: userEditing.email,
+        salary: userEditing.salary,
+
         role: userEditing.role,
       });
     }
@@ -73,11 +72,15 @@ const UserModal = ({
   //------------------------Functions----------------------------------
 
   const onSubmit = (data: AddUserSchema) => {
+    const dataToSend = {
+      ...data,
+      email: data.email && data.email.length > 0 ? data.email : undefined,
+    };
     if (userEditing) {
       data.password = data.password || undefined;
-      editUser(data);
+      editUser(dataToSend);
     } else {
-      addUser(data, {
+      addUser(dataToSend, {
         onSuccess: () => {
           cancelFormRef.current?.click();
         },
@@ -103,13 +106,6 @@ const UserModal = ({
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
               <TextField
                 control={control}
-                label="Full Name*"
-                name="fullName"
-                placeholder="joe G"
-                colSpan={6}
-              />
-              <TextField
-                control={control}
                 label="User Name*"
                 name="username"
                 placeholder="joe"
@@ -117,9 +113,9 @@ const UserModal = ({
               />
               <TextField
                 control={control}
-                label="address"
-                name="address"
-                colSpan={12}
+                label="Email"
+                name="emil"
+                colSpan={6}
               />
               <SelectField
                 control={control}
@@ -129,13 +125,12 @@ const UserModal = ({
                 creatable={false}
                 options={roleOptions}
               />
-              <PhoneCodePicker
+              <NumberField
                 control={control}
-                label="Phone Number"
-                name="phoneNumber"
+                label="Salary"
+                name="salary"
                 colSpan={12}
               />
-
               <PasswordField
                 control={control}
                 label="Password"
