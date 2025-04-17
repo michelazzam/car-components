@@ -3,7 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class Purchase {
-  @Prop({ type: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' } })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
   supplier: mongoose.Types.ObjectId;
 
   @Prop({ required: true })

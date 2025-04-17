@@ -5,10 +5,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 @Schema()
 export class Expense {
   @Prop({ required: true })
-  name: string;
-
-  @Prop({ required: true })
-  date: string; // YYYY/MM/DD
+  date: string;
 
   @Prop({ required: true })
   amount: number;
@@ -16,7 +13,7 @@ export class Expense {
   @Prop()
   note: string;
 
-  @Prop({ type: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseType' } })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseType' })
   expenseType: mongoose.Types.ObjectId;
 
   @Prop({ default: Date.now })
