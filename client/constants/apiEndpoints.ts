@@ -2,7 +2,7 @@ export const API = {
   // Users
   login: "/users/login", // POST
   listUsers: "/users", // GET
-  userAuth: "/users/auth", // GET
+  userAuth: "/users/authenticate", // GET
   addUser: "/users",
   editUsers: (id: string) => `/users/${id}`, // PUT
   deleteUser: (id: string) => `/users/${id}`, // DELETE
@@ -97,6 +97,6 @@ export const API = {
 
   // Supplier:
   listSupplier: "/supplier", //GET
-  addSupplier: "/supplier",  //POST
-  editSupplier:(id:string) =>  `/supplier/${id}`
+  addSupplier: "/supplier", //POST
+  editSupplier: (id: string) => `/supplier/${id}`,
 };

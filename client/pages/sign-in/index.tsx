@@ -84,6 +84,7 @@ const Firebaselogin = () => {
                   <div>
                     <TextField
                       control={control}
+                      dontCapitalize
                       name="username"
                       label="User Name"
                       colSpan={12}

@@ -1,8 +1,7 @@
 import { useReadData } from "../api-service/useReadData";
-import { getAccessToken, setAccessToken } from "@/utils/auth-storage";
+import { getAccessToken } from "@/utils/auth-storage";
 import { User } from "@/api-hooks/users/use-list-users";
 import { API } from "@/constants/apiEndpoints";
-import { useEffect } from "react";
 
 export default function UseAuth() {
   const accessToken = getAccessToken();
@@ -17,12 +16,12 @@ export default function UseAuth() {
     enabled: !!accessToken,
   });
 
-  // update token in local storage
-  useEffect(() => {
-    if (data?.token) {
-      setAccessToken(data.token);
-    }
-  }, [data]);
+  // // update token in local storage
+  // useEffect(() => {
+  //   if (data?.token) {
+  //     setAccessToken(data.token);
+  //   }
+  // }, [data]);
 
   return {
     user: data?.user,
