@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
 import { ApiTags } from '@nestjs/swagger';
 import { EditExpenseDto } from './dto/edit-expense.dto';
 import { AddExpenseDto } from './dto/add-expense.dto';
+import { GetExpensesDto } from './dto/get-expenses.dto';
 
 @ApiTags('Expense')
 @Controller({ version: '1', path: 'expense' })
@@ -18,8 +20,8 @@ export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
   @Get()
-  async getAll() {
-    return this.expenseService.getAll();
+  async getAll(@Query() dto: GetExpensesDto) {
+    return this.expenseService.getAll(dto);
   }
 
   @Post()

@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AddItemDto } from './dto/add-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
+import { GetItemsDto } from './dto/get-items.dto';
 
 @ApiTags('Item')
 @Controller({ version: '1', path: 'items' })
@@ -18,8 +20,8 @@ export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
   @Get()
-  async getAll() {
-    return this.itemService.getAll();
+  async getAll(@Query() dto: GetItemsDto) {
+    return this.itemService.getAll(dto);
   }
 
   @Post()

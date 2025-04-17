@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IItem, Item } from './item.schema';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { AddItemDto } from './dto/add-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
+import { GetItemsDto } from './dto/get-items.dto';
 
 @Injectable()
 export class ItemService {
@@ -12,8 +13,36 @@ export class ItemService {
     private itemModel: Model<IItem>,
   ) {}
 
-  async getAll() {
-    return this.itemModel.find().sort({ createdAt: -1 });
+  async getAll(dto: GetItemsDto) {
+    const { pageIndex, search, pageSize } = dto;
+
+    const filter: FilterQuery<IItem> = {};
+
+    // Add search filter
+    if (search) {
+      filter.$or = [{ name: { $regex: search, $options: 'i' } }];
+    }
+
+    const [items, totalCount] = await Promise.all([
+      this.itemModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pageIndex * pageSize)
+        .limit(pageSize),
+      this.itemModel.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      items,
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages,
+      },
+    };
   }
 
   async create(dto: AddItemDto) {

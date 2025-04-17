@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
 
-export class GetCustomersDto {
+export class GetItemsDto {
   @ApiProperty({ required: true, type: Number })
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
