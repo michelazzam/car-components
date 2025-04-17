@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class Vehicle {
@@ -18,7 +18,8 @@ export class Vehicle {
   @Prop({ default: Date.now })
   createdAt: Date;
 }
-const VehicleSchema = SchemaFactory.createForClass(Vehicle);
+export const VehicleSchema = SchemaFactory.createForClass(Vehicle);
+export type IVehicle = HydratedDocument<Vehicle>;
 
 @Schema()
 export class Customer {
@@ -43,8 +44,11 @@ export class Customer {
   @Prop({ default: 0 })
   loan: number;
 
-  @Prop({ type: [VehicleSchema], default: [] })
-  vehicles: Vehicle[];
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle' }],
+    default: [],
+  })
+  vehicles: mongoose.Types.ObjectId[];
 
   @Prop({ default: Date.now })
   createdAt: Date;

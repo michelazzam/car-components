@@ -39,6 +39,9 @@ export class Supplier {
   @Prop()
   extraInfo: string;
 
+  @Prop({ default: 0 })
+  loan: number;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 }

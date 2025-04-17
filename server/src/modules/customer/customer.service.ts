@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Customer, ICustomer } from './customer.schema';
+import { Customer, ICustomer, IVehicle, Vehicle } from './customer.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { AddCustomerDto } from './dto/add-customer.dto';
 import { EditCustomerDto } from './dto/edit-customer.dto';
@@ -12,10 +12,12 @@ export class CustomerService {
   constructor(
     @InjectModel(Customer.name)
     private customerModel: Model<ICustomer>,
+    @InjectModel(Vehicle.name)
+    private vehicleModel: Model<IVehicle>,
   ) {}
 
   async getOne(id: string) {
-    const customer = await this.customerModel.findById(id);
+    const customer = await this.customerModel.findById(id).populate('vehicles');
     if (!customer) throw new NotFoundException('Customer not found');
 
     return customer;
@@ -40,7 +42,9 @@ export class CustomerService {
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
-        .limit(pageSize),
+        .limit(pageSize)
+        .populate('vehicles')
+        .lean(),
       this.customerModel.countDocuments(filter),
     ]);
 
@@ -84,14 +88,16 @@ export class CustomerService {
 
     const { make, model, number, odometer } = dto;
 
-    customer.vehicles.push({
+    // create the vehicle
+    const vehicle = await this.vehicleModel.create({
       make,
       model,
       number,
       odometer,
-      createdAt: new Date(),
     });
 
+    // link it to the customer
+    customer.vehicles.push(vehicle._id);
     await customer.save();
   }
 
@@ -99,17 +105,13 @@ export class CustomerService {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const vehicle = customer.vehicles.find(
-      // @ts-ignore
-      (v) => v._id.toString() === vehicleId,
-    );
-    if (!vehicle) throw new NotFoundException('Vehicle not found');
-
+    // remove the vehicle from the customer
     customer.vehicles = customer.vehicles.filter(
-      // @ts-ignore
-      (v) => v._id.toString() !== vehicleId,
+      (v) => v.toString() !== vehicleId,
     );
-
     await customer.save();
+
+    // delete the vehicle
+    await this.vehicleModel.deleteOne({ _id: vehicleId });
   }
 }
