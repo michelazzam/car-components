@@ -17,7 +17,7 @@ export default function useMenuItems() {
 
   const router = useRouter();
   const pathname = router.pathname;
-  if (user?.role === "employee") {
+  if (user?.role === "user") {
     if (pathname !== "/sign-in" && pathname !== "/add-invoice") {
       router.push("/add-invoice");
     }

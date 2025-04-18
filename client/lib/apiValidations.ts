@@ -75,9 +75,16 @@ const CategorySchema = z.object({
 export type CategorySchema = z.infer<typeof CategorySchema>;
 const SupplierSchema = z.object({
   name: z.string().min(1, "Supplier Name is required"),
-  phoneNumber: z.string().min(1, "Phone Number is required"),
+  capital: z.string().optional(),
+  poBox: z.string().optional(),
   address: z.string().optional(),
-  loans: z.number().optional(),
+  phoneNumber: z.string().optional(),
+  fax: z.string().optional(),
+  ext: z.string().optional(),
+  email: z.string().optional(),
+  website: z.string().optional(),
+  vatNumber: z.string().optional(),
+  extraInfo: z.string().optional(),
 });
 export type SupplierSchema = z.infer<typeof SupplierSchema>;
 

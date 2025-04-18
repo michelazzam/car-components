@@ -99,7 +99,9 @@ export const API = {
   createService: "/services", // POST
 
   // Supplier:
-  listSupplier: "/supplier", //GET
-  addSupplier: "/supplier", //POST
-  editSupplier: (id: string) => `/supplier/${id}`,
+  listSupplier: "/suppliers", //GET
+  addSupplier: "/suppliers", //POST
+  getSingleSupplier: (id: string) => `/suppliers/${id}`, //GET
+  editSupplier: (id: string) => `/suppliers/${id}`, //PUT
+  deleteSupplier: (id: string) => `/suppliers/${id}`, //DELETE
 };

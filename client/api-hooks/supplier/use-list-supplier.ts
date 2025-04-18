@@ -1,20 +1,41 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
+import { Pagination } from "@/pages/components/admin/Pagination";
 
-export interface Supplier {
-  _id: string;
+export type Supplier = {
   name: string;
-  phoneNumber:string;
-  address?:string;
-  loans?:number
+  amountDue?: number;
+  capital?: string;
+  poBox?: string;
+  address?: string;
+  phoneNumber?: string;
+  fax?: string;
+  ext?: string;
+  email?: string;
+  website?: string;
+  vatNumber?: string;
+  extraInfo?: string;
+  //----GET
+  _id?: string;
+  loan?: number;
+  createdAt?: Date;
+};
 
-}
-
-const useListSupplier = () => {
-  return useReadData<Supplier[]>({
-    queryKey: ["supplier"],
+const useListSupplier = (params: {
+  pageIndex?: number;
+  pageSize?: number;
+  search?: string;
+}) => {
+  return useReadData<SupplierResponse>({
+    queryKey: ["suppliers", JSON.stringify(params)],
     endpoint: API.listSupplier,
+    params,
   });
 };
 
 export { useListSupplier };
+
+type SupplierResponse = {
+  suppliers: Supplier[];
+  pagination: Pagination;
+};
