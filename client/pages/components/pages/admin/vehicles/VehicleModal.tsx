@@ -16,18 +16,22 @@ import SelectField from "@/pages/components/admin/Fields/SlectField";
 import { SelectOption } from "@/pages/components/admin/Fields/SlectField";
 import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import { TiInfo } from "react-icons/ti";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
+import { CarMakes, CarModels } from "@/lib/constants/carMakeModalNames";
 
 function VehicleModal({
   vehicle,
   setEditingVehicle,
   triggerModalId,
   modalTitle,
+  selectedCustomer,
 }: {
   vehicle?: Vehicle;
   setEditingVehicle?: React.Dispatch<React.SetStateAction<Vehicle | undefined>>;
   triggerModalId: string;
   modalTitle: string;
   setVehicle?: React.Dispatch<React.SetStateAction<Vehicle | undefined>>;
+  selectedCustomer?: Customer;
 }) {
   //---------------------------REFS------------------------------
   const formRef = useRef<HTMLFormElement>(null);
@@ -35,7 +39,14 @@ function VehicleModal({
   //---------------------------STATE--------------------------
   const [selectedCustomerOption, setSelectedCustomerOption] = useState<
     SelectOption | undefined
-  >();
+  >(
+    selectedCustomer
+      ? {
+          label: selectedCustomer.name,
+          value: selectedCustomer._id,
+        }
+      : undefined
+  );
   //---------------------------API----------------------------------
 
   const [customerSearch, setCustomerSearch] = useState("");
@@ -75,15 +86,17 @@ function VehicleModal({
   });
 
   //---------------------------FORM---------------------------------
-  const { handleSubmit, control, reset } = useForm<VehicleSchema>({
-    resolver: zodResolver(apiValidations.VehicleSchema),
-    defaultValues: {
-      model: "",
-      make: "",
-      odometer: 0,
-      number: "",
-    },
-  });
+  const { handleSubmit, control, reset, watch, setValue } =
+    useForm<VehicleSchema>({
+      resolver: zodResolver(apiValidations.VehicleSchema),
+      defaultValues: {
+        model: "",
+        make: "",
+        odometer: 0,
+        number: "",
+      },
+    });
+  const selectedMake = watch("make");
 
   //-----------------------------------Options----------------
 
@@ -117,6 +130,14 @@ function VehicleModal({
     <Modal
       id={triggerModalId}
       size="md"
+      onOpen={() => {
+        if (selectedCustomer) {
+          setSelectedCustomerOption({
+            label: selectedCustomer.name,
+            value: selectedCustomer._id,
+          });
+        }
+      }}
       onClose={() => {
         setEditingVehicle && setEditingVehicle(undefined);
         setSelectedCustomerOption(undefined);
@@ -154,15 +175,22 @@ function VehicleModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <Select
+          <SelectFieldControlled
+            options={CarMakes}
             control={control}
             name="make"
+            onChangeValue={(opt) => {
+              if (opt) {
+                setValue && setValue("model", "");
+              }
+            }}
             label="Vehicle Make"
             placeholder="brand name"
             colSpan={6}
           />
 
-          <TextFieldControlled
+          <SelectFieldControlled
+            options={CarModels[selectedMake] ?? []}
             control={control}
             name="model"
             label="Vehicle Model"
@@ -182,7 +210,7 @@ function VehicleModal({
             label="Odometer"
             placeholder="123456"
             colSpan={6}
-            prefix="KM"
+            prefix="km"
           />
         </form>
       </Modal.Body>

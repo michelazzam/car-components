@@ -3,7 +3,7 @@ import { API } from "@/constants/apiEndpoints";
 
 export interface AddEditVehicleBodyParam {
   make: string;
-  model?: string;
+  model: string;
   odometer?: number;
   number: string;
 }
@@ -16,7 +16,7 @@ const useAddVehicle = ({
   customerId: string;
 }) => {
   return usePostData<AddEditVehicleBodyParam>({
-    queryKeysToInvalidate: [["vehicles"]],
+    queryKeysToInvalidate: [["vehicles"], ["single-customer"]],
     endpoint: API.addVehicle(customerId),
     callBackOnSuccess: callBackOnSuccess,
   });

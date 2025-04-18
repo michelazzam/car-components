@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import TableVehicles from "../../../components/pages/admin/vehicles/VehicleTalbe";
 import CustomerHeader from "../../../components/pages/admin/customers/customerDetails/Header";
 import ListInvoice from "@/pages/components/pages/admin/invoices/ListInvoice";
+import { useGetCustomerById } from "@/api-hooks/customer/use-get-customer-by-id";
 
 const CustomerDetails = () => {
   const [view, setView] = useState<"invoices" | "vehicles">("invoices");
@@ -13,7 +14,10 @@ const CustomerDetails = () => {
   const customerName = cN as string;
   const customerPhone = cP as string;
   const customerEmail = cE as string;
-
+  const { data: customer } = useGetCustomerById({
+    customerId: customerId as string,
+  });
+  if (!customer) return <div>Loading...</div>;
   return (
     <Suspense fallback={<div>Loading...</div>}>
       {typeof customerName === "string" && typeof customerId === "string" && (
@@ -53,7 +57,7 @@ const CustomerDetails = () => {
       </div>
       {typeof customerId === "string" ? (
         view === "vehicles" ? (
-          <TableVehicles customerId={customerId} />
+          <TableVehicles customer={customer} />
         ) : (
           <ListInvoice customerId={customerId} />
         )

@@ -12,7 +12,7 @@ const useEditVehicle = ({
   callBackOnSuccess?: () => void;
 }) => {
   return useUpdateData<AddEditVehicleBodyParam>({
-    queryKeysToInvalidate: [["vehicles"]],
+    queryKeysToInvalidate: [["vehicles"], ["single-customer"]],
     endpoint: API.editVehicle(vehicleId, customerId),
     callBackOnSuccess: callBackOnSuccess,
   });

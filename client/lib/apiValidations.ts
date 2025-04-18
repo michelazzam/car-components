@@ -113,7 +113,7 @@ const ExpenseTypeSchema = z.object({
 
 const VehicleSchema = z.object({
   make: z.string().min(1, "make is required"),
-  model: z.string().optional(),
+  model: z.string().min(1, "model is required"),
   odometer: z.number().nonnegative().optional(),
   number: z.string().min(1, "number is required"),
 });

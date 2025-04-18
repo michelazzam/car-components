@@ -38,7 +38,7 @@ export const API = {
   deleteGasType: (id: string) => `/gasType/${id}`,
 
   // Vehicles
-  listVehicles: "/vehicles", //GET
+  listVehicles: `/customers/vehicle`, //GET
   addVehicle: (customerId: string) => `/customers/${customerId}/vehicle`, //POST
   editVehicle: (vehicleId: string, customerId: string) =>
     `/customers/${customerId}/vehicle/${vehicleId}`, //PUT
@@ -46,6 +46,7 @@ export const API = {
     `/customers/${customerId}/vehicle/${vehicleId}`, //DELETE
 
   // Customers
+  getCustomerById: (id: string) => `/customers/${id}`,
   listCustomers: "/customers",
   addCustomer: "/customers",
   editCustomer: (id: string) => `/customers/${id}`,

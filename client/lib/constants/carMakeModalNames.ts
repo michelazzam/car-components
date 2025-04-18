@@ -1,4 +1,6 @@
-export const CarBrandNames = [
+import { SelectOption } from "@/pages/components/admin/Fields/SlectField";
+
+export const CarMakes = [
   { value: "Acura", label: "Acura" },
   { value: "Alfa Romeo", label: "Alfa Romeo" },
   { value: "Aston Martin", label: "Aston Martin" },
@@ -28,9 +30,10 @@ export const CarBrandNames = [
   { value: "Volkswagen", label: "Volkswagen" },
   { value: "Volvo", label: "Volvo" },
 ];
+export type CarMake = (typeof CarMakes)[number]["value"];
 
 //------------------------------------------------
-export const CarModelNames = {
+export const CarModels: Record<CarMake, SelectOption[]> = {
   Acura: [
     { value: "ILX", label: "ILX" },
     { value: "MDX", label: "MDX" },
