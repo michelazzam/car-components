@@ -116,6 +116,7 @@ const UserModal = ({
                 label="Email"
                 name="emil"
                 colSpan={6}
+                dontCapitalize
               />
               <SelectFieldControlled
                 control={control}

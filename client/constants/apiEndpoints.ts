@@ -4,8 +4,8 @@ export const API = {
   listUsers: "/users", // GET
   userAuth: "/users/authenticate", // GET
   addUser: "/users/add", // POST
-  editUsers: (id: string) => `/users/${id}`, // PUT
-  deleteUser: (id: string) => `/users/${id}`, // DELETE
+  editUser: (id: string) => `/users/edit/${id}`, // PUT
+  deleteUser: (id: string) => `/users/delete/${id}`, // DELETE
   editUserPermissions: (id: string) => `/users/edit-permissions/${id}`, // PUT
 
   // Profile

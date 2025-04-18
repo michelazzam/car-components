@@ -9,7 +9,7 @@ export const useEditUser = ({
   callBackOnSuccess?: () => void;
 }) =>
   useUpdateData({
-    endpoint: API.editUsers(id),
+    endpoint: API.editUser(id),
     queryKeysToInvalidate: [["users"]],
     callBackOnSuccess,
   });
