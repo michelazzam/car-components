@@ -12,22 +12,13 @@ import DeleteRecord from "../../../../components/admin/DeleteRecord";
 import { ReactTabulator } from "react-tabulator";
 import { API } from "@/constants/apiEndpoints";
 import VehicleModal from "../../../../components/pages/admin/vehicles/VehicleModal";
-import Link from "next/link";
-import SelectField from "@/pages/components/admin/Fields/SlectField";
-import {
-  Customer,
-  useListCustomers,
-} from "@/api-hooks/customer/use-list-customer";
-import { Option } from "react-multi-select-component";
+import { Customer } from "@/api-hooks/customer/use-list-customer";
 import Pagination from "@/pages/components/admin/Pagination";
 
 const TableVehicles = ({ customer }: { customer: Customer }) => {
   const { _id: customerId } = customer;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const [selectedCustomerToFilter, setSelectedCustomerToFilter] =
-    useState<Option | null>();
 
   const [search, setSearch] = useState("");
   const debouncedVehicleSearch = useDebounce(search);
@@ -38,20 +29,7 @@ const TableVehicles = ({ customer }: { customer: Customer }) => {
     pageSize: pageSize,
     pageIndex: currentPage - 1,
     search: debouncedVehicleSearch,
-    customerId: selectedCustomerToFilter?.value || customerId,
-  });
-
-  const [customerSearch, setCustomerSearch] = useState("");
-  const debouncedCustomerSearch = useDebounce(customerSearch);
-  const { data: customers } = useListCustomers({
-    pageIndex: 0,
-    search: debouncedCustomerSearch,
-  });
-  const customerOptions = customers?.customers.map((customer) => {
-    return {
-      label: customer.name,
-      value: customer._id,
-    };
+    customerId: customerId,
   });
 
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | undefined>();
