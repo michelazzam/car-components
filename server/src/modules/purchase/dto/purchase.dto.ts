@@ -15,7 +15,7 @@ class Item {
     required: true,
   })
   @IsMongoId()
-  item: string;
+  itemId: string;
 
   @ApiProperty({
     required: false,

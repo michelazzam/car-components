@@ -90,7 +90,7 @@ export class PurchaseService {
   async create(dto: PurchaseDto) {
     // get products from db and save the name with each one
     const products = await this.itemModel
-      .find({ _id: dto.items.map((item) => item.item) })
+      .find({ _id: dto.items.map((item) => item.itemId) })
       .lean();
 
     if (products.length !== dto.items.length)
@@ -98,7 +98,8 @@ export class PurchaseService {
 
     // override the dto items array to add the product name field
     dto.items = products.map((product) => ({
-      ...dto.items.find((item) => item.item === product._id?.toString())!,
+      ...dto.items.find((item) => item.itemId === product._id?.toString())!,
+      item: product._id,
       name: product.name,
       currentItemCost: product.cost,
     }));
@@ -125,7 +126,7 @@ export class PurchaseService {
 
     // get products from db and save the name with each one
     const products = await this.itemModel
-      .find({ _id: dto.items.map((item) => item.item) })
+      .find({ _id: dto.items.map((item) => item.itemId) })
       .lean();
 
     if (products.length !== dto.items.length)
@@ -133,7 +134,8 @@ export class PurchaseService {
 
     // override the dto items array to add the product name field
     dto.items = products.map((product) => ({
-      ...dto.items.find((item) => item.item === product._id?.toString())!,
+      ...dto.items.find((item) => item.itemId === product._id?.toString())!,
+      item: product._id,
       name: product.name,
       currentItemCost: product.cost,
     }));
@@ -164,7 +166,7 @@ export class PurchaseService {
   private async doPurchaseEffects(dto: PurchaseDto) {
     // update product quantity + price
     for (const item of dto.items) {
-      const product = await this.itemModel.findById(item.item);
+      const product = await this.itemModel.findById(item.itemId);
       if (!product) throw new BadRequestException('Product not found');
 
       product.quantity += item.quantity;

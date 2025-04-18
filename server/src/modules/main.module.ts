@@ -16,6 +16,7 @@ import { ExpenseTypeModule } from './expense-type/expense-type.module';
 import { ExpenseModule } from './expense/expense.module';
 import { ItemModule } from './item/item.module';
 import { PurchaseModule } from './purchase/purchase.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { PurchaseModule } from './purchase/purchase.module';
     ExpenseModule,
     ItemModule,
     PurchaseModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [
