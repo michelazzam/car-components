@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
 import { ApiTags } from '@nestjs/swagger';
-import { EditExpenseDto } from './dto/edit-expense.dto';
-import { AddExpenseDto } from './dto/add-expense.dto';
+import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
 
 @ApiTags('Expense')
@@ -25,14 +24,14 @@ export class ExpenseController {
   }
 
   @Post()
-  async create(@Body() dto: AddExpenseDto) {
+  async create(@Body() dto: ExpenseDto) {
     await this.expenseService.create(dto);
 
     return { message: 'Expense added successfully' };
   }
 
   @Put(':id')
-  async edit(@Param('id') id: string, @Body() dto: EditExpenseDto) {
+  async edit(@Param('id') id: string, @Body() dto: ExpenseDto) {
     await this.expenseService.edit(id, dto);
 
     return { message: 'Expense updated successfully' };

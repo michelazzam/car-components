@@ -44,4 +44,8 @@ export class GetExpensesDto {
   @ApiProperty({ required: false })
   @IsOptional()
   expenseTypeId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  supplierId?: string;
 }
