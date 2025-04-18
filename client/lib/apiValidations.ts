@@ -103,7 +103,7 @@ export type IncreaseStockSchema = z.infer<typeof IncreaseStockSchema>;
 const ExpenseSchema = z.object({
   expenseTypeId: z.string().min(1, "Expense type is required"),
   amount: z.number().min(0, "Amount is required"),
-  date: z.date(),
+  date: z.string().min(1, "Date is required"),
   note: z.string().optional(),
 });
 

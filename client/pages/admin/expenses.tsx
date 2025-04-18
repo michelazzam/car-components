@@ -272,7 +272,7 @@ const Expenses = () => {
                 loading={isLoading}
                 paginating={isFetching}
                 hidePagination
-                totalRows={expensesData?.totalCount || 0}
+                totalRows={expensesData?.pagination.totalCount || 0}
                 totalAmount={formatNumber(totalAmount, 2) + "$"}
               />
               <Pagination
@@ -280,7 +280,7 @@ const Expenses = () => {
                 setPageSize={setPageSize}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-                totalPages={expensesData?.totalPages || 0}
+                totalPages={expensesData?.pagination.totalPages || 0}
               />
             </div>
           </div>

@@ -35,9 +35,7 @@ function ExpenseTypeModal({
   const { mutate: addExpenseType, isPending: isAdding } = useAddExpenseType({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-      }, 1000);
+      cancelFormRef.current?.click();
     },
   });
 
@@ -45,10 +43,8 @@ function ExpenseTypeModal({
     id: expenseType?._id!,
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-        setSelectedExpenseType(undefined);
-      }, 1000);
+      cancelFormRef.current?.click();
+      setSelectedExpenseType(undefined);
     },
   });
 
@@ -92,9 +88,9 @@ function ExpenseTypeModal({
         >
           <TextField
             control={control}
-            name="title"
-            label="Title"
-            placeholder="title.."
+            name="name"
+            label="Name"
+            placeholder="name.."
             colSpan={12}
           />
         </form>
@@ -102,7 +98,6 @@ function ExpenseTypeModal({
 
       <Modal.Footer>
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"

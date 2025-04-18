@@ -1,5 +1,5 @@
 import Modal from "@/shared/Modal";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
@@ -18,6 +18,7 @@ import {
 import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType";
 import DateField from "@/pages/components/admin/FormFields/DateField";
 import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
 
 function ExpenseModal({
   expense,
@@ -34,6 +35,8 @@ function ExpenseModal({
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
+  //---------------------------STATE--------------------------
+  const [keepAdding, setKeepAdding] = useState(false);
   //-----------------------------------Options----------------
 
   const { data: expenseType } = useListExpensesType();
@@ -50,18 +53,18 @@ function ExpenseModal({
     defaultValues: {
       expenseTypeId: "",
       amount: 0,
-      date: new Date(),
+      date: "",
       note: "",
     },
   });
 
   //---------------------------API----------------------------------
-  const { mutate: addProduct, isPending: isAdding } = useAddExpense({
+  const { mutate: addExpense, isPending: isAdding } = useAddExpense({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
+      if (!keepAdding) {
         cancelFormRef.current?.click();
-      }, 1000);
+      }
     },
   });
 
@@ -71,26 +74,20 @@ function ExpenseModal({
     },
   });
 
-  const { mutate: editProduct, isPending: isEditing } = useEditExpense({
+  const { mutate: editExpense, isPending: isEditing } = useEditExpense({
     id: expense?._id!,
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-        setSelectedExpense(undefined);
-      }, 1000);
+      cancelFormRef.current?.click();
+      setSelectedExpense(undefined);
     },
   });
 
   const onSubmit: SubmitHandler<AddEditExpenseBodyParam> = (
     data: AddEditExpenseBodyParam
   ) => {
-    if (expense) editProduct(data);
-    else
-      addProduct({
-        ...data,
-        date: "2025-04-17",
-      });
+    if (expense) editExpense(data);
+    else addExpense(data);
   };
 
   const handleCreateOption = (data: string) => {
@@ -106,7 +103,7 @@ function ExpenseModal({
       reset({
         expenseTypeId: expense?.expenseType?._id || "",
         amount: expense?.amount || 0,
-        date: new Date(expense?.date),
+        date: expense?.date || "",
         note: expense?.note || "",
       });
     } else {
@@ -114,7 +111,7 @@ function ExpenseModal({
       reset({
         expenseTypeId: "",
         amount: 0,
-        date: new Date(),
+        date: "",
         note: "",
       });
     }
@@ -161,11 +158,13 @@ function ExpenseModal({
             name="date"
             label="Date"
             placeholder="2012-12-01"
+            formatType="dd-MM-yyyy"
             colSpan={6}
           />
           <TextField
             control={control}
             name="note"
+            dontCapitalize
             label="Note"
             placeholder="note here for later"
             colSpan={6}
@@ -174,8 +173,14 @@ function ExpenseModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {!expense && (
+          <Checkbox
+            isChecked={keepAdding}
+            onValueChange={(v) => setKeepAdding(v)}
+            label="Add More"
+          />
+        )}
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"
