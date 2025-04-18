@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, DBBackupPath } from "@/lib/apiValidations";
 import { useForm } from "react-hook-form";
-import TextField from "../../../admin/FormFields/TextField";
+import TextFieldControlled from "../../../admin/FormControlledFields/TextFieldControlled";
 import { BsPencilSquare } from "react-icons/bs";
 import { useEditDBBackupPath } from "@/api-hooks/db-backup/use-edit-DB-backup-path";
 
@@ -70,7 +70,7 @@ const EditBackupPath: React.FC<EditBackupPathProps> = ({ path }) => {
       </div>
 
       <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-        <TextField
+        <TextFieldControlled
           dontCapitalize
           control={control}
           label="Path"

@@ -3,7 +3,7 @@ import React, { useRef, useState } from "react";
 import PrintInvoice from "./PrintInvoice";
 import ReactToPrint from "react-to-print";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
-import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 

@@ -39,9 +39,11 @@ export const API = {
 
   // Vehicles
   listVehicles: "/vehicles", //GET
-  addVehicle: "/vehicles", //POST
-  editVehicle: (id: string) => `/vehicles/${id}`, //PUT
-  deleteVehicle: (id: string) => `/vehicles/${id}`, //DELETE
+  addVehicle: (customerId: string) => `/customers/${customerId}/vehicle`, //POST
+  editVehicle: (vehicleId: string, customerId: string) =>
+    `/customers/${customerId}/vehicle/${vehicleId}`, //PUT
+  deleteVehicle: (vehicleId: string, customerId: string) =>
+    `/customers/${customerId}/vehicle/${vehicleId}`, //DELETE
 
   // Customers
   listCustomers: "/customers",

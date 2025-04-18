@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, IncreaseStockSchema } from "@/lib/apiValidations";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import { useIncreaseOrDecreaseStock } from "@/api-hooks/products/use-increase-or-decrease-stock";
 import { Product } from "@/api-hooks/products/use-list-products";
 
@@ -44,7 +44,7 @@ function DecreaseStockModal({ product }: { product: Product | undefined }) {
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="amount"
             label="Amount"

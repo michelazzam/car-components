@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { UseEditUsdRate } from "@/api-hooks/usdRate/use-edit-usdRate";
 import { z } from "zod";
-import NumberField from "../../admin/FormFields/NumberField";
+import NumberFieldControlled from "../../admin/FormControlledFields/NumberFieldControlled";
 
 const UsdRateModal = ({
   triggerModalId,
@@ -69,7 +69,7 @@ const UsdRateModal = ({
         <form onSubmit={handleSubmit(onSubmit)}>
           <Modal.Body>
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-              <NumberField
+              <NumberFieldControlled
                 control={control}
                 label="USD Rate"
                 name="usdRate"

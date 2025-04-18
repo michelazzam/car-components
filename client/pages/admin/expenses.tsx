@@ -16,12 +16,12 @@ import {
 import ExpenseModal from "../components/pages/admin/expenses/ExpenseModal";
 import SelectField, {
   SelectOption,
-} from "../components/admin/ControlledFields/SlectField";
+} from "../components/admin/Fields/SlectField";
 import { useListExpensesType } from "@/api-hooks/expensesType/use-list-expensesType";
 import { formatDateToISO } from "@/lib/helpers/formatDate";
 import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
-import Checkbox from "../components/admin/ControlledFields/Checkbox";
+import Checkbox from "../components/admin/Fields/Checkbox";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 

@@ -4,7 +4,7 @@ import { FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddPaymentSchema, apiValidations } from "@/lib/apiValidations";
 import { useAddPayment } from "@/api-hooks/customer/use-add-payment";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 
 function AddPaymentModal({
@@ -82,7 +82,7 @@ function AddPaymentModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="amountPaidUsd"
             label="Amount Paid in USD"
@@ -90,7 +90,7 @@ function AddPaymentModal({
             colSpan={6}
             prefix="$"
           />
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="amountPaidLbp"
             label="Amount Paid in LBP"

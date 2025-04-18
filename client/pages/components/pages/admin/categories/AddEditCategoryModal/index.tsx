@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, CategorySchema } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { Category } from "@/api-hooks/categories/use-list-categories";
 import { useAddCategory } from "@/api-hooks/categories/use-add-category";
 import { useEditCategory } from "@/api-hooks/categories/use-edit-category";
@@ -61,7 +61,12 @@ function AddEditCategoryModal({
       <Modal.Header title="Add Item" id={triggerModalId} />
       <Modal.Body>
         <form ref={formRef} onSubmit={handleSubmit(onFormSubmit)}>
-          <TextField control={control} name="name" label="Name" colSpan={6} />
+          <TextFieldControlled
+            control={control}
+            name="name"
+            label="Name"
+            colSpan={6}
+          />
         </form>
       </Modal.Body>
 

@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { ExpenseType } from "@/api-hooks/expensesType/use-list-expensesType";
 import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType";
 import { useEditExpenseType } from "@/api-hooks/expensesType/use-edit-expenseType";
@@ -86,7 +86,7 @@ function ExpenseTypeModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <TextField
+          <TextFieldControlled
             control={control}
             name="name"
             label="Name"

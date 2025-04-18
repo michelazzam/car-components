@@ -18,7 +18,7 @@ interface PhoneCodePickerProps extends UseControllerProps {
   control: Control<any>;
 }
 
-const PhoneCodePicker: React.FC<PhoneCodePickerProps> = ({
+const PhoneCodePickerControlled: React.FC<PhoneCodePickerProps> = ({
   control,
   name,
   label,
@@ -101,4 +101,4 @@ const PhoneCodePicker: React.FC<PhoneCodePickerProps> = ({
   );
 };
 
-export default PhoneCodePicker;
+export default PhoneCodePickerControlled;

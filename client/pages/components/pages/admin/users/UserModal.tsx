@@ -1,15 +1,15 @@
 import Modal from "@/shared/Modal";
 import React, { useEffect, useRef } from "react";
-import TextField from "../../../../components/admin/FormFields/TextField";
+import TextFieldControlled from "../../../admin/FormControlledFields/TextFieldControlled";
 import { useForm } from "react-hook-form";
 import { AddUserSchema, apiValidations } from "@/lib/apiValidations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddUser } from "@/api-hooks/users/use-add-user";
-import PasswordField from "../../../../components/admin/FormFields/PasswordField";
-import SelectField from "../../../../components/admin/FormFields/SelectField";
+import PasswordFieldControlled from "../../../admin/FormControlledFields/PasswordFieldControlled";
+import SelectFieldControlled from "../../../admin/FormControlledFields/SelectFieldControlled";
 import { useEditUser } from "@/api-hooks/users/use-edit-user";
 import { User, userRoles } from "@/api-hooks/users/use-list-users";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 
 const UserModal = ({
   triggerModalId,
@@ -104,20 +104,20 @@ const UserModal = ({
         <form onSubmit={handleSubmit(onSubmit)}>
           <Modal.Body>
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="User Name*"
                 name="username"
                 placeholder="joe"
                 colSpan={6}
               />
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="Email"
                 name="emil"
                 colSpan={6}
               />
-              <SelectField
+              <SelectFieldControlled
                 control={control}
                 label="Role*"
                 name="role"
@@ -125,13 +125,13 @@ const UserModal = ({
                 creatable={false}
                 options={roleOptions}
               />
-              <NumberField
+              <NumberFieldControlled
                 control={control}
                 label="Salary"
                 name="salary"
                 colSpan={12}
               />
-              <PasswordField
+              <PasswordFieldControlled
                 control={control}
                 label="Password"
                 name="password"

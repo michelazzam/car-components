@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
-import SelectField from "@/pages/components/admin/FormFields/SelectField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import { Expense } from "@/api-hooks/expenses/use_list_expenses";
 import {
   AddEditExpenseBodyParam,
@@ -16,9 +16,9 @@ import {
   useListExpensesType,
 } from "@/api-hooks/expensesType/use-list-expensesType";
 import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType";
-import DateField from "@/pages/components/admin/FormFields/DateField";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
-import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
+import DateFieldControlled from "@/pages/components/admin/FormControlledFields/DateFieldControlled";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 
 function ExpenseModal({
   expense,
@@ -135,7 +135,7 @@ function ExpenseModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <SelectField
+          <SelectFieldControlled
             control={control}
             name="expenseTypeId"
             label="Expense Type"
@@ -145,7 +145,7 @@ function ExpenseModal({
             creatable={true}
             handleCreate={handleCreateOption}
           />
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="amount"
             label="Total Amount"
@@ -153,7 +153,7 @@ function ExpenseModal({
             prefix="$"
             colSpan={6}
           />
-          <DateField
+          <DateFieldControlled
             control={control}
             name="date"
             label="Date"
@@ -161,7 +161,7 @@ function ExpenseModal({
             formatType="dd-MM-yyyy"
             colSpan={6}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="note"
             dontCapitalize

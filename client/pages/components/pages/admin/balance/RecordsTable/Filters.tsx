@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Option } from "react-multi-select-component";
 
 import DatePicker from "react-datepicker";
-import SelectField from "@/pages/components/admin/ControlledFields/SlectField";
+import SelectField from "@/pages/components/admin/Fields/SlectField";
 
 function Filters({
   startDate,

@@ -13,14 +13,14 @@ import { ReactTabulator } from "react-tabulator";
 import { API } from "@/constants/apiEndpoints";
 import VehicleModal from "../../../../components/pages/admin/vehicles/VehicleModal";
 import Link from "next/link";
-import SelectField from "@/pages/components/admin/ControlledFields/SlectField";
+import SelectField from "@/pages/components/admin/Fields/SlectField";
 import { useListCustomers } from "@/api-hooks/customer/use-list-customer";
 import { Option } from "react-multi-select-component";
 import Pagination from "@/pages/components/admin/Pagination";
 
 const TableVehicles = ({ customerId }: { customerId?: string }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize , setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
   const [selectedCustomerToFilter, setSelectedCustomerToFilter] =
     useState<Option | null>();
@@ -31,7 +31,7 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
   //-------------------APIS Call-----------------------------
 
   const { data: vehicles } = useListVehicles({
-    pageSize:pageSize,
+    pageSize: pageSize,
     pageIndex: currentPage - 1,
     search: debouncedVehicleSearch,
     customerId: selectedCustomerToFilter?.value || customerId,

@@ -17,7 +17,7 @@ export class AddVehicleDto {
   model: string;
 
   @ApiProperty({
-    required: false,
+    required: true,
     type: String,
   })
   @IsString()

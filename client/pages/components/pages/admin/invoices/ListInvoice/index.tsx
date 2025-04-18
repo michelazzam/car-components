@@ -11,7 +11,7 @@ import { useRouter } from "next/router";
 import { Invoice, useListInvoices } from "@/api-hooks/invoices/useListInvoices";
 import { cn } from "@/utils/cn";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import SelectField from "@/pages/components/admin/ControlledFields/SlectField";
+import SelectField from "@/pages/components/admin/Fields/SlectField";
 import { usePosStore } from "@/shared/store/usePosStore";
 import AddPaymentModal from "../../customers/AddPaymentModal";
 import { useListVehicles } from "@/api-hooks/vehicles/use_list_vehicles";
@@ -22,7 +22,7 @@ import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
-import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 
 const paidStatuses = [
   {

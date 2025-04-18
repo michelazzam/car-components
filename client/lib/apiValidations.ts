@@ -112,10 +112,10 @@ const ExpenseTypeSchema = z.object({
 });
 
 const VehicleSchema = z.object({
-  customerId: z.string().min(1, "please choose a customer"),
-  model: z.string().min(1, "model is required"),
-  gasTypeId: z.string().min(1, "gas type is required"),
-  vehicleNb: z.string().min(1, "vehicle number is required"),
+  make: z.string().min(1, "make is required"),
+  model: z.string().optional(),
+  odometer: z.number().nonnegative().optional(),
+  number: z.string().min(1, "number is required"),
 });
 export type VehicleSchema = z.infer<typeof VehicleSchema>;
 

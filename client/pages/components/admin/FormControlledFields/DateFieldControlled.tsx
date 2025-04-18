@@ -39,7 +39,7 @@ interface DateFieldProps<TFieldValues extends FieldValues> {
   showTimeInput?: boolean;
 }
 
-const DateField = <TFieldValues extends FieldValues>({
+const DateFieldControlled = <TFieldValues extends FieldValues>({
   readOnly = false,
   control,
   name,
@@ -171,4 +171,4 @@ const DateField = <TFieldValues extends FieldValues>({
   );
 };
 
-export default DateField;
+export default DateFieldControlled;

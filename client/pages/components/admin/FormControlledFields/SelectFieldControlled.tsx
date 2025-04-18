@@ -28,7 +28,7 @@ interface SelectFieldProps {
   treatAsObject?: boolean;
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({
+const SelectFieldControlled: React.FC<SelectFieldProps> = ({
   control,
   options,
   placeholder,
@@ -156,4 +156,4 @@ const customStyles = {
   }),
 };
 
-export default SelectField;
+export default SelectFieldControlled;

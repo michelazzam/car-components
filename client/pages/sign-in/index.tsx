@@ -6,8 +6,8 @@ import { useLoginUser } from "@/api-hooks/auth/useLoginUser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextField from "../components/admin/FormFields/TextField";
-import PasswordField from "../components/admin/FormFields/PasswordField";
+import TextFieldControlled from "../components/admin/FormControlledFields/TextFieldControlled";
+import PasswordFieldControlled from "../components/admin/FormControlledFields/PasswordFieldControlled";
 import { cn } from "@/utils/cn";
 import bg from "../../../client/public/assets/images/signin_img.jpeg";
 
@@ -82,14 +82,14 @@ const Firebaselogin = () => {
 
                 <form onSubmit={handleSubmit(onSubmit, onError)} className="">
                   <div>
-                    <TextField
+                    <TextFieldControlled
                       control={control}
                       dontCapitalize
                       name="username"
                       label="User Name"
                       colSpan={12}
                     />
-                    <PasswordField
+                    <PasswordFieldControlled
                       control={control}
                       name="password"
                       label="Password"
