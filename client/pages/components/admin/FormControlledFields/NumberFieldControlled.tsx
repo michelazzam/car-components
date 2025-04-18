@@ -20,7 +20,7 @@ interface NumberFieldProps {
   [x: string]: any; // To allow any other additional props
 }
 
-const NumberField: React.FC<NumberFieldProps> = ({
+const NumberFieldControlled: React.FC<NumberFieldProps> = ({
   prefix = "",
   suffix = "",
   decimalsLimit = 2,
@@ -123,4 +123,4 @@ const NumberField: React.FC<NumberFieldProps> = ({
   );
 };
 
-export default NumberField;
+export default NumberFieldControlled;

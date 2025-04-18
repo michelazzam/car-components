@@ -1,6 +1,7 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
 import { ExpenseType } from "../expensesType/use-list-expensesType";
+import { Pagination } from "@/pages/components/admin/Pagination";
 
 export interface Expense {
   _id: string;
@@ -15,13 +16,11 @@ export interface Expense {
 
 export interface ExpensesResponse {
   expenses: Expense[];
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  pagination: Pagination;
 }
 
 const useListExpenses = (params: {
-  pageSize?:number;
+  pageSize?: number;
   pageIndex?: number;
   search?: string;
   startDate?: string;

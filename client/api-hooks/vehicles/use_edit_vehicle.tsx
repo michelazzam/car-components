@@ -3,15 +3,17 @@ import { useUpdateData } from "@/api-service/useUpdateData";
 import { AddEditVehicleBodyParam } from "./use_add_vehicle";
 
 const useEditVehicle = ({
-  id,
+  customerId,
+  vehicleId,
   callBackOnSuccess,
 }: {
-  id: string;
+  customerId: string;
+  vehicleId: string;
   callBackOnSuccess?: () => void;
 }) => {
   return useUpdateData<AddEditVehicleBodyParam>({
-    queryKeysToInvalidate: [["vehicles"]],
-    endpoint: API.editVehicle(id),
+    queryKeysToInvalidate: [["vehicles"], ["single-customer"]],
+    endpoint: API.editVehicle(vehicleId, customerId),
     callBackOnSuccess: callBackOnSuccess,
   });
 };

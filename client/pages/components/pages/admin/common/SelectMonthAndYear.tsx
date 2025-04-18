@@ -1,4 +1,4 @@
-import SelectField from "@/pages/components/admin/ControlledFields/SlectField";
+import SelectField from "@/pages/components/admin/Fields/SlectField";
 import React, { useEffect } from "react";
 import { Option } from "react-multi-select-component";
 

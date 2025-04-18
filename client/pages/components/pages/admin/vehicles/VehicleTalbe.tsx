@@ -12,18 +12,20 @@ import DeleteRecord from "../../../../components/admin/DeleteRecord";
 import { ReactTabulator } from "react-tabulator";
 import { API } from "@/constants/apiEndpoints";
 import VehicleModal from "../../../../components/pages/admin/vehicles/VehicleModal";
-import Link from "next/link";
-import SelectField from "@/pages/components/admin/ControlledFields/SlectField";
-import { useListCustomers } from "@/api-hooks/customer/use-list-customer";
-import { Option } from "react-multi-select-component";
+import { Customer } from "@/api-hooks/customer/use-list-customer";
 import Pagination from "@/pages/components/admin/Pagination";
 
-const TableVehicles = ({ customerId }: { customerId?: string }) => {
+const TableVehicles = ({ customer }: { customer: Customer }) => {
+  if (!customer) {
+    return (
+      <div className="flex justify-center items-center">
+        No customer data available
+      </div>
+    );
+  }
+  const { _id: customerId } = customer;
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize , setPageSize] = useState(10);
-
-  const [selectedCustomerToFilter, setSelectedCustomerToFilter] =
-    useState<Option | null>();
+  const [pageSize, setPageSize] = useState(10);
 
   const [search, setSearch] = useState("");
   const debouncedVehicleSearch = useDebounce(search);
@@ -31,53 +33,47 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
   //-------------------APIS Call-----------------------------
 
   const { data: vehicles } = useListVehicles({
-    pageSize:pageSize,
+    pageSize: pageSize,
     pageIndex: currentPage - 1,
     search: debouncedVehicleSearch,
-    customerId: selectedCustomerToFilter?.value || customerId,
-  });
-
-  const [customerSearch, setCustomerSearch] = useState("");
-  const debouncedCustomerSearch = useDebounce(customerSearch);
-  const { data: customers } = useListCustomers({
-    pageIndex: 0,
-    search: debouncedCustomerSearch,
-  });
-  const customerOptions = customers?.customers.map((customer) => {
-    return {
-      label: customer.name,
-      value: customer._id,
-    };
+    customerId: customerId,
   });
 
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | undefined>();
 
   const columns: any = [
     {
-      title: "Track No.",
-      field: "vehicleNb",
+      title: "Vehicle No.",
+      field: "number",
       headerSort: false,
     },
 
     {
-      title: "Customer",
-      field: "customer.name",
+      title: "Odometer",
+      field: "odometer",
       sorter: "string",
       headerSort: false,
     },
 
     {
-      title: "Unit Model",
-      field: "model",
+      title: "Type",
+      field: "make",
       sorter: "string",
       headerSort: false,
+      formatter: (cell: any) => {
+        const vehicle = cell.getRow().getData() as Vehicle;
+        const make = vehicle?.make;
+        const model = vehicle?.model;
+        return ReactDOMServer.renderToString(
+          <div>
+            {make}
+            {model && ","}
+            {model}
+          </div>
+        );
+      },
     },
-    {
-      title: "Gas Type",
-      field: "gasType.title",
-      sorter: "string",
-      headerSort: false,
-    },
+
     {
       title: "Last Service Date",
       field: "lastServiceDate",
@@ -151,29 +147,7 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
                 <div className="w-[20rem]">
                   <Search onChangeSearch={(v) => setSearch(v)} value={search} />
                 </div>
-                <div className="mt-3.5 w-[15rem]">
-                  <SelectField
-                    disabled={!!customerId}
-                    label=""
-                    options={customerOptions || []}
-                    placeholder={
-                      customerId ? "Customer selected" : "Filter by customer"
-                    }
-                    creatable={false}
-                    onInputChange={(value) => {
-                      setCustomerSearch(value);
-                    }}
-                    onChangeValue={(opt) => {
-                      setSelectedCustomerToFilter(opt);
-                    }}
-                    value={selectedCustomerToFilter}
-                    isClearable
-                  />
-                </div>
               </div>
-              <Link href="/admin/gasType" className="text-blue-500 underline">
-                Manage Gas Types
-              </Link>
             </div>
             <div className="box-body space-y-3">
               <div className="overflow-hidden table-bordered">
@@ -196,7 +170,7 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
                 setPageSize={setPageSize}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-                totalPages={vehicles?.totalPages || 0}
+                totalPages={vehicles?.pagination.totalPages || 0}
               />
             </div>
           </div>
@@ -210,6 +184,7 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
         vehicle={selectedVehicle}
         modalTitle="Edit Vehicle"
         setVehicle={setSelectedVehicle}
+        selectedCustomer={customer}
       />
       {/* Add Modal */}
       <VehicleModal
@@ -218,11 +193,12 @@ const TableVehicles = ({ customerId }: { customerId?: string }) => {
         vehicle={selectedVehicle}
         modalTitle="Add Vehicle"
         setVehicle={setSelectedVehicle}
+        selectedCustomer={customer}
       />
 
       {selectedVehicle && (
         <DeleteRecord
-          endpoint={API.deleteVehicle(selectedVehicle._id)}
+          endpoint={API.deleteVehicle(selectedVehicle._id, customerId)}
           queryKeysToInvalidate={[["vehicles"]]}
         />
       )}

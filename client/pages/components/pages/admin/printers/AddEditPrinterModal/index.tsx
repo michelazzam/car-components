@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, PrinterSchema } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { useAddPrinter } from "@/api-hooks/printers/use-add-printer";
 import { Printer } from "@/api-hooks/printers/use-list-printers";
 import { useEditPrinter } from "@/api-hooks/printers/use-edit-printer";
@@ -67,8 +67,13 @@ function AddEditPrinterModal({
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-12 gap-x-2"
         >
-          <TextField control={control} name="name" label="Name" colSpan={6} />
-          <TextField
+          <TextFieldControlled
+            control={control}
+            name="name"
+            label="Name"
+            colSpan={6}
+          />
+          <TextFieldControlled
             control={control}
             name="ipAddress"
             label="IP Address"

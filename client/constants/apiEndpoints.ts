@@ -4,8 +4,8 @@ export const API = {
   listUsers: "/users", // GET
   userAuth: "/users/authenticate", // GET
   addUser: "/users/add", // POST
-  editUsers: (id: string) => `/users/${id}`, // PUT
-  deleteUser: (id: string) => `/users/${id}`, // DELETE
+  editUser: (id: string) => `/users/edit/${id}`, // PUT
+  deleteUser: (id: string) => `/users/delete/${id}`, // DELETE
   editUserPermissions: (id: string) => `/users/edit-permissions/${id}`, // PUT
 
   // Profile
@@ -38,12 +38,15 @@ export const API = {
   deleteGasType: (id: string) => `/gasType/${id}`,
 
   // Vehicles
-  listVehicles: "/vehicles", //GET
-  addVehicle: "/vehicles", //POST
-  editVehicle: (id: string) => `/vehicles/${id}`, //PUT
-  deleteVehicle: (id: string) => `/vehicles/${id}`, //DELETE
+  listVehicles: `/customers/vehicle`, //GET
+  addVehicle: (customerId: string) => `/customers/${customerId}/vehicle`, //POST
+  editVehicle: (vehicleId: string, customerId: string) =>
+    `/customers/${customerId}/vehicle/${vehicleId}`, //PUT
+  deleteVehicle: (vehicleId: string, customerId: string) =>
+    `/customers/${customerId}/vehicle/${vehicleId}`, //DELETE
 
   // Customers
+  getCustomerById: (id: string) => `/customers/${id}`,
   listCustomers: "/customers",
   addCustomer: "/customers",
   editCustomer: (id: string) => `/customers/${id}`,
@@ -96,7 +99,9 @@ export const API = {
   createService: "/services", // POST
 
   // Supplier:
-  listSupplier: "/supplier", //GET
-  addSupplier: "/supplier", //POST
-  editSupplier: (id: string) => `/supplier/${id}`,
+  listSupplier: "/suppliers", //GET
+  addSupplier: "/suppliers", //POST
+  getSingleSupplier: (id: string) => `/suppliers/${id}`, //GET
+  editSupplier: (id: string) => `/suppliers/${id}`, //PUT
+  deleteSupplier: (id: string) => `/suppliers/${id}`, //DELETE
 };

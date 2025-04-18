@@ -14,6 +14,8 @@ import { AddCustomerDto } from './dto/add-customer.dto';
 import { EditCustomerDto } from './dto/edit-customer.dto';
 import { GetCustomersDto } from './dto/get-customers.dto';
 import { AddVehicleDto } from './dto/add-vehicle.dto';
+import { EditVehicleDto } from './dto/edit-vehicle.dto';
+import { GetVehiclesDto } from './dto/get-vehicles.dto';
 
 @ApiTags('Customer')
 @Controller({ version: '1', path: 'customers' })
@@ -23,6 +25,11 @@ export class CustomerController {
   @Get()
   async getAll(@Query() dto: GetCustomersDto) {
     return this.customerService.getAll(dto);
+  }
+
+  @Get('vehicle')
+  async getAllCustomerVehicles(@Query() dto: GetVehiclesDto) {
+    return this.customerService.getAllVehicles(dto);
   }
 
   @Get(':id')
@@ -52,6 +59,18 @@ export class CustomerController {
     await this.customerService.deleteCustomer(id);
 
     return { message: 'Customer deleted successfully' };
+  }
+
+  //-------------------------Vehicles------------------------
+
+  @Put(':id/vehicle/:vehicleId')
+  async editVehicle(
+    @Param('id') id: string,
+    @Param('vehicleId') vehicleId: string,
+    @Body() dto: EditVehicleDto,
+  ) {
+    await this.customerService.editVehicle(id, vehicleId, dto);
+    return { message: 'Vehicle updated successfully' };
   }
 
   @Post(':id/vehicle')

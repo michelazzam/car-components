@@ -64,4 +64,53 @@ function formatDateToISO(date: Date | null): string | null {
   return adjustedDate.toISOString().split("T")[0];
 }
 
-export { formatDate, dateTimeToDateFormat, formatTime, formatDateToISO };
+/**
+ * Formats a date object to a string in the format "dd/MM/yyyy".
+ * @param  {Date | null} date
+ * @returns  {string | null}
+ */
+const formatDateWithSlashes = (date: Date | null | string): string | null => {
+  if (!date) return null;
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new Error("Invalid date provided");
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${day}/${month}/${year}`; // Format as dd/MM/yyyy
+};
+
+/**
+ * Formats a date object to a string in the format "dd-MM-yyyy".
+ * @param  {Date | null} date
+ * @param  {boolean} reversed - Whether to reverse the order of the date components (e.g., "yyyy-MM-dd" instead of "dd-MM-yyyy").
+ * @returns  {string | null}
+ */
+
+const formatDateWithDashes = (
+  date: Date | null | string,
+  reversed = false
+): string | null => {
+  if (!date) return null;
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new Error("Invalid date provided");
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+  if (reversed) {
+    return `${year}-${month}-${day}`;
+  }
+
+  return `${day}-${month}-${year}`; // Format as dd/MM/yyyy
+};
+
+export {
+  formatDate,
+  dateTimeToDateFormat,
+  formatTime,
+  formatDateToISO,
+  formatDateWithDashes,
+  formatDateWithSlashes,
+};

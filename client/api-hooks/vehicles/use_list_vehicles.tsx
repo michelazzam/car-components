@@ -1,32 +1,25 @@
 import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
+import { Pagination } from "@/pages/components/admin/Pagination";
 
 interface Customer {
   _id: string;
   name: string;
 }
 
-interface GasType {
-  _id: string;
-  title: string;
-}
-
 export interface Vehicle {
   _id: string;
-  vehicleNb: string;
+  number: string;
+  make: string;
   model: string;
-  gasType: GasType;
   lastServiceDate: string;
-  odoMeter: string;
+  odometer: number;
   customer: Customer;
 }
 
 interface VehiclesResponse {
   vehicles: Vehicle[];
-  pageIndex: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  pagination: Pagination;
 }
 
 const useListVehicles = ({

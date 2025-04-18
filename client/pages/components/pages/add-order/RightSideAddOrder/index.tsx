@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import ItemsList from "./ItemsList";
-import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 import { clearPosStore, usePosStore } from "@/shared/store/usePosStore";
 import { SubmitHandler, useFormContext } from "react-hook-form";
 import { useAddInvoice } from "@/api-hooks/invoices/use-add-invoices";
 import GeneralInfoModal from "./GeneralInfoModal";
 import { useGetOrganization } from "@/api-hooks/restaurant/use-get-organization-info";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
-import SelectField from "@/pages/components/admin/FormFields/SelectField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import toast from "react-hot-toast";
 import { useEditInvoice } from "@/api-hooks/invoices/use-edit-invoices";
 import { useRouter } from "next/router";
@@ -114,7 +114,7 @@ function RightSideAddOrder({
     ) {
       return toast.error("please add products or services");
     }
-    console.log("isFullPaid:",isFullPaid)
+    console.log("isFullPaid:", isFullPaid);
     if (isFullPaid || data.amountPaidLbp !== 0 || data.amountPaidUsd !== 0) {
       data.isPaid = true;
     } else {
@@ -234,7 +234,7 @@ function RightSideAddOrder({
         >
           General Info
         </button>
-        <NumberField
+        <NumberFieldControlled
           control={control}
           name="discount.amount"
           label="Discount"
@@ -244,7 +244,7 @@ function RightSideAddOrder({
           } // Pass amount and type correctly
         />
 
-        <SelectField
+        <SelectFieldControlled
           control={control}
           label="Type"
           name="discount.type"
@@ -259,14 +259,14 @@ function RightSideAddOrder({
         {/* items list */}
         <ItemsList />
         {/* items list */}
-        <NumberField
+        <NumberFieldControlled
           control={control}
           name="amountPaidUsd"
           label="USD"
           colSpan={1}
           prefix="$"
         />
-        <NumberField
+        <NumberFieldControlled
           control={control}
           name="amountPaidLbp"
           label="LBP"
@@ -302,10 +302,10 @@ function RightSideAddOrder({
             <Checkbox
               label="Full Paid"
               onValueChange={() => {
-                if(isFullPaid){
+                if (isFullPaid) {
                   setValue("amountPaidUsd", 0);
                   setIsFullPaid(false);
-                }else{
+                } else {
                   setValue("amountPaidUsd", +totalAmount());
                   setIsFullPaid(true);
                 }

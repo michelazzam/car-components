@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { ExpenseType } from "@/api-hooks/expensesType/use-list-expensesType";
 import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType";
 import { useEditExpenseType } from "@/api-hooks/expensesType/use-edit-expenseType";
@@ -35,9 +35,7 @@ function ExpenseTypeModal({
   const { mutate: addExpenseType, isPending: isAdding } = useAddExpenseType({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-      }, 1000);
+      cancelFormRef.current?.click();
     },
   });
 
@@ -45,10 +43,8 @@ function ExpenseTypeModal({
     id: expenseType?._id!,
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-        setSelectedExpenseType(undefined);
-      }, 1000);
+      cancelFormRef.current?.click();
+      setSelectedExpenseType(undefined);
     },
   });
 
@@ -90,11 +86,11 @@ function ExpenseTypeModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <TextField
+          <TextFieldControlled
             control={control}
-            name="title"
-            label="Title"
-            placeholder="title.."
+            name="name"
+            label="Name"
+            placeholder="name.."
             colSpan={12}
           />
         </form>
@@ -102,7 +98,6 @@ function ExpenseTypeModal({
 
       <Modal.Footer>
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"

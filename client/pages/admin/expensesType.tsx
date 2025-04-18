@@ -39,8 +39,8 @@ const ExpensesType = () => {
 
   const columns: any = [
     {
-      title: "Title",
-      field: "title",
+      title: "Name",
+      field: "name",
       sorter: "string",
       headerSort: false,
     },

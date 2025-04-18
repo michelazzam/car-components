@@ -1,6 +1,6 @@
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
-import PasswordField from "@/pages/components/admin/FormFields/PasswordField";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
+import PasswordFieldControlled from "@/pages/components/admin/FormControlledFields/PasswordFieldControlled";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -10,14 +10,14 @@ function RightSideViewOrder() {
   return (
     <div className="bg-white min-h-full -mr-[1.5rem]  px-3 py-4">
       <div className="grid grid-cols-2 gap-x-2 items-center justify-between ">
-        <TextField
+        <TextFieldControlled
           name="tableName"
           label="Table Name"
           colSpan={1}
           control={control}
           withCheckbox={false}
         />
-        <NumberField
+        <NumberFieldControlled
           name="total"
           label="Total"
           colSpan={1}
@@ -25,7 +25,7 @@ function RightSideViewOrder() {
           withCheckbox={false}
         />
 
-        <PasswordField
+        <PasswordFieldControlled
           name="password"
           label="Password"
           colSpan={1}

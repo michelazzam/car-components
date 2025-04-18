@@ -2,72 +2,135 @@ import Pageheader from "@/shared/layout-components/page-header/pageheader";
 import Seo from "@/shared/layout-components/seo/seo";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import React, { useState } from "react";
-import { ReactTabulator } from "react-tabulator";
+import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
-import ReactDOMServer from "react-dom/server";
-import { FaRegTrashCan } from "react-icons/fa6";
-import { AiOutlineArrowLeft } from "react-icons/ai";
-import { useRouter } from "next/router";
+import { createColumnHelper } from "@tanstack/react-table";
+import { FaEye, FaRegTrashCan } from "react-icons/fa6";
 import AddEditSupplierModal from "../components/pages/admin/supplier/AddEditSupplierModal";
-import { Supplier } from "@/api-hooks/supplier/use-list-supplier";
+import {
+  Supplier,
+  useListSupplier,
+} from "@/api-hooks/supplier/use-list-supplier";
+import { formatNumber } from "@/lib/helpers/formatNumber";
+import Pagination from "../components/admin/Pagination";
+import { useDebounce } from "@/hooks/useDebounce";
+import DeleteRecord from "../components/admin/DeleteRecord";
+import { API } from "@/constants/apiEndpoints";
+import ViewSupplierModal from "../components/pages/admin/supplier/ViewSupplierModal";
 
 const SupplierPage = () => {
+  const [pageIndex, setPageIndex] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const [searchValue, setSearchValue] = useState("");
+  const debouncedSearch = useDebounce(searchValue);
+
+  const {
+    data: suppliersResponse,
+    isLoading,
+    isFetching,
+    error,
+  } = useListSupplier({
+    pageSize: pageSize,
+    pageIndex: pageIndex - 1,
+    search: debouncedSearch,
+  });
+  const suppliers = suppliersResponse?.suppliers;
+
   const [selectedSupplier, setSelectedSupplier] = useState<
     Supplier | undefined
   >();
 
-  const columns = [
-    {
-      title: "Name",
-      field: "name",
-      headerSort: false,
-    },
-    {
-      title: "Actions",
-      field: "actions",
-      width: 150,
-      formatter: () =>
-        ReactDOMServer.renderToString(
-          <div
-            className="flex align-middle gap-2"
-            style={{ display: "flex", justifyContent: "space-around" }}
-          >
-            <button
-              id="edit-btn"
-              className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white"
-              data-hs-overlay="#edit-category-modal"
-            >
-              <FaRegEdit />
-            </button>
-            <button
-              id="delete-btn"
-              className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
-              data-hs-overlay="#delete-record-modal"
-            >
-              <FaRegTrashCan />
-            </button>
-          </div>
-        ),
+  //---------------Create Columns--------------------
+  const columnHelper = createColumnHelper<Supplier>();
 
-      cellClick: (e: any, cell: any) => {
-        const rowData = cell.getRow().getData() as Supplier;
-        const clickedButton = e.target.closest("button");
+  const tanstackColumns = [
+    columnHelper.accessor("name", {
+      header: "Name",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
 
-        if (clickedButton) {
-          const buttonId = clickedButton.id;
-          if (buttonId === "edit-btn") setSelectedSupplier(rowData);
-          else if (buttonId === "delete-btn") setSelectedSupplier(rowData);
-        }
+    columnHelper.accessor("amountDue", {
+      header: "Amount Due",
+      cell: ({ getValue }) => {
+        const value = Number(getValue());
+        return <div>{formatNumber(value, 2)}$</div>;
       },
-    },
+    }),
+
+    columnHelper.accessor("loan", {
+      header: "Loan",
+      cell: ({ getValue }) => {
+        const value = Number(getValue());
+        return <div>{formatNumber(value, 2)}$</div>;
+      },
+    }),
+
+    columnHelper.accessor("capital", {
+      header: "Capital",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
+
+    columnHelper.accessor("poBox", {
+      header: "PO Box",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
+
+    columnHelper.accessor("phoneNumber", {
+      header: "Phone Number",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
+
+    columnHelper.accessor("email", {
+      header: "Email",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
+
+    columnHelper.accessor("vatNumber", {
+      header: "VAT Number",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
+
+    columnHelper.display({
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <div
+          className="flex align-middle gap-2"
+          style={{ display: "flex", justifyContent: "space-around" }}
+        >
+          <button
+            id="view-btn"
+            className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
+            onClick={() => setSelectedSupplier(row.original)}
+            data-hs-overlay="#view-supplier-modal"
+          >
+            <FaEye />
+          </button>{" "}
+          <button
+            id="edit-btn"
+            className="btn btn-sm btn-primary text-secondary border-secondary rounded-md p-1 hover:bg-secondary border hover:text-white transition-all"
+            onClick={() => setSelectedSupplier(row.original)}
+            data-hs-overlay="#edit-supplier-modal"
+          >
+            <FaRegEdit />
+          </button>
+          <button
+            id="delete-btn"
+            className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"
+            data-hs-overlay="#delete-record-modal"
+            onClick={() => setSelectedSupplier(row.original)}
+          >
+            <FaRegTrashCan />
+          </button>
+        </div>
+      ),
+    }),
   ];
 
-  const [searchValue, setSearchValue] = useState("");
   const onSearchValueChange = (value: string) => {
     setSearchValue(value);
   };
-
-  const router = useRouter();
 
   return (
     <div>
@@ -86,19 +149,38 @@ const SupplierPage = () => {
         searchValue={searchValue}
         onSearchValueChange={onSearchValueChange}
       >
-        <ReactTabulator
-          className="table-hover table-bordered"
-          data={[]}
-          columns={columns}
+        <ReactTablePaginated
+          errorMessage={error?.message}
+          data={suppliers || []}
+          columns={tanstackColumns}
+          hidePagination
+          loading={isLoading}
+          paginating={isFetching}
+          totalRows={suppliersResponse?.pagination.totalCount || 0}
+        />
+
+        <Pagination
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          currentPage={pageIndex}
+          setCurrentPage={setPageIndex}
+          totalPages={suppliersResponse?.pagination.totalPages || 0}
         />
       </TableWrapper>
 
-      <AddEditSupplierModal triggerModalId="add-category-modal" />
+      <AddEditSupplierModal triggerModalId="add-supplier-modal" />
       <AddEditSupplierModal
-        triggerModalId="edit-category-modal"
+        triggerModalId="edit-supplier-modal"
         supplier={selectedSupplier}
       />
-
+      <ViewSupplierModal
+        triggerModalId="view-supplier-modal"
+        supplier={selectedSupplier}
+      />
+      <DeleteRecord
+        endpoint={API.deleteSupplier(selectedSupplier?._id || "")}
+        queryKeysToInvalidate={[["suppliers"]]}
+      />
     </div>
   );
 };

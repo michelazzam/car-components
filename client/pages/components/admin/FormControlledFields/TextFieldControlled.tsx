@@ -1,11 +1,11 @@
 import { cn } from "@/utils/cn";
-import { useState } from "react";
 import { Controller, useController } from "react-hook-form";
+import { IconType } from "react-icons/lib";
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
+import { capitalizeWord } from "@/utils/capitalize-word";
 
-interface PasswordFieldProps {
+interface TextFieldProps {
   readOnly?: boolean;
-  placeholder?: string;
   control: any;
   name: string;
   label: string;
@@ -13,11 +13,15 @@ interface PasswordFieldProps {
   withCheckbox?: boolean;
   setIsChecked?: (checked: boolean) => void;
   isChecked?: boolean;
+  placeholder?: string;
+  actionButtonTitle?: string;
+  onClickActionButton?: () => void;
+  ActionButtonIcon?: IconType;
+  dontCapitalize?: boolean;
 }
 
-const PasswordField: React.FC<PasswordFieldProps> = ({
+const TextFieldControlled: React.FC<TextFieldProps> = ({
   readOnly = false,
-  placeholder = "Password",
   control,
   name,
   label,
@@ -25,14 +29,18 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   withCheckbox = false,
   isChecked = false,
   setIsChecked,
+  placeholder = "Enter text",
+  //action button
+  actionButtonTitle,
+  onClickActionButton,
+  ActionButtonIcon,
+  dontCapitalize = false,
 }) => {
   if (!control) return null;
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { fieldState, field } = useController({ name, control });
 
   const errorMessage = fieldState.error?.message;
-  const OpenedEye = <i className="bi bi-eye-fill"></i>;
-  const ClosedEye = <i className="bi bi-eye-slash-fill"></i>;
+
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
@@ -54,30 +62,39 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
             name={name}
             render={() => (
               <div className="relative">
-                <div className="flex items-center relative mt-1">
+                <div className="flex items-center">
                   <input
                     placeholder={placeholder}
-                    type={isPasswordVisible ? "text" : "password"}
                     value={field.value}
-                    onChange={field.onChange}
+                    onChange={(e) => {
+                      if (dontCapitalize) field.onChange(e.target.value);
+                      else field.onChange(capitalizeWord(e.target.value || ""));
+                    }}
                     disabled={(!isChecked && withCheckbox) || readOnly}
                     className={cn(
-                      "block w-full  px-3 py-2 border  rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
-                      errorMessage ? "border-red/50 " : "border-gray-300 "
+                      `block w-full mt-1 px-3 py-2 border  disabled:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#6b7280] rounded-md shadow-sm  sm:text-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none`,
+                      errorMessage ? "border-red/50 " : "border-gray-300 ",
+                      dontCapitalize ? "" : "capitalize"
                     )}
                   />
+                </div>
+                {actionButtonTitle && (
                   <button
                     type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 "
-                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-primary"
+                    data-hs-overlay={`#primary-modal`}
+                    onClick={onClickActionButton}
                   >
-                    {isPasswordVisible ? OpenedEye : ClosedEye}
-                  </button>
-                </div>
+                    {ActionButtonIcon && (
+                      <ActionButtonIcon className="size-5" />
+                    )}
 
+                    <span className="font-bold">{actionButtonTitle}</span>
+                  </button>
+                )}
                 <div className="absolute -bottom-5">
                   {errorMessage ? (
-                    <p className="mt-2 text-sm text-red">{errorMessage}</p>
+                    <p className=" text-sm text-red">{errorMessage}</p>
                   ) : null}
                 </div>
               </div>
@@ -89,4 +106,4 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
   );
 };
 
-export default PasswordField;
+export default TextFieldControlled;

@@ -1,10 +1,10 @@
 import Modal from "@/shared/Modal";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
-import SelectField from "@/pages/components/admin/FormFields/SelectField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import { Expense } from "@/api-hooks/expenses/use_list_expenses";
 import {
   AddEditExpenseBodyParam,
@@ -16,8 +16,9 @@ import {
   useListExpensesType,
 } from "@/api-hooks/expensesType/use-list-expensesType";
 import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType";
-import DateField from "@/pages/components/admin/FormFields/DateField";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import DateFieldControlled from "@/pages/components/admin/FormControlledFields/DateFieldControlled";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 
 function ExpenseModal({
   expense,
@@ -34,6 +35,8 @@ function ExpenseModal({
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
+  //---------------------------STATE--------------------------
+  const [keepAdding, setKeepAdding] = useState(false);
   //-----------------------------------Options----------------
 
   const { data: expenseType } = useListExpensesType();
@@ -50,18 +53,18 @@ function ExpenseModal({
     defaultValues: {
       expenseTypeId: "",
       amount: 0,
-      date: new Date(),
+      date: "",
       note: "",
     },
   });
 
   //---------------------------API----------------------------------
-  const { mutate: addProduct, isPending: isAdding } = useAddExpense({
+  const { mutate: addExpense, isPending: isAdding } = useAddExpense({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
+      if (!keepAdding) {
         cancelFormRef.current?.click();
-      }, 1000);
+      }
     },
   });
 
@@ -71,26 +74,20 @@ function ExpenseModal({
     },
   });
 
-  const { mutate: editProduct, isPending: isEditing } = useEditExpense({
+  const { mutate: editExpense, isPending: isEditing } = useEditExpense({
     id: expense?._id!,
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-        setSelectedExpense(undefined);
-      }, 1000);
+      cancelFormRef.current?.click();
+      setSelectedExpense(undefined);
     },
   });
 
   const onSubmit: SubmitHandler<AddEditExpenseBodyParam> = (
     data: AddEditExpenseBodyParam
   ) => {
-    if (expense) editProduct(data);
-    else
-      addProduct({
-        ...data,
-        date: "2025-04-17",
-      });
+    if (expense) editExpense(data);
+    else addExpense(data);
   };
 
   const handleCreateOption = (data: string) => {
@@ -106,7 +103,7 @@ function ExpenseModal({
       reset({
         expenseTypeId: expense?.expenseType?._id || "",
         amount: expense?.amount || 0,
-        date: new Date(expense?.date),
+        date: expense?.date || "",
         note: expense?.note || "",
       });
     } else {
@@ -114,7 +111,7 @@ function ExpenseModal({
       reset({
         expenseTypeId: "",
         amount: 0,
-        date: new Date(),
+        date: "",
         note: "",
       });
     }
@@ -138,7 +135,7 @@ function ExpenseModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <SelectField
+          <SelectFieldControlled
             control={control}
             name="expenseTypeId"
             label="Expense Type"
@@ -148,7 +145,7 @@ function ExpenseModal({
             creatable={true}
             handleCreate={handleCreateOption}
           />
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="amount"
             label="Total Amount"
@@ -156,16 +153,18 @@ function ExpenseModal({
             prefix="$"
             colSpan={6}
           />
-          <DateField
+          <DateFieldControlled
             control={control}
             name="date"
             label="Date"
             placeholder="2012-12-01"
+            formatType="dd-MM-yyyy"
             colSpan={6}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="note"
+            dontCapitalize
             label="Note"
             placeholder="note here for later"
             colSpan={6}
@@ -174,8 +173,14 @@ function ExpenseModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {!expense && (
+          <Checkbox
+            isChecked={keepAdding}
+            onValueChange={(v) => setKeepAdding(v)}
+            label="Add More"
+          />
+        )}
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"

@@ -1,6 +1,7 @@
 import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
 import { Vehicle } from "../vehicles/use_list_vehicles";
+import { Pagination } from "@/pages/components/admin/Pagination";
 
 export interface Customer {
   _id: string;
@@ -20,9 +21,7 @@ export interface Customer {
 
 interface CustomerResponse {
   customers: Customer[];
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  pagination: Pagination;
 }
 
 const useListCustomers = ({

@@ -22,6 +22,11 @@ const Users = () => {
       sorter: "string",
       headerSort: false,
     },
+    {
+      title: "Salary",
+      field: "salary",
+      headerSort: false,
+    },
     { title: "Email", field: "email", sorter: "string" },
     { title: "Role", field: "role", sorter: "string" },
     {
@@ -106,10 +111,15 @@ const Users = () => {
     setSearchValue(value);
   };
   const filteredUsers = users?.filter((user) => {
-    return searchValue === ""
-      ? true
-      : user.username.toLowerCase().includes(searchValue.toLowerCase()) ||
+    const isActive = user?.isActive;
+
+    const matchSearch =
+      searchValue === ""
+        ? true
+        : user.username.toLowerCase().includes(searchValue.toLowerCase()) ||
           user.role.toLowerCase().includes(searchValue.toLowerCase());
+
+    return matchSearch && isActive;
   });
 
   return (

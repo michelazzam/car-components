@@ -11,7 +11,7 @@ const Main = () => {
     const timeout = setTimeout(() => {
       if (user) {
         console.log("I AM A USER");
-        if (user.role === "employee") {
+        if (user.role === "user") {
           router.push("/add-invoice");
         } else {
           router.push("/admin/balance");

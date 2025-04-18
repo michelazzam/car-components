@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import PhoneCodePicker from "../../../../components/admin/FormFields/PhoneCodePicker";
+import PhoneCodePickerControlled from "../../../admin/FormControlledFields/PhoneCodePickerControlled";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, ProfileSchema } from "@/lib/apiValidations";
 import { useForm } from "react-hook-form";
-import TextField from "../../../../components/admin/FormFields/TextField";
+import TextFieldControlled from "../../../admin/FormControlledFields/TextFieldControlled";
 import { useEditProfile } from "@/api-hooks/users/use-edit-profile";
 import UseAuth from "@/api-hooks/useAuth";
 import { BsPencilSquare } from "react-icons/bs";
@@ -53,7 +53,6 @@ const EditProfile: React.FC<EditProfileProps> = ({
   useEffect(() => {
     if (user) {
       reset({
-        fullName: user.fullName,
         username: user.username,
         address: user.address,
         phoneNumber: user.phoneNumber,
@@ -72,7 +71,6 @@ const EditProfile: React.FC<EditProfileProps> = ({
     setEditable(false);
     if (user) {
       reset({
-        fullName: user.fullName,
         username: user.username,
         address: user.address,
         phoneNumber: user.phoneNumber,
@@ -101,7 +99,7 @@ const EditProfile: React.FC<EditProfileProps> = ({
       </div>
 
       <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-        <TextField
+        <TextFieldControlled
           control={control}
           label="Full Name*"
           name="fullName"
@@ -109,7 +107,7 @@ const EditProfile: React.FC<EditProfileProps> = ({
           colSpan={12}
           readOnly={!editable}
         />
-        <TextField
+        <TextFieldControlled
           control={control}
           label="User Name*"
           name="username"
@@ -117,14 +115,14 @@ const EditProfile: React.FC<EditProfileProps> = ({
           colSpan={6}
           readOnly={!editable}
         />
-        <PhoneCodePicker
+        <PhoneCodePickerControlled
           control={control}
           label="Phone Number"
           name="phoneNumber"
           colSpan={6}
           disabled={!editable}
         />
-        <TextField
+        <TextFieldControlled
           control={control}
           label="Address"
           name="address"

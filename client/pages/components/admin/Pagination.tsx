@@ -70,7 +70,11 @@ const Pagination = ({
             }`}
             onClick={() => {
               if (currentPage < totalPages) {
+                console.log("SETTING PAGE TO", currentPage + 1);
                 setCurrentPage(currentPage + 1);
+              } else {
+                console.log("CURRENT PAGE", currentPage);
+                console.log("TOTAL PAGES", totalPages);
               }
             }}
           >
@@ -83,3 +87,10 @@ const Pagination = ({
 };
 
 export default Pagination;
+
+export type Pagination = {
+  pageIndex: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+};

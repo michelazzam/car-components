@@ -1,6 +1,6 @@
 import { useUpdateData } from "@/api-service/useUpdateData";
 import { API } from "@/constants/apiEndpoints";
-import { CategorySchema } from "@/lib/apiValidations";
+import { CreateSupplier } from "./use-Add-supplier";
 
 const useEditSupplier = ({
   id,
@@ -9,8 +9,8 @@ const useEditSupplier = ({
   id: string;
   callBackOnSuccess?: () => void;
 }) => {
-  return useUpdateData<CategorySchema>({
-    queryKeysToInvalidate: [["supplier"]],
+  return useUpdateData<CreateSupplier>({
+    queryKeysToInvalidate: [["suppliers"]],
     endpoint: API.editSupplier(id),
     callBackOnSuccess: callBackOnSuccess,
   });

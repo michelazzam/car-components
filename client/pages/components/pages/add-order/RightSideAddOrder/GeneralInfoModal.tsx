@@ -1,8 +1,8 @@
 import Modal from "@/shared/Modal";
 import React, { useRef } from "react";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { useFormContext } from "react-hook-form";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 
 const GeneralInfoModal = ({
   triggerModalId,
@@ -32,28 +32,28 @@ const GeneralInfoModal = ({
         <Modal.Header title={modalTitle} id={triggerModalId} />
         {/* <form onSubmit={handleSubmit(onSubmit)}> */}
         <Modal.Body>
-          <NumberField
+          <NumberFieldControlled
             control={control}
             label="Invoice Number"
             name="invoiceNumber"
             placeholder="Nb."
             colSpan={1}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             label="Driver Name"
             name="driverName"
             placeholder="type name"
             colSpan={1}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             label="General Note"
             name="genralNote"
             placeholder="note"
             colSpan={2}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             label="Customer Note"
             name="customerNote"

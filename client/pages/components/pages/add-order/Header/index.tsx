@@ -1,6 +1,6 @@
 import { useListCustomers } from "@/api-hooks/customer/use-list-customer";
 import { useListVehicles } from "@/api-hooks/vehicles/use_list_vehicles";
-import TextField from "@/pages/components/admin/ControlledFields/TextField";
+import TextField from "@/pages/components/admin/Fields/TextField";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { FaCarRear } from "react-icons/fa6";
@@ -10,7 +10,7 @@ import VehicleModal from "../../admin/vehicles/VehicleModal";
 import { useDebounce } from "@/hooks/useDebounce";
 import ServiceModal from "../service/ServiceModal";
 import { usePosStore } from "@/shared/store/usePosStore";
-import SelectField from "@/pages/components/admin/FormFields/SelectField";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 
 function Header({
   search,
@@ -48,7 +48,7 @@ function Header({
     return {
       label: customer.name,
       value: customer._id,
-      phone: customer.phone,
+      phone: customer.phoneNumber,
       address: customer.address,
       tvaNumber: customer.tvaNumber,
     };
@@ -56,9 +56,9 @@ function Header({
 
   const vehicleOptions = vehicles?.vehicles.map((vehicle) => {
     return {
-      label: vehicle.vehicleNb,
+      label: vehicle.number,
       value: vehicle._id,
-      vehicleNb: vehicle.vehicleNb,
+      vehicleNb: vehicle.number,
       model: vehicle.model,
     };
   });
@@ -79,7 +79,7 @@ function Header({
       )}
       <div className="grid grid-cols-5 gap-5 items-center justify-between pe-2 w-full">
         <div className="col-span-2 flex items-center justify-between w-full">
-          <SelectField
+          <SelectFieldControlled
             control={control}
             label="Customer"
             name="customerId"
@@ -106,7 +106,7 @@ function Header({
         </div>
 
         <div className="col-span-2 flex items-center justify-between w-full">
-          <SelectField
+          <SelectFieldControlled
             control={control}
             label="Vehicle"
             name="vehicleId"

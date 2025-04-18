@@ -21,18 +21,17 @@ const Header = () => {
 
   const toggleFullscreen = () => {
     const element = document.documentElement;
-      if (!document.fullscreenElement) {
-    // Enter fullscreen mode
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-
+    if (!document.fullscreenElement) {
+      // Enter fullscreen mode
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      }
+    } else {
+      // Exit fullscreen mode
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
-  } else {
-    // Exit fullscreen mode
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
   };
 
   useEffect(() => {
@@ -305,7 +304,7 @@ const Header = () => {
               <div className="header-element md:!px-[0.65rem] px-2 !items-center [--placement:bottom-left]">
                 <div className="md:block hidden dropdown-profile me-3">
                   <p className="font-semibold mb-0 leading-none text-[#536485] text-[0.813rem] ">
-                    {user?.fullName}
+                    {user?.username}
                   </p>
                   <span className="opacity-[0.7] font-normal text-[#536485] block text-[0.6875rem] ">
                     {user?.role}

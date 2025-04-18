@@ -1,13 +1,14 @@
 import Modal from "@/shared/Modal";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, CustomerSchema } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import { Customer } from "@/api-hooks/customer/use-list-customer";
 import { useAddCustomer } from "@/api-hooks/customer/use-add-customer";
 import { useEditCustomer } from "@/api-hooks/customer/use-edit-customer";
-import PhoneCodePicker from "@/pages/components/admin/FormFields/PhoneCodePicker";
+import PhoneCodePickerControlled from "@/pages/components/admin/FormControlledFields/PhoneCodePickerControlled";
+import Checkbox from "@/pages/components/admin/Fields/Checkbox";
 
 function CustomerModal({
   customer,
@@ -24,14 +25,16 @@ function CustomerModal({
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
+  //---------------------------STATE--------------------------
+  const [keepAdding, setKeepAdding] = useState(false);
   //---------------------------API----------------------------------
 
   const { mutate: addCustomer, isPending: isAdding } = useAddCustomer({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
+      if (!keepAdding) {
         cancelFormRef.current?.click();
-      }, 10);
+      }
     },
   });
 
@@ -39,10 +42,8 @@ function CustomerModal({
     id: customer?._id!,
     callBackOnSuccess: () => {
       reset();
-      setCustomer && setCustomer(undefined);
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-      }, 10);
+      setCustomer?.(undefined);
+      cancelFormRef.current?.click();
     },
   });
 
@@ -109,14 +110,14 @@ function CustomerModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <TextField
+          <TextFieldControlled
             control={control}
             name="name"
             label="Customer Name"
             placeholder="customer name"
             colSpan={4}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="email"
             label="Email"
@@ -124,27 +125,27 @@ function CustomerModal({
             colSpan={4}
             dontCapitalize
           />
-          <PhoneCodePicker
+          <PhoneCodePickerControlled
             control={control}
             name="phoneNumber"
             label="Phone Number"
             colSpan={4}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="address"
             label="Address"
             placeholder="customer address"
             colSpan={12}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="tvaNumber"
             label="Vat Number"
             placeholder="123456"
             colSpan={12}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="note"
             label="Note"
@@ -155,8 +156,14 @@ function CustomerModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {!customer && (
+          <Checkbox
+            isChecked={keepAdding}
+            onValueChange={(v) => setKeepAdding(v)}
+            label="Add More"
+          />
+        )}
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"

@@ -2,20 +2,22 @@ import { usePostData } from "@/api-service/usePostData";
 import { API } from "@/constants/apiEndpoints";
 
 export interface AddEditVehicleBodyParam {
-  customerId: string;
+  make: string;
   model: string;
-  gasTypeId: string;
-  vehicleNb: string;
+  odometer?: number;
+  number: string;
 }
 
 const useAddVehicle = ({
   callBackOnSuccess,
+  customerId,
 }: {
   callBackOnSuccess?: () => void;
+  customerId: string;
 }) => {
   return usePostData<AddEditVehicleBodyParam>({
-    queryKeysToInvalidate: [["vehicles"]],
-    endpoint: API.addVehicle,
+    queryKeysToInvalidate: [["vehicles"], ["single-customer"]],
+    endpoint: API.addVehicle(customerId),
     callBackOnSuccess: callBackOnSuccess,
   });
 };

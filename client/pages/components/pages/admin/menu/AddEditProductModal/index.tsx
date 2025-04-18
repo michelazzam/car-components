@@ -3,8 +3,8 @@ import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, ProductSchema } from "@/lib/apiValidations";
-import TextField from "@/pages/components/admin/FormFields/TextField";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import { useAddProduct } from "@/api-hooks/products/use-add-product";
 import { Product } from "@/api-hooks/products/use-list-products";
 import { useEditProduct } from "@/api-hooks/products/use-edit-product";
@@ -131,14 +131,14 @@ function AddEditProductModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
-          <TextField
+          <TextFieldControlled
             control={control}
             name="name"
             label="Name"
             placeholder="name"
             colSpan={6}
           />
-          <TextField
+          <TextFieldControlled
             control={control}
             name="brand"
             label="Brand"
@@ -151,14 +151,14 @@ function AddEditProductModal({
             label="Stock "
             colSpan={!product ? 3 : 4}
           /> */}
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="cost"
             label="Cost"
             colSpan={6}
             prefix="$"
           />
-          <NumberField
+          <NumberFieldControlled
             control={control}
             name="price"
             label="Price"
@@ -167,14 +167,14 @@ function AddEditProductModal({
           />
           {/* in case of editing a product, we don't need to show the stock field */}
           {!product && (
-            <NumberField
+            <NumberFieldControlled
               control={control}
               name="stock"
               label="Stock"
               colSpan={12}
             />
           )}
-          <TextField
+          <TextFieldControlled
             control={control}
             name="note"
             label="Note"

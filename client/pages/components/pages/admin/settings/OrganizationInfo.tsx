@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import PhoneCodePicker from "../../../../components/admin/FormFields/PhoneCodePicker";
+import PhoneCodePickerControlled from "../../../admin/FormControlledFields/PhoneCodePickerControlled";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, OrganizationSchema } from "@/lib/apiValidations";
 import { useForm } from "react-hook-form";
-import TextField from "../../../../components/admin/FormFields/TextField";
+import TextFieldControlled from "../../../admin/FormControlledFields/TextFieldControlled";
 import { OrganizationInfoType } from "@/api-hooks/restaurant/use-get-organization-info";
 import { BsPencilSquare } from "react-icons/bs";
 import { useEditOrganizationInfo } from "@/api-hooks/restaurant/use-edit-organization-info";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 
 const OrganizationInfo = ({
   organization,
@@ -72,7 +72,7 @@ const OrganizationInfo = ({
             </div>
 
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="Organization Name"
                 name="name"
@@ -80,14 +80,14 @@ const OrganizationInfo = ({
                 colSpan={6}
                 readOnly={!editable}
               />
-              <PhoneCodePicker
+              <PhoneCodePickerControlled
                 control={control}
                 label="Phone Number"
                 name="phoneNumber"
                 colSpan={6}
                 disabled={!editable}
               />
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="Email"
                 name="email"
@@ -95,7 +95,7 @@ const OrganizationInfo = ({
                 colSpan={6}
                 readOnly={!editable}
               />
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="VAT Number"
                 name="tvaNumber"
@@ -103,7 +103,7 @@ const OrganizationInfo = ({
                 colSpan={6}
                 readOnly={!editable}
               />
-              <NumberField
+              <NumberFieldControlled
                 prefix="%"
                 control={control}
                 label="VAT Percentage"
@@ -112,7 +112,7 @@ const OrganizationInfo = ({
                 colSpan={6}
                 readOnly={!editable}
               />
-              <TextField
+              <TextFieldControlled
                 control={control}
                 label="Address"
                 name="address"

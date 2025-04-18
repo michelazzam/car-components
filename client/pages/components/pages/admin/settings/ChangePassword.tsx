@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, ChangePassword } from "@/lib/apiValidations";
 import { useForm } from "react-hook-form";
-import PasswordField from "../../../../components/admin/FormFields/PasswordField";
+import PasswordFieldControlled from "../../../admin/FormControlledFields/PasswordFieldControlled";
 import { useChangePassword } from "@/api-hooks/users/use-change-password";
 
 interface ChangePasswordProps {
@@ -59,13 +59,13 @@ const ChangePasswordPage: React.FC<ChangePasswordProps> = ({
             </div>
 
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-              <PasswordField
+              <PasswordFieldControlled
                 control={control}
                 label="Current Password"
                 name="currentPassword"
                 colSpan={12}
               />
-              <PasswordField
+              <PasswordFieldControlled
                 control={control}
                 label="New Password"
                 name="newPassword"

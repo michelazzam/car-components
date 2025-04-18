@@ -3,12 +3,12 @@ import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import NumberField from "@/pages/components/admin/FormFields/NumberField";
+import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import { usePosStore } from "@/shared/store/usePosStore";
 import { CiCirclePlus } from "react-icons/ci";
 import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashCan } from "react-icons/fa6";
-import SelectField from "@/pages/components/admin/FormFields/SelectField";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import {
   Service,
   useListServices,
@@ -210,7 +210,7 @@ const ServiceModal = ({
                 </div>
               ))}
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
-              <SelectField
+              <SelectFieldControlled
                 control={control}
                 name="name"
                 label="Name"
@@ -222,13 +222,13 @@ const ServiceModal = ({
                 onInputChange={(value) => setSearchQuery(value)}
                 treatAsObject
               />
-              <NumberField
+              <NumberFieldControlled
                 control={control}
                 name="quantity"
                 label="Quantity"
                 colSpan={4}
               />
-              <NumberField
+              <NumberFieldControlled
                 control={control}
                 name="price"
                 label="Price"
