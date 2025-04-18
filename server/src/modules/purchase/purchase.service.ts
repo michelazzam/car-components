@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { AddPurchaseDto } from './dto/add-purchase.dto';
 import { ISupplier, Supplier } from '../supplier/supplier.schema';
 import { IItem, Item } from '../item/item.schema';
+import { GetPurchaseDto } from './dto/get-purchase.dto';
+import { formatISODate } from 'src/utils/formatIsoDate';
 
 @Injectable()
 export class PurchaseService {
@@ -16,6 +18,74 @@ export class PurchaseService {
     @InjectModel(Supplier.name)
     private supplierModel: Model<ISupplier>,
   ) {}
+
+  async getAll(dto: GetPurchaseDto) {
+    const { pageIndex, search, pageSize, supplierId, startDate, endDate } = dto;
+
+    const filter: FilterQuery<IPurchase> = { $and: [{ $or: [] }] };
+
+    if (search) {
+      // @ts-ignore
+      filter.$and[0].$or.push({
+        invoiceNumber: { $regex: search, $options: 'i' },
+        customerConsultant: { $regex: search, $options: 'i' },
+        phoneNumber: { $regex: search, $options: 'i' },
+      });
+    }
+
+    if (supplierId) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ supplier: supplierId });
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      const dateFilter: any = {};
+      if (startDate) {
+        dateFilter.$gte = startDate;
+      }
+      if (endDate) {
+        const nextDay = new Date(endDate as string);
+        nextDay.setDate(nextDay.getDate() + 1);
+        dateFilter.$lt = formatISODate(nextDay);
+      }
+      // @ts-ignore
+      filter.$and.push({ invoiceDate: dateFilter });
+    }
+
+    // If no filters were added to $or, remove it
+    if (filter?.$and?.[0]?.$or?.length === 0) {
+      filter.$and = filter.$and.slice(1);
+    }
+
+    // If no filters were added at all, use an empty filter to query all orders
+    if (filter?.$and?.length === 0) {
+      // @ts-ignore
+      delete filter.$and;
+    }
+
+    const [purchases, totalCount] = await Promise.all([
+      this.purchaseModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pageIndex * pageSize)
+        .limit(pageSize)
+        .populate('supplier'),
+      this.purchaseModel.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      purchases,
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages,
+      },
+    };
+  }
 
   async create(dto: AddPurchaseDto) {
     // get products from db and save the name with each one

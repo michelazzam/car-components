@@ -79,8 +79,6 @@ export class ExpenseService {
         totalPages,
       },
     };
-
-    return this.expenseModel.find().sort({ createdAt: -1 });
   }
 
   async create(dto: AddExpenseDto) {
