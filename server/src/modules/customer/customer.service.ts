@@ -6,6 +6,8 @@ import { AddCustomerDto } from './dto/add-customer.dto';
 import { EditCustomerDto } from './dto/edit-customer.dto';
 import { GetCustomersDto } from './dto/get-customers.dto';
 import { AddVehicleDto } from './dto/add-vehicle.dto';
+import { EditVehicleDto } from './dto/edit-vehicle.dto';
+import { GetVehiclesDto } from './dto/get-vehicles.dto';
 
 @Injectable()
 export class CustomerService {
@@ -16,6 +18,7 @@ export class CustomerService {
     private vehicleModel: Model<IVehicle>,
   ) {}
 
+  //-----------------------------GET SINGLE CUSTOMER-----------------------------
   async getOne(id: string) {
     const customer = await this.customerModel.findById(id).populate('vehicles');
     if (!customer) throw new NotFoundException('Customer not found');
@@ -23,6 +26,7 @@ export class CustomerService {
     return customer;
   }
 
+  //-----------------------------GET ALL CUSTOMERS-----------------------------
   async getAll(dto: GetCustomersDto) {
     const { pageIndex, search, pageSize } = dto;
 
@@ -61,10 +65,12 @@ export class CustomerService {
     };
   }
 
+  //-----------------------------ADD CUSTOMER-----------------------------
   async create(customer: AddCustomerDto) {
     return await this.customerModel.create(customer);
   }
 
+  //-----------------------------EDIT CUSTOMER-----------------------------
   async editCustomer(id: string, dto: EditCustomerDto) {
     const customer = await this.customerModel.findOneAndUpdate(
       { _id: id },
@@ -75,6 +81,7 @@ export class CustomerService {
     return customer;
   }
 
+  //-----------------------------DELETE CUSTOMER-----------------------------
   async deleteCustomer(id: string) {
     const customer = await this.customerModel.findOneAndDelete({ _id: id });
 
@@ -82,6 +89,7 @@ export class CustomerService {
     return customer;
   }
 
+  //---------------------------------------------------------------------VEHICLES----------------
   async addVehicle(customerId: string, dto: AddVehicleDto) {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');
@@ -101,6 +109,80 @@ export class CustomerService {
     await customer.save();
   }
 
+  //-----------------------------GET ALL CUSTOMER VEHICLES-----------------------------
+  async getAllVehicles(dto: GetVehiclesDto) {
+    const { pageIndex = 0, pageSize = 10, search, customerId } = dto;
+
+    // 1. Start with an empty filter
+    const filter: FilterQuery<IVehicle> = {};
+
+    // 2. Text‐search on make/model/number
+    if (search) {
+      filter.$or = [
+        { make: { $regex: search, $options: 'i' } },
+        { model: { $regex: search, $options: 'i' } },
+        { number: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    // 3. If a customerId was passed, restrict to their vehicles
+    if (customerId) {
+      const customer = await this.customerModel
+        .findById(customerId)
+        .select('vehicles');
+      if (!customer) {
+        throw new NotFoundException('Customer not found');
+      }
+      filter._id = { $in: customer.vehicles as any[] };
+    }
+
+    // 4. Fetch paginated vehicles + total count
+    const [vehicles, totalCount] = await Promise.all([
+      this.vehicleModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pageIndex * pageSize)
+        .limit(pageSize)
+        .lean(),
+      this.vehicleModel.countDocuments(filter),
+    ]);
+
+    // 5. Compute total pages
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    // 6. Return payload with pagination metadata
+    return {
+      vehicles,
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages,
+      },
+    };
+  }
+
+  //-----------------------------EDIT VEHICLE-----------------------------
+  async editVehicle(
+    customerId: string,
+    vehicleId: string,
+    dto: EditVehicleDto,
+  ) {
+    const customer = await this.customerModel.findById(customerId);
+    if (!customer) throw new NotFoundException('Customer not found');
+
+    const { make, model, number, odometer } = dto;
+
+    // update the vehicle
+    await this.vehicleModel.findByIdAndUpdate(vehicleId, {
+      make,
+      model,
+      number,
+      odometer,
+    });
+  }
+
+  //-----------------------------DELETE VEHICLE-----------------------------
   async deleteVehicle(customerId: string, vehicleId: string) {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');

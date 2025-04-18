@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, MinLength } from 'class-validator';
 
 export class AddVehicleDto {
   @ApiProperty({
@@ -10,9 +10,10 @@ export class AddVehicleDto {
   make: string;
 
   @ApiProperty({
-    required: false,
+    required: true,
     type: String,
   })
+  @MinLength(1, { message: 'Model is required' })
   @IsString()
   model: string;
 
