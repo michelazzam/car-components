@@ -48,7 +48,7 @@ function Header({
     return {
       label: customer.name,
       value: customer._id,
-      phone: customer.phone,
+      phone: customer.phoneNumber,
       address: customer.address,
       tvaNumber: customer.tvaNumber,
     };

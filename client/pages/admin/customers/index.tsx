@@ -44,14 +44,19 @@ const Customers = () => {
     },
     {
       title: "Phone Number",
-      field: "phone",
+      field: "phoneNumber",
       sorter: "string",
       headerSort: false,
     },
     {
       title: "Total Vehicles",
-      field: "totalVehicles",
+      field: "vehicles",
       headerSort: false,
+      formatter: (cell: any) => {
+        return ReactDOMServer.renderToString(
+          <span> {cell.getValue().length}</span>
+        );
+      },
     },
     {
       title: "Loan",
@@ -157,7 +162,7 @@ const Customers = () => {
                 setPageSize={setPageSize}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-                totalPages={customers?.totalPages || 0}
+                totalPages={customers?.pagination.totalPages || 0}
               />
             </div>
           </div>
