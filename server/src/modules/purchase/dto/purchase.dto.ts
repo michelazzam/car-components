@@ -70,7 +70,7 @@ class Item {
   totalPrice: number;
 }
 
-export class AddPurchaseDto {
+export class PurchaseDto {
   @ApiProperty({
     required: true,
   })

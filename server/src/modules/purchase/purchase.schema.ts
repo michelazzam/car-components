@@ -28,6 +28,9 @@ export class Purchase {
   totalAmount: number;
 
   @Prop({ required: true })
+  amountPaid: number;
+
+  @Prop({ required: true })
   items: {
     item: mongoose.Schema.Types.ObjectId;
     name: string;
@@ -35,6 +38,7 @@ export class Purchase {
     price: number;
     quantity: number;
     quantityFree: number;
+    currentItemCost: number;
     discount: number;
     lotNumber: string;
     expDate: string;
