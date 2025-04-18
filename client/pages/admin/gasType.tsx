@@ -9,7 +9,6 @@ import DeleteRecord from "../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import Search from "../components/admin/Search";
 import { GasType, useListGasType } from "@/api-hooks/gasType/use-list-gasTypes";
-import GasTypeModal from "../components/pages/admin/gasType/GasTypeModal";
 
 const GasTypes = () => {
   const [search, setSearch] = useState("");
@@ -138,7 +137,7 @@ const GasTypes = () => {
         </div>
       </div>
 
-      <GasTypeModal
+      {/* <GasTypeModal
         triggerModalId="edit-gas-type-modal"
         gasType={selectedGasType}
         modalTitle="Edit Gas Type"
@@ -149,7 +148,7 @@ const GasTypes = () => {
         gasType={selectedGasType}
         modalTitle="Add Gas Type"
         setSelectedGasType={setSelectedGasType}
-      />
+      /> */}
 
       <DeleteRecord
         endpoint={API.deleteGasType(selectedGasType?._id || "")}

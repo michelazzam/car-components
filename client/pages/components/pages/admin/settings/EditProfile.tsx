@@ -53,7 +53,6 @@ const EditProfile: React.FC<EditProfileProps> = ({
   useEffect(() => {
     if (user) {
       reset({
-        fullName: user.fullName,
         username: user.username,
         address: user.address,
         phoneNumber: user.phoneNumber,
@@ -72,7 +71,6 @@ const EditProfile: React.FC<EditProfileProps> = ({
     setEditable(false);
     if (user) {
       reset({
-        fullName: user.fullName,
         username: user.username,
         address: user.address,
         phoneNumber: user.phoneNumber,

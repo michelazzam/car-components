@@ -248,7 +248,7 @@ function ListInvoice({ customerId }: { customerId?: string }) {
   });
   const vehiclesOptions = data?.vehicles.map((vehicle) => {
     return {
-      label: `${vehicle.model} - ${vehicle.vehicleNb}`,
+      label: `${vehicle.model} - ${vehicle.number}`,
       value: vehicle._id,
     };
   });

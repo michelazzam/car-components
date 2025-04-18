@@ -59,6 +59,10 @@ const DateFieldControlled = <TFieldValues extends FieldValues>({
   maxDate,
   showTimeInput = false,
 }: DateFieldProps<TFieldValues>) => {
+  if (!control) {
+    console.error("Control prop is missing");
+    return null; // Or render a fallback UI
+  }
   const { fieldState, field } = useController({ name, control });
   const errorMessage = fieldState.error?.message;
 

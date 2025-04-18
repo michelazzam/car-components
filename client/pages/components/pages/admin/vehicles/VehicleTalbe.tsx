@@ -16,6 +16,13 @@ import { Customer } from "@/api-hooks/customer/use-list-customer";
 import Pagination from "@/pages/components/admin/Pagination";
 
 const TableVehicles = ({ customer }: { customer: Customer }) => {
+  if (!customer) {
+    return (
+      <div className="flex justify-center items-center">
+        No customer data available
+      </div>
+    );
+  }
   const { _id: customerId } = customer;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
