@@ -1,5 +1,5 @@
 import Modal from "@/shared/Modal";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, CustomerSchema } from "@/lib/apiValidations";
@@ -8,6 +8,7 @@ import { Customer } from "@/api-hooks/customer/use-list-customer";
 import { useAddCustomer } from "@/api-hooks/customer/use-add-customer";
 import { useEditCustomer } from "@/api-hooks/customer/use-edit-customer";
 import PhoneCodePicker from "@/pages/components/admin/FormFields/PhoneCodePicker";
+import Checkbox from "@/pages/components/admin/ControlledFields/Checkbox";
 
 function CustomerModal({
   customer,
@@ -24,14 +25,16 @@ function CustomerModal({
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
+  //---------------------------STATE--------------------------
+  const [keepAdding, setKeepAdding] = useState(false);
   //---------------------------API----------------------------------
 
   const { mutate: addCustomer, isPending: isAdding } = useAddCustomer({
     callBackOnSuccess: () => {
       reset();
-      setTimeout(() => {
+      if (!keepAdding) {
         cancelFormRef.current?.click();
-      }, 10);
+      }
     },
   });
 
@@ -40,9 +43,7 @@ function CustomerModal({
     callBackOnSuccess: () => {
       reset();
       setCustomer && setCustomer(undefined);
-      setTimeout(() => {
-        cancelFormRef.current?.click();
-      }, 10);
+      cancelFormRef.current?.click();
     },
   });
 
@@ -155,8 +156,14 @@ function CustomerModal({
       </Modal.Body>
 
       <Modal.Footer>
+        {!customer && (
+          <Checkbox
+            isChecked={keepAdding}
+            onValueChange={(v) => setKeepAdding(v)}
+            label="Add More"
+          />
+        )}
         <button
-          disabled={isAdding || isEditing}
           ref={cancelFormRef}
           type="button"
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"
