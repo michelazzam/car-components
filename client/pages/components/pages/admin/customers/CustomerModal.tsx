@@ -42,7 +42,7 @@ function CustomerModal({
     id: customer?._id!,
     callBackOnSuccess: () => {
       reset();
-      setCustomer && setCustomer(undefined);
+      setCustomer?.(undefined);
       cancelFormRef.current?.click();
     },
   });
