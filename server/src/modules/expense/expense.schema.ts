@@ -1,11 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-// suppier & invoice to be added once I start the business logic
 @Schema()
 export class Expense {
   @Prop({ required: true })
-  date: string; // YYYY/MM/DD
+  date: string;
 
   @Prop({ required: true })
   amount: number;
@@ -15,6 +14,9 @@ export class Expense {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ExpenseType' })
   expenseType: mongoose.Types.ObjectId;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
+  supplier: mongoose.Types.ObjectId;
 
   @Prop({ default: Date.now })
   createdAt: Date;

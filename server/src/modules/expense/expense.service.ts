@@ -1,22 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Expense, IExpense } from './expense.schema';
 import { FilterQuery, Model } from 'mongoose';
-import { AddExpenseDto } from './dto/add-expense.dto';
-import { EditExpenseDto } from './dto/edit-expense.dto';
+import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
 import { formatISODate } from 'src/utils/formatIsoDate';
+import { ISupplier, Supplier } from '../supplier/supplier.schema';
 
 @Injectable()
 export class ExpenseService {
   constructor(
     @InjectModel(Expense.name)
     private expenseModel: Model<IExpense>,
+    @InjectModel(Supplier.name)
+    private supplierModel: Model<ISupplier>,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
-    const { pageIndex, search, pageSize, expenseTypeId, startDate, endDate } =
-      dto;
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      expenseTypeId,
+      startDate,
+      endDate,
+      supplierId,
+    } = dto;
 
     const filter: FilterQuery<IExpense> = { $and: [{ $or: [] }] };
 
@@ -30,6 +43,11 @@ export class ExpenseService {
     if (expenseTypeId) {
       // @ts-ignore
       filter.$and[0].$or.push({ expenseType: expenseTypeId });
+    }
+
+    if (supplierId) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ supplier: supplierId });
     }
 
     // Add date range filter
@@ -79,44 +97,77 @@ export class ExpenseService {
         totalPages,
       },
     };
-
-    return this.expenseModel.find().sort({ createdAt: -1 });
   }
 
-  async create(dto: AddExpenseDto) {
+  async create(dto: ExpenseDto) {
     await this.expenseModel.create({
       expenseType: dto.expenseTypeId,
+      supplier: dto.supplierId,
       amount: dto.amount,
       date: dto.date,
       note: dto.note,
     });
 
-    // Events:
-    // TODO: subtract supplier loan
-    // TODO: update accounting
+    await this.doExpenseEffects(dto);
   }
 
-  async edit(id: string, dto: EditExpenseDto) {
+  async edit(id: string, dto: ExpenseDto) {
+    await this.revertExpenseEffects(id);
+
     const expense = await this.expenseModel.findOneAndUpdate(
       { _id: id },
       {
         expenseType: dto.expenseTypeId,
+        supplier: dto.supplierId,
         amount: dto.amount,
         date: dto.date,
         note: dto.note,
       },
     );
-    // TODO: update accounting
+    if (!expense) throw new NotFoundException('Expense not found');
+
+    await this.doExpenseEffects(dto);
+
+    return expense;
+  }
+
+  async delete(id: string) {
+    await this.revertExpenseEffects(id);
+
+    const expense = await this.expenseModel.findOneAndDelete({ _id: id });
 
     if (!expense) throw new NotFoundException('Expense not found');
     return expense;
   }
 
-  async delete(id: string) {
-    const expense = await this.expenseModel.findOneAndDelete({ _id: id });
-    // TODO: update accounting
+  private async doExpenseEffects(dto: ExpenseDto) {
+    // subtract supplier loan
+    if (dto.supplierId) {
+      const supplier = await this.supplierModel.findById(dto.supplierId);
+      if (!supplier) throw new NotFoundException('Supplier not found');
 
-    if (!expense) throw new NotFoundException('Expense not found');
-    return expense;
+      supplier.loan -= dto.amount;
+      await supplier.save();
+    }
+
+    // TODO: update accounting
+  }
+
+  private async revertExpenseEffects(expenseId: string) {
+    const expense = await this.expenseModel.findById(expenseId).lean();
+    if (!expense) {
+      throw new BadRequestException('Expense not found');
+    }
+
+    // Increase supplier loan
+    const supplier = await this.supplierModel.findById(expense.supplier);
+    if (!supplier) {
+      return; //ignore deleted suppliers
+    }
+
+    supplier.loan += expense.amount;
+    await supplier.save();
+
+    // TODO: update accounting
   }
 }

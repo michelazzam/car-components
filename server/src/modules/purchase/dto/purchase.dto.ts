@@ -15,7 +15,7 @@ class Item {
     required: true,
   })
   @IsMongoId()
-  item: string;
+  itemId: string;
 
   @ApiProperty({
     required: false,
@@ -70,7 +70,7 @@ class Item {
   totalPrice: number;
 }
 
-export class AddPurchaseDto {
+export class PurchaseDto {
   @ApiProperty({
     required: true,
   })

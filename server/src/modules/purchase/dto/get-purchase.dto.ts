@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 
-export class GetExpensesDto {
+export class GetPurchaseDto {
   @ApiProperty({ required: true, type: Number })
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
@@ -40,10 +40,6 @@ export class GetExpensesDto {
   @ApiProperty({ required: false })
   @IsOptional()
   search?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  expenseTypeId?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

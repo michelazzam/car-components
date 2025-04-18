@@ -102,6 +102,7 @@ export class CustomerService {
       model,
       number,
       odometer,
+      customer: customer._id,
     });
 
     // link it to the customer

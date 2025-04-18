@@ -3,11 +3,15 @@ import { ExpenseService } from './expense.service';
 import { ExpenseController } from './expense.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Expense, ExpenseSchema } from './expense.schema';
+import { Supplier, SupplierSchema } from '../supplier/supplier.schema';
 
 @Module({
   imports: [
     // configure model to be used in this Module
-    MongooseModule.forFeature([{ name: Expense.name, schema: ExpenseSchema }]),
+    MongooseModule.forFeature([
+      { name: Expense.name, schema: ExpenseSchema },
+      { name: Supplier.name, schema: SupplierSchema },
+    ]),
   ],
   controllers: [ExpenseController],
   providers: [ExpenseService],

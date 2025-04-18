@@ -6,9 +6,6 @@ export class Supplier {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ default: 0 })
-  amountDue: number;
-
   @Prop()
   capital: string;
 

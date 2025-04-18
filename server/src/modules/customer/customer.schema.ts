@@ -3,6 +3,9 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class Vehicle {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
+  customer: mongoose.Types.ObjectId;
+
   @Prop({ required: true })
   make: string;
 
