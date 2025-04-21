@@ -4,6 +4,7 @@ import { API } from "@/constants/apiEndpoints";
 export interface Service {
   _id: string;
   name: string;
+  price:number
 }
 
 export const useListServices = ({
@@ -13,7 +14,7 @@ export const useListServices = ({
   pageIndex?: number;
   search?: string;
 }) => {
-  return useReadData<ServiceResponse>({
+  return useReadData<Service[]>({
     queryKey: ["services", { pageIndex, search }],
     endpoint: API.getAllServices,
     keepPreviousData: true,
@@ -21,10 +22,10 @@ export const useListServices = ({
   });
 };
 
-export interface ServiceResponse {
-  services: Service[];
-  pageIndex: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-}
+// export interface ServiceResponse {
+//   services: Service[];
+//   pageIndex: number;
+//   pageSize: number;
+//   totalCount: number;
+//   totalPages: number;
+// }

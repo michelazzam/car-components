@@ -41,7 +41,7 @@ const ServiceModal = ({
   const { data } = useListServices({
     search: searchQuery,
   });
-  const servicesOptions = data?.services?.map((exp) => {
+  const servicesOptions =data &&  data.map((exp) => {
     return {
       label: exp?.name,
       value: exp?._id,
