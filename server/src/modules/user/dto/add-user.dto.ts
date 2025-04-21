@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { UserRole, userRoles } from '../user.schema';
+import { Trim } from 'src/decorators/trim.decorator';
 
 export class AddUserDto {
   @ApiProperty({
@@ -14,6 +15,7 @@ export class AddUserDto {
     type: String,
   })
   @IsString()
+  @Trim()
   username: string;
 
   @ApiProperty({
@@ -21,6 +23,7 @@ export class AddUserDto {
     type: String,
   })
   @IsEmail()
+  @Trim()
   @IsOptional()
   email: string;
 
@@ -29,6 +32,7 @@ export class AddUserDto {
     type: String,
   })
   @IsString()
+  @Trim()
   @IsOptional()
   password: string;
 

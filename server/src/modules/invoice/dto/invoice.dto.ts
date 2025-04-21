@@ -36,7 +36,7 @@ class Discount {
   type: DiscountType;
 }
 
-class Item {
+class InvoiceItem {
   @ApiProperty({
     required: true,
   })
@@ -63,7 +63,7 @@ class Item {
 
   @ApiProperty({
     required: true,
-    type: Item,
+    type: Discount,
   })
   @ValidateNested()
   @Type(() => Discount)
@@ -146,11 +146,17 @@ export class InvoiceDto {
 
   @ApiProperty({
     required: true,
-    type: Item,
+  })
+  @IsNumber()
+  totalAmount: number;
+
+  @ApiProperty({
+    required: true,
+    type: InvoiceItem,
     isArray: true,
   })
   @IsArray()
   @ValidateNested()
-  @Type(() => Item)
-  items: Item[];
+  @Type(() => InvoiceItem)
+  items: InvoiceItem[];
 }

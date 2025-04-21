@@ -29,7 +29,7 @@ export const userPermissions = {
     read: true,
     update: true,
   },
-  Balance: {
+  Accounting: {
     create: true,
     read: true,
     update: true,

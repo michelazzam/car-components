@@ -12,17 +12,21 @@ import { ExpenseService } from './expense.service';
 import { ApiTags } from '@nestjs/swagger';
 import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
+import { Roles } from '../user/decorators/roles.decorator';
+import { Permissions } from '../user/decorators/permissions.decorator';
 
 @ApiTags('Expense')
 @Controller({ version: '1', path: 'expense' })
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
+  @Permissions('Expenses', 'read')
   @Get()
   async getAll(@Query() dto: GetExpensesDto) {
     return this.expenseService.getAll(dto);
   }
 
+  @Permissions('Expenses', 'create')
   @Post()
   async create(@Body() dto: ExpenseDto) {
     await this.expenseService.create(dto);
@@ -30,6 +34,7 @@ export class ExpenseController {
     return { message: 'Expense added successfully' };
   }
 
+  @Permissions('Expenses', 'update')
   @Put(':id')
   async edit(@Param('id') id: string, @Body() dto: ExpenseDto) {
     await this.expenseService.edit(id, dto);
@@ -37,6 +42,7 @@ export class ExpenseController {
     return { message: 'Expense updated successfully' };
   }
 
+  @Roles('admin', 'superAmsAdmin')
   @Delete(':id')
   async delete(@Param('id') id: string) {
     await this.expenseService.delete(id);

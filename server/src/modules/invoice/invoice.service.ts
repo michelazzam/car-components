@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import {
   IInvoice,
   IInvoiceCounter,
@@ -9,9 +9,14 @@ import {
   InvoiceType,
 } from './invoice.schema';
 import { InvoiceDto } from './dto/invoice.dto';
-import dayjs from 'dayjs';
 import { IService, Service } from '../service/service.schema';
 import { IItem, Item } from '../item/item.schema';
+import { GetInvoicesDto } from './dto/get-invoices.dto';
+import { formatISODate } from 'src/utils/formatIsoDate';
+import { Customer, ICustomer } from '../customer/customer.schema';
+import { ReqUserData } from '../user/interfaces/req-user-data.interface';
+import { AccountingService } from '../accounting/accounting.service';
+import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -24,13 +29,112 @@ export class InvoiceService {
     private itemModel: Model<IItem>,
     @InjectModel(Service.name)
     private serviceModel: Model<IService>,
+    @InjectModel(Customer.name)
+    private customerModel: Model<ICustomer>,
+    private readonly accountingService: AccountingService,
   ) {}
 
+  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      customerId,
+      type,
+      startDate,
+      endDate,
+    } = dto;
+
+    const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
+
+    if (search) {
+      // @ts-ignore
+      filter.$and[0].$or.push({
+        number: { $regex: search, $options: 'i' },
+        driverName: { $regex: search, $options: 'i' },
+        generalNote: { $regex: search, $options: 'i' },
+        customerNote: { $regex: search, $options: 'i' },
+      });
+    }
+
+    // for "specialAccess" user, only s1 invoices
+    if (user.role === 'specialAccess') {
+      // @ts-ignore
+      filter.$and[0].$or.push({ type: 's1' });
+    } else if (type) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ type });
+    }
+
+    if (customerId) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ customer: customerId });
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      const dateFilter: any = {};
+      if (startDate) {
+        dateFilter.$gte = startDate;
+      }
+      if (endDate) {
+        const nextDay = new Date(endDate as string);
+        nextDay.setDate(nextDay.getDate() + 1);
+        dateFilter.$lt = formatISODate(nextDay);
+      }
+      // @ts-ignore
+      filter.$and.push({ createdAt: dateFilter });
+    }
+
+    // If no filters were added to $or, remove it
+    if (filter?.$and?.[0]?.$or?.length === 0) {
+      filter.$and = filter.$and.slice(1);
+    }
+
+    // If no filters were added at all, use an empty filter to query all orders
+    if (filter?.$and?.length === 0) {
+      // @ts-ignore
+      delete filter.$and;
+    }
+
+    const [invoices, totalCount] = await Promise.all([
+      this.invoiceModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pageIndex * pageSize)
+        .limit(pageSize)
+        .populate('customer')
+        .populate('vehicle'),
+      this.invoiceModel.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      invoices,
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages,
+      },
+    };
+  }
+
   async create(dto: InvoiceDto) {
-    const updatedDto = await this.validateItemsAndUpdateDto(dto);
+    const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
     // Generate invoice number
     const invoiceNumber = await this.generateInvoiceNumber(dto.type);
+
+    const accounting = await this.accountingService.getAccounting();
+
+    const totalPaidUsd = Number(
+      (
+        updatedDto.amountPaidUsd +
+        updatedDto.amountPaidLbp / accounting.usdRate
+      ).toFixed(2),
+    );
 
     // Create new invoice
     await this.invoiceModel.create({
@@ -44,13 +148,87 @@ export class InvoiceService {
       customerNote: updatedDto.customerNote,
       accounting: {
         isPaid: updatedDto.isPaid,
-        usdRate: 90000, //TODO: get from accounting
+        usdRate: accounting.usdRate,
         amountPaidLbp: updatedDto.amountPaidLbp,
         amountPaidUsd: updatedDto.amountPaidUsd,
+        remainingAmountUsd: updatedDto.totalAmount - totalPaidUsd,
+        //TODO: we should agree on what fields to save and what not
       },
       items: updatedDto.items,
     });
 
+    await this.doInvoiceEffects(updatedDto);
+  }
+
+  /**
+   * Applies a customer's payment towards their unpaid invoices.
+   *
+   * This method distributes the given payment amount across all of the customer's unpaid invoices,
+   * starting from the oldest. It updates the `amountPaidUsd` and `isPaid` status of each invoice
+   * based on how much of the invoice remains unpaid. Once the payment is exhausted, it stops processing.
+   *
+   * Additionally, it updates the accounting data:
+   * - Increases the total income in the accounting system by the amount paid.
+   * - Decreases the total customer loan by the amount paid.
+   * - Updates the customer's individual loan.
+   *
+   * @param dto - Object containing:
+   *   - `customerId`: MongoDB ID of the customer.
+   *   - `amount`: Total payment amount in USD to apply.
+   *
+   * @throws {BadRequestException} If the customer does not exist.
+   *
+   * @returns {Promise<void>} Resolves when all updates are completed.
+   */
+  async payCustomerInvoices(dto: PayCustomerInvoicesDto) {
+    const { customerId, amount: customerPaidAmount } = dto;
+
+    // validate customer exists
+    const customer = await this.customerModel.findById(customerId);
+    if (!customer) throw new BadRequestException('Customer not found');
+
+    let remainingAmountThatCustomerPaidNow = customerPaidAmount;
+
+    const unpaidInvoices = await this.invoiceModel
+      .find({
+        customer: customerId,
+        'accounting.isPaid': false,
+      })
+      .sort({ createdAt: 1 });
+
+    for (const invoice of unpaidInvoices) {
+      const invoiceRemaining = invoice.accounting.remainingAmountUsd;
+
+      // TODO: based on above fields agreement, update here
+      if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
+        invoice.accounting.amountPaidUsd += invoiceRemaining;
+        invoice.accounting.isPaid = true;
+        remainingAmountThatCustomerPaidNow -= invoiceRemaining;
+      } else {
+        invoice.accounting.amountPaidUsd += remainingAmountThatCustomerPaidNow;
+        invoice.accounting.isPaid = false;
+        remainingAmountThatCustomerPaidNow = 0;
+      }
+
+      await invoice.save();
+
+      if (remainingAmountThatCustomerPaidNow <= 0) break;
+    }
+
+    if (customerPaidAmount > 0) {
+      // Update accounting
+      await this.accountingService.updateAccounting({
+        totalIncome: customerPaidAmount, // increase total income
+        totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
+      });
+
+      // Decrease customer loan
+      customer.loan = customer.loan - customerPaidAmount;
+      await customer.save();
+    }
+  }
+
+  private async doInvoiceEffects(updatedDto: InvoiceDto) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -59,12 +237,34 @@ export class InvoiceService {
       });
     }
 
-    // TODO:
-    // save product cost as expenses
+    const totalAmountPaidUsd = Number(
+      (updatedDto.amountPaidUsd + updatedDto.amountPaidLbp / 90000).toFixed(2),
+    );
+
+    // save customer loan if did not pay all
+    const remainingAmount = updatedDto.totalAmount - totalAmountPaidUsd;
+    if (!updatedDto.isPaid && remainingAmount > 0) {
+      const customer = await this.customerModel.findById(updatedDto.customerId);
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      customer.loan = customer.loan + remainingAmount;
+      await customer.save();
+
+      // increase total customer loans
+      await this.accountingService.updateAccounting({
+        totalCustomersLoan: customer.loan,
+      });
+    }
+
+    // TODO: save product cost as expenses
+
     // update accounting
+    await this.accountingService.updateAccounting({
+      totalIncome: totalAmountPaidUsd,
+    });
   }
 
-  private async validateItemsAndUpdateDto(dto: InvoiceDto) {
+  private async validateItemsExistanceAndUpdateDto(dto: InvoiceDto) {
     // Separate items and services from the provided DTO
     const itemRefs = dto.items
       .filter((item) => item.itemRef)
@@ -133,7 +333,7 @@ export class InvoiceService {
   }
 
   private async generateInvoiceNumber(type: InvoiceType) {
-    const currentYear = dayjs().format('YYYY');
+    const currentYear = new Date().getFullYear();
 
     // Increment the counter specific to the year & type
     const updatedCounter = await this.invoiceCounterModel.findOneAndUpdate(

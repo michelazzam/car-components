@@ -10,6 +10,7 @@ import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
 import { formatISODate } from 'src/utils/formatIsoDate';
 import { ISupplier, Supplier } from '../supplier/supplier.schema';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class ExpenseService {
@@ -18,6 +19,7 @@ export class ExpenseService {
     private expenseModel: Model<IExpense>,
     @InjectModel(Supplier.name)
     private supplierModel: Model<ISupplier>,
+    private readonly accountingService: AccountingService,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
@@ -150,7 +152,11 @@ export class ExpenseService {
       await supplier.save();
     }
 
-    // TODO: update accounting
+    // update accounting
+    await this.accountingService.updateAccounting({
+      totalExpenses: dto.amount, //increase total expenses
+      totalSuppliersLoan: -dto.amount, //decrease total suppliers loan
+    });
   }
 
   private async revertExpenseEffects(expenseId: string) {
@@ -168,6 +174,10 @@ export class ExpenseService {
     supplier.loan += expense.amount;
     await supplier.save();
 
-    // TODO: update accounting
+    // update accounting
+    await this.accountingService.updateAccounting({
+      totalExpenses: -expense.amount, // decrease total expenses
+      totalSuppliersLoan: expense.amount, // re-add total suppliers loan
+    });
   }
 }

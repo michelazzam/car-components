@@ -10,6 +10,8 @@ import {
 } from './invoice.schema';
 import { Item, ItemSchema } from '../item/item.schema';
 import { Service, ServiceSchema } from '../service/service.schema';
+import { Customer, CustomerSchema } from '../customer/customer.schema';
+import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { Service, ServiceSchema } from '../service/service.schema';
       },
       { name: Item.name, schema: ItemSchema },
       { name: Service.name, schema: ServiceSchema },
+      { name: Customer.name, schema: CustomerSchema },
     ]),
+    AccountingModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],
