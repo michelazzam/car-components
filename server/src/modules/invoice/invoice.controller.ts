@@ -1,12 +1,18 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceDto } from './dto/invoice.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { GetInvoicesDto } from './dto/get-invoices.dto';
 
 @ApiTags('Invoices')
 @Controller({ version: '1', path: 'invoices' })
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
+
+  @Get()
+  async getAll(@Query() dto: GetInvoicesDto) {
+    return this.invoiceService.getAll(dto);
+  }
 
   @Post()
   async createInvoice(@Body() createInvoiceDto: InvoiceDto) {

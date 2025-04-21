@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class Item {
+class PurchaseItem {
   @ApiProperty({
     required: true,
   })
@@ -131,11 +131,11 @@ export class PurchaseDto {
 
   @ApiProperty({
     required: true,
-    type: Item,
+    type: PurchaseItem,
     isArray: true,
   })
   @IsArray()
   @ValidateNested()
-  @Type(() => Item)
-  items: Item[];
+  @Type(() => PurchaseItem)
+  items: PurchaseItem[];
 }

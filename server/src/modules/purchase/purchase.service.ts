@@ -164,7 +164,7 @@ export class PurchaseService {
   }
 
   private async doPurchaseEffects(dto: PurchaseDto) {
-    // update product quantity + price
+    // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemModel.findById(item.itemId);
       if (!product) throw new BadRequestException('Product not found');

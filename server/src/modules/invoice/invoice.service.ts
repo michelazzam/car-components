@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import {
   IInvoice,
   IInvoiceCounter,
@@ -9,9 +9,11 @@ import {
   InvoiceType,
 } from './invoice.schema';
 import { InvoiceDto } from './dto/invoice.dto';
-import dayjs from 'dayjs';
 import { IService, Service } from '../service/service.schema';
 import { IItem, Item } from '../item/item.schema';
+import { GetInvoicesDto } from './dto/get-invoices.dto';
+import { formatISODate } from 'src/utils/formatIsoDate';
+import { Customer, ICustomer } from '../customer/customer.schema';
 
 @Injectable()
 export class InvoiceService {
@@ -24,10 +26,95 @@ export class InvoiceService {
     private itemModel: Model<IItem>,
     @InjectModel(Service.name)
     private serviceModel: Model<IService>,
+    @InjectModel(Customer.name)
+    private customerModel: Model<ICustomer>,
   ) {}
 
+  async getAll(dto: GetInvoicesDto) {
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      customerId,
+      type,
+      startDate,
+      endDate,
+    } = dto;
+
+    const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
+
+    if (search) {
+      // @ts-ignore
+      filter.$and[0].$or.push({
+        number: { $regex: search, $options: 'i' },
+        driverName: { $regex: search, $options: 'i' },
+        generalNote: { $regex: search, $options: 'i' },
+        customerNote: { $regex: search, $options: 'i' },
+      });
+    }
+
+    if (type) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ type });
+    }
+
+    if (customerId) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ customer: customerId });
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      const dateFilter: any = {};
+      if (startDate) {
+        dateFilter.$gte = startDate;
+      }
+      if (endDate) {
+        const nextDay = new Date(endDate as string);
+        nextDay.setDate(nextDay.getDate() + 1);
+        dateFilter.$lt = formatISODate(nextDay);
+      }
+      // @ts-ignore
+      filter.$and.push({ createdAt: dateFilter });
+    }
+
+    // If no filters were added to $or, remove it
+    if (filter?.$and?.[0]?.$or?.length === 0) {
+      filter.$and = filter.$and.slice(1);
+    }
+
+    // If no filters were added at all, use an empty filter to query all orders
+    if (filter?.$and?.length === 0) {
+      // @ts-ignore
+      delete filter.$and;
+    }
+
+    const [invoices, totalCount] = await Promise.all([
+      this.invoiceModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pageIndex * pageSize)
+        .limit(pageSize)
+        .populate('customer')
+        .populate('vehicle'),
+      this.invoiceModel.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      invoices,
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalCount,
+        totalPages,
+      },
+    };
+  }
+
   async create(dto: InvoiceDto) {
-    const updatedDto = await this.validateItemsAndUpdateDto(dto);
+    const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
     // Generate invoice number
     const invoiceNumber = await this.generateInvoiceNumber(dto.type);
@@ -59,12 +146,25 @@ export class InvoiceService {
       });
     }
 
+    // save customer loan if did not pay all
+    const remainingAmount =
+      updatedDto.totalAmount -
+      (updatedDto.amountPaidUsd + updatedDto.amountPaidLbp / 90000);
+
+    if (!updatedDto.isPaid && remainingAmount > 0) {
+      const customer = await this.customerModel.findById(dto.customerId);
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      customer.loan = customer.loan + remainingAmount;
+      await customer.save();
+    }
+
     // TODO:
     // save product cost as expenses
     // update accounting
   }
 
-  private async validateItemsAndUpdateDto(dto: InvoiceDto) {
+  private async validateItemsExistanceAndUpdateDto(dto: InvoiceDto) {
     // Separate items and services from the provided DTO
     const itemRefs = dto.items
       .filter((item) => item.itemRef)
@@ -133,7 +233,7 @@ export class InvoiceService {
   }
 
   private async generateInvoiceNumber(type: InvoiceType) {
-    const currentYear = dayjs().format('YYYY');
+    const currentYear = new Date().getFullYear();
 
     // Increment the counter specific to the year & type
     const updatedCounter = await this.invoiceCounterModel.findOneAndUpdate(
