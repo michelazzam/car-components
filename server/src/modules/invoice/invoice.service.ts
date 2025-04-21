@@ -15,6 +15,7 @@ import { GetInvoicesDto } from './dto/get-invoices.dto';
 import { formatISODate } from 'src/utils/formatIsoDate';
 import { Customer, ICustomer } from '../customer/customer.schema';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class InvoiceService {
@@ -29,6 +30,7 @@ export class InvoiceService {
     private serviceModel: Model<IService>,
     @InjectModel(Customer.name)
     private customerModel: Model<ICustomer>,
+    private readonly accountingService: AccountingService,
   ) {}
 
   async getAll(dto: GetInvoicesDto, user: ReqUserData) {
@@ -143,6 +145,10 @@ export class InvoiceService {
       items: updatedDto.items,
     });
 
+    await this.doInvoiceEffects(updatedDto);
+  }
+
+  private async doInvoiceEffects(updatedDto: InvoiceDto) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -151,22 +157,31 @@ export class InvoiceService {
       });
     }
 
-    // save customer loan if did not pay all
-    const remainingAmount =
-      updatedDto.totalAmount -
-      (updatedDto.amountPaidUsd + updatedDto.amountPaidLbp / 90000);
+    const totalAmountPaidUsd = Number(
+      (updatedDto.amountPaidUsd + updatedDto.amountPaidLbp / 90000).toFixed(2),
+    );
 
+    // save customer loan if did not pay all
+    const remainingAmount = updatedDto.totalAmount - totalAmountPaidUsd;
     if (!updatedDto.isPaid && remainingAmount > 0) {
-      const customer = await this.customerModel.findById(dto.customerId);
+      const customer = await this.customerModel.findById(updatedDto.customerId);
       if (!customer) throw new BadRequestException('Customer not found');
 
       customer.loan = customer.loan + remainingAmount;
       await customer.save();
+
+      // increase total customer loans
+      await this.accountingService.updateAccounting({
+        totalCustomersLoan: customer.loan,
+      });
     }
 
-    // TODO:
-    // save product cost as expenses
+    // TODO: save product cost as expenses
+
     // update accounting
+    await this.accountingService.updateAccounting({
+      totalIncome: totalAmountPaidUsd,
+    });
   }
 
   private async validateItemsExistanceAndUpdateDto(dto: InvoiceDto) {
