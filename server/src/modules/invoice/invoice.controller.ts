@@ -4,6 +4,8 @@ import { InvoiceDto } from './dto/invoice.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
 import { Permissions } from '../user/decorators/permissions.decorator';
+import { User } from '../user/decorators/user.decorator';
+import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 
 @ApiTags('Invoices')
 @Controller({ version: '1', path: 'invoices' })
@@ -12,8 +14,8 @@ export class InvoiceController {
 
   @Permissions('Invoices', 'read')
   @Get()
-  async getAll(@Query() dto: GetInvoicesDto) {
-    return this.invoiceService.getAll(dto);
+  async getAll(@Query() dto: GetInvoicesDto, @User() user: ReqUserData) {
+    return this.invoiceService.getAll(dto, user);
   }
 
   @Permissions('Invoices', 'create')

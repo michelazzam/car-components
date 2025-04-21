@@ -14,6 +14,7 @@ import { IItem, Item } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
 import { formatISODate } from 'src/utils/formatIsoDate';
 import { Customer, ICustomer } from '../customer/customer.schema';
+import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 
 @Injectable()
 export class InvoiceService {
@@ -30,7 +31,7 @@ export class InvoiceService {
     private customerModel: Model<ICustomer>,
   ) {}
 
-  async getAll(dto: GetInvoicesDto) {
+  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
     const {
       pageIndex,
       search,
@@ -53,7 +54,11 @@ export class InvoiceService {
       });
     }
 
-    if (type) {
+    // for "specialAccess" user, only s1 invoices
+    if (user.role === 'specialAccess') {
+      // @ts-ignore
+      filter.$and[0].$or.push({ type: 's1' });
+    } else if (type) {
       // @ts-ignore
       filter.$and[0].$or.push({ type });
     }
