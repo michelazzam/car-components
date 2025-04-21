@@ -26,6 +26,6 @@
     "**/*.tsx",
     "api-hooks/expensesType",
     "api-hooks/expensesType"
-  ],
+, "pages/components/pages/admin/service/AddEditServiceModal"  ],
   "exclude": ["node_modules", "server", "dist", "out"]
 }

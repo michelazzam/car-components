@@ -97,6 +97,8 @@ export const API = {
   // Service:
   getAllServices: "/services", // GET
   createService: "/services", // POST
+  editService:(id:string) => `/services/${id}`,//PUT
+  deleteService:(id:string) => `/services/${id}`,//DELETE
 
   // Supplier:
   listSupplier: "/suppliers", //GET

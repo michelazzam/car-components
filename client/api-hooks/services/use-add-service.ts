@@ -4,6 +4,7 @@ import { Service } from "./use-list-services";
 
 export interface AddServiceBodyParam {
   name: string;
+  price?:number
 }
 
 export const useAddService = ({

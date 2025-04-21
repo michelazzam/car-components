@@ -7,18 +7,11 @@ export interface Service {
   price:number
 }
 
-export const useListServices = ({
-  pageIndex = 0,
-  search,
-}: {
-  pageIndex?: number;
-  search?: string;
-}) => {
+export const useListServices = () => {
   return useReadData<Service[]>({
-    queryKey: ["services", { pageIndex, search }],
+    queryKey: ["services"],
     endpoint: API.getAllServices,
-    keepPreviousData: true,
-    params: { pageIndex, search },
+    keepPreviousData: true
   });
 };
 
