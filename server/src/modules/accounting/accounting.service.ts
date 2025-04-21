@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Accounting, IAccounting } from './accounting.schema';
 import { Model } from 'mongoose';
@@ -38,5 +43,37 @@ export class AccountingService implements OnModuleInit {
 
     accounting.usdRate = usdRate;
     await accounting.save();
+  }
+
+  /**
+   * Updates the accounting document by incrementing specified numeric fields.
+   *
+   * @param data - An object where each key is a field of IAccounting and the value is a number to increment.
+   *
+   * @throws NotFoundException if the accounting document does not exist.
+   * @throws BadRequestException if no valid numeric fields are provided for update.
+   *
+   * @example
+   * await updateAccounting({ totalIncome: 100, totalExpenses: -50 });
+   */
+  async updateAccounting(data: Partial<Record<keyof IAccounting, number>>) {
+    const accounting = await this.accountingModel.findOne();
+    if (!accounting) throw new NotFoundException('Accounting not found');
+
+    const incFields: Record<string, number> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'number') {
+        incFields[key] = value;
+      }
+    }
+
+    if (Object.keys(incFields).length === 0) {
+      throw new BadRequestException('No valid numeric fields to update');
+    }
+
+    await this.accountingModel.findByIdAndUpdate(accounting._id, {
+      $inc: incFields,
+    });
   }
 }
