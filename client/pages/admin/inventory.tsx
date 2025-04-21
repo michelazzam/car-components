@@ -20,15 +20,15 @@ import DecreaseStockModal from "../components/pages/admin/inventory/DecreaseStoc
 
 const Inventory = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize , setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
 
   const { data } = useListProducts({
-    pageIndex: currentPage - 1,
+    pageIndex: currentPage-1,
     search: debouncedSearch,
-    pageSize:pageSize
+    pageSize: pageSize,
   });
 
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -41,8 +41,8 @@ const Inventory = () => {
       headerSort: false,
     },
     {
-      title: "Brand",
-      field: "brand",
+      title: "Supplier",
+      field: "supplier.name",
       sorter: "string",
       headerSort: false,
     },
@@ -58,42 +58,42 @@ const Inventory = () => {
       },
     },
     {
-      title: "Stock",
-      field: "stock",
+      title: "Quantity",
+      field: "quantity",
       headerSort: false,
-      formatter: (cell: any) => {
-        return ReactDOMServer.renderToString(
-          <div className="flex justify-between">
-            <span> {cell.getValue()}</span>
-            <div className="flex space-x-2">
-              <button
-                className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white"
-                id="add-stock"
-                data-hs-overlay="#increase-stock-modal"
-              >
-                Add
-              </button>
-              <button
-                className="btn btn-sm btn-primary edit-btn text-red border border-red rounded-md p-1 hover:bg-red hover:text-white"
-                id="add-stock"
-                data-hs-overlay="#decrease-stock-modal"
-              >
-                Used
-              </button>
-            </div>
-          </div>
-        );
-      },
+      // formatter: (cell: any) => {
+      //   return ReactDOMServer.renderToString(
+      //     <div className="flex justify-between">
+      //       <span> {cell.getValue()}</span>
+      //       <div className="flex space-x-2">
+      //         <button
+      //           className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white"
+      //           id="add-stock"
+      //           data-hs-overlay="#increase-stock-modal"
+      //         >
+      //           Add
+      //         </button>
+      //         <button
+      //           className="btn btn-sm btn-primary edit-btn text-red border border-red rounded-md p-1 hover:bg-red hover:text-white"
+      //           id="add-stock"
+      //           data-hs-overlay="#decrease-stock-modal"
+      //         >
+      //           Used
+      //         </button>
+      //       </div>
+      //     </div>
+      //   );
+      // },
 
-      cellClick: (e: any, cell: any) => {
-        const rowData = cell.getRow().getData() as Product;
-        const clickedButton = e.target.closest("button");
+      // cellClick: (e: any, cell: any) => {
+      //   const rowData = cell.getRow().getData() as Product;
+      //   const clickedButton = e.target.closest("button");
 
-        if (clickedButton) {
-          const buttonId = clickedButton.id;
-          if (buttonId === "add-stock") setSelectedProduct(rowData);
-        }
-      },
+      //   if (clickedButton) {
+      //     const buttonId = clickedButton.id;
+      //     if (buttonId === "add-stock") setSelectedProduct(rowData);
+      //   }
+      // },
     },
     {
       title: "Actions",
@@ -163,7 +163,7 @@ const Inventory = () => {
                 <div className="ti-custom-table ti-striped-table ti-custom-table-hover">
                   <ReactTabulator
                     className="table-hover table-bordered"
-                    data={data?.products}
+                    data={data?.items}
                     columns={columns}
                   />
                 </div>

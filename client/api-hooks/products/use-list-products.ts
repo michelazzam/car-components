@@ -4,12 +4,16 @@ import { API } from "@/constants/apiEndpoints";
 export interface Product {
   _id:string;
   name:string;
-  brand:string;
+  supplier:{
+    _id:string;
+    name:string;
+  }
   price:number;
   cost:number;
-  stock:number;
-  note:string;
+  quantity:number;
+  status:"new" | "used";
 }
+
 
 const useListProducts = ({
   pageSize = 10,
@@ -33,7 +37,7 @@ const useListProducts = ({
 export { useListProducts };
 
 export interface ProductResponse {
-  products: Product[];
+  items: Product[];
   pageIndex: number;
   pageSize: number;
   totalCount: number;

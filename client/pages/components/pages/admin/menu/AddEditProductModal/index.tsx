@@ -1,5 +1,5 @@
 import Modal from "@/shared/Modal";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, ProductSchema } from "@/lib/apiValidations";
@@ -8,6 +8,11 @@ import NumberFieldControlled from "@/pages/components/admin/FormControlledFields
 import { useAddProduct } from "@/api-hooks/products/use-add-product";
 import { Product } from "@/api-hooks/products/use-list-products";
 import { useEditProduct } from "@/api-hooks/products/use-edit-product";
+import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
+import { useDebounce } from "@/hooks/useDebounce";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
+import { SelectOption } from "@/pages/components/admin/Fields/SlectField";
+import { statusOptions } from "@/constants/constant";
 
 function AddEditProductModal({
   product,
@@ -20,6 +25,11 @@ function AddEditProductModal({
   modalTitle: string;
   setProduct?: React.Dispatch<React.SetStateAction<Product | undefined>>;
 }) {
+
+  //--------------state----------
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const supplierDeboundSearch = useDebounce(supplierSearch);
+
   //---------------------------REFS------------------------------
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
@@ -45,6 +55,15 @@ function AddEditProductModal({
     },
   });
 
+  const {data:supplier} = useListSupplier({search:supplierDeboundSearch});
+
+  const supplierOptions = supplier?.suppliers.map((supplier) => {
+    return {
+      label: supplier.name,
+      value: supplier._id
+    };
+  }) as SelectOption[];
+
   //----Getting Data for Options-----
   // const { data: categories } = useListCategories();
   // const { data: printers } = useListPrinters();
@@ -65,11 +84,11 @@ function AddEditProductModal({
     resolver: zodResolver(apiValidations.AddEditProduct),
     defaultValues: {
       name: product?.name || "",
-      brand: product?.brand || "",
+      supplierId: product?.supplier._id || "",
       price: product?.price || 0,
       cost: product?.cost || 0,
-      stock: product?.stock || 0,
-      note: product?.note || "",
+      quantity: product?.quantity || 0,
+      status: product?.status || "",
     },
   });
 
@@ -95,20 +114,20 @@ function AddEditProductModal({
     if (product) {
       reset({
         name: product?.name,
-        brand: product?.brand,
+        supplierId: product?.supplier._id,
         price: product?.price,
         cost: product?.cost,
-        stock: product?.stock,
-        note: product?.note,
+        quantity: product?.quantity,
+        status:product.status
       });
     } else {
       reset({
         name: "",
-        brand: "",
+        supplierId: "",
         price: 0,
         cost: 0,
-        stock: 0,
-        note: "",
+        quantity: 0,
+        status: "",
       });
     }
   }, [product]);
@@ -138,12 +157,20 @@ function AddEditProductModal({
             placeholder="name"
             colSpan={6}
           />
-          <TextFieldControlled
+          <SelectFieldControlled
             control={control}
-            name="brand"
-            label="Brand"
-            placeholder="brand name"
-            colSpan={6}
+            label="supplier"
+            name="supplierId"
+            options={supplierOptions || []}
+            placeholder={"choose supplier"}
+            creatable={false}
+            onInputChange={(e) => {
+              setSupplierSearch(e);
+              // setValue("supplierId", "");
+            }}
+            // onObjectChange={(e) => {
+            //   setValue("supplierId", e);
+            // }}
           />
           {/* <NumberField
             control={control}
@@ -166,20 +193,26 @@ function AddEditProductModal({
             colSpan={6}
           />
           {/* in case of editing a product, we don't need to show the stock field */}
-          {!product && (
             <NumberFieldControlled
               control={control}
-              name="stock"
-              label="Stock"
-              colSpan={12}
+              label="Quantity"
+              name="quantity"
+              colSpan={6}
             />
-          )}
-          <TextFieldControlled
+          <SelectFieldControlled
             control={control}
-            name="note"
-            label="Note"
-            placeholder="Add note"
-            colSpan={12}
+            label="Status"
+            name="status"
+            options={statusOptions || []}
+            placeholder={"choose status"}
+            creatable={false}
+            // onInputChange={(e) => {
+            //   setSupplierSearch(e);
+            //   // setValue("supplierId", "");
+            // }}
+            // onObjectChange={(e) => {
+            //   setValue("supplierId", e);
+            // }}
           />
         </form>
       </Modal.Body>
