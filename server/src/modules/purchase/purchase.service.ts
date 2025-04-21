@@ -7,6 +7,7 @@ import { ISupplier, Supplier } from '../supplier/supplier.schema';
 import { IItem, Item } from '../item/item.schema';
 import { GetPurchaseDto } from './dto/get-purchase.dto';
 import { formatISODate } from 'src/utils/formatIsoDate';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class PurchaseService {
@@ -17,6 +18,7 @@ export class PurchaseService {
     private itemModel: Model<IItem>,
     @InjectModel(Supplier.name)
     private supplierModel: Model<ISupplier>,
+    private readonly accountingService: AccountingService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -185,6 +187,11 @@ export class PurchaseService {
 
       supplier.loan = supplier.loan + remainingAmount;
       await supplier.save();
+
+      // increase total supplier loans
+      this.accountingService.updateAccounting({
+        totalSuppliersLoan: supplier.loan,
+      });
     }
   }
 
@@ -221,5 +228,10 @@ export class PurchaseService {
     if (supplier.loan < 0) supplier.loan = 0;
 
     await supplier.save();
+
+    // decrease total supplier loans
+    this.accountingService.updateAccounting({
+      totalSuppliersLoan: -supplier.loan,
+    });
   }
 }
