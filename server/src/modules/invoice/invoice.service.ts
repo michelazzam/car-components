@@ -16,6 +16,7 @@ import { formatISODate } from 'src/utils/formatIsoDate';
 import { Customer, ICustomer } from '../customer/customer.schema';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
+import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -126,6 +127,15 @@ export class InvoiceService {
     // Generate invoice number
     const invoiceNumber = await this.generateInvoiceNumber(dto.type);
 
+    const accounting = await this.accountingService.getAccounting();
+
+    const totalPaidUsd = Number(
+      (
+        updatedDto.amountPaidUsd +
+        updatedDto.amountPaidLbp / accounting.usdRate
+      ).toFixed(2),
+    );
+
     // Create new invoice
     await this.invoiceModel.create({
       customer: updatedDto.customerId,
@@ -138,14 +148,84 @@ export class InvoiceService {
       customerNote: updatedDto.customerNote,
       accounting: {
         isPaid: updatedDto.isPaid,
-        usdRate: 90000, //TODO: get from accounting
+        usdRate: accounting.usdRate,
         amountPaidLbp: updatedDto.amountPaidLbp,
         amountPaidUsd: updatedDto.amountPaidUsd,
+        remainingAmountUsd: updatedDto.totalAmount - totalPaidUsd,
+        //TODO: we should agree on what fields to save and what not
       },
       items: updatedDto.items,
     });
 
     await this.doInvoiceEffects(updatedDto);
+  }
+
+  /**
+   * Applies a customer's payment towards their unpaid invoices.
+   *
+   * This method distributes the given payment amount across all of the customer's unpaid invoices,
+   * starting from the oldest. It updates the `amountPaidUsd` and `isPaid` status of each invoice
+   * based on how much of the invoice remains unpaid. Once the payment is exhausted, it stops processing.
+   *
+   * Additionally, it updates the accounting data:
+   * - Increases the total income in the accounting system by the amount paid.
+   * - Decreases the total customer loan by the amount paid.
+   * - Updates the customer's individual loan.
+   *
+   * @param dto - Object containing:
+   *   - `customerId`: MongoDB ID of the customer.
+   *   - `amount`: Total payment amount in USD to apply.
+   *
+   * @throws {BadRequestException} If the customer does not exist.
+   *
+   * @returns {Promise<void>} Resolves when all updates are completed.
+   */
+  async payCustomerInvoices(dto: PayCustomerInvoicesDto) {
+    const { customerId, amount: customerPaidAmount } = dto;
+
+    // validate customer exists
+    const customer = await this.customerModel.findById(customerId);
+    if (!customer) throw new BadRequestException('Customer not found');
+
+    let remainingAmountThatCustomerPaidNow = customerPaidAmount;
+
+    const unpaidInvoices = await this.invoiceModel
+      .find({
+        customer: customerId,
+        'accounting.isPaid': false,
+      })
+      .sort({ createdAt: 1 });
+
+    for (const invoice of unpaidInvoices) {
+      const invoiceRemaining = invoice.accounting.remainingAmountUsd;
+
+      // TODO: based on above fields agreement, update here
+      if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
+        invoice.accounting.amountPaidUsd += invoiceRemaining;
+        invoice.accounting.isPaid = true;
+        remainingAmountThatCustomerPaidNow -= invoiceRemaining;
+      } else {
+        invoice.accounting.amountPaidUsd += remainingAmountThatCustomerPaidNow;
+        invoice.accounting.isPaid = false;
+        remainingAmountThatCustomerPaidNow = 0;
+      }
+
+      await invoice.save();
+
+      if (remainingAmountThatCustomerPaidNow <= 0) break;
+    }
+
+    if (customerPaidAmount > 0) {
+      // Update accounting
+      await this.accountingService.updateAccounting({
+        totalIncome: customerPaidAmount, // increase total income
+        totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
+      });
+
+      // Decrease customer loan
+      customer.loan = customer.loan - customerPaidAmount;
+      await customer.save();
+    }
   }
 
   private async doInvoiceEffects(updatedDto: InvoiceDto) {

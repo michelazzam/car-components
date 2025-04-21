@@ -45,6 +45,13 @@ export class AccountingService implements OnModuleInit {
     await accounting.save();
   }
 
+  async getAccounting() {
+    const accounting = await this.accountingModel.findOne();
+    if (!accounting) throw new NotFoundException('Accounting not found');
+
+    return accounting;
+  }
+
   /**
    * Updates the accounting document by incrementing specified numeric fields.
    *
@@ -57,8 +64,7 @@ export class AccountingService implements OnModuleInit {
    * await updateAccounting({ totalIncome: 100, totalExpenses: -50 });
    */
   async updateAccounting(data: Partial<Record<keyof IAccounting, number>>) {
-    const accounting = await this.accountingModel.findOne();
-    if (!accounting) throw new NotFoundException('Accounting not found');
+    const accounting = await this.getAccounting();
 
     const incFields: Record<string, number> = {};
 

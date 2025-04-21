@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceDto } from './dto/invoice.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -6,6 +6,7 @@ import { GetInvoicesDto } from './dto/get-invoices.dto';
 import { Permissions } from '../user/decorators/permissions.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
+import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
 
 @ApiTags('Invoices')
 @Controller({ version: '1', path: 'invoices' })
@@ -24,5 +25,13 @@ export class InvoiceController {
     await this.invoiceService.create(createInvoiceDto);
 
     return { message: 'Invoice saved successfully' };
+  }
+
+  @Permissions('Invoices', 'update')
+  @Put('pay-customer-invoices')
+  async payCustomerInvoices(@Body() dto: PayCustomerInvoicesDto) {
+    await this.invoiceService.payCustomerInvoices(dto);
+
+    return { message: 'Invoices paid successfully' };
   }
 }
