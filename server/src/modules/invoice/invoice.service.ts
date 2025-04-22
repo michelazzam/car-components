@@ -22,6 +22,7 @@ import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
 import { OrganizationService } from '../organization/organization.service';
+import { ReportService } from '../report/report.service';
 
 @Injectable()
 export class InvoiceService {
@@ -38,6 +39,7 @@ export class InvoiceService {
     private customerModel: Model<ICustomer>,
     private readonly accountingService: AccountingService,
     private readonly organizationService: OrganizationService,
+    private readonly reportService: ReportService,
   ) {}
 
   async getAll(dto: GetInvoicesDto, user: ReqUserData) {
@@ -252,11 +254,14 @@ export class InvoiceService {
       const invoiceRemaining =
         invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
 
+      // if customer paid more than invoice remaining -> invoice is paid
       if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
         invoice.accounting.paidAmountUsd += invoiceRemaining;
         invoice.accounting.isPaid = true;
         remainingAmountThatCustomerPaidNow -= invoiceRemaining;
-      } else {
+      }
+      // if customer paid less than invoice remaining -> invoice is not paid
+      else {
         invoice.accounting.paidAmountUsd += remainingAmountThatCustomerPaidNow;
         invoice.accounting.isPaid = false;
         remainingAmountThatCustomerPaidNow = 0;
@@ -268,15 +273,21 @@ export class InvoiceService {
     }
 
     if (customerPaidAmount > 0) {
+      // Decrease customer loan
+      customer.loan = customer.loan - customerPaidAmount;
+      await customer.save();
+
       // Update accounting
       await this.accountingService.updateAccounting({
         totalIncome: customerPaidAmount, // increase total income
         totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
       });
 
-      // Decrease customer loan
-      customer.loan = customer.loan - customerPaidAmount;
-      await customer.save();
+      // update daily report
+      await this.reportService.syncDailyReport({
+        date: new Date(),
+        totalIncome: customerPaidAmount,
+      });
     }
   }
 
@@ -308,6 +319,12 @@ export class InvoiceService {
 
     // update accounting
     await this.accountingService.updateAccounting({
+      totalIncome: updatedDto.paidAmountUsd,
+    });
+
+    // update daily report
+    await this.reportService.syncDailyReport({
+      date: new Date(),
       totalIncome: updatedDto.paidAmountUsd,
     });
   }
@@ -344,6 +361,12 @@ export class InvoiceService {
 
     // decrease accounting total income
     await this.accountingService.updateAccounting({
+      totalIncome: -invoice.accounting.paidAmountUsd,
+    });
+
+    // update daily report
+    await this.reportService.syncDailyReport({
+      date: invoice.createdAt,
       totalIncome: -invoice.accounting.paidAmountUsd,
     });
   }
