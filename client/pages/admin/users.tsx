@@ -9,6 +9,8 @@ import { FaRegEdit } from "react-icons/fa";
 import UserModal from "../components/pages/admin/users/UserModal";
 import DeleteRecord from "../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
+import { LuUserCog2 } from "react-icons/lu";
+import EditUserPermissionsModal from "../components/pages/admin/users/EditUserPermissionsModal";
 
 const Users = () => {
   const [userEditing, setUserEditing] = useState<User>();
@@ -53,6 +55,13 @@ const Users = () => {
             className="flex align-middle gap-2"
             style={{ display: "flex", justifyContent: "space-around" }}
           >
+            <button
+              id="edit-permissions-btn"
+              data-hs-overlay="#edit-permissions-modal"
+              className="btn btn-sm btn-danger delete-btn text-success border border-success rounded-md p-1 hover:bg-success hover:text-white"
+            >
+              <LuUserCog2 />
+            </button>
             <button
               id="edit-btn"
               className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white"
@@ -157,6 +166,13 @@ const Users = () => {
         triggerModalId="edit-user-modal"
         userEditing={userEditing}
         setUserEditing={setUserEditing}
+      />
+
+      {/* Edit User Permissions Modal */}
+      <EditUserPermissionsModal
+        title="Edit User Permissions"
+        triggerModalId="edit-permissions-modal"
+        editingUser={userEditing}
       />
 
       <DeleteRecord

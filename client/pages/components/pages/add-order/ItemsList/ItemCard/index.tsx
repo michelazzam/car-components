@@ -20,7 +20,7 @@ function ItemCard({ product }: { product: Product }) {
 
     // If product is in the cart and there's stock left, increment quantity
     if (isInCart) {
-      if (product?.stock > Number(isInCart.quantity)) {
+      if (product?.quantity > Number(isInCart.quantity)) {
         handleInc(isInCart); // Increment quantity in the cart
       }
     } else {
@@ -39,7 +39,7 @@ function ItemCard({ product }: { product: Product }) {
     return acc;
   }, 0);
 
-  const outOfStock = product?.stock < 1;
+  const outOfStock = product?.quantity < 1;
 
   return (
     <button
@@ -60,7 +60,7 @@ function ItemCard({ product }: { product: Product }) {
           outOfStock ? "text-danger" : "text-gray-600"
         )}
       >
-        Stock: {product?.stock}
+        Stock: {product?.quantity}
       </span>
 
       {/* in cart count top right*/}
@@ -68,7 +68,7 @@ function ItemCard({ product }: { product: Product }) {
         <span
           className={cn(
             "absolute top-1 right-1",
-            product?.stock > 0
+            product?.quantity > 0
               ? "text-white rounded-lg bg-success px-2"
               : "text-danger"
           )}

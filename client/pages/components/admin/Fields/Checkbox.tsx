@@ -1,6 +1,7 @@
 import React from "react";
 
 function Checkbox({
+  id,
   readOnly = false,
   label,
   description,
@@ -8,6 +9,7 @@ function Checkbox({
   isChecked,
   setIsChecked,
 }: {
+  id?:string
   readOnly?: boolean;
   label?: string;
   description?: string;
@@ -17,7 +19,7 @@ function Checkbox({
 }) {
   return (
     <>
-      <div className="">
+      <div className="" id={id}>
         <label className=" text-sm font-medium text-gray-700 flex items-center">
           <input
             readOnly={readOnly}
