@@ -19,6 +19,12 @@ export const API = {
   deleteProduct: (id: string) => `/items/${id} `, // DELETE
   increaseStock: (id: string) => `/items/${id}/stock`, // PUT
 
+  //purchase
+  listPurchase: "/purchase",
+  addPurchase: "/purchase",
+  editPurchase: (id: string) => `/purchase/${id}`,
+  deletePurchase: (id: string) => `/purchase/${id}`,
+
   //Expenses
   listExpenses: "/expense", //GET
   addExpense: "/expense", // POST
@@ -97,8 +103,8 @@ export const API = {
   // Service:
   getAllServices: "/services", // GET
   createService: "/services", // POST
-  editService:(id:string) => `/services/${id}`,//PUT
-  deleteService:(id:string) => `/services/${id}`,//DELETE
+  editService: (id: string) => `/services/${id}`, //PUT
+  deleteService: (id: string) => `/services/${id}`, //DELETE
 
   // Supplier:
   listSupplier: "/suppliers", //GET

@@ -11,7 +11,6 @@ function DecreaseStockModal({ product }: { product: Product | undefined }) {
   //---------------------------REFS------------------------------
   const formRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
-
   //---------------------------API----------------------------------
   const { mutate: increaseStock, isPending } = useIncreaseOrDecreaseStock({
     id: product?._id || "",
@@ -49,7 +48,6 @@ function DecreaseStockModal({ product }: { product: Product | undefined }) {
             name="amount"
             label="Amount"
             colSpan={12}
-            max={product?.stock}
           />
         </form>
       </Modal.Body>

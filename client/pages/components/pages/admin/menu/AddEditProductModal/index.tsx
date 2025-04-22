@@ -12,7 +12,7 @@ import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 import { useDebounce } from "@/hooks/useDebounce";
 import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import { SelectOption } from "@/pages/components/admin/Fields/SlectField";
-import { statusOptions } from "@/constants/constant";
+import { ITEM_STATUSES_OPTIONS, itemStatuses } from "@/lib/constants/item";
 
 function AddEditProductModal({
   product,
@@ -25,7 +25,6 @@ function AddEditProductModal({
   modalTitle: string;
   setProduct?: React.Dispatch<React.SetStateAction<Product | undefined>>;
 }) {
-
   //--------------state----------
   const [supplierSearch, setSupplierSearch] = useState("");
   const supplierDeboundSearch = useDebounce(supplierSearch);
@@ -55,12 +54,12 @@ function AddEditProductModal({
     },
   });
 
-  const {data:supplier} = useListSupplier({search:supplierDeboundSearch});
+  const { data: supplier } = useListSupplier({ search: supplierDeboundSearch });
 
   const supplierOptions = supplier?.suppliers.map((supplier) => {
     return {
       label: supplier.name,
-      value: supplier._id
+      value: supplier._id,
     };
   }) as SelectOption[];
 
@@ -80,7 +79,7 @@ function AddEditProductModal({
   // }));
 
   //---------------------------FORM---------------------------------
-  const { handleSubmit, control, reset } = useForm({
+  const { handleSubmit, control, reset } = useForm<ProductSchema>({
     resolver: zodResolver(apiValidations.AddEditProduct),
     defaultValues: {
       name: product?.name || "",
@@ -88,7 +87,7 @@ function AddEditProductModal({
       price: product?.price || 0,
       cost: product?.cost || 0,
       quantity: product?.quantity || 0,
-      status: product?.status || "",
+      status: product?.status || itemStatuses[0],
     },
   });
 
@@ -118,7 +117,7 @@ function AddEditProductModal({
         price: product?.price,
         cost: product?.cost,
         quantity: product?.quantity,
-        status:product.status
+        status: product.status,
       });
     } else {
       reset({
@@ -127,7 +126,7 @@ function AddEditProductModal({
         price: 0,
         cost: 0,
         quantity: 0,
-        status: "",
+        status: itemStatuses[0],
       });
     }
   }, [product]);
@@ -193,17 +192,17 @@ function AddEditProductModal({
             colSpan={6}
           />
           {/* in case of editing a product, we don't need to show the stock field */}
-            <NumberFieldControlled
-              control={control}
-              label="Quantity"
-              name="quantity"
-              colSpan={6}
-            />
+          <NumberFieldControlled
+            control={control}
+            label="Quantity"
+            name="quantity"
+            colSpan={6}
+          />
           <SelectFieldControlled
             control={control}
             label="Status"
             name="status"
-            options={statusOptions || []}
+            options={ITEM_STATUSES_OPTIONS || []}
             placeholder={"choose status"}
             creatable={false}
             // onInputChange={(e) => {

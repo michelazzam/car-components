@@ -52,6 +52,7 @@ function VehicleModal({
   const [customerSearch, setCustomerSearch] = useState("");
   const { data: customers } = useListCustomers({
     pageIndex: 0,
+    pageSize: 30,
     search: customerSearch,
   });
 

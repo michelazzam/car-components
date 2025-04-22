@@ -5,7 +5,6 @@ const FoodMenuIcon = <i className="bx bx-food-menu side-menu__icon"></i>;
 const ArchiveIcon = <i className="bx bx-archive side-menu__icon"></i>;
 const CustomerIcon = <i className="bx bx-user side-menu__icon"></i>;
 const SettingsIcon = <i className="bx bx-cog side-menu__icon"></i>;
-const CarIcon = <i className="ri-car-line side-menu__icon"></i>;
 const UserIcon = <i className="ri-user-follow-fill side-menu__icon"></i>;
 const InvoiceIcon = <i className="ri-file-list-3-line side-menu__icon"></i>;
 const BalanceIcon = <i className="ri-scales-fill side-menu__icon"></i>;
@@ -35,16 +34,7 @@ export default function useMenuItems() {
       visible: true,
       children: [],
     },
-    {
-      icon: CarIcon,
-      path: "/admin/vehicles",
-      type: "link",
-      active: pathname.startsWith("/admin/vehicles"),
-      selected: pathname === "/admin/vehicles",
-      title: "Vehicles",
-      visible: true,
-      children: [],
-    },
+
     {
       icon: CustomerIcon,
       path: "/admin/customers",
