@@ -35,13 +35,9 @@ const ServiceModal = ({
   const [editingService, setEditingService] = useState<
     ServiceSchema | undefined
   >();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
   //-------------------------API-------------------------------
-  const { data } = useListServices({
-    search: searchQuery,
-  });
-  const servicesOptions = data?.services?.map((exp) => {
+  const { data } = useListServices();
+  const servicesOptions =data &&  data.map((exp) => {
     return {
       label: exp?.name,
       value: exp?._id,
@@ -219,7 +215,7 @@ const ServiceModal = ({
                 colSpan={4}
                 creatable={true}
                 handleCreate={handleCreateOption}
-                onInputChange={(value) => setSearchQuery(value)}
+                // onInputChange={(value) => setSearchQuery(value)}
                 treatAsObject
               />
               <NumberFieldControlled

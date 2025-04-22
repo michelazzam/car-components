@@ -11,6 +11,7 @@ const InvoiceIcon = <i className="ri-file-list-3-line side-menu__icon"></i>;
 const BalanceIcon = <i className="ri-scales-fill side-menu__icon"></i>;
 const DBBackupIcon = <i className="fe fe-database side-menu__icon"></i>;
 const SupplierIcon = <i className="fe fe-truck side-menu__icon"></i>;
+const ServicesIcon = <i className="ri-service-line side-menu__icon"></i>;
 
 export default function useMenuItems() {
   const { user } = UseAuth();
@@ -61,6 +62,16 @@ export default function useMenuItems() {
       active: pathname.startsWith("/admin/inventory"),
       selected: pathname.startsWith("/admin/inventory"),
       title: "Inventory",
+      visible: true,
+      children: [],
+    },
+    {
+      icon: ServicesIcon,
+      path: "/admin/services",
+      type: "link",
+      active: pathname.startsWith("/admin/services"),
+      selected: pathname.startsWith("/admin/services"),
+      title: "Services",
       visible: true,
       children: [],
     },

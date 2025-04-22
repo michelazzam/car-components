@@ -9,6 +9,7 @@ import SimpleBar from "simplebar-react";
 import Menuloop from "./menuloop";
 
 import useMenuItems from "./useMenuItems";
+import Image from "next/image";
 
 const Sidebar = ({ local_varaiable }: any) => {
   const location = useRouter();
@@ -685,15 +686,62 @@ const Sidebar = ({ local_varaiable }: any) => {
         onMouseLeave={() => {}}
       >
         <div className="main-sidebar-header ">
-          <Link href="/add-invoice" className="header-logo">
-            <img
-              src={`${
-                process.env.NODE_ENV === "production" ? basePath : ""
-              }/assets/images/brand-logos/thermobox-nobg.png`}
-              alt="logo"
-              className="main-logo desktop-dark"
-            />
-          </Link>
+          <div className="flex items-center space-x-2">
+            <Link href="/add-invoice" className="header-logo">
+              <img
+                src={`${
+                  process.env.NODE_ENV === "production" ? basePath : ""
+                }/assets/images/brand-logos/thermobox-nobg.png`}
+                alt="logo"
+                className="main-logo desktop-dark"
+              />
+            </Link>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 100 100"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop
+                    offset="0%"
+                    style={{ stopColor: "#6a11cb", stopOpacity: 1 }}
+                  />
+                  <stop
+                    offset="100%"
+                    style={{ stopColor: "#2575fc", stopOpacity: 1 }}
+                  />
+                </linearGradient>
+              </defs>
+              <line
+                x1="20"
+                y1="20"
+                x2="80"
+                y2="80"
+                stroke="url(#grad)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <line
+                x1="80"
+                y1="20"
+                x2="20"
+                y2="80"
+                stroke="url(#grad)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+            </svg>
+            <Link href={"https://advanced-meta.com/"}>
+              <Image
+                width={30}
+                height={30}
+                alt="ams-logo"
+                src="/assets/images/ams.ico"
+              />
+            </Link>
+          </div>
         </div>
 
         <div className="main-sidebar " id="sidebar-scroll">

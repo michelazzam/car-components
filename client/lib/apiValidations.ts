@@ -55,13 +55,20 @@ export type AddUserSchema = z.infer<typeof UserSchema>;
 
 const ProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  brand: z.string().min(1, "Name is required"),
+  supplierId: z.string().min(1, "Name is required"),
   price: z.number().min(1, "Price is required"),
   cost: z.number(),
-  stock: z.number(),
-  note: z.string().optional(),
+  quantity: z.number(),
+  status: z.string().optional(),
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
+
+const ServiceSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  price: z.number().optional(),
+});
+export type ServiceSchema = z.infer<typeof ServiceSchema>;
+
 
 const PrinterSchema = z.object({
   name: z.string().min(1, "Name must be at least 3 characters"),
@@ -268,6 +275,7 @@ export const apiValidations = {
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,
+  AddEditService:ServiceSchema,
   AddEditPrinter: PrinterSchema,
   AddEditCategory: CategorySchema,
   changePassword: ChangePassword,

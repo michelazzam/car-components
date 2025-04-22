@@ -148,7 +148,7 @@ const AddInvoice = () => {
         <FormProvider {...methods}>
           <div className="col-span-9 pt-2">
             <Header search={search} setSearch={setSearch} />
-            <ItemsList products={products?.products} />
+            <ItemsList products={products?.items} />
           </div>
           <div className="col-span-3">
             <RightSideAddOrder refetchProducts={refetchProducts} />

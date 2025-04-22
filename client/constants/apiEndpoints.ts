@@ -13,11 +13,11 @@ export const API = {
   changePassword: "/users/change-password",
 
   // products
-  listProducts: "/products", // GET
-  addProduct: "/products", // POST
-  editProduct: (id: string) => `/products/${id}`, // PUT
-  deleteProduct: (id: string) => `/products/${id} `, // DELETE
-  increaseStock: (id: string) => `/products/${id}/stock`, // PUT
+  listProducts: "/items", // GET
+  addProduct: "/items", // POST
+  editProduct: (id: string) => `/items/${id}`, // PUT
+  deleteProduct: (id: string) => `/items/${id} `, // DELETE
+  increaseStock: (id: string) => `/items/${id}/stock`, // PUT
 
   //Expenses
   listExpenses: "/expense", //GET
@@ -97,6 +97,8 @@ export const API = {
   // Service:
   getAllServices: "/services", // GET
   createService: "/services", // POST
+  editService:(id:string) => `/services/${id}`,//PUT
+  deleteService:(id:string) => `/services/${id}`,//DELETE
 
   // Supplier:
   listSupplier: "/suppliers", //GET

@@ -3,11 +3,11 @@ import { API } from "@/constants/apiEndpoints";
 
 export interface AddEditProductBodyParam {
   name: string;
-  price: number;
-  brand: string;
+  supplierId:string;
   cost: number;
-  note?: string;
-  stock: number;
+  price: number;
+  quantity: number;
+  status?: string;
 }
 
 const useAddProduct = ({
