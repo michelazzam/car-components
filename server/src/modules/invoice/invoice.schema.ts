@@ -22,23 +22,20 @@ export class Invoice {
   type: InvoiceType;
 
   @Prop({ required: true, type: Object })
-  discount: {
-    amount: number;
-    type: DiscountType;
-  };
-
-  @Prop({ required: true, type: Object })
   accounting: {
     isPaid: boolean;
     usdRate: number;
-    totalPriceLbp: number;
-    totalPriceUsd: number;
-    amountPaidUsd: number;
-    amountPaidLbp: number;
+
+    discount: {
+      amount: number;
+      type: DiscountType;
+    };
     taxesLbp: number;
-    finalPriceUsd: number;
-    remainingAmountUsd: number;
-    totalPaidUsd: number;
+
+    subTotalUsd: number;
+    totalUsd: number;
+
+    paidAmountUsd: number;
   };
 
   @Prop()
@@ -62,6 +59,7 @@ export class Invoice {
       amount: number;
       type: DiscountType;
     };
+    subTotal: number;
     totalPrice: number;
   }[];
 

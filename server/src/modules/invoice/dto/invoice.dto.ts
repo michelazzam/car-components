@@ -71,6 +71,10 @@ class InvoiceItem {
 
   @ApiProperty({ required: true })
   @IsNumber()
+  subTotal: number;
+
+  @ApiProperty({ required: true })
+  @IsNumber()
   totalPrice: number;
 }
 
@@ -115,13 +119,19 @@ export class InvoiceDto {
     required: true,
   })
   @IsNumber()
-  amountPaidUsd: number;
+  paidAmountUsd: number;
 
   @ApiProperty({
     required: true,
   })
   @IsNumber()
-  amountPaidLbp: number;
+  subTotalUsd: number;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  totalUsd: number;
 
   @ApiProperty({
     required: false,
@@ -143,12 +153,6 @@ export class InvoiceDto {
   @IsOptional()
   @IsString()
   customerNote: string;
-
-  @ApiProperty({
-    required: true,
-  })
-  @IsNumber()
-  totalAmount: number;
 
   @ApiProperty({
     required: true,

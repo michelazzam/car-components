@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import {
@@ -17,6 +21,7 @@ import { Customer, ICustomer } from '../customer/customer.schema';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
+import { OrganizationService } from '../organization/organization.service';
 
 @Injectable()
 export class InvoiceService {
@@ -32,6 +37,7 @@ export class InvoiceService {
     @InjectModel(Customer.name)
     private customerModel: Model<ICustomer>,
     private readonly accountingService: AccountingService,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   async getAll(dto: GetInvoicesDto, user: ReqUserData) {
@@ -122,6 +128,7 @@ export class InvoiceService {
   }
 
   async create(dto: InvoiceDto) {
+    // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
     // Generate invoice number
@@ -129,12 +136,11 @@ export class InvoiceService {
 
     const accounting = await this.accountingService.getAccounting();
 
-    const totalPaidUsd = Number(
-      (
-        updatedDto.amountPaidUsd +
-        updatedDto.amountPaidLbp / accounting.usdRate
-      ).toFixed(2),
+    // calculate taxes
+    const taxesPercent = Number(
+      (await this.organizationService.getOrganization())?.tvaPercentage || 0,
     );
+    const taxesUsd = (updatedDto.totalUsd * taxesPercent) / 100;
 
     // Create new invoice
     await this.invoiceModel.create({
@@ -142,22 +148,68 @@ export class InvoiceService {
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
       type: dto.type,
-      discount: updatedDto.discount,
       driverName: updatedDto.driverName,
       generalNote: updatedDto.generalNote,
       customerNote: updatedDto.customerNote,
       accounting: {
         isPaid: updatedDto.isPaid,
         usdRate: accounting.usdRate,
-        amountPaidLbp: updatedDto.amountPaidLbp,
-        amountPaidUsd: updatedDto.amountPaidUsd,
-        remainingAmountUsd: updatedDto.totalAmount - totalPaidUsd,
-        //TODO: we should agree on what fields to save and what not
+
+        discount: updatedDto.discount,
+        taxesUsd,
+
+        subTotalUsd: updatedDto.subTotalUsd,
+        totalUsd: updatedDto.totalUsd,
+
+        paidAmountUsd: updatedDto.paidAmountUsd,
       },
       items: updatedDto.items,
     });
 
     await this.doInvoiceEffects(updatedDto);
+  }
+
+  async edit(invoiceId: string, dto: InvoiceDto) {
+    await this.revertInvoiceEffects(invoiceId);
+
+    // items existance validation
+    const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
+
+    // calculate taxes
+    const taxesPercent = Number(
+      (await this.organizationService.getOrganization())?.tvaPercentage || 0,
+    );
+    const taxesUsd = (updatedDto.totalUsd * taxesPercent) / 100;
+
+    // Create new invoice
+    await this.invoiceModel.findByIdAndUpdate(invoiceId, {
+      customer: updatedDto.customerId,
+      vehicle: updatedDto.vehicleId,
+      type: dto.type,
+      driverName: updatedDto.driverName,
+      generalNote: updatedDto.generalNote,
+      customerNote: updatedDto.customerNote,
+      accounting: {
+        isPaid: updatedDto.isPaid,
+
+        discount: updatedDto.discount,
+        taxesUsd,
+
+        subTotalUsd: updatedDto.subTotalUsd,
+        totalUsd: updatedDto.totalUsd,
+
+        paidAmountUsd: updatedDto.paidAmountUsd,
+      },
+      items: updatedDto.items,
+    });
+
+    await this.doInvoiceEffects(updatedDto);
+  }
+
+  async delete(invoiceId: string) {
+    await this.revertInvoiceEffects(invoiceId);
+
+    await this.invoiceModel.findByIdAndDelete(invoiceId);
   }
 
   /**
@@ -197,15 +249,15 @@ export class InvoiceService {
       .sort({ createdAt: 1 });
 
     for (const invoice of unpaidInvoices) {
-      const invoiceRemaining = invoice.accounting.remainingAmountUsd;
+      const invoiceRemaining =
+        invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
 
-      // TODO: based on above fields agreement, update here
       if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
-        invoice.accounting.amountPaidUsd += invoiceRemaining;
+        invoice.accounting.paidAmountUsd += invoiceRemaining;
         invoice.accounting.isPaid = true;
         remainingAmountThatCustomerPaidNow -= invoiceRemaining;
       } else {
-        invoice.accounting.amountPaidUsd += remainingAmountThatCustomerPaidNow;
+        invoice.accounting.paidAmountUsd += remainingAmountThatCustomerPaidNow;
         invoice.accounting.isPaid = false;
         remainingAmountThatCustomerPaidNow = 0;
       }
@@ -237,12 +289,8 @@ export class InvoiceService {
       });
     }
 
-    const totalAmountPaidUsd = Number(
-      (updatedDto.amountPaidUsd + updatedDto.amountPaidLbp / 90000).toFixed(2),
-    );
-
     // save customer loan if did not pay all
-    const remainingAmount = updatedDto.totalAmount - totalAmountPaidUsd;
+    const remainingAmount = updatedDto.totalUsd - updatedDto.paidAmountUsd;
     if (!updatedDto.isPaid && remainingAmount > 0) {
       const customer = await this.customerModel.findById(updatedDto.customerId);
       if (!customer) throw new BadRequestException('Customer not found');
@@ -252,7 +300,7 @@ export class InvoiceService {
 
       // increase total customer loans
       await this.accountingService.updateAccounting({
-        totalCustomersLoan: customer.loan,
+        totalCustomersLoan: remainingAmount,
       });
     }
 
@@ -260,7 +308,43 @@ export class InvoiceService {
 
     // update accounting
     await this.accountingService.updateAccounting({
-      totalIncome: totalAmountPaidUsd,
+      totalIncome: updatedDto.paidAmountUsd,
+    });
+  }
+
+  private async revertInvoiceEffects(invoiceId: string) {
+    const invoice = await this.invoiceModel.findById(invoiceId).lean();
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    // increase item quantity
+    const items = invoice.items.filter((item) => !!item.itemRef);
+    for (const item of items) {
+      await this.itemModel.findByIdAndUpdate(item.itemRef, {
+        $inc: { quantity: item.quantity },
+      });
+    }
+
+    // decrease customer loan (in case isPaid is false)
+    const remainingAmount =
+      invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
+    if (!invoice.accounting.isPaid && remainingAmount > 0) {
+      const customer = await this.customerModel.findById(invoice.customer);
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      customer.loan = customer.loan - remainingAmount;
+      await customer.save();
+
+      // decrease total customer loans
+      await this.accountingService.updateAccounting({
+        totalCustomersLoan: -remainingAmount,
+      });
+    }
+
+    //TODO: revert saving product cost as expenses
+
+    // decrease accounting total income
+    await this.accountingService.updateAccounting({
+      totalIncome: -invoice.accounting.paidAmountUsd,
     });
   }
 

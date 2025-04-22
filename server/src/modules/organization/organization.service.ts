@@ -29,7 +29,7 @@ export class OrganizationService implements OnModuleInit {
     }
   }
 
-  async findOrganization() {
+  async getOrganization() {
     const org = await this.organizationModel.findOne();
     return org;
   }
