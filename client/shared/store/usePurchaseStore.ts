@@ -223,6 +223,7 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
           label: item.description,
         },
       }));
+      //@ts-ignore
       set({ products: formatted });
     }
 

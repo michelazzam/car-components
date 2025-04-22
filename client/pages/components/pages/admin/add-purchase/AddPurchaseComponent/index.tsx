@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
-import CustomPurchaseAddPaymentModal from "../CustomPurchaseAddPaymentModal";
 import TotalsCard from "./TotalsCard";
 import ItemRow from "./ItemRow";
 import AddItemForm from "./AddItemForm";
@@ -173,7 +172,6 @@ const CustomAddPurchaseComponent = () => {
         </div>
       </div>
       {/* Add Purchase */}
-      <CustomPurchaseAddPaymentModal />
     </>
   );
 };
