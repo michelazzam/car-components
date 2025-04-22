@@ -18,6 +18,7 @@ import { ItemModule } from './item/item.module';
 import { PurchaseModule } from './purchase/purchase.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { AccountingModule } from './accounting/accounting.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AccountingModule } from './accounting/accounting.module';
     PurchaseModule,
     InvoiceModule,
     AccountingModule,
+    ReportModule,
   ],
   controllers: [],
   providers: [

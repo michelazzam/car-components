@@ -16,7 +16,7 @@ import { InvoiceDto } from './dto/invoice.dto';
 import { IService, Service } from '../service/service.schema';
 import { IItem, Item } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
-import { formatISODate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { Customer, ICustomer } from '../customer/customer.schema';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
@@ -86,7 +86,7 @@ export class InvoiceService {
       if (endDate) {
         const nextDay = new Date(endDate as string);
         nextDay.setDate(nextDay.getDate() + 1);
-        dateFilter.$lt = formatISODate(nextDay);
+        dateFilter.$lt = getFormattedDate(nextDay);
       }
       // @ts-ignore
       filter.$and.push({ createdAt: dateFilter });

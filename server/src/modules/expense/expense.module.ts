@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Expense, ExpenseSchema } from './expense.schema';
 import { Supplier, SupplierSchema } from '../supplier/supplier.schema';
 import { AccountingModule } from '../accounting/accounting.module';
+import { ReportModule } from '../report/report.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AccountingModule } from '../accounting/accounting.module';
       { name: Supplier.name, schema: SupplierSchema },
     ]),
     AccountingModule,
+    ReportModule,
   ],
   controllers: [ExpenseController],
   providers: [ExpenseService],
