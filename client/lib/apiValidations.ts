@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { itemStatuses } from "./constants/item";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Required"),
@@ -59,7 +60,7 @@ const ProductSchema = z.object({
   price: z.number().min(1, "Price is required"),
   cost: z.number(),
   quantity: z.number(),
-  status: z.string().optional(),
+  status: z.enum(itemStatuses),
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
@@ -68,7 +69,6 @@ const ServiceSchema = z.object({
   price: z.number().optional(),
 });
 export type ServiceSchema = z.infer<typeof ServiceSchema>;
-
 
 const PrinterSchema = z.object({
   name: z.string().min(1, "Name must be at least 3 characters"),
@@ -275,7 +275,7 @@ export const apiValidations = {
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,
-  AddEditService:ServiceSchema,
+  AddEditService: ServiceSchema,
   AddEditPrinter: PrinterSchema,
   AddEditCategory: CategorySchema,
   changePassword: ChangePassword,
