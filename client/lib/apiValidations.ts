@@ -64,6 +64,55 @@ const ProductSchema = z.object({
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
+//-------------PURCHASE
+const AddPurchaseItemSchema = z.object({
+  product: z.object({
+    _id: z.string(),
+    title: z.string(),
+    price: z.number(),
+    cost: z.number(),
+    quantity: z.number(),
+    status: z.enum(itemStatuses),
+  }),
+  itemId: z.string(),
+  description: z.string(),
+  price: z.number(),
+  quantity: z.number(),
+  quantityFree: z.number(),
+  discount: z.number(),
+  lotNumber: z.string(),
+  expDate: z.string(),
+  totalPrice: z.number(),
+  supplier: z
+    .object({
+      value: z.string(),
+      label: z.string(),
+    })
+    .optional(),
+});
+export type AddPurchaseItemSchemaType = z.infer<typeof AddPurchaseItemSchema>;
+
+const AddPurchaseSchema = z.object({
+  supplier: z
+    .object({
+      value: z.string().min(1),
+      label: z.string().min(1),
+    })
+    .nullable(),
+  invoiceDate: z.string().min(1),
+  invoiceNumber: z.string().min(1),
+  customerConsultant: z.string().min(1),
+  phoneCode: z.string().min(1),
+  phoneNumber: z.string().min(1),
+  vatPercent: z.number().min(0),
+  vatLBP: z.number().min(0),
+  totalAmount: z.number().min(0),
+  amountPaid: z.number().min(0),
+  items: z.array(AddPurchaseItemSchema),
+});
+export type AddPurchaseSchemaType = z.infer<typeof AddPurchaseSchema>;
+
+//-------------SERVICE
 const ServiceSchema = z.object({
   name: z.string().min(1, "Name is required"),
   price: z.number().optional(),
@@ -288,6 +337,8 @@ export const apiValidations = {
   ProfileSchema: ProfileSchema,
   AddInvoiceSchema: AddInvoiceSchema,
   AddExpenseType: ExpenseTypeSchema,
+  AddPurchaseSchema: AddPurchaseSchema,
+  AddPurchaseItemSchema,
   DBBackupPath,
   AddEditSupplier: SupplierSchema,
 };

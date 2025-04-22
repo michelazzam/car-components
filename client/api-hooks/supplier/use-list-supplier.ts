@@ -16,7 +16,7 @@ export type Supplier = {
   vatNumber?: string;
   extraInfo?: string;
   //----GET
-  _id?: string;
+  _id: string;
   loan?: number;
   createdAt?: Date;
 };
