@@ -12,6 +12,8 @@ import { Item, ItemSchema } from '../item/item.schema';
 import { Service, ServiceSchema } from '../service/service.schema';
 import { Customer, CustomerSchema } from '../customer/customer.schema';
 import { AccountingModule } from '../accounting/accounting.module';
+import { OrganizationModule } from '../organization/organization.module';
+import { ReportModule } from '../report/report.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { AccountingModule } from '../accounting/accounting.module';
       { name: Customer.name, schema: CustomerSchema },
     ]),
     AccountingModule,
+    OrganizationModule,
+    ReportModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],

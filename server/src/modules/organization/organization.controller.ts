@@ -12,7 +12,7 @@ export class OrganizationController {
   @Permissions('Organization', 'read')
   @Get()
   async findOrganization() {
-    return await this.organizationService.findOrganization();
+    return await this.organizationService.getOrganization();
   }
 
   @Permissions('Organization', 'update')

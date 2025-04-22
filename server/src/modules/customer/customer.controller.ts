@@ -31,6 +31,12 @@ export class CustomerController {
   }
 
   @Permissions('Customers', 'read')
+  @Get('vehicle')
+  async getAllCustomerVehicles(@Query() dto: GetVehiclesDto) {
+    return this.customerService.getAllVehicles(dto);
+  }
+
+  @Permissions('Customers', 'read')
   @Get(':id')
   async getOne(@Param('id') id: string) {
     return this.customerService.getOne(id);
@@ -64,11 +70,6 @@ export class CustomerController {
   }
 
   //-------------------------Vehicles------------------------
-  @Permissions('Customers', 'read')
-  @Get('vehicle')
-  async getAllCustomerVehicles(@Query() dto: GetVehiclesDto) {
-    return this.customerService.getAllVehicles(dto);
-  }
 
   @Permissions('Customers', 'create')
   @Post(':id/vehicle')

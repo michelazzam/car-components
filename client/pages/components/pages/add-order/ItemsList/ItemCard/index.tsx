@@ -6,7 +6,7 @@ import { cn } from "@/utils/cn";
 function ItemCard({ product }: { product: Product }) {
   //----------------Storage----------------------------
   const { cart, addToCart, setQuantity } = usePosStore();
-
+  const productStock = 99999999;
   //------------------Functions--------------------
   const handleInc = (item: Item) => {
     setQuantity(item.name || "", item.price || 0, Number(item.quantity) + 1);
@@ -40,6 +40,7 @@ function ItemCard({ product }: { product: Product }) {
   }, 0);
 
   const outOfStock = product?.quantity < 1;
+
 
   return (
     <button
