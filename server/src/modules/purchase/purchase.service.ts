@@ -6,7 +6,7 @@ import { PurchaseDto } from './dto/purchase.dto';
 import { ISupplier, Supplier } from '../supplier/supplier.schema';
 import { IItem, Item } from '../item/item.schema';
 import { GetPurchaseDto } from './dto/get-purchase.dto';
-import { formatISODate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
@@ -49,7 +49,7 @@ export class PurchaseService {
       if (endDate) {
         const nextDay = new Date(endDate as string);
         nextDay.setDate(nextDay.getDate() + 1);
-        dateFilter.$lt = formatISODate(nextDay);
+        dateFilter.$lt = getFormattedDate(nextDay);
       }
       // @ts-ignore
       filter.$and.push({ invoiceDate: dateFilter });

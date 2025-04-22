@@ -8,9 +8,10 @@ import { Expense, IExpense } from './expense.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
-import { formatISODate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { ISupplier, Supplier } from '../supplier/supplier.schema';
 import { AccountingService } from '../accounting/accounting.service';
+import { ReportService } from '../report/report.service';
 
 @Injectable()
 export class ExpenseService {
@@ -20,6 +21,7 @@ export class ExpenseService {
     @InjectModel(Supplier.name)
     private supplierModel: Model<ISupplier>,
     private readonly accountingService: AccountingService,
+    private readonly reportService: ReportService,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
@@ -61,7 +63,7 @@ export class ExpenseService {
       if (endDate) {
         const nextDay = new Date(endDate as string);
         nextDay.setDate(nextDay.getDate() + 1);
-        dateFilter.$lt = formatISODate(nextDay);
+        dateFilter.$lt = getFormattedDate(nextDay);
       }
       // @ts-ignore
       filter.$and.push({ date: dateFilter });
@@ -152,6 +154,12 @@ export class ExpenseService {
       await supplier.save();
     }
 
+    // update daily report
+    await this.reportService.syncDailyReport({
+      date: dto.date,
+      totalExpenses: dto.amount,
+    });
+
     // update accounting
     await this.accountingService.updateAccounting({
       totalExpenses: dto.amount, //increase total expenses
@@ -173,6 +181,12 @@ export class ExpenseService {
 
     supplier.loan += expense.amount;
     await supplier.save();
+
+    // update daily report
+    await this.reportService.syncDailyReport({
+      date: expense.date,
+      totalExpenses: expense.amount,
+    });
 
     // update accounting
     await this.accountingService.updateAccounting({

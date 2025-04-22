@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceDto } from './dto/invoice.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -7,6 +16,7 @@ import { Permissions } from '../user/decorators/permissions.decorator';
 import { User } from '../user/decorators/user.decorator';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
+import { Roles } from '../user/decorators/roles.decorator';
 
 @ApiTags('Invoices')
 @Controller({ version: '1', path: 'invoices' })
@@ -21,7 +31,7 @@ export class InvoiceController {
 
   @Permissions('Invoices', 'create')
   @Post()
-  async createInvoice(@Body() createInvoiceDto: InvoiceDto) {
+  async create(@Body() createInvoiceDto: InvoiceDto) {
     await this.invoiceService.create(createInvoiceDto);
 
     return { message: 'Invoice saved successfully' };
@@ -33,5 +43,21 @@ export class InvoiceController {
     await this.invoiceService.payCustomerInvoices(dto);
 
     return { message: 'Invoices paid successfully' };
+  }
+
+  @Permissions('Invoices', 'update')
+  @Put(':id')
+  async editPurchase(@Param('id') id: string, @Body() dto: InvoiceDto) {
+    await this.invoiceService.edit(id, dto);
+
+    return { message: 'Invoice updated successfully' };
+  }
+
+  @Roles('admin', 'superAmsAdmin')
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    await this.invoiceService.delete(id);
+
+    return { message: 'Invoice deleted successfully' };
   }
 }
