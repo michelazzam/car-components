@@ -35,16 +35,7 @@ export default function useMenuItems() {
       visible: true,
       children: [],
     },
-    {
-      icon: CarIcon,
-      path: "/admin/vehicles",
-      type: "link",
-      active: pathname.startsWith("/admin/vehicles"),
-      selected: pathname === "/admin/vehicles",
-      title: "Vehicles",
-      visible: true,
-      children: [],
-    },
+
     {
       icon: CustomerIcon,
       path: "/admin/customers",
