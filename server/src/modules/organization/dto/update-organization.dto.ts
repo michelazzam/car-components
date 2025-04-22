@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateOrganizationDto {
@@ -27,7 +27,7 @@ export class UpdateOrganizationDto {
   tvaNumber: string;
 
   @ApiProperty({ required: false })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  tvaPercentage: string;
+  tvaPercentage: number;
 }

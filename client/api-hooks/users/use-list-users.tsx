@@ -15,12 +15,12 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
-type PermissionAction = {
+export type PermissionAction = {
   create: boolean;
   read: boolean;
   update: boolean;
 };
-type Permissions = {
+export type Permissions = {
   Customers: PermissionAction;
   Invoices: PermissionAction;
   Inventory: PermissionAction;
@@ -30,6 +30,7 @@ type Permissions = {
   Balance: PermissionAction;
   Organization: PermissionAction;
   Expenses: PermissionAction;
+  Accounting:PermissionAction;
 };
 
 export const userRoles = [

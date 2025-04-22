@@ -82,7 +82,7 @@ export const API = {
   editUsdRate: "/accounting/usdRate",
   // Restaurant
   getOrganization: `/organization`, // GET
-  editOrganization: `/organization`, // PUT
+  editOrganization: `/organization/update`, // PUT
 
   // Orders
   listOrders: "/orders", // GET

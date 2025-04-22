@@ -48,6 +48,7 @@ function DecreaseStockModal({ product }: { product: Product | undefined }) {
             name="amount"
             label="Amount"
             colSpan={12}
+            max={product?.quantity}
           />
         </form>
       </Modal.Body>

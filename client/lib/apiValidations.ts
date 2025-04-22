@@ -24,6 +24,80 @@ const UserSchema = z.object({
   salary: z.number(),
   role: z.string().min(1, "Role is required"),
 });
+
+const EditUserPermissions = z.object({
+  Customers: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Invoices: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Inventory: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Purchases: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Services: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Suppliers: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Organization: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Expenses: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Accounting: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+  Balance: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
+});
+
 const ProfileSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   username: z.string().min(1, "Username is required"),
@@ -341,4 +415,5 @@ export const apiValidations = {
   AddPurchaseItemSchema,
   DBBackupPath,
   AddEditSupplier: SupplierSchema,
+  EditUserPermissions: EditUserPermissions,
 };
