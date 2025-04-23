@@ -56,13 +56,6 @@ function InvoiceDetailsForm() {
       <TextFieldControlled
         colSpan={6}
         control={control}
-        name="salesOrder"
-        label="Sales Order"
-      />
-
-      <TextFieldControlled
-        colSpan={6}
-        control={control}
         name="customerConsultant"
         label="Customer Consultant"
       />

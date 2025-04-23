@@ -10,6 +10,7 @@ import { useEditPurchase } from "@/api-hooks/purchase/use-edit-purchase";
 import { useAddPurchase } from "@/api-hooks/purchase/use-add-purchase";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
 import ExpenseModal from "../../expenses/ExpenseModal";
+import { useRouter } from "next/router";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STATES--------------------------------------
@@ -23,6 +24,7 @@ const CustomAddPurchaseComponent = () => {
     editingPurchase,
     totals,
     addPayment: addExpense,
+    setEditingPurchase,
   } = usePurchase();
   //--------------------------------------------------------------
 
@@ -52,23 +54,26 @@ const CustomAddPurchaseComponent = () => {
   const methods = useForm<AddPurchaseSchemaType>({
     resolver: zodResolver(apiValidations.AddPurchaseSchema),
     defaultValues: {
-      amountPaid: 0,
-      vatLBP: 0,
-      vatPercent: 0,
+      amountPaid: editingPurchase?.amountPaid || 0,
+      vatLBP: editingPurchase?.vatLBP || 0,
+      vatPercent: editingPurchase?.vatPercent || 0,
       supplierId: supplier?.value,
       invoiceNumber: editingPurchase?.invoiceNumber || "",
       invoiceDate: editingPurchase?.invoiceDate || "",
       customerConsultant: editingPurchase?.customerConsultant || "",
-      phoneNumber: editingPurchase?.phoneNumber?.split("-")[1] || "",
+      phoneNumber: editingPurchase?.phoneNumber || "",
     },
   });
   const { handleSubmit, reset } = methods;
 
   //----------------------------------CONSTANTS------------------------------------
   //----------------------------------HANDLERS & Functions----------------------------
+  const router = useRouter();
   const handleSuccess = () => {
     reset();
     clearPurchase();
+    setEditingPurchase(undefined);
+    router.push("/admin/purchase");
   };
   useEffect(() => {
     console.log(totals.totalAmountPaid);

@@ -15,6 +15,7 @@ import {
   useListPurchase,
 } from "@/api-hooks/purchase/use-list-purchase";
 import Link from "next/link";
+import { usePurchase } from "@/shared/store/usePurchaseStore";
 
 const PurchasePage = () => {
   const [pageIndex, setPageIndex] = useState(1);
@@ -22,7 +23,7 @@ const PurchasePage = () => {
 
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
-
+  const { setEditingPurchase } = usePurchase();
   const {
     data: purchasesResponse,
     isLoading,
@@ -81,14 +82,17 @@ const PurchasePage = () => {
           >
             <FaEye />
           </button>{" "}
-          <button
+          <Link
+            href={"/admin/purchase/add-edit-purchase"}
             id="edit-btn"
             className="btn btn-sm btn-primary text-secondary border-secondary rounded-md p-1 hover:bg-secondary border hover:text-white transition-all"
-            onClick={() => setSelectedPurchase(row.original)}
+            onClick={() => {
+              setEditingPurchase(row.original);
+            }}
             data-hs-overlay="#edit-purchase-modal"
           >
             <FaRegEdit />
-          </button>
+          </Link>
           <button
             id="delete-btn"
             className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"

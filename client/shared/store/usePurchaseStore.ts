@@ -64,7 +64,7 @@ export interface PurchaseState {
     onError?: () => void,
     onSuccess?: () => void
   ) => void;
-  setEditingPurchase: (purchase: Purchase) => void;
+  setEditingPurchase: (purchase: Purchase | undefined) => void;
   clearPurchase: () => void;
 }
 
@@ -181,6 +181,13 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
   },
 
   setEditingPurchase: (purchase) => {
+    if (!purchase) {
+      set({
+        editingPurchase: undefined,
+      });
+      return;
+    }
+
     get().clearPurchase();
     if (!purchase) return;
 
