@@ -46,6 +46,14 @@ export class ItemService {
     };
   }
 
+  getOneById(id: string) {
+    return this.itemModel.findById(id);
+  }
+
+  getManyByIds(ids: string[]) {
+    return this.itemModel.find({ _id: { $in: ids } }).lean();
+  }
+
   async create(dto: AddItemDto) {
     await this.itemModel.create({
       supplier: dto.supplierId,
