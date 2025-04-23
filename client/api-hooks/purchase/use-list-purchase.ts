@@ -1,10 +1,36 @@
+import { useReadData } from "@/api-service/useReadData";
 import { Supplier } from "../supplier/use-list-supplier";
+import { API } from "@/constants/apiEndpoints";
+import { Pagination } from "@/pages/components/admin/Pagination";
 
+const useListPurchase = ({
+  pageSize = 10,
+  pageIndex = 0,
+  search,
+}: {
+  pageSize?: number;
+  pageIndex?: number;
+  search?: string;
+}) => {
+  return useReadData<PurchaseResponse>({
+    queryKey: ["purchases", { pageSize, pageIndex, search }],
+    endpoint: API.listPurchase,
+    keepPreviousData: true,
+    params: { pageSize, pageIndex, search },
+  });
+};
+
+export { useListPurchase };
+
+interface PurchaseResponse {
+  purchases: Purchase[];
+  pagination: Pagination;
+}
 export type Purchase = {
   _id: string;
   supplier: Supplier;
-  invoiceDate: string;
   invoiceNumber: string;
+  invoiceDate: string;
   customerConsultant: string;
   phoneNumber: string;
   vatPercent: number;
@@ -14,11 +40,13 @@ export type Purchase = {
   items: [
     {
       itemId: string;
+      quantityFree: number;
+      discount: number;
+      name: string;
+      currentItemCost: number;
       description: string;
       price: number;
       quantity: number;
-      quantityFree: number;
-      discount: number;
       lotNumber: string;
       expDate: string;
       totalPrice: number;

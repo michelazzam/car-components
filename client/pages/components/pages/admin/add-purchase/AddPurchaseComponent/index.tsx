@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import TotalsCard from "./TotalsCard";
 import ItemRow from "./ItemRow";
 import AddItemForm from "./AddItemForm";
@@ -9,6 +9,8 @@ import { AddPurchaseSchemaType, apiValidations } from "@/lib/apiValidations";
 import { useEditPurchase } from "@/api-hooks/purchase/use-edit-purchase";
 import { useAddPurchase } from "@/api-hooks/purchase/use-add-purchase";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
+import ExpenseModal from "../../expenses/ExpenseModal";
+import { useRouter } from "next/router";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STATES--------------------------------------
@@ -18,11 +20,11 @@ const CustomAddPurchaseComponent = () => {
     products: productsStore,
     clearPurchase,
     invoiceDetails: { supplier },
-    setSupplier,
-    tva,
-    lebaneseTva,
-    payment,
+    payment: expense,
     editingPurchase,
+    totals,
+    addPayment: addExpense,
+    setEditingPurchase,
   } = usePurchase();
   //--------------------------------------------------------------
 
@@ -42,74 +44,60 @@ const CustomAddPurchaseComponent = () => {
         handleSuccess();
       },
     });
-  console.log(editingPurchase?._id);
   //----------------------------------REFS------------------------------------------
 
-  /** @type {React.MutableRefObject<HTMLButtonElement | null>} */
   const addPurchaseCancelRef = useRef(null);
-  /** @type {React.MutableRefObject<HTMLFormElement | null>} */
   const addPurchaseFormRef = useRef<HTMLFormElement | null>(null);
 
   //----------------------------------FORM SETUP------------------------------------
 
-  const { control, handleSubmit, reset, watch } =
-    useForm<AddPurchaseSchemaType>({
-      resolver: zodResolver(apiValidations.AddPurchaseSchema),
-      defaultValues: {
-        supplier: supplier,
-        invoiceNumber: editingPurchase?.invoiceNumber || "",
-        invoiceDate: editingPurchase?.invoiceDate || "",
-        customerConsultant: editingPurchase?.customerConsultant || "",
-        phoneNumber: editingPurchase?.phoneNumber?.split("-")[1] || "",
-        phoneCode: editingPurchase?.phoneNumber?.split("-")[0] || "",
-      },
-    });
-  //----------------------------------EFFECTS--------------------------------------
-
-  // Watch for supplier changes and update the store
-  const watchedSupplier = watch("supplier");
-  useEffect(() => {
-    if (watchedSupplier) {
-      setSupplier(watchedSupplier);
-    }
-  }, [watchedSupplier, setSupplier]);
+  const methods = useForm<AddPurchaseSchemaType>({
+    resolver: zodResolver(apiValidations.AddPurchaseSchema),
+    defaultValues: {
+      amountPaid: editingPurchase?.amountPaid || 0,
+      vatLBP: editingPurchase?.vatLBP || 0,
+      vatPercent: editingPurchase?.vatPercent || 0,
+      supplierId: supplier?.value,
+      invoiceNumber: editingPurchase?.invoiceNumber || "",
+      invoiceDate: editingPurchase?.invoiceDate || "",
+      customerConsultant: editingPurchase?.customerConsultant || "",
+      phoneNumber: editingPurchase?.phoneNumber || "",
+    },
+  });
+  const { handleSubmit, reset } = methods;
 
   //----------------------------------CONSTANTS------------------------------------
   //----------------------------------HANDLERS & Functions----------------------------
+  const router = useRouter();
   const handleSuccess = () => {
     reset();
     clearPurchase();
+    setEditingPurchase(undefined);
+    router.push("/admin/purchase");
   };
-
+  useEffect(() => {
+    console.log(totals.totalAmountPaid);
+  }, [totals]);
   const onSubmitAddEdit = (data: AddPurchaseSchemaType) => {
     const newData = {
       ...data,
-      supplierId: data?.supplier?.value,
-      products: productsStore.map((product) => ({
+      items: productsStore.map((product) => ({
         ...product,
         productId: product.itemId,
       })),
-      vatPercent: tva,
-      vatLBP: lebaneseTva,
-      fromCaisse: payment.fromCaisse,
-      fromBalance: payment.fromBalance,
-      fromCaisseLbp: payment.fromCaisseLbp,
-      notes: payment.notes,
-    };
 
-    newData.phoneNumber = `${
-      newData.phoneCode
-    }-${newData.phoneNumber.replaceAll(` `, ``)}`;
+      amountPaid: totals.totalAmountPaid,
+      notes: expense.note,
+      totalAmount: totals.totalAmount,
+    };
 
     if (editingPurchase) {
       editPurchase({
         ...newData,
-        supplierId: newData?.supplier?.value || "",
       });
     } else {
       addPurchase({
         ...newData,
-        supplierId: newData?.supplier?.value || "",
       });
     }
   };
@@ -122,34 +110,35 @@ const CustomAddPurchaseComponent = () => {
     <>
       {/*Add Purchase */}
       <div>
-        <form
-          ref={addPurchaseFormRef}
-          onSubmit={handleSubmit(onSubmitAddEdit, onError)}
-        >
-          <div className=" d-flex mb-4">
-            <div className="col-6">
-              <InvoiceDetailsForm control={control} />
+        <FormProvider {...methods}>
+          <form
+            ref={addPurchaseFormRef}
+            onSubmit={handleSubmit(onSubmitAddEdit, onError)}
+          >
+            <div className="grid grid-cols-12 mb-4">
+              <div className="col-span-6">
+                <InvoiceDetailsForm />
+              </div>
+              <div className="col-span-6">
+                <TotalsCard />
+              </div>
             </div>
-            <div className="col-6">
-              <TotalsCard />
-            </div>
-          </div>
-        </form>
+          </form>
+        </FormProvider>
 
         <div className="border p-4 shadow-sm" style={{ borderRadius: "8px" }}>
           <AddItemForm />
-          <div className="d-flex flex-column gap-3 divider">
+          <div className="flex flex-col gap-3 divider">
             {productsStore.map((product) => (
               <ItemRow product={product} />
             ))}
           </div>
         </div>
 
-        <div className=" my-4  d-flex justify-content-end px-5">
+        <div className=" my-4 flex justify-end px-5">
           <button
             type="button"
             className="btn btn-cancel me-2"
-            // data-bs-dismiss="modal"
             ref={addPurchaseCancelRef}
           >
             Cancel
@@ -165,11 +154,22 @@ const CustomAddPurchaseComponent = () => {
               addPurchaseFormRef?.current.requestSubmit()
             }
             type="submit"
-            className="btn btn-submit"
+            className="ti-btn ti-btn-primary-full disabled:bg-gray-500"
           >
             {editingPurchase ? "Save Changes" : "Add Purchase"}
           </button>
         </div>
+        <ExpenseModal
+          triggerModalId="add-expense-from-purchase-modal"
+          modalTitle="Add Expense"
+          onSuccess={({ amount, note }) => {
+            addExpense({
+              amount: amount,
+              amountLbp: 0,
+              note: note,
+            });
+          }}
+        />
       </div>
       {/* Add Purchase */}
     </>

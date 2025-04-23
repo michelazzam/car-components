@@ -5,7 +5,8 @@ export interface AddEditExpenseBodyParam {
   expenseType?: string;
   amount: number;
   date: string;
-  note: string;
+  note?: string;
+  supplierId?: string;
 }
 
 const useAddExpense = ({

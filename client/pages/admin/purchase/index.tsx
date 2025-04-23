@@ -6,81 +6,64 @@ import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
 import { FaEye, FaRegTrashCan } from "react-icons/fa6";
-import AddEditSupplierModal from "../components/pages/admin/supplier/AddEditSupplierModal";
-import {
-  Supplier,
-  useListSupplier,
-} from "@/api-hooks/supplier/use-list-supplier";
-import { formatNumber } from "@/lib/helpers/formatNumber";
-import Pagination from "../components/admin/Pagination";
+import Pagination from "../../components/admin/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
-import ViewSupplierModal from "../components/pages/admin/supplier/ViewSupplierModal";
+import {
+  Purchase,
+  useListPurchase,
+} from "@/api-hooks/purchase/use-list-purchase";
+import Link from "next/link";
+import { usePurchase } from "@/shared/store/usePurchaseStore";
 
-const SupplierPage = () => {
+const PurchasePage = () => {
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
-
+  const { setEditingPurchase } = usePurchase();
   const {
-    data: suppliersResponse,
+    data: purchasesResponse,
     isLoading,
     isFetching,
     error,
-  } = useListSupplier({
+  } = useListPurchase({
     pageSize: pageSize,
     pageIndex: pageIndex - 1,
     search: debouncedSearch,
   });
-  const suppliers = suppliersResponse?.suppliers;
+  const purchases = purchasesResponse?.purchases;
 
-  const [selectedSupplier, setSelectedSupplier] = useState<
-    Supplier | undefined
+  const [selectedPurchase, setSelectedPurchase] = useState<
+    Purchase | undefined
   >();
 
   //---------------Create Columns--------------------
-  const columnHelper = createColumnHelper<Supplier>();
+  const columnHelper = createColumnHelper<Purchase>();
 
   const tanstackColumns = [
-    columnHelper.accessor("name", {
-      header: "Name",
+    columnHelper.accessor("invoiceNumber", {
+      header: "Invoice Number",
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
-    columnHelper.accessor("loan", {
-      header: "Loan",
-      cell: ({ getValue }) => {
-        const value = Number(getValue());
-        return <div>{formatNumber(value, 2)}$</div>;
-      },
+    columnHelper.accessor("invoiceDate", {
+      header: "Invoice Date",
     }),
 
-    columnHelper.accessor("capital", {
-      header: "Capital",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
-    }),
-
-    columnHelper.accessor("poBox", {
-      header: "PO Box",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
+    columnHelper.accessor("customerConsultant", {
+      header: "Customer Consultant",
     }),
 
     columnHelper.accessor("phoneNumber", {
       header: "Phone Number",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
-    columnHelper.accessor("email", {
-      header: "Email",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
-    }),
-
-    columnHelper.accessor("vatNumber", {
-      header: "VAT Number",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
+    columnHelper.accessor("vatPercent", {
+      header: "VAT Percent",
+      cell: ({ getValue }) => <div>{getValue()}%</div>,
     }),
 
     columnHelper.display({
@@ -94,24 +77,27 @@ const SupplierPage = () => {
           <button
             id="view-btn"
             className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
-            onClick={() => setSelectedSupplier(row.original)}
-            data-hs-overlay="#view-supplier-modal"
+            onClick={() => setSelectedPurchase(row.original)}
+            data-hs-overlay="#view-purchase-modal"
           >
             <FaEye />
           </button>{" "}
-          <button
+          <Link
+            href={"/admin/purchase/add-edit-purchase"}
             id="edit-btn"
             className="btn btn-sm btn-primary text-secondary border-secondary rounded-md p-1 hover:bg-secondary border hover:text-white transition-all"
-            onClick={() => setSelectedSupplier(row.original)}
-            data-hs-overlay="#edit-supplier-modal"
+            onClick={() => {
+              setEditingPurchase(row.original);
+            }}
+            data-hs-overlay="#edit-purchase-modal"
           >
             <FaRegEdit />
-          </button>
+          </Link>
           <button
             id="delete-btn"
             className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"
             data-hs-overlay="#delete-record-modal"
-            onClick={() => setSelectedSupplier(row.original)}
+            onClick={() => setSelectedPurchase(row.original)}
           >
             <FaRegTrashCan />
           </button>
@@ -126,29 +112,32 @@ const SupplierPage = () => {
 
   return (
     <div>
-      <Seo title={"Suppliers List"} />
+      <Seo title={"Purchases List"} />
       {/* back btn to the products list */}
 
-      <Pageheader
-        buttonTitle="Add supplier"
-        currentpage="Suppliers List"
-        withBreadCrumbs={false}
-        triggerModalId="add-supplier-modal"
-      />
+      <div className="flex justify-between items-center">
+        <Pageheader currentpage="Purchases List" withBreadCrumbs={false} />
+        <Link
+          className="ti-btn ti-btn-primary-full ti-btn-wave rounded-md"
+          href={"/admin/purchase/add-edit-purchase"}
+        >
+          Add Purchase
+        </Link>
+      </div>
 
       <TableWrapper
-        id="supplier-table"
+        id="purchases-table"
         searchValue={searchValue}
         onSearchValueChange={onSearchValueChange}
       >
         <ReactTablePaginated
           errorMessage={error?.message}
-          data={suppliers || []}
+          data={purchases || []}
           columns={tanstackColumns}
           hidePagination
           loading={isLoading}
           paginating={isFetching}
-          totalRows={suppliersResponse?.pagination.totalCount || 0}
+          totalRows={purchasesResponse?.pagination.totalCount || 0}
         />
 
         <Pagination
@@ -156,26 +145,17 @@ const SupplierPage = () => {
           setPageSize={setPageSize}
           currentPage={pageIndex}
           setCurrentPage={setPageIndex}
-          totalPages={suppliersResponse?.pagination.totalPages || 0}
+          totalPages={purchasesResponse?.pagination.totalPages || 0}
         />
       </TableWrapper>
 
-      <AddEditSupplierModal triggerModalId="add-supplier-modal" />
-      <AddEditSupplierModal
-        triggerModalId="edit-supplier-modal"
-        supplier={selectedSupplier}
-      />
-      <ViewSupplierModal
-        triggerModalId="view-supplier-modal"
-        supplier={selectedSupplier}
-      />
       <DeleteRecord
-        endpoint={API.deleteSupplier(selectedSupplier?._id || "")}
-        queryKeysToInvalidate={[["suppliers"]]}
+        endpoint={API.deletePurchase(selectedPurchase?._id || "")}
+        queryKeysToInvalidate={[["purchases"]]}
       />
     </div>
   );
 };
 
-SupplierPage.layout = "Contentlayout";
-export default SupplierPage;
+PurchasePage.layout = "Contentlayout";
+export default PurchasePage;
