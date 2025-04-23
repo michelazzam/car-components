@@ -9,17 +9,16 @@ import { FilterQuery, Model } from 'mongoose';
 import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
 import { getFormattedDate } from 'src/utils/formatIsoDate';
-import { ISupplier, Supplier } from '../supplier/supplier.schema';
 import { AccountingService } from '../accounting/accounting.service';
 import { ReportService } from '../report/report.service';
+import { SupplierService } from '../supplier/supplier.service';
 
 @Injectable()
 export class ExpenseService {
   constructor(
     @InjectModel(Expense.name)
     private expenseModel: Model<IExpense>,
-    @InjectModel(Supplier.name)
-    private supplierModel: Model<ISupplier>,
+    private readonly supplierervice: SupplierService,
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
   ) {}
@@ -147,7 +146,7 @@ export class ExpenseService {
   private async doExpenseEffects(dto: ExpenseDto) {
     // subtract supplier loan
     if (dto.supplierId) {
-      const supplier = await this.supplierModel.findById(dto.supplierId);
+      const supplier = await this.supplierervice.getOneById(dto.supplierId);
       if (!supplier) throw new NotFoundException('Supplier not found');
 
       supplier.loan -= dto.amount;
@@ -174,7 +173,9 @@ export class ExpenseService {
     }
 
     // Increase supplier loan
-    const supplier = await this.supplierModel.findById(expense.supplier);
+    const supplier = await this.supplierervice.getOneById(
+      expense.supplier?.toString(),
+    );
     if (!supplier) {
       return; //ignore deleted suppliers
     }
