@@ -4,7 +4,6 @@ import { Pagination } from "@/pages/components/admin/Pagination";
 
 export type Supplier = {
   name: string;
-  amountDue?: number;
   capital?: string;
   poBox?: string;
   address?: string;
@@ -17,8 +16,8 @@ export type Supplier = {
   extraInfo?: string;
   //----GET
   _id: string;
-  loan?: number;
   createdAt?: Date;
+  loan?: number;
 };
 
 const useListSupplier = (params: {

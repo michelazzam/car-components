@@ -9,4 +9,5 @@ function AddEditPurchasePage() {
   );
 }
 
+AddEditPurchasePage.layout = "Contentlayout";
 export default AddEditPurchasePage;

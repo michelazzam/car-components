@@ -100,9 +100,7 @@ const DateFieldControlled = <TFieldValues extends FieldValues>({
                       popperClassName="!z-[50]"
                       className={cn(
                         "mt-1 block !w-full rounded-sm border !py-4 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-[#f3f4f6] disabled:text-[#6b7280] sm:text-sm",
-                        errorMessage
-                          ? "!border-red-500/50"
-                          : "!border-neutral-200"
+                        errorMessage ? "!border-red/50" : "!border-neutral-200"
                       )}
                       placeholderText={placeholder}
                       selected={
@@ -159,9 +157,7 @@ const DateFieldControlled = <TFieldValues extends FieldValues>({
                     )}
                     <div className="absolute -bottom-5">
                       {errorMessage ? (
-                        <p className="mt-2 text-sm text-red-500">
-                          {errorMessage}
-                        </p>
+                        <p className="mt-2 text-sm text-red">{errorMessage}</p>
                       ) : null}
                     </div>
                   </div>

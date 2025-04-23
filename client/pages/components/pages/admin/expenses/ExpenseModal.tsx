@@ -2,14 +2,11 @@ import Modal from "@/shared/Modal";
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { apiValidations } from "@/lib/apiValidations";
+import { apiValidations, ExpenseSchemaType } from "@/lib/apiValidations";
 import TextFieldControlled from "@/pages/components/admin/FormControlledFields/TextFieldControlled";
 import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import { Expense } from "@/api-hooks/expenses/use_list_expenses";
-import {
-  AddEditExpenseBodyParam,
-  useAddExpense,
-} from "@/api-hooks/expenses/use_add_expense";
+import { useAddExpense } from "@/api-hooks/expenses/use_add_expense";
 import { useEditExpense } from "@/api-hooks/expenses/use_edit_expense";
 import {
   ExpenseType,
@@ -19,20 +16,24 @@ import { useAddExpenseType } from "@/api-hooks/expensesType/use-add-expenseType"
 import DateFieldControlled from "@/pages/components/admin/FormControlledFields/DateFieldControlled";
 import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import Checkbox from "@/pages/components/admin/Fields/Checkbox";
+import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
+import { useDebounce } from "@/hooks/useDebounce";
 
 function ExpenseModal({
   expense,
   triggerModalId,
   modalTitle,
   setSelectedExpense,
+  onSuccess,
 }: {
   expense?: Expense;
   triggerModalId: string;
   modalTitle: string;
-  setSelectedExpense: (expense: Expense | undefined) => void;
+  setSelectedExpense?: (expense: Expense | undefined) => void;
+  onSuccess?: ({ amount, note }: { amount: number; note: string }) => void;
 }) {
   //---------------------------REFS------------------------------
-  const formRef = useRef<HTMLFormElement>(null);
+  const expenseFormRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
   //---------------------------STATE--------------------------
@@ -48,19 +49,38 @@ function ExpenseModal({
   });
 
   //---------------------------FORM---------------------------------
-  const { handleSubmit, control, reset, setValue } = useForm({
-    resolver: zodResolver(apiValidations.AddExpense),
-    defaultValues: {
-      expenseTypeId: "",
-      amount: 0,
-      date: "",
-      note: "",
-    },
-  });
-
+  const { handleSubmit, control, reset, setValue, watch } =
+    useForm<ExpenseSchemaType>({
+      resolver: zodResolver(apiValidations.AddExpense),
+      defaultValues: {
+        expenseTypeId: "",
+        supplierId: "",
+        amount: 0,
+        date: "",
+        note: "",
+      },
+    });
+  const amount = watch("amount");
+  const note = watch("note");
   //---------------------------API----------------------------------
+  const [search, setSearch] = useState("");
+  const debouncedSupplierSearch = useDebounce(search);
+  const { data: suppliersResponse } = useListSupplier({
+    pageIndex: 0,
+    pageSize: 50,
+    search: debouncedSupplierSearch,
+  });
+  const suppliersOptions = suppliersResponse?.suppliers?.map((supplier) => ({
+    label: supplier.name,
+    value: supplier._id,
+  }));
+
   const { mutate: addExpense, isPending: isAdding } = useAddExpense({
     callBackOnSuccess: () => {
+      onSuccess?.({
+        amount: amount,
+        note: note || "",
+      });
       reset();
       if (!keepAdding) {
         cancelFormRef.current?.click();
@@ -79,12 +99,12 @@ function ExpenseModal({
     callBackOnSuccess: () => {
       reset();
       cancelFormRef.current?.click();
-      setSelectedExpense(undefined);
+      setSelectedExpense?.(undefined);
     },
   });
 
-  const onSubmit: SubmitHandler<AddEditExpenseBodyParam> = (
-    data: AddEditExpenseBodyParam
+  const onSubmit: SubmitHandler<ExpenseSchemaType> = (
+    data: ExpenseSchemaType
   ) => {
     if (expense) editExpense(data);
     else addExpense(data);
@@ -105,6 +125,7 @@ function ExpenseModal({
         amount: expense?.amount || 0,
         date: expense?.date || "",
         note: expense?.note || "",
+        supplierId: expense?.supplier?._id || "",
       });
     } else {
       // Reset the form to default values if there's no expense (e.g., for creating a new expense)
@@ -113,6 +134,7 @@ function ExpenseModal({
         amount: 0,
         date: "",
         note: "",
+        supplierId: "",
       });
     }
   }, [expense]);
@@ -124,14 +146,14 @@ function ExpenseModal({
       id={triggerModalId}
       size="md"
       onClose={() => {
-        setSelectedExpense(undefined);
+        setSelectedExpense?.(undefined);
         reset();
       }}
     >
       <Modal.Header title={modalTitle} id={triggerModalId} />
       <Modal.Body>
         <form
-          ref={formRef}
+          ref={expenseFormRef}
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
@@ -144,6 +166,19 @@ function ExpenseModal({
             colSpan={6}
             creatable={true}
             handleCreate={handleCreateOption}
+          />
+          <SelectFieldControlled
+            control={control}
+            name="supplierId"
+            label="Supplier"
+            options={suppliersOptions || []}
+            placeholder={"Choose Supplier"}
+            colSpan={6}
+            creatable={true}
+            handleCreate={handleCreateOption}
+            onInputChange={(value) => {
+              setSearch(value);
+            }}
           />
           <NumberFieldControlled
             control={control}
@@ -192,7 +227,7 @@ function ExpenseModal({
           disabled={isAdding || isEditing}
           type="button"
           onClick={() => {
-            formRef.current?.requestSubmit();
+            expenseFormRef.current?.requestSubmit();
           }}
           className="ti-btn ti-btn-primary-full"
         >

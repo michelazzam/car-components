@@ -12,7 +12,7 @@ interface NumberFieldProps {
   localError?: string;
   control: any; // You can replace 'any' with the specific type for your control if known
   name: string;
-  label: string;
+  label?: string;
   colSpan?: number;
   withCheckbox?: boolean;
   setIsChecked?: (checked: boolean) => void;

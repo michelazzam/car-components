@@ -14,6 +14,7 @@ import {
   Purchase,
   useListPurchase,
 } from "@/api-hooks/purchase/use-list-purchase";
+import Link from "next/link";
 
 const PurchasePage = () => {
   const [pageIndex, setPageIndex] = useState(1);
@@ -110,12 +111,15 @@ const PurchasePage = () => {
       <Seo title={"Purchases List"} />
       {/* back btn to the products list */}
 
-      <Pageheader
-        buttonTitle="Add Purchase"
-        currentpage="Purchases List"
-        withBreadCrumbs={false}
-        triggerModalId="add-purchase-modal"
-      />
+      <div className="flex justify-between items-center">
+        <Pageheader currentpage="Purchases List" withBreadCrumbs={false} />
+        <Link
+          className="ti-btn ti-btn-primary-full ti-btn-wave rounded-md"
+          href={"/admin/purchase/add-edit-purchase"}
+        >
+          Add Purchase
+        </Link>
+      </div>
 
       <TableWrapper
         id="purchases-table"

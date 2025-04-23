@@ -29,8 +29,8 @@ interface PurchaseResponse {
 export type Purchase = {
   _id: string;
   supplier: Supplier;
-  invoiceDate: string;
   invoiceNumber: string;
+  invoiceDate: string;
   customerConsultant: string;
   phoneNumber: string;
   vatPercent: number;
@@ -40,11 +40,13 @@ export type Purchase = {
   items: [
     {
       itemId: string;
+      quantityFree: number;
+      discount: number;
+      name: string;
+      currentItemCost: number;
       description: string;
       price: number;
       quantity: number;
-      quantityFree: number;
-      discount: number;
       lotNumber: string;
       expDate: string;
       totalPrice: number;
