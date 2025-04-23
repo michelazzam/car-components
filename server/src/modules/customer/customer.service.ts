@@ -19,11 +19,8 @@ export class CustomerService {
   ) {}
 
   //-----------------------------GET SINGLE CUSTOMER-----------------------------
-  async getOne(id: string) {
-    const customer = await this.customerModel.findById(id).populate('vehicles');
-    if (!customer) throw new NotFoundException('Customer not found');
-
-    return customer;
+  async getOneById(id: string) {
+    return this.customerModel.findById(id).populate('vehicles');
   }
 
   //-----------------------------GET ALL CUSTOMERS-----------------------------

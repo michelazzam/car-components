@@ -13,16 +13,18 @@ import {
   InvoiceType,
 } from './invoice.schema';
 import { InvoiceDto } from './dto/invoice.dto';
-import { IService, Service } from '../service/service.schema';
-import { IItem, Item } from '../item/item.schema';
+import { IService } from '../service/service.schema';
+import { IItem } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
 import { getFormattedDate } from 'src/utils/formatIsoDate';
-import { Customer, ICustomer } from '../customer/customer.schema';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
 import { OrganizationService } from '../organization/organization.service';
 import { ReportService } from '../report/report.service';
+import { CustomerService } from '../customer/customer.service';
+import { ServiceService } from '../service/service.service';
+import { ItemService } from '../item/item.service';
 
 @Injectable()
 export class InvoiceService {
@@ -31,12 +33,9 @@ export class InvoiceService {
     private invoiceModel: Model<IInvoice>,
     @InjectModel(InvoiceCounter.name)
     private invoiceCounterModel: Model<IInvoiceCounter>,
-    @InjectModel(Item.name)
-    private itemModel: Model<IItem>,
-    @InjectModel(Service.name)
-    private serviceModel: Model<IService>,
-    @InjectModel(Customer.name)
-    private customerModel: Model<ICustomer>,
+    private readonly servicesService: ServiceService,
+    private readonly itemService: ItemService,
+    private readonly customerService: CustomerService,
     private readonly accountingService: AccountingService,
     private readonly organizationService: OrganizationService,
     private readonly reportService: ReportService,
@@ -238,7 +237,7 @@ export class InvoiceService {
     const { customerId, amount: customerPaidAmount } = dto;
 
     // validate customer exists
-    const customer = await this.customerModel.findById(customerId);
+    const customer = await this.customerService.getOneById(customerId);
     if (!customer) throw new BadRequestException('Customer not found');
 
     let remainingAmountThatCustomerPaidNow = customerPaidAmount;
@@ -295,15 +294,15 @@ export class InvoiceService {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
-      await this.itemModel.findByIdAndUpdate(item.itemRef, {
-        $inc: { quantity: -item.quantity },
-      });
+      await this.itemService.updateItemQuantity(item.itemRef, -item.quantity);
     }
 
     // save customer loan if did not pay all
     const remainingAmount = updatedDto.totalUsd - updatedDto.paidAmountUsd;
     if (!updatedDto.isPaid && remainingAmount > 0) {
-      const customer = await this.customerModel.findById(updatedDto.customerId);
+      const customer = await this.customerService.getOneById(
+        updatedDto.customerId,
+      );
       if (!customer) throw new BadRequestException('Customer not found');
 
       customer.loan = customer.loan + remainingAmount;
@@ -336,16 +335,19 @@ export class InvoiceService {
     // increase item quantity
     const items = invoice.items.filter((item) => !!item.itemRef);
     for (const item of items) {
-      await this.itemModel.findByIdAndUpdate(item.itemRef, {
-        $inc: { quantity: item.quantity },
-      });
+      await this.itemService.updateItemQuantity(
+        item.itemRef?.toString(),
+        item.quantity,
+      );
     }
 
     // decrease customer loan (in case isPaid is false)
     const remainingAmount =
       invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
     if (!invoice.accounting.isPaid && remainingAmount > 0) {
-      const customer = await this.customerModel.findById(invoice.customer);
+      const customer = await this.customerService.getOneById(
+        invoice.customer?.toString(),
+      );
       if (!customer) throw new BadRequestException('Customer not found');
 
       customer.loan = customer.loan - remainingAmount;
@@ -386,7 +388,7 @@ export class InvoiceService {
     // Process items if there are any
     if (itemRefs.length > 0) {
       // get products from db
-      dbItems = await this.itemModel.find({ _id: { $in: itemRefs } }).lean();
+      dbItems = await this.itemService.getManyByIds(itemRefs);
 
       // make sure all items are valid
       if (dbItems.length !== itemRefs.length)
@@ -412,9 +414,7 @@ export class InvoiceService {
     // Process services if there are any
     if (serviceRefs.length > 0) {
       // get services from db
-      dbServices = await this.serviceModel
-        .find({ _id: { $in: serviceRefs } })
-        .lean();
+      dbServices = await this.servicesService.getManyByIds(serviceRefs);
 
       // make sure all services are valid
       if (dbServices.length !== serviceRefs.length)

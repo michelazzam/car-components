@@ -7,6 +7,7 @@ import {
   Param,
   Controller,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { SupplierService } from './supplier.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -30,7 +31,9 @@ export class SupplierController {
   @Permissions('Suppliers', 'read')
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return this.supplierService.getOne(id);
+    const supplier = await this.supplierService.getOneById(id);
+    if (!supplier) throw new NotFoundException('Supplier not found');
+    return supplier;
   }
 
   @Permissions('Suppliers', 'create')

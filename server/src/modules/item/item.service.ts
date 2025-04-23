@@ -46,6 +46,14 @@ export class ItemService {
     };
   }
 
+  getOneById(id: string) {
+    return this.itemModel.findById(id);
+  }
+
+  getManyByIds(ids: string[]) {
+    return this.itemModel.find({ _id: { $in: ids } }).lean();
+  }
+
   async create(dto: AddItemDto) {
     await this.itemModel.create({
       supplier: dto.supplierId,
@@ -69,6 +77,12 @@ export class ItemService {
 
     if (!item) throw new NotFoundException(`Item with id ${id} not found`);
     return item;
+  }
+
+  updateItemQuantity(id: string, quantity: number) {
+    return this.itemModel.findByIdAndUpdate(id, {
+      $inc: { quantity },
+    });
   }
 
   async delete(id: string) {
