@@ -13,11 +13,8 @@ export class SupplierService {
     private supplierModel: Model<ISupplier>,
   ) {}
 
-  async getOne(id: string) {
-    const supplier = await this.supplierModel.findById(id);
-    if (!supplier) throw new NotFoundException('Supplier not found');
-
-    return supplier;
+  getOneById(id: string) {
+    return this.supplierModel.findById(id);
   }
 
   async getAll(dto: GetSuppliersDto) {

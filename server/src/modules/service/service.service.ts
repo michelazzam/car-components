@@ -16,6 +16,10 @@ export class ServiceService {
     return this.serviceModel.find().sort({ createdAt: -1 });
   }
 
+  getManyByIds(ids: string[]) {
+    return this.serviceModel.find({ _id: { $in: ids } }).lean();
+  }
+
   async create(service: AddServiceDto) {
     return await this.serviceModel.create(service);
   }

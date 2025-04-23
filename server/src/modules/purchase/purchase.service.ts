@@ -3,21 +3,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { PurchaseDto } from './dto/purchase.dto';
-import { ISupplier, Supplier } from '../supplier/supplier.schema';
-import { IItem, Item } from '../item/item.schema';
 import { GetPurchaseDto } from './dto/get-purchase.dto';
 import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { AccountingService } from '../accounting/accounting.service';
+import { SupplierService } from '../supplier/supplier.service';
+import { ItemService } from '../item/item.service';
 
 @Injectable()
 export class PurchaseService {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
-    @InjectModel(Item.name)
-    private itemModel: Model<IItem>,
-    @InjectModel(Supplier.name)
-    private supplierModel: Model<ISupplier>,
+    private readonly itemService: ItemService,
+    private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
   ) {}
 
@@ -91,9 +89,9 @@ export class PurchaseService {
 
   async create(dto: PurchaseDto) {
     // get products from db and save the name with each one
-    const products = await this.itemModel
-      .find({ _id: dto.items.map((item) => item.itemId) })
-      .lean();
+    const products = await this.itemService.getManyByIds(
+      dto.items.map((item) => item.itemId),
+    );
 
     if (products.length !== dto.items.length)
       throw new BadRequestException('Some items are not valid');
@@ -127,9 +125,9 @@ export class PurchaseService {
     await this.revertPurchaseEffects(purchaseId);
 
     // get products from db and save the name with each one
-    const products = await this.itemModel
-      .find({ _id: dto.items.map((item) => item.itemId) })
-      .lean();
+    const products = await this.itemService.getManyByIds(
+      dto.items.map((item) => item.itemId),
+    );
 
     if (products.length !== dto.items.length)
       throw new BadRequestException('Some items are not valid');
@@ -168,7 +166,7 @@ export class PurchaseService {
   private async doPurchaseEffects(dto: PurchaseDto) {
     // update product quantity + new product cost
     for (const item of dto.items) {
-      const product = await this.itemModel.findById(item.itemId);
+      const product = await this.itemService.getOneById(item.itemId);
       if (!product) throw new BadRequestException('Product not found');
 
       product.quantity += item.quantity;
@@ -182,7 +180,7 @@ export class PurchaseService {
     // add loan to supplier of not fully paid
     const remainingAmount = dto.totalAmount - dto.amountPaid;
     if (remainingAmount > 0) {
-      const supplier = await this.supplierModel.findById(dto.supplierId);
+      const supplier = await this.supplierService.getOneById(dto.supplierId);
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       supplier.loan = supplier.loan + remainingAmount;
@@ -203,7 +201,7 @@ export class PurchaseService {
 
     // Revert product quantities and cost
     for (const item of purchase.items) {
-      const product = await this.itemModel.findById(item.item);
+      const product = await this.itemService.getOneById(item.item?.toString());
       if (!product) {
         continue; //ignore deleted products
       }
@@ -218,7 +216,9 @@ export class PurchaseService {
     }
 
     // Revert supplier loan
-    const supplier = await this.supplierModel.findById(purchase.supplier);
+    const supplier = await this.supplierService.getOneById(
+      purchase.supplier?.toString(),
+    );
     if (!supplier) {
       return; //ignore deleted suppliers
     }
