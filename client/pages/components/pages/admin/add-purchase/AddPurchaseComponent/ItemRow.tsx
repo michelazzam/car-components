@@ -9,7 +9,7 @@ function ItemRow({ product }: { product: AddPurchaseItemSchemaType }) {
   const columns = [
     {
       title: "Product Name",
-      value: product.name,
+      value: product?.name,
     },
     {
       title: "Description",

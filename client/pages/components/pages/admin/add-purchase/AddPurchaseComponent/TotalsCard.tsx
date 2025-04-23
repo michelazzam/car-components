@@ -1,4 +1,3 @@
-//@ts-check
 import { useGetSupplierById } from "@/api-hooks/supplier/use-get-single-supplier-by-id";
 import { AddPurchaseSchemaType } from "@/lib/apiValidations";
 import { formatNumber } from "@/lib/helpers/formatNumber";

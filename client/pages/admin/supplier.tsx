@@ -50,14 +50,6 @@ const SupplierPage = () => {
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
-    columnHelper.accessor("amountDue", {
-      header: "Amount Due",
-      cell: ({ getValue }) => {
-        const value = Number(getValue());
-        return <div>{formatNumber(value, 2)}$</div>;
-      },
-    }),
-
     columnHelper.accessor("loan", {
       header: "Loan",
       cell: ({ getValue }) => {
