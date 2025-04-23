@@ -8,12 +8,12 @@ import {
   InvoiceCounterSchema,
   InvoiceSchema,
 } from './invoice.schema';
-import { Item, ItemSchema } from '../item/item.schema';
-import { Service, ServiceSchema } from '../service/service.schema';
-import { Customer, CustomerSchema } from '../customer/customer.schema';
 import { AccountingModule } from '../accounting/accounting.module';
 import { OrganizationModule } from '../organization/organization.module';
 import { ReportModule } from '../report/report.module';
+import { CustomerModule } from '../customer/customer.module';
+import { ServiceModule } from '../service/service.module';
+import { ItemModule } from '../item/item.module';
 
 @Module({
   imports: [
@@ -26,13 +26,13 @@ import { ReportModule } from '../report/report.module';
         name: InvoiceCounter.name,
         schema: InvoiceCounterSchema,
       },
-      { name: Item.name, schema: ItemSchema },
-      { name: Service.name, schema: ServiceSchema },
-      { name: Customer.name, schema: CustomerSchema },
     ]),
     AccountingModule,
     OrganizationModule,
     ReportModule,
+    CustomerModule,
+    ServiceModule,
+    ItemModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],

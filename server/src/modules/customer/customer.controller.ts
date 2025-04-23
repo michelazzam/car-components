@@ -7,6 +7,7 @@ import {
   Param,
   Controller,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -39,7 +40,10 @@ export class CustomerController {
   @Permissions('Customers', 'read')
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return this.customerService.getOne(id);
+    const customer = await this.customerService.getOneById(id);
+    if (!customer) throw new NotFoundException('Customer not found');
+
+    return customer;
   }
 
   @Permissions('Customers', 'create')

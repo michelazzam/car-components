@@ -79,6 +79,12 @@ export class ItemService {
     return item;
   }
 
+  updateItemQuantity(id: string, quantity: number) {
+    return this.itemModel.findByIdAndUpdate(id, {
+      $inc: { quantity },
+    });
+  }
+
   async delete(id: string) {
     const item = await this.itemModel.findByIdAndDelete(id);
 
