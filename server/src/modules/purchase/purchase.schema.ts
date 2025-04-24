@@ -19,6 +19,9 @@ export class Purchase {
   phoneNumber: string;
 
   @Prop({ required: true })
+  usdRate: number;
+
+  @Prop({ required: true })
   vatPercent: number;
 
   @Prop({ required: true })
