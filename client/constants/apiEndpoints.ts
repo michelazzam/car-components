@@ -78,8 +78,8 @@ export const API = {
   deletePrinter: (id: string) => `/printers/${id}`, // DELETE
 
   //usdRate
-  getUsdRate: "/accounting/usdRate",
-  editUsdRate: "/accounting/usdRate",
+  getUsdRate: "/accounting/usd-rate",
+  editUsdRate: "/accounting/usd-rate",
   // Restaurant
   getOrganization: `/organization`, // GET
   editOrganization: `/organization/update`, // PUT

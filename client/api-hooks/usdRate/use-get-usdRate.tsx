@@ -10,8 +10,6 @@ const useGetUsdRate = () => {
     queryKey: ["usdRate"],
     endpoint: API.getUsdRate,
     staleTime: Infinity,
-    //TEMPORARY CHANGE
-    enabled: false,
   });
 
   return { data, error, isLoading };
