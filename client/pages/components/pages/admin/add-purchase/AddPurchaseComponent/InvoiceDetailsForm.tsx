@@ -22,12 +22,12 @@ function InvoiceDetailsForm() {
 
   return (
     <div
-      className="row border p-2 shadow-sm grid grid-cols-12 gap-x-2"
+      className=" p-2  grid grid-cols-12 gap-x-2 "
       style={{ borderRadius: "8px" }}
     >
       <SelectFieldControlled
         placeholder={"Select"}
-        colSpan={4}
+        colSpan={6}
         control={control}
         name="supplierId"
         label="Supplier"
@@ -38,7 +38,7 @@ function InvoiceDetailsForm() {
       />
 
       <TextFieldControlled
-        colSpan={4}
+        colSpan={6}
         control={control}
         name="invoiceNumber"
         label="Invoice Number"
@@ -50,7 +50,7 @@ function InvoiceDetailsForm() {
         label="Invoice Date"
         placeholder={"Select Date"}
         formatType="dd-MM-yyyy"
-        colSpan={4}
+        colSpan={6}
       />
 
       <TextFieldControlled

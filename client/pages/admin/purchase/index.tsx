@@ -118,6 +118,9 @@ const PurchasePage = () => {
       <div className="flex justify-between items-center">
         <Pageheader currentpage="Purchases List" withBreadCrumbs={false} />
         <Link
+          onClick={() => {
+            setEditingPurchase(undefined);
+          }}
           className="ti-btn ti-btn-primary-full ti-btn-wave rounded-md"
           href={"/admin/purchase/add-edit-purchase"}
         >

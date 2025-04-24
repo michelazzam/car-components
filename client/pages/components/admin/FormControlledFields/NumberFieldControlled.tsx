@@ -17,6 +17,7 @@ interface NumberFieldProps {
   withCheckbox?: boolean;
   setIsChecked?: (checked: boolean) => void;
   onChangeValue?: (value: string | number | null) => void;
+  marginBotton?: string;
   [x: string]: any; // To allow any other additional props
 }
 
@@ -36,6 +37,7 @@ const NumberFieldControlled: React.FC<NumberFieldProps> = ({
   onChangeValue = () => {},
   min,
   max,
+  marginBotton = "mb-5",
 }) => {
   if (!control) return null;
   const { fieldState, field } = useController({ name, control });
@@ -73,7 +75,7 @@ const NumberFieldControlled: React.FC<NumberFieldProps> = ({
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
-        <div className="mb-5">
+        <div className={marginBotton}>
           <label className="block text-sm font-medium text-gray-700">
             {withCheckbox && setIsChecked && (
               <input
