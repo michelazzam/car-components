@@ -134,18 +134,10 @@ export class InvoiceDto {
   totalUsd: number;
 
   @ApiProperty({
-    required: false,
+    required: true,
   })
-  @IsOptional()
-  @IsString()
-  driverName: string;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  generalNote: string;
+  @IsNumber()
+  taxesUsd: number;
 
   @ApiProperty({
     required: false,

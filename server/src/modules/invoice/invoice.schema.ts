@@ -30,19 +30,13 @@ export class Invoice {
       amount: number;
       type: DiscountType;
     };
-    taxesLbp: number;
+    taxesUsd: number;
 
     subTotalUsd: number;
     totalUsd: number;
 
     paidAmountUsd: number;
   };
-
-  @Prop()
-  driverName: string;
-
-  @Prop()
-  generalNote: string;
 
   @Prop()
   customerNote: string;

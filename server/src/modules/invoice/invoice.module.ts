@@ -9,7 +9,6 @@ import {
   InvoiceSchema,
 } from './invoice.schema';
 import { AccountingModule } from '../accounting/accounting.module';
-import { OrganizationModule } from '../organization/organization.module';
 import { ReportModule } from '../report/report.module';
 import { CustomerModule } from '../customer/customer.module';
 import { ServiceModule } from '../service/service.module';
@@ -28,7 +27,6 @@ import { ItemModule } from '../item/item.module';
       },
     ]),
     AccountingModule,
-    OrganizationModule,
     ReportModule,
     CustomerModule,
     ServiceModule,

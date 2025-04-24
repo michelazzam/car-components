@@ -20,7 +20,6 @@ import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
-import { OrganizationService } from '../organization/organization.service';
 import { ReportService } from '../report/report.service';
 import { CustomerService } from '../customer/customer.service';
 import { ServiceService } from '../service/service.service';
@@ -37,7 +36,6 @@ export class InvoiceService {
     private readonly itemService: ItemService,
     private readonly customerService: CustomerService,
     private readonly accountingService: AccountingService,
-    private readonly organizationService: OrganizationService,
     private readonly reportService: ReportService,
   ) {}
 
@@ -137,27 +135,19 @@ export class InvoiceService {
 
     const accounting = await this.accountingService.getAccounting();
 
-    // calculate taxes
-    const taxesPercent = Number(
-      (await this.organizationService.getOrganization())?.tvaPercentage || 0,
-    );
-    const taxesUsd = (updatedDto.totalUsd * taxesPercent) / 100;
-
     // Create new invoice
     await this.invoiceModel.create({
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
       type: dto.type,
-      driverName: updatedDto.driverName,
-      generalNote: updatedDto.generalNote,
       customerNote: updatedDto.customerNote,
       accounting: {
         isPaid: updatedDto.isPaid,
         usdRate: accounting.usdRate,
 
         discount: updatedDto.discount,
-        taxesUsd,
+        taxesUsd: updatedDto.taxesUsd,
 
         subTotalUsd: updatedDto.subTotalUsd,
         totalUsd: updatedDto.totalUsd,
@@ -176,25 +166,17 @@ export class InvoiceService {
     // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
-    // calculate taxes
-    const taxesPercent = Number(
-      (await this.organizationService.getOrganization())?.tvaPercentage || 0,
-    );
-    const taxesUsd = (updatedDto.totalUsd * taxesPercent) / 100;
-
     // Create new invoice
     await this.invoiceModel.findByIdAndUpdate(invoiceId, {
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       type: dto.type,
-      driverName: updatedDto.driverName,
-      generalNote: updatedDto.generalNote,
       customerNote: updatedDto.customerNote,
       accounting: {
         isPaid: updatedDto.isPaid,
 
         discount: updatedDto.discount,
-        taxesUsd,
+        taxesUsd: updatedDto.taxesUsd,
 
         subTotalUsd: updatedDto.subTotalUsd,
         totalUsd: updatedDto.totalUsd,
