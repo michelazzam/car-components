@@ -12,13 +12,12 @@ import SelectFieldControlled from "@/pages/components/admin/FormControlledFields
 import toast from "react-hot-toast";
 import { useEditInvoice } from "@/api-hooks/invoices/use-edit-invoices";
 import { useRouter } from "next/router";
-import PrintInvoiceModal, {
-  PreviewInvoice,
-} from "../../admin/invoices/PrintInvoiceModal";
+import PrintInvoiceModal from "../../admin/invoices/PrintInvoiceModal";
 import { FaEye, FaPrint } from "react-icons/fa6";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
-import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
+// import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
+// import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 
 function RightSideAddOrder({
   refetchProducts,
@@ -29,7 +28,7 @@ function RightSideAddOrder({
   const [invoice, setInvoice] = useState();
   const [isPrint, setIsPrint] = useState(false);
   const [isFullPaid, setIsFullPaid] = useState(false);
-  const [previewingInvoice, setPreviewingInvoice] = useState<PreviewInvoice>();
+  // const [previewingInvoice, setPreviewingInvoice] = useState<Invoice>();
 
   //--------------------Refs-------------------------------------
   const printRef = useRef<HTMLFormElement>(null);
@@ -43,7 +42,7 @@ function RightSideAddOrder({
     discountStore,
     vatAmount,
     editingInvoice,
-    cart,
+    // cart,
   } = usePosStore();
 
   //---------------------Router----------------------------------------
@@ -53,7 +52,7 @@ function RightSideAddOrder({
   const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
-  const { handleSubmit, control, watch, setValue, reset, getValues } =
+  const { handleSubmit, control, watch, setValue, reset } =
     formContext;
 
   const { hasVehicle } = watch();
@@ -61,7 +60,7 @@ function RightSideAddOrder({
   //-----------------------API Calls------------------------------------
 
   const { data: organization } = useGetOrganization();
-  const { data: usdRate } = useGetUsdRate();
+  // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
     refetchProducts();
     clearPosStore();
@@ -108,10 +107,8 @@ function RightSideAddOrder({
     data: AddInvoiceSchema
   ) => {
     if (
-      data.products &&
-      data.products.length < 1 &&
-      data.services &&
-      data.services.length < 1
+      data.items &&
+      data.items.length < 1
     ) {
       return toast.error("please add products or services");
     }
@@ -131,33 +128,28 @@ function RightSideAddOrder({
 
   //-------------------Effects----------------------------------
 
-  const setPrevInv = () => {
-    if (usdRate) {
-      setPreviewingInvoice({
-        driverName: getValues("driverName"),
-        generalNote: getValues("generalNote"),
-        customerNote: getValues("customerNote"),
-        invoiceNumber: getValues("invoiceNumber"),
-        discount: {
-          amount: discountStore.amount,
-          type: discountStore.type,
-        },
-        products: cart.filter((item) => item.type === "product") || [],
-        services: cart.filter((item) => item.type === "service") || [],
-        totalPriceUsd: totalAmount(),
-        paidAmountUsd: getValues("paidAmountUsd"),
-        totalPriceLbp: Number(totalAmount()) * usdRate.usdRate,
-        taxesLbp: Number(vatAmount) * usdRate.usdRate,
-        customer: {
-          name: getValues("customer")?.label || "",
-          phone: getValues("customer")?.phone,
-          address: getValues("customer")?.address,
-          tvaNumber: getValues("customer")?.tvaNumber,
-        },
-        vehicle: getValues("vehicle"),
-      });
-    }
-  };
+  // const setPrevInv = () => {
+  //   if (usdRate) {
+  //     setPreviewingInvoice({
+  //       customerNote: getValues("customerNote"),
+  //       invoiceNumber: getValues("invoiceNumber"),
+  //       discount: {
+  //         amount: discountStore.amount,
+  //         type: discountStore.type,
+  //       },
+  //       totalPriceUsd: totalAmount(),
+  //       paidAmountUsd: getValues("paidAmountUsd"),
+  //       totalPriceLbp: Number(totalAmount()) * usdRate.usdRate,
+  //       taxesLbp: Number(vatAmount) * usdRate.usdRate,
+  //       customer: {
+  //         name: getValues("customer")?.label || "",
+  //         address: getValues("customer")?.address,
+  //         tvaNumber: getValues("customer")?.tvaNumber,
+  //       },
+  //       vehicle: getValues("vehicle"),
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
     let totalWithDiscount = 0;
@@ -191,11 +183,10 @@ function RightSideAddOrder({
       isPaid: false,
       hasVehicle: true,
       vehicleId: "",
-      products: [],
-      services: [],
       generalNote: "",
       customerNote: "",
       invoiceNumber: 0,
+      items:[]
     });
   };
   const handleCancelEditing = () => {
@@ -261,13 +252,6 @@ function RightSideAddOrder({
             applyDiscount(discountStore.amount, type);
           }} // Pass type correctly
         />
-        {/* <NumberFieldControlled
-          control={control}
-          name="amountPaidLbp"
-          label="LBP"
-          colSpan={1}
-          prefix="lbp"
-        /> */}
         {/*  */}
         <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
           <div className="flex items-center justify-between mt-1">
@@ -275,14 +259,14 @@ function RightSideAddOrder({
             <span>${cartSum()}</span>
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
-            <span>${vatAmount}</span>
-          </div>
-          <div className="flex items-center justify-between mt-1">
             <span className="text-danger">{`Discount`}</span>
             <span className="text-danger">{`${
               discountStore.type === "fixed" ? "$" : "%"
             }${discountStore.amount || 0}`}</span>
+          </div>
+          <div className="flex items-center justify-between mt-1">
+            <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
+            <span>${vatAmount}</span>
           </div>
           <div className="flex items-center justify-between mt-1">
             <span>Total</span>
@@ -338,7 +322,7 @@ function RightSideAddOrder({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setPrevInv()}
+              // onClick={() => setPrevInv()}
               data-hs-overlay="#preview-invoice"
               className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
             >
@@ -374,12 +358,12 @@ function RightSideAddOrder({
         title="New Inovice"
         printingInvoices={invoice ? [invoice] : undefined}
       />
-      <PrintInvoiceModal
+      {/* <PrintInvoiceModal
         triggerModalId="preview-invoice"
         title="New Inovice"
         previewingInvoice={previewingInvoice}
         prev={true}
-      />
+      /> */}
     </form>
   );
 }

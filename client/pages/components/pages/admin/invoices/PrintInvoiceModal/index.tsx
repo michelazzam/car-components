@@ -17,7 +17,7 @@ function PrintInvoiceModal({
   triggerModalId: string;
   title: string;
   printingInvoices?: Invoice[] | undefined;
-  previewingInvoice?: PreviewInvoice;
+  previewingInvoice?: Invoice;
   prev?: boolean;
 }) {
   const [noTaxt, setNoTax] = useState(true);
@@ -70,7 +70,7 @@ function PrintInvoiceModal({
       pdf.save(
         printingInvoices.length > 1
           ? "invoices.pdf"
-          : `${printingInvoices[0].customer.name}-TB${printingInvoices[0].invoiceNumber}.pdf`
+          : `${printingInvoices[0].customer.name}-TB${printingInvoices[0]}.pdf`
       );
     }
     setLoading(false);
@@ -167,42 +167,42 @@ function PrintInvoiceModal({
 
 export default PrintInvoiceModal;
 
-export type PreviewInvoice = {
-  driverName?: string;
-  generalNote?: string;
-  customerNote?: string;
-  invoiceNumber?: number;
+// export type PreviewInvoice = {
+//   driverName?: string;
+//   generalNote?: string;
+//   customerNote?: string;
+//   invoiceNumber?: number;
 
-  discount: {
-    amount: number;
-    type: "fixed" | "percentage";
-  };
+//   discount: {
+//     amount: number;
+//     type: "fixed" | "percentage";
+//   };
 
-  customer?: CustomerPrev;
+//   customer?: CustomerPrev;
 
-  vehicle?: VehiclePrev;
-  usdRate?: number;
-  products?: InvoicePreviewItem[];
-  services?: InvoicePreviewItem[];
-  totalPriceLbp: number;
-  totalPriceUsd: number;
-  paidAmountUsd: number;
-  taxesLbp: number;
-};
-export type CustomerPrev = {
-  name: string;
-  phone?: string;
-  address?: string;
-  tvaNumber?: string;
-};
-export type VehiclePrev = {
-  vehicleNb?: string;
-  model?: string;
-};
-export interface InvoicePreviewItem {
-  type?: string;
-  name?: string;
-  quantity?: number;
-  price?: number;
-  amount?: number;
-}
+//   vehicle?: VehiclePrev;
+//   usdRate?: number;
+//   products?: InvoicePreviewItem[];
+//   services?: InvoicePreviewItem[];
+//   totalPriceLbp: number;
+//   totalPriceUsd: number;
+//   paidAmountUsd: number;
+//   taxesLbp: number;
+// };
+// export type CustomerPrev = {
+//   name: string;
+//   phone?: string;
+//   address?: string;
+//   tvaNumber?: string;
+// };
+// export type VehiclePrev = {
+//   vehicleNb?: string;
+//   model?: string;
+// };
+// export interface InvoicePreviewItem {
+//   type?: string;
+//   name?: string;
+//   quantity?: number;
+//   price?: number;
+//   amount?: number;
+// }

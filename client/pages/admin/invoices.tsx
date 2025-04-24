@@ -2,7 +2,7 @@ import Seo from "@/shared/layout-components/seo/seo";
 import React, { Suspense } from "react";
 
 import ListInvoice from "../components/pages/admin/invoices/ListInvoice";
-import StatementPrinting from "../components/pages/admin/common/StatementPrinting";
+// import StatementPrinting from "../components/pages/admin/common/StatementPrinting";
 
 const Invoices = () => {
   return (
@@ -16,7 +16,7 @@ const Invoices = () => {
             </h3>
           </div>
 
-          <StatementPrinting />
+          {/* <StatementPrinting /> */}
         </div>
 
         <ListInvoice />

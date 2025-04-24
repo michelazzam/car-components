@@ -65,9 +65,9 @@ function Header({
   // If the car is on a page that needs pagination to reach
   if (editingInvoice && editingInvoice.vehicle) {
     vehicleOptions?.push({
-      label: editingInvoice.vehicle.vehicleNb,
+      label: editingInvoice.vehicle.number,
       value: editingInvoice.vehicle._id,
-      vehicleNb: editingInvoice.vehicle.vehicleNb,
+      vehicleNb: editingInvoice.vehicle.number,
       model: editingInvoice.vehicle.model,
     });
   }
