@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Purchase {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
   supplier: mongoose.Types.ObjectId;
@@ -17,6 +17,9 @@ export class Purchase {
 
   @Prop({ required: true })
   phoneNumber: string;
+
+  @Prop({ required: true })
+  usdRate: number;
 
   @Prop({ required: true })
   vatPercent: number;
@@ -44,9 +47,6 @@ export class Purchase {
     expDate: string;
     totalPrice: number;
   }[];
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type IPurchase = HydratedDocument<Purchase>;

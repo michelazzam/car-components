@@ -25,6 +25,9 @@ export class EnvironmentVariables {
 
   @IsString()
   DATABASE_URL: string;
+
+  @IsString()
+  BACKUP_DATABASE_URL: string;
 }
 
 // To be used when we want to get env variables in our Modules

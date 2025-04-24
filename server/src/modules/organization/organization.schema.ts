@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Organization {
   @Prop({ required: true })
   name: string;
@@ -20,9 +20,6 @@ export class Organization {
 
   @Prop()
   tvaPercentage: string;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type IOrganization = HydratedDocument<Organization>;

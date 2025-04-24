@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Accounting {
   @Prop({ required: true, default: 89000 })
   usdRate: number;
@@ -17,9 +17,6 @@ export class Accounting {
 
   @Prop({ default: 0 })
   totalSuppliersLoan: number;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type IAccounting = HydratedDocument<Accounting>;

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Supplier {
   @Prop({ required: true })
   name: string;
@@ -38,9 +38,6 @@ export class Supplier {
 
   @Prop({ default: 0 })
   loan: number;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type ISupplier = HydratedDocument<Supplier>;
