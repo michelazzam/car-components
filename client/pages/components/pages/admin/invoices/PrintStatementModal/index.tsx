@@ -2,7 +2,7 @@ import Modal from "@/shared/Modal";
 import React, { useRef } from "react";
 import ReactToPrint from "react-to-print";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
-import PrintStatement from "./PrintStatement";
+// import PrintStatement from "./PrintStatement";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
@@ -10,10 +10,10 @@ function PrintStatementModal({
   triggerModalId,
   title,
   printingInvoices = undefined,
-  startDate,
-  endDate,
-  currency,
-  customerDetails,
+  // startDate,
+  // endDate,
+  // currency,
+  // customerDetails,
 }: {
   triggerModalId: string;
   title: string;
@@ -94,7 +94,7 @@ function PrintStatementModal({
       <Modal.Body>
         {printingInvoices && (
           <div>
-            <PrintStatement
+            {/* <PrintStatement
               currency={currency}
               invoiceRef={invoiceRef}
               printingInvoices={printingInvoices}
@@ -103,7 +103,7 @@ function PrintStatementModal({
               startDate={startDate}
               endDate={endDate}
               customerDetails={customerDetails}
-            />
+            /> */}
           </div>
         )}
       </Modal.Body>

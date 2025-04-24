@@ -1,5 +1,14 @@
-import { Invoice } from "@/api-hooks/invoices/useListInvoices";
+import { GetItem, Invoice } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
+
+function calculateDiscountedAmount(price: number, quantity: number, discount: Discount): number {
+  const total = price * quantity;
+  if (discount.type === "percentage") {
+    return Number((total - (total * discount.amount) / 100).toFixed(2));
+  } else {
+    return Number((total - discount.amount).toFixed(2));
+  }
+}
 
 export interface Item {
   type?: "product" | "service";
@@ -16,9 +25,10 @@ export interface Item {
     price: number;
   };
   stock?: number;
+  discount?:Discount;
 }
 
-interface Discount {
+export interface Discount {
   amount: number;
   type: "percentage" | "fixed";
 }
@@ -38,63 +48,64 @@ interface PosState {
   editingInvoice?: Invoice;
   setEditingInvoice: (invoice?: Invoice) => void;
   addToCart: (type: "product" | "service", item: Item) => void;
-  addGroupItem: (type: "product" | "service", items: Item[]) => void;
+  addGroupItem: (type: "product" | "service", items: GetItem[]) => void;
   removeItem: (item: Item) => void;
   totalAmount: () => number;
   setQuantity: (name: string, price: number, quantity: number) => void;
+  addItemDiscount:(prodcutId:string, discount:Discount) => void;
 }
 
-interface EditingInvoice {
-  finalPriceUsd: number;
-  discount: Discount;
-  _id: string;
-  customer: {
-    _id: string;
-    name: string;
-    loan: number;
-    loanLbp: number;
-    phoneNumber?: string;
-    address?: string;
-  };
-  driverName: string;
-  generalNote: string;
-  customerNote: string;
-  isPaid: boolean;
-  totalPriceUsd: number;
-  totalPriceLbp: number;
-  amountPaidUsd: number;
-  amountPaidLbp: number;
-  taxesLbp: number;
-  createdBy: {
-    _id: string;
-    fullName: string;
-    username: string;
-  };
-  vehicle: {
-    _id: string;
-    vehicleNb: string;
-    model: string;
-  };
-  products: {
-    product: {
-      _id: string;
-      name: string;
-      price: number;
-      stock?: number;
-    };
-    quantity: number;
-  }[];
-  services: {
-    name: string;
-    quantity: number;
-    price: number;
-  }[];
+// interface EditingInvoice {
+//   finalPriceUsd: number;
+//   discount: Discount;
+//   _id: string;
+//   customer: {
+//     _id: string;
+//     name: string;
+//     loan: number;
+//     loanLbp: number;
+//     phoneNumber?: string;
+//     address?: string;
+//   };
+//   driverName: string;
+//   generalNote: string;
+//   customerNote: string;
+//   isPaid: boolean;
+//   totalPriceUsd: number;
+//   totalPriceLbp: number;
+//   amountPaidUsd: number;
+//   amountPaidLbp: number;
+//   taxesLbp: number;
+//   createdBy: {
+//     _id: string;
+//     fullName: string;
+//     username: string;
+//   };
+//   vehicle: {
+//     _id: string;
+//     vehicleNb: string;
+//     model: string;
+//   };
+//   products: {
+//     product: {
+//       _id: string;
+//       name: string;
+//       price: number;
+//       stock?: number;
+//     };
+//     quantity: number;
+//   }[];
+//   services: {
+//     name: string;
+//     quantity: number;
+//     price: number;
+//   }[];
 
-  createdAt: string;
-  updatedAt: string;
-  invoiceNumber: number;
-  __v: number;
-}
+//   createdAt: string;
+//   updatedAt: string;
+//   invoiceNumber: number;
+//   __v: number;
+// }
 
 // function updateArray(originalArray: Item[], newItem: Item): Item[] {
 //   let index = null;
@@ -122,8 +133,8 @@ export const usePosStore = create<PosState>()((set, get) => ({
   // Setters
   setVatAmount: (vatAmount: number) => set({ vatAmount }),
   setPayLater: (payLater: boolean) => set({ payLater }),
-  setEditingInvoice: (invoice?: Invoice | EditingInvoice) => {
-    set({ editingInvoice: invoice as EditingInvoice });
+  setEditingInvoice: (invoice?: Invoice) => {
+    set({ editingInvoice: invoice as Invoice });
   },
 
   // Apply discount logic
@@ -168,7 +179,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
       amount:
         Number(item.price) * (type === "product" ? 1 : Number(item.quantity)),
       productId: item._id || "",
-      stock: item.stock || 0,
+      stock: item.quantity || 0,
     };
 
     set((state) => ({
@@ -176,32 +187,22 @@ export const usePosStore = create<PosState>()((set, get) => ({
     }));
   },
 
-  addGroupItem: (type: "product" | "service", items: Item[]) => {
+  addGroupItem: (type: "product" | "service", items: GetItem[]) => {
     if (items) {
       const itemsToAdd = items.map((element) => ({
         type,
-        name:
-          type === "service"
-            ? element.name
-            : element.product && element.product.name,
-        price:
-          type === "service"
-            ? element.price
-            : element.product && element.product.price,
+        name:element.name,
+        price:element.price,
         quantity: element.quantity,
-        amount:
-          type === "service"
-            ? element.price && element.quantity
-              ? element.price * element.quantity
-              : 0
-            : element.product && element.product.price && element.quantity
-            ? element.product.price * element.quantity
-            : 0,
+        amount:element.discount?
+        (element.price * element.quantity - (element.discount.type === "percentage"?element.price *element.quantity * (element.discount.amount * 0.01):element.discount.amount)):
+        (element.price * element.quantity),
+        discount:element.discount,
         productId:
-          type === "product"
-            ? element.product && element.product._id
-            : undefined,
-        stock: element.stock || 0,
+          type === "product"?
+          element.itemRef:
+          element.serviceRef
+            
       }));
       set((state) => ({
         cart: [...state.cart, ...itemsToAdd],
@@ -258,6 +259,20 @@ export const usePosStore = create<PosState>()((set, get) => ({
         ),
       };
     });
+  },
+  
+  addItemDiscount: (productId:string, discount: Discount) => {
+    set((state) => ({
+      cart: state.cart.map((item) =>
+        item.productId === productId
+          ? {
+              ...item,
+              discount,
+              amount: calculateDiscountedAmount(item.price!, item.quantity!, discount),
+            }
+          : item
+      ),
+    }));
   },
 
   clearCart: () =>

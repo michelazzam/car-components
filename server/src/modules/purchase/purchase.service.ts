@@ -104,6 +104,8 @@ export class PurchaseService {
       currentItemCost: product.cost,
     }));
 
+    const accounting = await this.accountingService.getAccounting();
+
     // save the purchase
     await this.purchaseModel.create({
       supplier: dto.supplierId,
@@ -115,6 +117,7 @@ export class PurchaseService {
       vatLBP: dto.vatLBP,
       totalAmount: dto.totalAmount,
       amountPaid: dto.amountPaid,
+      usdRate: accounting.usdRate,
       items: dto.items,
     });
 

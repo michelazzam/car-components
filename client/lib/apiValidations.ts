@@ -286,8 +286,7 @@ const AddInvoiceSchema = z
       amount: z.number().min(0, "Discount amount cannot be negative"),
       type: z.string().min(1, "Discount type is required"),
     }),
-    amountPaidUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
-    amountPaidLbp: z.number().min(0, "Amount paid in LBP cannot be negative"),
+    paidAmountUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
     customerId: z.string().min(1, "Customer ID is required"),
     customer: z
       .object({
@@ -307,26 +306,45 @@ const AddInvoiceSchema = z
     isPaid: z.boolean(),
     hasVehicle: z.boolean(),
     vehicleId: z.string().optional(),
-    products: z
-      .array(
-        z.object({
-          productId: z.string().min(1, "Product ID is required"),
-          quantity: z.number().min(1, "Quantity must be at least 1"),
-          price: z.number().min(0, "Price must be non-negative"),
-        })
-      )
-      .optional(),
-    services: z
-      .array(
-        z.object({
-          name: z.string().min(1, "Service name is required"),
-          quantity: z.number().min(1, "Quantity must be at least 1"),
-          price: z.number().min(0, "Price must be non-negative"),
-        })
-      )
-      .optional(),
+    taxesUsd: z.number(),
+    // products: z
+    //   .array(
+    //     z.object({
+    //       productId: z.string().min(1, "Product ID is required"),
+    //       quantity: z.number().min(1, "Quantity must be at least 1"),
+    //       price: z.number().min(0, "Price must be non-negative"),
+    //     })
+    //   )
+    //   .optional(),
+    // services: z
+    //   .array(
+    //     z.object({
+    //       name: z.string().min(1, "Service name is required"),
+    //       quantity: z.number().min(1, "Quantity must be at least 1"),
+    //       price: z.number().min(0, "Price must be non-negative"),
+    //     })
+    //   )
+    //   .optional(),
+    items: z.array(
+      z.object({
+        itemRef: z.string().optional(),
+        serviceRef: z.string().optional(),
+        quantity: z.number(),
+        discount: z
+          .object({
+            amount: z.number(),
+            type: z.string(),
+          })
+          .optional(),
+        subTotal: z.number(),
+        totalPrice: z.number(),
+      })
+    ).optional(),
+    subTotalUsd:z.number(),
+    totalUsd:z.number(),
     generalNote: z.string().optional(),
     customerNote: z.string().optional(),
+    type:z.enum(["s1","s2"])
   })
   .refine(
     (data) => {
@@ -340,42 +358,42 @@ const AddInvoiceSchema = z
       path: ["vehicleId"],
     }
   )
-  .refine(
-    (data) => {
-      console.log("Data:", data);
+  // .refine(
+  //   (data) => {
+  //     console.log("Data:", data);
 
-      // Calculate the sum of products (quantity * price)
-      const productTotal =
-        data.products?.reduce(
-          (sum, product) => sum + product.quantity * product.price,
-          0
-        ) || 0;
+  //     // Calculate the sum of products (quantity * price)
+  //     const productTotal =
+  //       data.products?.reduce(
+  //         (sum, product) => sum + product.quantity * product.price,
+  //         0
+  //       ) || 0;
 
-      console.log("Product Total:", productTotal);
+  //     console.log("Product Total:", productTotal);
 
-      // Calculate the sum of services (quantity * price)
-      const serviceTotal =
-        data.services?.reduce(
-          (sum, service) => sum + service.quantity * service.price,
-          0
-        ) || 0;
+  //     // Calculate the sum of services (quantity * price)
+  //     const serviceTotal =
+  //       data.services?.reduce(
+  //         (sum, service) => sum + service.quantity * service.price,
+  //         0
+  //       ) || 0;
 
-      console.log("Service Total:", serviceTotal);
+  //     console.log("Service Total:", serviceTotal);
 
-      const total = productTotal + serviceTotal;
-      console.log("Total:", total);
+  //     const total = productTotal + serviceTotal;
+  //     console.log("Total:", total);
 
-      if (data.discount.type === "fixed") {
-        return data.discount.amount <= total; // This should return false if invalid
-      } else {
-        return data.discount.amount >= 0 && data.discount.amount <= 100;
-      }
-    },
-    {
-      message: `Discount amount is not valid`,
-      path: ["discount", "amount"],
-    }
-  );
+  //     if (data.discount.type === "fixed") {
+  //       return data.discount.amount <= total; // This should return false if invalid
+  //     } else {
+  //       return data.discount.amount >= 0 && data.discount.amount <= 100;
+  //     }
+  //   },
+  //   {
+  //     message: `Discount amount is not valid`,
+  //     path: ["discount", "amount"],
+  //   }
+  // );
 export type AddInvoiceSchema = z.infer<typeof AddInvoiceSchema>;
 
 const DBBackupPath = z.object({

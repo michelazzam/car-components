@@ -8,7 +8,7 @@ export interface InvoiceSchema {
       amount: number;
       type: string;
     };
-    amountPaidUsd: number;
+    paidAmountUsd: number;
     amountPaidLbp: number;
     customerId: string;
     isPaid?: boolean;

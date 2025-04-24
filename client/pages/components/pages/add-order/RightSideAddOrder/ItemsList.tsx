@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import IncDecButton from "../IncDecButton";
 import { FaRegTrashCan } from "react-icons/fa6";
+import AddItemDiscountModal from "./AddItemDiscountModal";
 
 function ItemsList() {
+  const [selectedItem, setSelectedItem] = useState<Item>();
+  //-----------store---
   const { cart, setQuantity, removeItem, clearCart } = usePosStore();
 
   const handleDec = (item: Item) => {
@@ -12,6 +15,7 @@ function ItemsList() {
   };
 
   const handleInc = (item: Item) => {
+    console.log("hasan test item data:", item);
     setQuantity(
       item.name || "",
       item.price || 0,
@@ -26,6 +30,7 @@ function ItemsList() {
     setQuantity(item.name || "", item.price || 0, +val);
   };
 
+  console.log(cart);
   return (
     <div className="col-span-2">
       <div className="flex items-center justify-between ">
@@ -45,7 +50,18 @@ function ItemsList() {
             key={item.name}
             className="flex items-center justify-between p-4"
           >
-            <p className="w-1/4">{item.name}</p>
+            {item.type === "product" ? (
+              <p
+                className="w-1/4 hover:cursor-pointer hover:text-primary hover:font-bold"
+                data-hs-overlay="#add-item-discount"
+                title="Click to add discount"
+                onClick={() => setSelectedItem(item)}
+              >
+                {item.name}
+              </p>
+            ) : (
+              <p className="w-1/4">{item.name}</p>
+            )}
             <IncDecButton
               dec={() => handleDec(item)}
               inc={() => handleInc(item)}
@@ -53,7 +69,7 @@ function ItemsList() {
               value={Number(item.quantity)}
               onChange={(val) => handleChangeValue(item, val)}
             />
-            <span className="w-1/4 text-center">{item.price}</span>
+            <span className={`w-1/4 text-center ${item.discount?.amount &&  item.discount?.amount > 0?"text-danger":""}`}>{item.amount}</span>
             <span
               className="w-1/4 flex items-center justify-center hover:cursor-pointer hover:text-danger"
               onClick={() => removeItem(item)}
@@ -63,6 +79,14 @@ function ItemsList() {
           </div>
         ))}
       </div>
+      {/* {selectedItem && ( */}
+        <AddItemDiscountModal
+          triggerModalId="add-item-discount"
+          modalTitle="Add Discount"
+          item={selectedItem || cart[0]}
+          setSelected={setSelectedItem}
+        />
+      {/* )} */}
     </div>
   );
 }

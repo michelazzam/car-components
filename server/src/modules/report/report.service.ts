@@ -124,8 +124,8 @@ export class ReportService {
       {
         $set: { date: formattedDate },
         $inc: {
-          totalIncome,
-          totalExpenses,
+          totalIncome: totalIncome || 0,
+          totalExpenses: totalExpenses || 0,
         },
       },
       {

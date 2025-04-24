@@ -3,20 +3,20 @@ import React, { useMemo } from "react";
 import { dateTimeToDateFormat } from "@/lib/helpers/formatDate";
 
 import {
+  Discount,
+  GetItem,
   Invoice,
-  ProductItem,
-  ServiceItem,
 } from "@/api-hooks/invoices/useListInvoices";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import Image from "next/image";
 import numWords from "num-words";
-import {
-  CustomerPrev,
-  InvoicePreviewItem,
-  PreviewInvoice,
-  VehiclePrev,
-} from ".";
+// import {
+//   CustomerPrev,
+//   InvoicePreviewItem,
+//   PreviewInvoice,
+//   VehiclePrev,
+// } from ".";
 import {
   OrganizationInfoType,
   useGetOrganization,
@@ -39,7 +39,7 @@ function PrintInvoice({
   prev,
 }: {
   printingInvoice?: Invoice;
-  previewingInvoice?: PreviewInvoice;
+  previewingInvoice?: Invoice;
   noTax: boolean;
   printA5: boolean;
   prev?: boolean;
@@ -52,59 +52,62 @@ function PrintInvoice({
     customer,
     vehicle,
     taxesUsd,
-    invoiceNum,
+    // invoiceNum,
     createdAt,
-    services,
-    products,
+    // services,
+    // products,
+    items,
     discount,
-    amountPaidUsd,
-    amountPaidLbp,
-    taxesLbp,
+    paidAmountUsd,
+    // taxesLbp,
+    subTotalUsd,
     customerNote,
     totalPriceUsd,
-    usdRate: invoiceUsdRate,
+    invoiceUsdRate,
   } = useMemo(() => {
     const invoiceData = prev ? previewingInvoice : printingInvoice;
     if (!invoiceData) return {};
 
-    const calculatedTaxesUsd =
-      invoiceData.taxesLbp /
-      Number(invoiceData.usdRate || usdRate?.usdRate || 1);
-    const finalPrice = printingInvoice?.finalPriceUsd || 0;
-    const totalPrice = prev ? invoiceData.totalPriceUsd : finalPrice;
+    // const calculatedTaxesUsd =
+    //   invoiceData.taxesLbp /
+    //   Number(invoiceData.usdRate || usdRate?.usdRate || 1);
+    // const finalPrice = printingInvoice?.finalPriceUsd || 0;
+    // const totalPrice = prev ? invoiceData.totalPriceUsd : finalPrice;
 
     return {
       customer: invoiceData.customer,
       vehicle: invoiceData.vehicle,
-      taxesUsd: calculatedTaxesUsd,
-      invoiceNum: invoiceData.invoiceNumber,
+      // invoiceNum: invoiceData.invoiceNumber,
       createdAt: printingInvoice?.createdAt,
-      services: invoiceData.services,
-      products: invoiceData.products?.map((item) => ({
-        type: "product",
-        //@ts-ignore
-        name: prev ? item.name : item.product.name,
-        quantity: item.quantity,
-        //@ts-ignore
-        price: prev ? item.price : item.product.price,
-        amount: prev ? (item.quantity || 0) * (item.price || 0) : item.amount,
-      })),
-      discount: invoiceData.discount,
-      amountPaidUsd: invoiceData.amountPaidUsd,
-      amountPaidLbp: invoiceData.amountPaidLbp,
-      taxesLbp: invoiceData.taxesLbp,
+      // services: invoiceData.services,
+      // products: invoiceData.products?.map((item) => ({
+      //   type: "product",
+      //   //@ts-ignore
+      //   name: prev ? item.name : item.product.name,
+      //   quantity: item.quantity,
+      //   //@ts-ignore
+      //   price: prev ? item.price : item.product.price,
+      //   amount: prev ? (item.quantity || 0) * (item.price || 0) : item.amount,
+      // })),
+      items: invoiceData.items,
+      discount: invoiceData.accounting.discount,
+      paidAmountUsd: invoiceData.accounting.paidAmountUsd,
+      // amountPaidLbp: invoiceData.amountPaidLbp,
+      // taxesLbp: invoiceData.taxesLbp,
+      subTotalUsd:invoiceData.accounting.subTotalUsd,
+      taxesUsd: invoiceData.accounting.taxesUsd,
       customerNote: invoiceData.customerNote,
-      totalPriceUsd: totalPrice,
-      usdRate:
-        usdRate?.usdRate ||
-        invoiceData.totalPriceLbp / invoiceData.totalPriceUsd,
+      totalPriceUsd: invoiceData.accounting.totalUsd,
+      invoiceUsdRate: invoiceData.accounting.usdRate,
+      // usdRate?.usdRate ||
+      // invoiceData.totalPriceLbp / invoiceData.totalPriceUsd,
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
 
   // Check for organization and usdRate load status
-  if (!organization || !usdRate) {
-    return <div className="p-5 text-center">Loading...</div>;
-  }
+  // if (!organization || !usdRate) {
+  //   return <div className="p-5 text-center">Loading...</div>;
+  // }
 
   return (
     <div
@@ -124,19 +127,19 @@ function PrintInvoice({
           <PrintInvoiceDetails
             customer={customer}
             vehicle={vehicle}
-            invoiceNumber={invoiceNum}
+            // invoiceNumber={invoiceNum}
             createdAt={createdAt}
-            invoiceUsdRate={invoiceUsdRate || usdRate.usdRate}
+            invoiceUsdRate={invoiceUsdRate || 90000}
           />
-          <InvoiceTable services={services} products={products} />
+          {items &&
+          <InvoiceTable items={items} />
+}
           <InvoiceSubtotal
             discount={discount}
-            products={products}
-            services={services}
+            subTotalUsd={subTotalUsd || 0}
+            totalPriceUsd={totalPriceUsd || 0}
             customerNote={customerNote}
-            amountPaidUsd={amountPaidUsd}
-            amountPaidLbp={amountPaidLbp}
-            taxesLbp={taxesLbp}
+            amountPaidUsd={paidAmountUsd}
             taxesUsd={taxesUsd}
             taxPercentage={organization.tvaPercentage}
           />
@@ -210,8 +213,8 @@ const PrintInvoiceDetails = ({
   createdAt,
   invoiceUsdRate,
 }: {
-  customer?: CustomerPrev;
-  vehicle?: VehiclePrev;
+  customer?: any;
+  vehicle?: any;
   invoiceNumber?: number;
   createdAt?: string;
   invoiceUsdRate: number;
@@ -281,13 +284,7 @@ const PrintInvoiceDetails = ({
     </div>
   </div>
 );
-const InvoiceTable = ({
-  products,
-  services,
-}: {
-  products?: InvoicePreviewItem[];
-  services?: InvoicePreviewItem[];
-}) => {
+const InvoiceTable = ({ items }: { items: GetItem[] }) => {
   return (
     <div className="mt-2 flex flex-col">
       <div className="flex-1 overflow-x-auto">
@@ -306,21 +303,25 @@ const InvoiceTable = ({
               <th className="px-6 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                 Amount
               </th>
+              <th className="px-6 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                Discount Amount
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products &&
-              products?.map((item, index) => (
+            {items &&
+              items?.map((item, index) => (
                 <ProductTableRow
                   product={{
                     name: item?.name || "",
                     price: item?.price || 0,
                     quantity: item.quantity || 1,
+                    discount: item.discount,
                   }}
                   key={index}
                 />
               ))}
-            {services && services?.length > 0 && (
+            {/* {services && services?.length > 0 && (
               <>
                 {services.map((item, index) => (
                   <ServiceTableRow
@@ -333,7 +334,7 @@ const InvoiceTable = ({
                   />
                 ))}
               </>
-            )}
+            )} */}
           </tbody>
         </table>
       </div>
@@ -341,7 +342,7 @@ const InvoiceTable = ({
   );
 };
 
-const ProductTableRow = ({ product }: { product: ProductItem }) => {
+const ProductTableRow = ({ product }: { product: {name:string;quantity:number;price:number;discount?:Discount} }) => {
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
@@ -356,74 +357,82 @@ const ProductTableRow = ({ product }: { product: ProductItem }) => {
       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
         ${formatNumber((product.price || 0) * product.quantity)}
       </td>
+      <td className="px-6 py-2 whitespace-nowrap text-sm text-danger">
+        {product.discount ?
+        formatNumber(
+          product.discount.type === "percentage"
+            ? (product.price || 0) *
+                product.quantity *
+                (product.discount.amount * 0.01)
+            : (product.price || 0) * product.quantity - product.discount.amount
+        ):0
+      }
+      </td>
     </tr>
   );
 };
 
-const ServiceTableRow = ({ service }: { service: ServiceItem }) => {
-  return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
-        {service.name}
-      </td>
-      {
-        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-          {formatNumber(service.quantity || 0)}
-        </td>
-      }
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-        ${formatNumber(service.price)}
-      </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-        ${formatNumber(service.price * Number(service.quantity))}
-      </td>
-    </tr>
-  );
-};
+// const ServiceTableRow = ({ service }: { service: ServiceItem }) => {
+//   return (
+//     <tr className="hover:bg-gray-50">
+//       <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
+//         {service.name}
+//       </td>
+//       {
+//         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
+//           {formatNumber(service.quantity || 0)}
+//         </td>
+//       }
+//       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
+//         ${formatNumber(service.price)}
+//       </td>
+//       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
+//         ${formatNumber(service.price * Number(service.quantity))}
+//       </td>
+//     </tr>
+//   );
+// };
 
 const InvoiceSubtotal = ({
   discount,
-  products,
-  services,
   amountPaidUsd,
-  amountPaidLbp,
-  taxesLbp,
   customerNote,
   taxesUsd,
   taxPercentage,
+  subTotalUsd,
+  totalPriceUsd
 }: {
   discount?: {
     amount: number;
     type: "fixed" | "percentage";
   };
-  products?: InvoicePreviewItem[];
-  services?: InvoicePreviewItem[];
   amountPaidUsd?: number;
-  amountPaidLbp?: number;
   taxesLbp?: number;
   customerNote?: string;
   taxesUsd?: number;
   taxPercentage?: number;
+  subTotalUsd:number;
+  totalPriceUsd:number
 }) => {
-  const productPrice =
-    products?.reduce(
-      (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
-      0
-    ) || 0;
-  const servicePrice =
-    services?.reduce(
-      (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
-      0
-    ) || 0;
+  // const productPrice =
+  //   products?.reduce(
+  //     (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
+  //     0
+  //   ) || 0;
+  // const servicePrice =
+  //   services?.reduce(
+  //     (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
+  //     0
+  //   ) || 0;
 
-  const subTotal = productPrice + servicePrice;
+  // const subTotal = productPrice + servicePrice;
 
-  const total = () => {
-    if (!discount) return subTotal;
-    return discount.type === "fixed"
-      ? subTotal - discount.amount
-      : subTotal - subTotal * discount.amount * 0.01;
-  };
+  // const total = () => {
+  //   if (!discount) return subTotal;
+  //   return discount.type === "fixed"
+  //     ? subTotal - discount.amount
+  //     : subTotal - subTotal * discount.amount * 0.01;
+  // };
 
   return (
     <div className="flex justify-end mt-2">
@@ -444,7 +453,7 @@ const InvoiceSubtotal = ({
         <div className="col-span-1 rounded-lg bg-white border-grey border  p-4 space-y-4">
           <div className="flex justify-between">
             <span className="font-semibold">Sub Total:</span>
-            <span>${formatNumber(subTotal, 2)}</span>
+            <span>${formatNumber(subTotalUsd, 2)}</span>
           </div>
           {discount && discount.amount > 0 && (
             <div className="flex justify-between text-red-500">
@@ -460,23 +469,23 @@ const InvoiceSubtotal = ({
             <span className="font-semibold">VAT {taxPercentage}% (USD):</span>
             <span>${taxesUsd ? formatNumber(taxesUsd, 2) : 0}</span>
           </div>
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <span className="font-semibold">VAT {taxPercentage}% (LBP):</span>
             <span>L.L{taxesLbp ? formatNumber(taxesLbp, 0) : 0}</span>
-          </div>
+          </div> */}
 
           <div className="flex justify-between text-green-600">
             <span className="font-semibold">Total:</span>
-            <span>${taxesUsd ? formatNumber(total() + taxesUsd, 2) : 0}</span>
+            <span>${taxesUsd ? formatNumber(totalPriceUsd, 2) : 0}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Paid (USD):</span>
             <span>${amountPaidUsd ? formatNumber(amountPaidUsd, 2) : 0}</span>
           </div>
-          <div className="flex justify-between">
+          {/* <div className="flex justify-between">
             <span className="font-semibold">Paid (LBP):</span>
             <span>L.L{amountPaidLbp ? formatNumber(amountPaidLbp, 0) : 0}</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

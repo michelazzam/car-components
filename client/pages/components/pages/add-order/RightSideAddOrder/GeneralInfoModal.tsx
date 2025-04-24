@@ -41,27 +41,12 @@ const GeneralInfoModal = ({
           />
           <TextFieldControlled
             control={control}
-            label="Driver Name"
-            name="driverName"
-            placeholder="type name"
-            colSpan={1}
-          />
-          <TextFieldControlled
-            control={control}
-            label="General Note"
-            name="genralNote"
-            placeholder="note"
-            colSpan={2}
-          />
-          <TextFieldControlled
-            control={control}
             label="Customer Note"
             name="customerNote"
             placeholder="note"
             colSpan={2}
           />
         </Modal.Body>
-
         <Modal.Footer>
           <button
             ref={cancelFormRef}
