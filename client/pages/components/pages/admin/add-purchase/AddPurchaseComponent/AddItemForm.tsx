@@ -17,6 +17,7 @@ import { useListProducts } from "@/api-hooks/products/use-list-products";
 import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
 import AddEditProductModal from "../../menu/AddEditProductModal";
 import { FaPlus } from "react-icons/fa6";
+import { formatNumber } from "@/lib/helpers/formatNumber";
 
 function AddItemForm() {
   //----------------------------------CONSTANTS--------------------------------------
@@ -49,7 +50,7 @@ function AddItemForm() {
     })) || [];
 
   //----------------------------------FORM SETUP------------------------------------
-  const { control, handleSubmit, reset, setValue } =
+  const { control, handleSubmit, reset, setValue, watch } =
     useForm<AddPurchaseItemSchemaType>({
       resolver: zodResolver(apiValidations.AddPurchaseItemSchema),
       defaultValues: {
@@ -70,6 +71,7 @@ function AddItemForm() {
   const price = useWatch({ control, name: "price" });
   const quantity = useWatch({ control, name: "quantity" });
   const discount = useWatch({ control, name: "discount" });
+  const totalPrice = watch("totalPrice");
   // const vat = useWatch({ control, name: "vat" });
   //----------------------------------EFFECTS--------------------------------------
 
@@ -180,23 +182,19 @@ function AddItemForm() {
             label="Exp.Date"
           />
 
-          <NumberFieldControlled
-            colSpan={3}
-            readOnly
-            control={control}
-            name="totalPrice"
-            label="Total Amount"
-            type={"formattedNumber"}
-            prefix="$"
-          />
+          <div className="flex items-center justify-end col-span-6">
+            <p className="text-end">
+              TOTAL ITEM PRICE:{" "}
+              <span className="text-black font-bold text-lg">
+                ${formatNumber(totalPrice, 2)}
+              </span>
+            </p>
+          </div>
 
           <div className="w-full flex justify-end col-span-12">
-            <button
-              className="mb-3 bg-transparent border-1 py-1 rounded-2 flex items-center gap-1 w-fit "
-              type="submit"
-            >
-              <BsPlusCircle className=" text-black" width={18} height={18} />
-              <span className="fw-bold text-black">Add Product</span>
+            <button className="ti-btn ti-btn-secondary " type="submit">
+              <BsPlusCircle className=" " width={18} height={18} />
+              <span className="fw-bold ">Add Product</span>
             </button>
           </div>
         </div>
@@ -217,7 +215,7 @@ const AddButton = () => {
       href={"#"}
       data-bs-toggle="modal"
       data-hs-overlay="#add-product-modal"
-      className="ti-btn ti-btn-icon flex items-center justify-center"
+      className="ti-btn ti-btn-icon flex items-center justify-center ti-btn-primary"
     >
       <FaPlus />
     </Link>

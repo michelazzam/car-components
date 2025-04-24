@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import TotalsCard from "./TotalsCard";
-import ItemRow from "./ItemRow";
 import AddItemForm from "./AddItemForm";
 import InvoiceDetailsForm from "./InvoiceDetailsForm";
 import { AddPurchaseSchemaType, apiValidations } from "@/lib/apiValidations";
@@ -11,6 +10,7 @@ import { useAddPurchase } from "@/api-hooks/purchase/use-add-purchase";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
 import ExpenseModal from "../../expenses/ExpenseModal";
 import { useRouter } from "next/router";
+import AllItemsTable from "./AllItemsTable";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STATES--------------------------------------
@@ -109,37 +109,41 @@ const CustomAddPurchaseComponent = () => {
   return (
     <>
       {/*Add Purchase */}
-      <div>
+      <div className=" my-[1.5rem]">
         <FormProvider {...methods}>
           <form
             ref={addPurchaseFormRef}
             onSubmit={handleSubmit(onSubmitAddEdit, onError)}
           >
-            <div className="grid grid-cols-12 mb-4">
-              <div className="col-span-6">
+            <div className="grid grid-cols-12 mb-4 gap-x-4">
+              <div className="col-span-6 bg-gray-100 rounded-lg">
                 <InvoiceDetailsForm />
               </div>
-              <div className="col-span-6">
+              <div className="col-span-6 bg-gray-100 rounded-lg">
                 <TotalsCard />
               </div>
             </div>
           </form>
         </FormProvider>
 
-        <div className="border p-4 shadow-sm" style={{ borderRadius: "8px" }}>
-          <AddItemForm />
-          <div className="flex flex-col gap-3 divider">
-            {productsStore.map((product) => (
-              <ItemRow product={product} />
-            ))}
+        <div>
+          <div className="bg-gray-100 rounded-lg p-2">
+            <AddItemForm />
           </div>
+          <AllItemsTable />
         </div>
 
         <div className=" my-4 flex justify-end px-5">
           <button
             type="button"
-            className="btn btn-cancel me-2"
+            className="ti-btn ti-btn-danger me-2"
             ref={addPurchaseCancelRef}
+            onClick={() => {
+              setEditingPurchase(undefined);
+              clearPurchase();
+              reset();
+              router.push("/admin/purchase");
+            }}
           >
             Cancel
           </button>

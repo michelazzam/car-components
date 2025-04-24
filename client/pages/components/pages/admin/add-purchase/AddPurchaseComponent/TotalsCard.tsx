@@ -1,4 +1,5 @@
 import { useGetSupplierById } from "@/api-hooks/supplier/use-get-single-supplier-by-id";
+import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { AddPurchaseSchemaType } from "@/lib/apiValidations";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
@@ -25,10 +26,11 @@ function TotalsCard() {
   const { data: supplier } = useGetSupplierById({
     supplierId: supplierOption?.value || "",
   });
+  const { data: usdRateData } = useGetUsdRate();
 
   useEffect(() => {
-    setUsdRate(90000);
-  }, []);
+    if (usdRateData) setUsdRate(usdRateData?.usdRate);
+  }, [usdRateData]);
 
   const tvaAmountInDollars = Number(
     ((totals.totalAmount * tva) / 100)?.toFixed(2)
@@ -39,14 +41,14 @@ function TotalsCard() {
       0 + totals.totalAmount - (amount + (amountLbp || 0) / usdRate)
     )?.toFixed(2)
   );
-  console.log("SUPPLIER AMOUNT DUE : ", supplierAmountDue);
 
   return (
-    <div className="border p-4 shadow-sm h-100" style={{ borderRadius: "8px" }}>
-      <div className="grid grid-cols-12  items-center mb-1">
-        <div className="col-span-2 ">TVA(%)</div>
+    <div className=" p-4 h-100" style={{ borderRadius: "8px" }}>
+      <div className="flex items-center gap-x-4  mb-1">
+        <div className="col-span-2 ">TVA</div>
         <div className="col-span-7">
           <NumberFieldControlled
+            marginBotton="mb-0"
             control={control}
             name="vatPercent"
             onChangeValue={(value) => {
@@ -62,17 +64,18 @@ function TotalsCard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 mb-4 items-center fw-bold text-black ">
-        <div className="col-span-2 ">=LBP</div>
+      <div className="flex items-center gap-x-4">
+        <div className="col-span-2">{"(LL)"}</div>
         <div className="col-span-7">
           <NumberFieldControlled
+            marginBotton="mb-0"
             control={control}
             name="vatLBP"
             onChangeValue={(value) => {
               setLebaneseTva(value as unknown as number);
             }}
             colSpan={12}
-            prefix="LBP"
+            prefix="LBP "
           />
         </div>
 
@@ -86,14 +89,15 @@ function TotalsCard() {
             );
             setValue("vatLBP", lebaneseTva);
           }}
-          className="btn col-span-1"
+          className="ti-btn ti-btn-outline-primary col-span-1"
         >
-          <CiCalculator1 />
+          <CiCalculator1 size={20} />
         </button>
       </div>
 
       <div className="col-span-12 grid grid-cols-2">
         <NumberFieldControlled
+          marginBotton="mb-0"
           control={control}
           name="amountPaid"
           label="Amount Paid"
@@ -106,12 +110,12 @@ function TotalsCard() {
           prefix="$"
         />
       </div>
-      <p
+      <div
         className={`${
           supplier?._id && supplierAmountDue < 0
             ? "text-success"
             : "text-danger"
-        }  fw-bold`}
+        }  fw-bold mt-4"`}
       >
         {supplier?._id ? (
           <div>
@@ -123,7 +127,7 @@ function TotalsCard() {
         ) : (
           "Please select a supplier"
         )}
-      </p>
+      </div>
       <div className="">
         <div className="">
           <span>Total Purchase Amount </span>
