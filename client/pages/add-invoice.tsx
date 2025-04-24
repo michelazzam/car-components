@@ -1,18 +1,18 @@
 import Seo from "@/shared/layout-components/seo/seo";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import RightSideAddOrder from "./components/pages/add-order/RightSideAddOrder";
 import ItemsList from "./components/pages/add-order/ItemsList";
 import Header from "./components/pages/add-order/Header";
 import { useListProducts } from "@/api-hooks/products/use-list-products";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useForm, FormProvider } from "react-hook-form";
-import { usePosStore } from "@/shared/store/usePosStore";
+import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddInvoiceSchema, apiValidations } from "@/lib/apiValidations";
 
 const AddInvoice = () => {
   //-----------------State----------------
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = useState("");
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -20,16 +20,50 @@ const AddInvoice = () => {
   const {
     editingInvoice,
     applyDiscount,
-    // discountStore,
+    discountStore,
     addGroupItem,
     cart,
     clearCart,
+    totalAmount
   } = usePosStore();
 
   //--------------------API----------------------
   const { data: products, refetch: refetchProducts } = useListProducts({
     search: debouncedSearch,
   });
+
+  type ProcessedItem = {
+    itemRef?: string;
+    serviceRef?: string;
+    quantity: number;
+    discount?: {
+      amount: number;
+      type: string;
+    };
+    subTotal: number;
+    totalPrice: number;
+  };
+
+  const processCart = (cart: Item[]): ProcessedItem[] => {
+    const items = cart.map((item) => ({
+      itemRef: item.type === "product" ? item.productId : undefined,
+      serviceRef: item.type === "service" ? item.productId : undefined,
+      quantity: item.quantity || 1,
+      discount: item.discount
+        ? {
+            amount: item.discount.amount,
+            type: item.discount.type,
+          }
+        : undefined,
+      subTotal: item.price && item.quantity ? item.price * item.quantity : 0,
+      totalPrice: item.amount ?? 0,
+    }));
+  
+    return items;
+  };
+  
+  const items = processCart(cart);
+
 
   //----------------FORM-------------------------
   const methods = useForm<AddInvoiceSchema>({
@@ -40,19 +74,22 @@ const AddInvoice = () => {
         amount: 0,
         type: "fixed",
       },
-      amountPaidUsd: 0,
-      amountPaidLbp: 0,
+      paidAmountUsd: 0,
       customerId: "",
       customer: {},
       vehicle: {},
       isPaid: false,
       hasVehicle: true,
       vehicleId: "",
-      products: cart.filter((item) => item.type === "product") || [],
-      services: cart.filter((item) => item.type === "service") || [],
+      // products: cart.filter((item) => item.type === "product") || [],
+      // services: cart.filter((item) => item.type === "service") || [],
+      items:items,
       generalNote: "",
       customerNote: "",
       invoiceNumber: 0,
+      subTotalUsd:0,
+      totalUsd:0,
+      type:"s1"
     },
   });
 
@@ -66,11 +103,10 @@ const AddInvoice = () => {
           amount: editingInvoice.discount.amount,
           type: editingInvoice.discount.type,
         },
-        amountPaidUsd: editingInvoice.amountPaidUsd,
-        amountPaidLbp: editingInvoice.amountPaidLbp,
+        paidAmountUsd: editingInvoice.paidAmountUsd,
         customerId: editingInvoice.customer._id,
-        isPaid: editingInvoice.isPaid,
         vehicleId: editingInvoice.vehicle?._id || "",
+        isPaid: editingInvoice.isPaid,
         hasVehicle: editingInvoice.vehicle?._id ? true : false,
         products: editingInvoice.products,
         services: editingInvoice.services,
@@ -135,11 +171,25 @@ const AddInvoice = () => {
           quantity: item.quantity!,
           price: item.price!, // Price is guaranteed to be defined now
         })) || [];
+        const items = processCart(cart);
+        methods.setValue("items",items);
 
     // Set the form values
     methods.setValue("products", products);
     methods.setValue("services", services);
+    const subTotalUsd = cart.reduce((accumulator, currentItem) => {
+      return accumulator + (currentItem.amount || 0);
+    }, 0);
+    methods.setValue("subTotalUsd",subTotalUsd);
+    methods.setValue("totalUsd", totalAmount())
+  
   }, [cart, methods]);
+
+  useEffect(() => {
+  methods.setValue("totalUsd" , totalAmount());
+  },[discountStore])
+
+
 
   return (
     <Fragment>

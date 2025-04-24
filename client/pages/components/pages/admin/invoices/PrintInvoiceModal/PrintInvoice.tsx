@@ -57,8 +57,8 @@ function PrintInvoice({
     services,
     products,
     discount,
-    amountPaidUsd,
-    amountPaidLbp,
+    paidAmountUsd,
+    // amountPaidLbp,
     taxesLbp,
     customerNote,
     totalPriceUsd,
@@ -90,8 +90,8 @@ function PrintInvoice({
         amount: prev ? (item.quantity || 0) * (item.price || 0) : item.amount,
       })),
       discount: invoiceData.discount,
-      amountPaidUsd: invoiceData.amountPaidUsd,
-      amountPaidLbp: invoiceData.amountPaidLbp,
+      paidAmountUsd: invoiceData.paidAmountUsd,
+      // amountPaidLbp: invoiceData.amountPaidLbp,
       taxesLbp: invoiceData.taxesLbp,
       customerNote: invoiceData.customerNote,
       totalPriceUsd: totalPrice,
@@ -134,8 +134,8 @@ function PrintInvoice({
             products={products}
             services={services}
             customerNote={customerNote}
-            amountPaidUsd={amountPaidUsd}
-            amountPaidLbp={amountPaidLbp}
+            amountPaidUsd={paidAmountUsd}
+            // amountPaidLbp={amountPaidLbp}
             taxesLbp={taxesLbp}
             taxesUsd={taxesUsd}
             taxPercentage={organization.tvaPercentage}

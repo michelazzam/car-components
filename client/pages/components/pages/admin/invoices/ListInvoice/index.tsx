@@ -117,12 +117,12 @@ function ListInvoice({ customerId }: { customerId?: string }) {
       cell: ({ getValue }) => <div>{formatNumber(getValue(), 2)}$</div>,
     }),
 
-    columnHelper.accessor("amountPaidUsd", {
+    columnHelper.accessor("paidAmountUsd", {
       header: "Received Amount",
       cell: ({ getValue, row }) => (
         <div>
           <div>{formatNumber(getValue(), 2)}$</div>
-          <div>{formatNumber(row.original.amountPaidLbp, 0)}L.L</div>
+          <div>{formatNumber(row.original.paidAmountUsd, 0)}L.L</div>
         </div>
       ),
     }),

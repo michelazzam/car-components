@@ -18,6 +18,7 @@ import PrintInvoiceModal, {
 import { FaEye, FaPrint } from "react-icons/fa6";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
+import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
 
 function RightSideAddOrder({
   refetchProducts,
@@ -115,7 +116,7 @@ function RightSideAddOrder({
       return toast.error("please add products or services");
     }
     console.log("isFullPaid:", isFullPaid);
-    if (isFullPaid || data.amountPaidLbp !== 0 || data.amountPaidUsd !== 0) {
+    if (isFullPaid || data.paidAmountUsd !== 0 || data.paidAmountUsd !== 0) {
       data.isPaid = true;
     } else {
       data.isPaid = false;
@@ -144,8 +145,7 @@ function RightSideAddOrder({
         products: cart.filter((item) => item.type === "product") || [],
         services: cart.filter((item) => item.type === "service") || [],
         totalPriceUsd: totalAmount(),
-        amountPaidUsd: getValues("amountPaidUsd"),
-        amountPaidLbp: getValues("amountPaidLbp"),
+        paidAmountUsd: getValues("paidAmountUsd"),
         totalPriceLbp: Number(totalAmount()) * usdRate.usdRate,
         taxesLbp: Number(vatAmount) * usdRate.usdRate,
         customer: {
@@ -186,8 +186,7 @@ function RightSideAddOrder({
         amount: 0,
         type: "fixed",
       },
-      amountPaidUsd: 0,
-      amountPaidLbp: 0,
+      paidAmountUsd: 0,
       customerId: "",
       isPaid: false,
       hasVehicle: true,
@@ -206,18 +205,6 @@ function RightSideAddOrder({
     router.back();
   };
 
-  //----------------------options---------------------------------
-
-  const discountTypeOptions = [
-    {
-      label: "$",
-      value: "fixed",
-    },
-    {
-      label: "%",
-      value: "percentage",
-    },
-  ];
   const onInvalid = (errors: any) => console.error(errors);
 
   return (
@@ -234,6 +221,24 @@ function RightSideAddOrder({
         >
           General Info
         </button>
+        <SelectFieldControlled
+          control={control}
+          label="Customer Type"
+          name="type"
+          colSpan={1}
+          creatable={false}
+          options={customerTypeOption}
+        />
+        <NumberFieldControlled
+          control={control}
+          name="paidAmountUsd"
+          label="USD"
+          colSpan={1}
+          prefix="$"
+        />
+        {/* items list */}
+        <ItemsList />
+        {/* items list */}
         <NumberFieldControlled
           control={control}
           name="discount.amount"
@@ -256,23 +261,13 @@ function RightSideAddOrder({
             applyDiscount(discountStore.amount, type);
           }} // Pass type correctly
         />
-        {/* items list */}
-        <ItemsList />
-        {/* items list */}
-        <NumberFieldControlled
-          control={control}
-          name="amountPaidUsd"
-          label="USD"
-          colSpan={1}
-          prefix="$"
-        />
-        <NumberFieldControlled
+        {/* <NumberFieldControlled
           control={control}
           name="amountPaidLbp"
           label="LBP"
           colSpan={1}
           prefix="lbp"
-        />
+        /> */}
         {/*  */}
         <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
           <div className="flex items-center justify-between mt-1">
@@ -303,10 +298,10 @@ function RightSideAddOrder({
               label="Full Paid"
               onValueChange={() => {
                 if (isFullPaid) {
-                  setValue("amountPaidUsd", 0);
+                  setValue("paidAmountUsd", 0);
                   setIsFullPaid(false);
                 } else {
-                  setValue("amountPaidUsd", +totalAmount());
+                  setValue("paidAmountUsd", +totalAmount());
                   setIsFullPaid(true);
                 }
               }}

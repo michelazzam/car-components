@@ -186,8 +186,7 @@ export type PreviewInvoice = {
   services?: InvoicePreviewItem[];
   totalPriceLbp: number;
   totalPriceUsd: number;
-  amountPaidUsd: number;
-  amountPaidLbp: number;
+  paidAmountUsd: number;
   taxesLbp: number;
 };
 export type CustomerPrev = {

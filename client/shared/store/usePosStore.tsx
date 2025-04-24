@@ -1,6 +1,15 @@
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
 
+function calculateDiscountedAmount(price: number, quantity: number, discount: Discount): number {
+  const total = price * quantity;
+  if (discount.type === "percentage") {
+    return Number((total - (total * discount.amount) / 100).toFixed(2));
+  } else {
+    return Number((total - discount.amount).toFixed(2));
+  }
+}
+
 export interface Item {
   type?: "product" | "service";
   name?: string;
@@ -16,9 +25,10 @@ export interface Item {
     price: number;
   };
   stock?: number;
+  discount?:Discount;
 }
 
-interface Discount {
+export interface Discount {
   amount: number;
   type: "percentage" | "fixed";
 }
@@ -42,6 +52,7 @@ interface PosState {
   removeItem: (item: Item) => void;
   totalAmount: () => number;
   setQuantity: (name: string, price: number, quantity: number) => void;
+  addItemDiscount:(prodcutId:string, discount:Discount) => void;
 }
 
 interface EditingInvoice {
@@ -168,7 +179,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
       amount:
         Number(item.price) * (type === "product" ? 1 : Number(item.quantity)),
       productId: item._id || "",
-      stock: item.stock || 0,
+      stock: item.quantity || 0,
     };
 
     set((state) => ({
@@ -258,6 +269,20 @@ export const usePosStore = create<PosState>()((set, get) => ({
         ),
       };
     });
+  },
+  
+  addItemDiscount: (productId:string, discount: Discount) => {
+    set((state) => ({
+      cart: state.cart.map((item) =>
+        item.productId === productId
+          ? {
+              ...item,
+              discount,
+              amount: calculateDiscountedAmount(item.price!, item.quantity!, discount),
+            }
+          : item
+      ),
+    }));
   },
 
   clearCart: () =>

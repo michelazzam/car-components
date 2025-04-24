@@ -50,9 +50,7 @@ export interface Invoice {
   totalPriceUsd: number;
   totalPriceLbp: number;
   finalPriceUsd: number;
-  amountPaidUsd: number;
-  amountPaidLbp: number;
-
+  paidAmountUsd: number;
   taxesLbp: number;
   createdBy: {
     fullName: string;

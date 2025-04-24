@@ -258,15 +258,15 @@ const InvoicesTable = ({
                     {invoice.isPaid ? (
                       <div className="flex-col gap-1">
                         <p>
-                          {invoice.amountPaidUsd
-                            ? "$" + formatNumber(invoice.amountPaidUsd, 2)
+                          {invoice.paidAmountUsd
+                            ? "$" + formatNumber(invoice.paidAmountUsd, 2)
                             : ""}
                         </p>
-                        <p>
+                        {/* <p>
                           {invoice.amountPaidLbp
                             ? "L.L" + formatNumber(invoice.amountPaidLbp, 2)
                             : ""}
-                        </p>
+                        </p> */}
                       </div>
                     ) : (
                       "Not Paid"
@@ -307,16 +307,16 @@ const InvoiceSubtotal = ({
     (acc, invoice) => acc + invoice.taxesLbp,
     0
   );
-  const totalPaidAmount = printingInvoices.reduce(
-    (acc, invoice) =>
-      acc +
-      (currency === "usd" || currency === "usd_vat"
-        ? invoice.amountPaidUsd +
-          invoice.amountPaidLbp / (invoice.usdRate || accountingUsdRate)
-        : invoice.amountPaidUsd * (invoice.usdRate || accountingUsdRate) +
-          invoice.amountPaidLbp),
-    0
-  );
+  // const totalPaidAmount = printingInvoices.reduce(
+  //   (acc, invoice) =>
+  //     acc +
+  //     (currency === "usd" || currency === "usd_vat"
+  //       ? invoice.paidAmountUsd +
+  //         invoice.amountPaidLbp / (invoice.usdRate || accountingUsdRate)
+  //       : invoice.amountPaidUsd * (invoice.usdRate || accountingUsdRate) +
+  //         invoice.amountPaidLbp),
+  //   0
+  // );
 
   return (
     <div className="flex justify-end mt-4">
@@ -339,11 +339,11 @@ const InvoiceSubtotal = ({
           )}
           <div className="flex justify-between">
             <span className="font-semibold">Total Paid:</span>
-            <span>
+            {/* <span>
               {currency === "lbp"
                 ? `L.L${formatNumber(totalPaidAmount)}`
                 : `$${formatNumber(totalPaidAmount, 2)}`}
-            </span>
+            </span> */}
           </div>
         </div>
       </div>

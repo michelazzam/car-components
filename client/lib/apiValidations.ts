@@ -297,8 +297,7 @@ const AddInvoiceSchema = z
       amount: z.number().min(0, "Discount amount cannot be negative"),
       type: z.string().min(1, "Discount type is required"),
     }),
-    amountPaidUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
-    amountPaidLbp: z.number().min(0, "Amount paid in LBP cannot be negative"),
+    paidAmountUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
     customerId: z.string().min(1, "Customer ID is required"),
     customer: z
       .object({
@@ -336,8 +335,26 @@ const AddInvoiceSchema = z
         })
       )
       .optional(),
+    items: z.array(
+      z.object({
+        itemRef: z.string().optional(),
+        serviceRef: z.string().optional(),
+        quantity: z.number(),
+        discount: z
+          .object({
+            amount: z.number(),
+            type: z.string(),
+          })
+          .optional(),
+        subTotal: z.number(),
+        totalPrice: z.number(),
+      })
+    ).optional(),
+    subTotalUsd:z.number(),
+    totalUsd:z.number(),
     generalNote: z.string().optional(),
     customerNote: z.string().optional(),
+    type:z.enum(["s1","s2"])
   })
   .refine(
     (data) => {
