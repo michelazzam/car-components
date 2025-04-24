@@ -8,52 +8,61 @@ import TextFieldControlled from "@/pages/components/admin/FormControlledFields/T
 import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
 import DateFieldControlled from "@/pages/components/admin/FormControlledFields/DateFieldControlled";
 import { BsPlusCircle } from "react-icons/bs";
-import SelectField from "@/pages/components/admin/Fields/SlectField";
 import Link from "next/link";
 import {
   AddPurchaseItemSchemaType,
   apiValidations,
 } from "@/lib/apiValidations";
 import { useListProducts } from "@/api-hooks/products/use-list-products";
+import SelectFieldControlled from "@/pages/components/admin/FormControlledFields/SelectFieldControlled";
+import AddEditProductModal from "../../menu/AddEditProductModal";
+import { FaPlus } from "react-icons/fa6";
 
 function AddItemForm() {
   //----------------------------------CONSTANTS--------------------------------------
 
   //----------------------------------STATES--------------------------------------
-  const [productsOptions, setProductsOptions] = useState<
-    | {
-        value: string;
-        label: string;
-      }[]
-    | null
-  >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery);
 
   //----------------------------------STORE--------------------------------------
-  const { addProduct, addingProduct } = usePurchase();
-  console.log("addingProduct", addingProduct);
+  const {
+    addProduct,
+    addingProduct,
+    products: productsInStore,
+  } = usePurchase();
 
   //----------------------------------API CALLS-------------------------------------
   const { data } = useListProducts({
     search: debouncedSearchQuery,
   });
-  const products = data?.items;
+  const products = data?.items?.filter((p) => {
+    const isInStore = productsInStore.find(
+      (productInStore) => productInStore.itemId === p._id
+    );
+    return !isInStore;
+  });
+  const productsOptions =
+    products?.map((product) => ({
+      value: product._id || "",
+      label: product.name || "",
+    })) || [];
 
   //----------------------------------FORM SETUP------------------------------------
   const { control, handleSubmit, reset, setValue } =
     useForm<AddPurchaseItemSchemaType>({
       resolver: zodResolver(apiValidations.AddPurchaseItemSchema),
       defaultValues: {
-        product: {},
+        itemId: "",
+        name: "",
         description: "",
         price: 0,
         quantity: 0,
         quantityFree: 0,
         discount: 0,
-
         expDate: "",
         totalPrice: 0,
+        lotNumber: "",
       },
     });
 
@@ -63,14 +72,6 @@ function AddItemForm() {
   const discount = useWatch({ control, name: "discount" });
   // const vat = useWatch({ control, name: "vat" });
   //----------------------------------EFFECTS--------------------------------------
-  useEffect(() => {
-    setProductsOptions(
-      products?.map((product) => ({
-        value: product._id || "",
-        label: product.name || "",
-      })) || []
-    );
-  }, [products]);
 
   useEffect(() => {
     // Calculate total when price, quantity, discount, or vat changes
@@ -82,15 +83,9 @@ function AddItemForm() {
     setValue("totalPrice", Number(total.toFixed(2)));
   }, [price, quantity, discount, setValue]);
 
-  // useEffect(() => {
-  //   //set the vat to the tva
-  //   tva > 0 ? setValue("vat", Number(tva)) : setValue("vat", 0);
-  // }, [tva]);
-
   useEffect(() => {
-    console.log(addingProduct);
     if (addingProduct && Object.keys(addingProduct).length !== 0) {
-      setValue("product", addingProduct?.product);
+      // setValue("product", addingProduct?.product);
       setValue("description", addingProduct?.description);
       setValue("price", addingProduct?.price);
     }
@@ -109,20 +104,23 @@ function AddItemForm() {
   return (
     <div className="d-flex justify-content-between mb-4 mt-4 ">
       <form onSubmit={handleSubmit(onSubmit, onError)}>
-        <div className="row w-100">
-          <div className="col-6">
-            <SelectField
+        <div className="grid grid-cols-12 gap-x-2">
+          <div className="col-span-6">
+            <SelectFieldControlled
               colSpan={12}
               onInputChange={(value) => {
                 setSearchQuery(value);
               }}
+              onObjectChange={(value) => {
+                console.log("VALUE", value);
+                setValue("name", value?.label);
+              }}
               control={control}
               options={productsOptions || []}
-              name="product"
+              name="itemId"
               label="Product Name"
               placeholder={"Select Product"}
-              //@ts-ignore
-              AddButton={AddButton}
+              AddButton={<AddButton />}
             />
           </div>
 
@@ -167,26 +165,16 @@ function AddItemForm() {
             prefix="$"
           />
 
-          <NumberFieldControlled
-            readOnly
-            colSpan={3}
-            control={control}
-            name="vat"
-            label="VAT(%)"
-            type={"formattedNumber"}
-            prefix="%"
-          />
-
-          <NumberFieldControlled
+          <TextFieldControlled
             colSpan={3}
             control={control}
             name="lotNumber"
             label="Lot Number"
-            type={"number"}
           />
 
           <DateFieldControlled
             colSpan={3}
+            formatType="dd-MM-yyyy"
             control={control}
             name="expDate"
             label="Exp.Date"
@@ -202,9 +190,9 @@ function AddItemForm() {
             prefix="$"
           />
 
-          <div className="w-full d-flex justify-content-end">
+          <div className="w-full flex justify-end col-span-12">
             <button
-              className="mb-3 bg-transparent border-1 py-1 rounded-2 d-flex align-items-center gap-1 "
+              className="mb-3 bg-transparent border-1 py-1 rounded-2 flex items-center gap-1 w-fit "
               type="submit"
             >
               <BsPlusCircle className=" text-black" width={18} height={18} />
@@ -213,6 +201,10 @@ function AddItemForm() {
           </div>
         </div>
       </form>
+      <AddEditProductModal
+        triggerModalId="add-product-modal"
+        modalTitle="Add Product"
+      />
     </div>
   );
 }
@@ -224,10 +216,10 @@ const AddButton = () => {
     <Link
       href={"#"}
       data-bs-toggle="modal"
-      data-bs-target="#add-product-modal"
-      className="btn btn-submit py-2"
+      data-hs-overlay="#add-product-modal"
+      className="ti-btn ti-btn-icon flex items-center justify-center"
     >
-      <i className="fa fa-plus" aria-hidden="true"></i>
+      <FaPlus />
     </Link>
   );
 };

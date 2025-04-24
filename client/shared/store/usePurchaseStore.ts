@@ -27,10 +27,9 @@ export interface InvoiceDetails {
 }
 
 export interface Payment {
-  fromCaisse: number;
-  fromCaisseLbp: number;
-  fromBalance: number;
-  notes: string;
+  amount: number;
+  amountLbp?: number;
+  note?: string;
 }
 
 export interface Totals {
@@ -58,7 +57,6 @@ export interface PurchaseState {
 
   setTVA: (newTVA: number) => void;
   setLebaneseTva: (newTVA: number) => void;
-  recalcLebaneseTva: () => void;
   setSupplier: (supplier: Option<string>) => void;
   deleteProduct: (_id: string) => void;
   addPayment: (
@@ -66,8 +64,7 @@ export interface PurchaseState {
     onError?: () => void,
     onSuccess?: () => void
   ) => void;
-  setEditingPurchase: (purchase: Purchase) => void;
-  calculateLebaneseTVA: () => void;
+  setEditingPurchase: (purchase: Purchase | undefined) => void;
   clearPurchase: () => void;
 }
 
@@ -77,8 +74,8 @@ export interface PurchaseState {
 
 function calculateTotals(products: ProductT[], payment: Payment): Totals {
   const totalAmount = products.reduce((acc, item) => acc + item.totalPrice, 0);
-  const totalAmountPaid = payment.fromBalance + payment.fromCaisse;
-  const totalAmountPaidLbp = payment.fromCaisseLbp;
+  const totalAmountPaid = payment.amount;
+  const totalAmountPaidLbp = payment.amountLbp || 0;
   const totalAmountDue = totalAmount - totalAmountPaid;
 
   return {
@@ -87,14 +84,6 @@ function calculateTotals(products: ProductT[], payment: Payment): Totals {
     totalAmountPaidLbp,
     totalAmountDue,
   };
-}
-
-function computeLebaneseTva(
-  totalAmount: number,
-  tva: number,
-  usdRate: number
-): number {
-  return parseFloat((((totalAmount * tva) / 100) * usdRate).toFixed(2));
 }
 
 function handleSetSupplier(
@@ -127,10 +116,9 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
     phoneNumber: null,
   },
   payment: {
-    fromCaisse: 0,
-    fromCaisseLbp: 0,
-    fromBalance: 0,
-    notes: "",
+    amount: 0,
+    amountLbp: 0,
+    note: "",
   },
   addingProduct: null,
   products: [],
@@ -167,16 +155,6 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
 
   setLebaneseTva: (newTVA) => set({ lebaneseTva: newTVA }),
 
-  recalcLebaneseTva: () => {
-    const { totalAmount } = get().totals;
-    const { tva, usdRate } = get();
-    if (usdRate !== null) {
-      set({
-        lebaneseTva: computeLebaneseTva(totalAmount, tva, usdRate),
-      });
-    }
-  },
-
   setSupplier: (supplier) => {
     set({
       invoiceDetails: {
@@ -196,13 +174,20 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
 
   addPayment: (payment, onSuccess) => {
     set({
-      payment,
+      payment: payment,
       totals: calculateTotals(get().products, payment),
     });
     onSuccess?.();
   },
 
   setEditingPurchase: (purchase) => {
+    if (!purchase) {
+      set({
+        editingPurchase: undefined,
+      });
+      return;
+    }
+
     get().clearPurchase();
     if (!purchase) return;
 
@@ -238,15 +223,6 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
     });
   },
 
-  calculateLebaneseTVA: () => {
-    const { totalAmount } = get().totals;
-    const { tva, usdRate } = get();
-    if (usdRate !== null) {
-      set({
-        lebaneseTva: computeLebaneseTva(totalAmount, tva, usdRate),
-      });
-    }
-  },
   clearPurchase: () => {
     set({
       invoiceDetails: {
@@ -262,10 +238,9 @@ export const usePurchase = create<PurchaseState>((set, get) => ({
       tva: 11,
       lebaneseTva: 0,
       payment: {
-        fromCaisse: 0,
-        fromCaisseLbp: 0,
-        fromBalance: 0,
-        notes: "",
+        amount: 0,
+        amountLbp: 0,
+        note: "",
       },
       editingPurchase: null,
       totals: {

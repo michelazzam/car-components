@@ -1,6 +1,6 @@
-import { usePostData } from "@/api-service/usePostData";
 import { API } from "@/constants/apiEndpoints";
 import { AddPurchaseT } from "./use-add-purchase";
+import { useUpdateData } from "@/api-service/useUpdateData";
 
 export const useEditPurchase = ({
   id,
@@ -9,7 +9,7 @@ export const useEditPurchase = ({
   id: string;
   callBackOnSuccess?: () => void;
 }) => {
-  return usePostData<AddPurchaseT>({
+  return useUpdateData<AddPurchaseT>({
     endpoint: API.editPurchase(id),
     queryKeysToInvalidate: [["purchases"]],
     callBackOnSuccess,

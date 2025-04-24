@@ -140,16 +140,9 @@ export type ProductSchema = z.infer<typeof ProductSchema>;
 
 //-------------PURCHASE
 const AddPurchaseItemSchema = z.object({
-  product: z.object({
-    _id: z.string(),
-    title: z.string(),
-    price: z.number(),
-    cost: z.number(),
-    quantity: z.number(),
-    status: z.enum(itemStatuses),
-  }),
-  itemId: z.string(),
+  itemId: z.string().min(1, { message: "Please select a product" }),
   description: z.string(),
+  name: z.string().optional(),
   price: z.number(),
   quantity: z.number(),
   quantityFree: z.number(),
@@ -167,22 +160,16 @@ const AddPurchaseItemSchema = z.object({
 export type AddPurchaseItemSchemaType = z.infer<typeof AddPurchaseItemSchema>;
 
 const AddPurchaseSchema = z.object({
-  supplier: z
-    .object({
-      value: z.string().min(1),
-      label: z.string().min(1),
-    })
-    .nullable(),
-  invoiceDate: z.string().min(1),
-  invoiceNumber: z.string().min(1),
-  customerConsultant: z.string().min(1),
-  phoneCode: z.string().min(1),
-  phoneNumber: z.string().min(1),
+  supplierId: z.string().min(1, { message: "required" }),
+  invoiceDate: z.string().min(1, { message: "required" }),
+  invoiceNumber: z.string().min(1, { message: "required" }),
+  customerConsultant: z.string().min(1, { message: "required" }),
+  phoneNumber: z.string().min(1, { message: "required" }),
   vatPercent: z.number().min(0),
   vatLBP: z.number().min(0),
-  totalAmount: z.number().min(0),
+  totalAmount: z.number().optional(),
   amountPaid: z.number().min(0),
-  items: z.array(AddPurchaseItemSchema),
+  items: z.array(AddPurchaseItemSchema).optional(),
 });
 export type AddPurchaseSchemaType = z.infer<typeof AddPurchaseSchema>;
 
@@ -241,8 +228,10 @@ const ExpenseSchema = z.object({
   expenseTypeId: z.string().min(1, "Expense type is required"),
   amount: z.number().min(0, "Amount is required"),
   date: z.string().min(1, "Date is required"),
+  supplierId: z.string().min(1, "Supplier is required"),
   note: z.string().optional(),
 });
+export type ExpenseSchemaType = z.infer<typeof ExpenseSchema>;
 
 const ExpenseTypeSchema = z.object({
   name: z.string().min(1, "title is required"),

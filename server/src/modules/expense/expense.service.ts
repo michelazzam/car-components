@@ -157,6 +157,7 @@ export class ExpenseService {
     await this.reportService.syncDailyReport({
       date: dto.date,
       totalExpenses: dto.amount,
+      totalIncome: 0,
     });
 
     // update accounting
