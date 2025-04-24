@@ -4,7 +4,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 export const itemStatuses = ['new', 'used'] as const;
 export type ItemStatus = (typeof itemStatuses)[number];
 
-@Schema()
+@Schema({ timestamps: true })
 export class Item {
   @Prop({ required: true })
   name: string;
@@ -23,9 +23,6 @@ export class Item {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
   supplier: mongoose.Types.ObjectId;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type IItem = HydratedDocument<Item>;

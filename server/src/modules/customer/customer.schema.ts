@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Vehicle {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
   customer: mongoose.Types.ObjectId;
@@ -17,14 +17,11 @@ export class Vehicle {
 
   @Prop({ required: true })
   odometer: number;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);
 export type IVehicle = HydratedDocument<Vehicle>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Customer {
   @Prop({ required: true })
   name: string;
@@ -52,9 +49,6 @@ export class Customer {
     default: [],
   })
   vehicles: mongoose.Types.ObjectId[];
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type ICustomer = HydratedDocument<Customer>;

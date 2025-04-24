@@ -14,7 +14,7 @@ export const userRoles = [
 ] as const;
 export type UserRole = (typeof userRoles)[number];
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ unique: true, required: true })
   username: string;
@@ -43,9 +43,6 @@ export class User {
     PermissionModuleName,
     Record<PermissionModuleAction, boolean>
   >;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export type IUser = HydratedDocument<User>;

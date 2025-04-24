@@ -12,6 +12,7 @@ import { PurchaseModule } from 'src/modules/purchase/purchase.module';
 import { InvoiceModule } from 'src/modules/invoice/invoice.module';
 import { AccountingModule } from 'src/modules/accounting/accounting.module';
 import { ReportModule } from 'src/modules/report/report.module';
+import { BackupModule } from 'src/modules/backup/backup.module';
 
 export function startSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(
@@ -38,6 +39,7 @@ export function startSwagger(app: INestApplication) {
         InvoiceModule,
         AccountingModule,
         ReportModule,
+        BackupModule,
       ],
     },
   );

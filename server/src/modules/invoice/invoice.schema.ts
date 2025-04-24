@@ -7,7 +7,7 @@ export type DiscountType = (typeof discountTypes)[number];
 export const invoiceTypes = ['s1', 's2'] as const;
 export type InvoiceType = (typeof invoiceTypes)[number];
 
-@Schema()
+@Schema({ timestamps: true })
 export class Invoice {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
   customer: mongoose.Types.ObjectId;
@@ -72,7 +72,7 @@ export type IInvoice = HydratedDocument<Invoice>;
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice);
 
 // The counter for both s1 and s2 invoices
-@Schema()
+@Schema({ timestamps: true })
 export class InvoiceCounter {
   @Prop({ required: true })
   year: string;
