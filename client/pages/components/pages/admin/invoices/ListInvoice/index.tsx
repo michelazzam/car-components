@@ -10,10 +10,8 @@ import { FaPrint, FaRegTrashCan } from "react-icons/fa6";
 import { useRouter } from "next/router";
 import { Invoice, useListInvoices } from "@/api-hooks/invoices/useListInvoices";
 import { cn } from "@/utils/cn";
-// import { formatNumber } from "@/lib/helpers/formatNumber";
 import SelectField from "@/pages/components/admin/Fields/SlectField";
 import { usePosStore } from "@/shared/store/usePosStore";
-import AddPaymentModal from "../../customers/AddPaymentModal";
 import { useListVehicles } from "@/api-hooks/vehicles/use_list_vehicles";
 import { useDebounce } from "@/hooks/useDebounce";
 import useListInvoicesQueryStrings from "@/shared/helper-hooks/useListInvoicesQueryStrings";
@@ -95,10 +93,10 @@ function ListInvoice({ customerId }: { customerId?: string }) {
       },
     }),
 
-    // columnHelper.accessor("invoiceNumber", {
-    //   header: "Invoice No.",
-    //   cell: ({ getValue }) => <div>TB{getValue()}</div>,
-    // }),
+    columnHelper.accessor("number", {
+      header: "Invoice No.",
+      cell: ({ getValue }) => <div>TB{getValue()}</div>,
+    }),
 
     ...(!customerId
       ? [
@@ -108,38 +106,37 @@ function ListInvoice({ customerId }: { customerId?: string }) {
         ]
       : []),
 
-    // columnHelper.accessor("finalPriceUsd", {
-    //   header: "Amount",
-    //   cell: ({ getValue }) => <div>{formatNumber(getValue(), 2)}$</div>,
-    // }),
+    columnHelper.accessor("accounting.totalUsd", {
+      header: "Amount",
+      cell: ({ getValue }) => <div>{Number(getValue()).toLocaleString("en-US")}$</div>,
+    }),
 
-    // columnHelper.accessor("paidAmountUsd", {
-    //   header: "Received Amount",
-    //   cell: ({ getValue, row }) => (
-    //     <div>
-    //       <div>{formatNumber(getValue(), 2)}$</div>
-    //       <div>{formatNumber(row.original.paidAmountUsd, 0)}L.L</div>
-    //     </div>
-    //   ),
-    // }),
+    columnHelper.accessor("accounting.paidAmountUsd", {
+      header: "Received Amount",
+      cell: ({ getValue }) => (
+        <div>
+          <div>{Number(getValue()).toLocaleString("en-US")}$</div>
+        </div>
+      ),
+    }),
 
-    // columnHelper.accessor("isPaid", {
-    //   header: "Status",
-    //   cell: ({ getValue, row }) => {
-    //     return (
-    //       <button
-    //         data-hs-overlay={!getValue() && "#add-payment-modal"}
-    //         className={cn(
-    //           "rounded-md px-3 py-1 text-center",
-    //           getValue() ? "text-success" : "border border-danger text-danger"
-    //         )}
-    //         onClick={() => setSelectedInvoice(row.original)}
-    //       >
-    //         {getValue() ? "Paid" : "Unpaid"}
-    //       </button>
-    //     );
-    //   },
-    // }),
+    columnHelper.accessor("accounting.isPaid", {
+      header: "Status",
+      cell: ({ getValue, row }) => {
+        return (
+          <button
+            data-hs-overlay={!getValue() && "#add-payment-modal"}
+            className={cn(
+              "rounded-md px-3 py-1 text-center",
+              getValue() ? "text-success" : "border border-danger text-danger"
+            )}
+            onClick={() => setSelectedInvoice(row.original)}
+          >
+            {getValue() ? "Paid" : "Unpaid"}
+          </button>
+        );
+      },
+    }),
 
     columnHelper.accessor("createdAt", {
       header: "Issued Date",
@@ -364,13 +361,6 @@ function ListInvoice({ customerId }: { customerId?: string }) {
         title="Print Invoice"
         printingInvoices={selectedInvoice ? [selectedInvoice] : undefined}
       />
-
-      <AddPaymentModal
-        triggerModalId="add-payment-modal"
-        selectedInvoice={selectedInvoice}
-        modalTitle="Pay in USD / LBP"
-      />
-
       {/* for multiple invoices (the btn above the table) */}
       <PrintInvoiceModal
         triggerModalId="print-invoices-modal"

@@ -55,73 +55,6 @@ interface PosState {
   addItemDiscount:(prodcutId:string, discount:Discount) => void;
 }
 
-// interface EditingInvoice {
-//   finalPriceUsd: number;
-//   discount: Discount;
-//   _id: string;
-//   customer: {
-//     _id: string;
-//     name: string;
-//     loan: number;
-//     loanLbp: number;
-//     phoneNumber?: string;
-//     address?: string;
-//   };
-//   driverName: string;
-//   generalNote: string;
-//   customerNote: string;
-//   isPaid: boolean;
-//   totalPriceUsd: number;
-//   totalPriceLbp: number;
-//   amountPaidUsd: number;
-//   amountPaidLbp: number;
-//   taxesLbp: number;
-//   createdBy: {
-//     _id: string;
-//     fullName: string;
-//     username: string;
-//   };
-//   vehicle: {
-//     _id: string;
-//     vehicleNb: string;
-//     model: string;
-//   };
-//   products: {
-//     product: {
-//       _id: string;
-//       name: string;
-//       price: number;
-//       stock?: number;
-//     };
-//     quantity: number;
-//   }[];
-//   services: {
-//     name: string;
-//     quantity: number;
-//     price: number;
-//   }[];
-
-//   createdAt: string;
-//   updatedAt: string;
-//   invoiceNumber: number;
-//   __v: number;
-// }
-
-// function updateArray(originalArray: Item[], newItem: Item): Item[] {
-//   let index = null;
-//   index = originalArray.findIndex((item) => item.name === newItem.name);
-//   if (index !== -1) {
-//     // Item already exists, remove it
-//     return [
-//       ...originalArray.slice(0, index),
-//       ...originalArray.slice(index + 1),
-//     ];
-//   } else {
-//     // Item doesn't exist, add it
-//     return [...originalArray, newItem];
-//   }
-// }
-
 export const usePosStore = create<PosState>()((set, get) => ({
   //-----\
   cart: [],
@@ -150,26 +83,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
   cartSum: () => {
     return get().cart.reduce((acc, item) => acc + Number(item.amount), 0);
   },
-  // setCart: (type: "product" | "service", item: Item, edit = false) => {
-  //   set((state) => {
-  //     let newItem: Item = {
-  //       type,
-  //       name: item.name,
-  //       quantity: edit ? item.quantity : 1,
-  //       price: item.price,
-  //       amount: Number(item.price) * (edit ? Number(item.quantity) : 1),
-  //     };
 
-  //     if (type === "product") {
-  //       newItem.brand = item.brand;
-  //       newItem.productId = item._id;
-  //     }
-  //     return {
-  //       ...state,
-  //       cart: updateArray(state.cart, newItem),
-  //     };
-  //   });
-  // },
   addToCart: (type: "product" | "service", item: Item) => {
     const newItem: Item = {
       type,

@@ -2,20 +2,18 @@ import { useUpdateData } from "@/api-service/useUpdateData";
 import { API } from "@/constants/apiEndpoints";
 
 export interface AddPaymentParam {
-  amountPaidUsd: number;
-  amountPaidLbp: number;
+  customerId: string;
+  amount: number;
 }
 
 const useAddPayment = ({
   callBackOnSuccess,
-  invoiceId,
 }: {
   callBackOnSuccess?: () => void;
-  invoiceId: string;
 }) => {
   return useUpdateData<AddPaymentParam>({
     queryKeysToInvalidate: [["customers"], ["invoices"]],
-    endpoint: API.addPayment(invoiceId),
+    endpoint: API.addPayment,
     callBackOnSuccess: callBackOnSuccess,
   });
 };

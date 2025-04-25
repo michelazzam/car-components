@@ -268,12 +268,8 @@ const CustomerSchema = z.object({
 
 const AddPaymentSchema = z
   .object({
-    amountPaidUsd: z.number().min(0, "Amount paid in USD is required"),
-    amountPaidLbp: z.number().min(0, "Amount paid in LBP is required"),
-  })
-  .refine((data) => data.amountPaidUsd > 0 || data.amountPaidLbp > 0, {
-    path: ["payment"], // Custom path that you will check in your component
-    message: "Either Amount paid in USD or LBP must be greater than 0",
+    customerId: z.string(),
+    amount: z.number().min(0, "Amount paid in USD is required"),
   });
 
 export type AddPaymentSchema = z.infer<typeof AddPaymentSchema>;

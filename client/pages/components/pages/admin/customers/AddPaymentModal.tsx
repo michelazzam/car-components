@@ -5,16 +5,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AddPaymentSchema, apiValidations } from "@/lib/apiValidations";
 import { useAddPayment } from "@/api-hooks/customer/use-add-payment";
 import NumberFieldControlled from "@/pages/components/admin/FormControlledFields/NumberFieldControlled";
-import { Invoice } from "@/api-hooks/invoices/useListInvoices";
+import { Customer } from "@/api-hooks/customer/use-list-customer";
 
 function AddPaymentModal({
   triggerModalId,
   modalTitle,
-  selectedInvoice,
+  selectedCustomer,
 }: {
   triggerModalId: string;
   modalTitle: string;
-  selectedInvoice?: Invoice;
+  selectedCustomer?: Customer;
 }) {
   //---------------------------REFS------------------------------
   const formRef = useRef<HTMLFormElement>(null);
@@ -27,7 +27,6 @@ function AddPaymentModal({
       reset();
       cancelFormRef.current?.click();
     },
-    invoiceId: selectedInvoice?._id!,
   });
 
   //---------------------------FORM---------------------------------
@@ -40,29 +39,30 @@ function AddPaymentModal({
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<AddPaymentSchema, AddPaymentFormErrors>({
     resolver: zodResolver(apiValidations.AddPaymentSchema),
     defaultValues: {
-      amountPaidUsd: 0,
-      amountPaidLbp: 0,
+      customerId: "",
+      amount: 0,
     },
   });
 
   const onSubmit = (data: AddPaymentSchema) => {
-    if (selectedInvoice) {
+    if (selectedCustomer) {
       addPayment(data);
     } else {
+      console.log("there is no data")
     }
   };
 
   // when clicking edit in the table, for the first ms, the state is not initialized, so we need to reset the form state
   useEffect(() => {
-    reset({
-      amountPaidUsd: 0,
-      amountPaidLbp: 0,
-    });
-  }, [selectedInvoice]);
+    if (selectedCustomer) {
+      setValue("customerId", selectedCustomer._id || "");
+    }
+  }, [selectedCustomer]);
 
   // when pressing enter in the input field, we need to add the ingredient
   const onInvalid = (errors: any) => console.error(errors);
@@ -84,19 +84,11 @@ function AddPaymentModal({
         >
           <NumberFieldControlled
             control={control}
-            name="amountPaidUsd"
+            name="amount"
             label="Amount Paid in USD"
             placeholder="amount paid in USD"
             colSpan={6}
             prefix="$"
-          />
-          <NumberFieldControlled
-            control={control}
-            name="amountPaidLbp"
-            label="Amount Paid in LBP"
-            placeholder="amount paid in LBP"
-            colSpan={6}
-            prefix="L.L."
           />
           {/* Displaying refine error */}
 
@@ -122,7 +114,7 @@ function AddPaymentModal({
           Cancel
         </button>
         <button
-          disabled={false}
+          // disabled={false}
           type="submit"
           onClick={() => {
             formRef.current?.requestSubmit();
