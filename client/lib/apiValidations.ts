@@ -150,6 +150,7 @@ const AddPurchaseItemSchema = z.object({
   lotNumber: z.string(),
   expDate: z.string(),
   totalPrice: z.number(),
+  discountType: z.enum(["fixed", "percentage"]),
   supplier: z
     .object({
       value: z.string(),

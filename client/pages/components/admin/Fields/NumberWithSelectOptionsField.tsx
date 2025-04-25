@@ -1,4 +1,5 @@
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
+import { useEffect, useState } from "react";
 import CurrencyInput from "react-currency-input-field";
 import Select from "react-select";
 
@@ -12,7 +13,8 @@ interface NumberWithSelectOptionsFieldProps {
   placeholder?: string;
   label?: string;
   value: number | string | undefined;
-  onChange: (value: number | string | undefined) => void;
+  onChange?: (value: number | string | undefined) => void;
+  onBlur?: (value: number) => void;
   prefix?: string;
   suffix?: string;
   decimalsLimit: number;
@@ -35,6 +37,7 @@ const NumberWithSelectOptionsField: React.FC<
   label,
   value,
   onChange,
+  onBlur,
   prefix,
   suffix,
   decimalsLimit,
@@ -46,6 +49,17 @@ const NumberWithSelectOptionsField: React.FC<
   //error message
   errorMessage,
 }) => {
+  const [displayValue, setDisplayValue] = useState<string | number | undefined>(
+    value
+  );
+  useEffect(() => {
+    if (value) {
+      setDisplayValue(value);
+    } else {
+      setDisplayValue(0);
+    }
+  }, [value]);
+
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
@@ -55,22 +69,29 @@ const NumberWithSelectOptionsField: React.FC<
             {errorMessage && <span></span>}
           </label>
           <div className="relative">
-            <div className="grid grid-cols-12 items-center border border-gray-300 rounded-md">
+            <div className="grid grid-cols-12 items-center border border-gray-300 rounded-md mt-1">
               <div className="col-span-9">
                 <CurrencyInput
                   placeholder={placeholder}
-                  value={value}
+                  value={displayValue}
                   prefix={prefix}
                   suffix={suffix}
                   disabled={readOnly}
-                  className="block w-full mt-1 pl-3 py-2  focus:outline-none  sm:text-sm border-0 shadow-none "
-                  onValueChange={onChange}
+                  onBlur={(e) => {
+                    const number = e.target.value.replace(/,/g, "");
+                    onBlur && onBlur(Number(number));
+                  }}
+                  className="block w-full  pl-3 py-2 rounded-l-md   focus:outline-none  sm:text-sm border-0 shadow-none "
+                  onValueChange={(value) => {
+                    setDisplayValue(value);
+                    onChange && onChange(value);
+                  }}
                   decimalsLimit={decimalsLimit}
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-3 h-full">
                 <Select
-                  className=""
+                  className="h-full"
                   onInputChange={onInputChange}
                   options={options}
                   value={
@@ -109,6 +130,8 @@ const customStyles = {
     ...provided,
     border: "none", // Removes the border
     boxShadow: "none", // Removes the box-shadow if any
+    borderRadius: "0px 8px 8px 0px",
+    height: "100%",
   }),
 
   menuPortal: (provided: any) => ({
@@ -117,5 +140,8 @@ const customStyles = {
   }),
   indicatorSeparator: () => ({
     display: "none", // This will hide the separator
+  }),
+  dropdownIndicator: () => ({
+    display: "none",
   }),
 };

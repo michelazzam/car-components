@@ -187,7 +187,7 @@ function AddEditProductModal({
           <NumberFieldControlled
             control={control}
             name="price"
-            label="Price"
+            label="Selling Price"
             prefix="$"
             colSpan={6}
           />

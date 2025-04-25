@@ -1,3 +1,4 @@
+import { useGetOrganization } from "@/api-hooks/restaurant/use-get-organization-info";
 import { useGetSupplierById } from "@/api-hooks/supplier/use-get-single-supplier-by-id";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { AddPurchaseSchemaType } from "@/lib/apiValidations";
@@ -10,7 +11,14 @@ import { useFormContext } from "react-hook-form";
 import { CiCalculator1 } from "react-icons/ci";
 
 function TotalsCard() {
+  //----------------------------------API CALLS--------------------------------------
+  const { data: organization } = useGetOrganization();
+  const vat = organization?.tvaPercentage || 0;
+
+  //----------------------------------FORM--------------------------------------
   const { control, setValue } = useFormContext<AddPurchaseSchemaType>();
+
+  //----------------------------------STORE--------------------------------------
   const {
     totals,
     tva,
@@ -28,10 +36,16 @@ function TotalsCard() {
   });
   const { data: usdRateData } = useGetUsdRate();
 
+  //----------------------------------EFFECTS--------------------------------------
   useEffect(() => {
     if (usdRateData) setUsdRate(usdRateData?.usdRate);
   }, [usdRateData]);
 
+  useEffect(() => {
+    if (vat) setValue("vatPercent", vat);
+  }, [organization]);
+
+  //----------------------------------CONSTANTS--------------------------------------
   const tvaAmountInDollars = Number(
     ((totals.totalAmount * tva) / 100)?.toFixed(2)
   );
@@ -139,13 +153,6 @@ function TotalsCard() {
             ${formatNumber(totals.totalAmountPaid, 2)}
           </span>
         </div>
-
-        {/* <div className="">
-          <span>Paid LBP</span>
-          <span className="text-success fs-20">
-            L.L. {formatNumber(totals.totalAmountPaidLbp, 2)}
-          </span>
-        </div> */}
       </div>
     </div>
   );
