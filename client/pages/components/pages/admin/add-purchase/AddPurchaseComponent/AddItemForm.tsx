@@ -18,6 +18,7 @@ import SelectFieldControlled from "@/pages/components/admin/FormControlledFields
 import AddEditProductModal from "../../menu/AddEditProductModal";
 import { FaPlus } from "react-icons/fa6";
 import { formatNumber } from "@/lib/helpers/formatNumber";
+import NumberWithSelectOptionsField from "@/pages/components/admin/Fields/NumberWithSelectOptionsField";
 
 function AddItemForm() {
   //----------------------------------CONSTANTS--------------------------------------
@@ -61,6 +62,7 @@ function AddItemForm() {
         quantity: 0,
         quantityFree: 0,
         discount: 0,
+        discountType: "fixed",
         expDate: "",
         totalPrice: 0,
         lotNumber: "",
@@ -72,18 +74,26 @@ function AddItemForm() {
   const quantity = useWatch({ control, name: "quantity" });
   const discount = useWatch({ control, name: "discount" });
   const totalPrice = watch("totalPrice");
+  const discountType = watch("discountType");
   // const vat = useWatch({ control, name: "vat" });
   //----------------------------------EFFECTS--------------------------------------
 
   useEffect(() => {
+    const itemDiscount = discount || 0;
     // Calculate total when price, quantity, discount, or vat changes
-    const subtotal = price * quantity - discount;
+    const itemPrice = price * quantity;
+
+    const discountAmount =
+      discountType === "percentage"
+        ? itemPrice * (itemDiscount / 100)
+        : itemDiscount;
+    const subtotal = itemPrice - discountAmount;
     // const vatAmount = subtotal * (vat / 100);
     const total = subtotal;
     // + vatAmount;
 
     setValue("totalPrice", Number(total.toFixed(2)));
-  }, [price, quantity, discount, setValue]);
+  }, [price, quantity, discount, discountType, setValue]);
 
   useEffect(() => {
     if (addingProduct && Object.keys(addingProduct).length !== 0) {
@@ -158,13 +168,34 @@ function AddItemForm() {
             type={"number"}
           />
 
-          <NumberFieldControlled
+          <NumberWithSelectOptionsField
             colSpan={3}
-            control={control}
-            name="discount"
-            label="Discount($)"
-            type={"formattedNumber"}
-            prefix="$"
+            label="Discount"
+            // type={"formattedNumber"}
+
+            onChangeValue={(value) => {
+              setValue(
+                "discountType",
+                value as string as "fixed" | "percentage"
+              );
+            }}
+            onBlur={(value) => {
+              console.log("ON BLUR VALUE", value);
+              setValue("discount", value as number);
+            }}
+            options={[
+              {
+                label: "%",
+                value: "percentage",
+              },
+              {
+                label: "$",
+                value: "fixed",
+              },
+            ]}
+            value={discount}
+            selectValue={discountType}
+            decimalsLimit={0}
           />
 
           <TextFieldControlled
