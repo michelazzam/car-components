@@ -94,7 +94,7 @@ function PrintInvoice({
       paidAmountUsd: invoiceData.accounting.paidAmountUsd,
       // amountPaidLbp: invoiceData.amountPaidLbp,
       // taxesLbp: invoiceData.taxesLbp,
-      subTotalUsd:invoiceData.accounting.subTotalUsd,
+      subTotalUsd: invoiceData.accounting.subTotalUsd,
       taxesUsd: invoiceData.accounting.taxesUsd,
       customerNote: invoiceData.customerNote,
       totalPriceUsd: invoiceData.accounting.totalUsd,
@@ -131,9 +131,7 @@ function PrintInvoice({
             createdAt={createdAt}
             invoiceUsdRate={invoiceUsdRate || 90000}
           />
-          {items &&
-          <InvoiceTable items={items} />
-}
+          {items && <InvoiceTable items={items} />}
           <InvoiceSubtotal
             discount={discount}
             subTotalUsd={subTotalUsd || 0}
@@ -321,20 +319,6 @@ const InvoiceTable = ({ items }: { items: GetItem[] }) => {
                   key={index}
                 />
               ))}
-            {/* {services && services?.length > 0 && (
-              <>
-                {services.map((item, index) => (
-                  <ServiceTableRow
-                    service={{
-                      name: item.name || "Unnamed Service",
-                      quantity: item.quantity || 1,
-                      price: item.price || 0,
-                    }}
-                    key={index}
-                  />
-                ))}
-              </>
-            )} */}
           </tbody>
         </table>
       </div>
@@ -342,7 +326,16 @@ const InvoiceTable = ({ items }: { items: GetItem[] }) => {
   );
 };
 
-const ProductTableRow = ({ product }: { product: {name:string;quantity:number;price:number;discount?:Discount} }) => {
+const ProductTableRow = ({
+  product,
+}: {
+  product: {
+    name: string;
+    quantity: number;
+    price: number;
+    discount?: Discount;
+  };
+}) => {
   return (
     <tr className="hover:bg-gray-50">
       <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
@@ -358,40 +351,15 @@ const ProductTableRow = ({ product }: { product: {name:string;quantity:number;pr
         ${formatNumber((product.price || 0) * product.quantity)}
       </td>
       <td className="px-6 py-2 whitespace-nowrap text-sm text-danger">
-        {product.discount ?
-        formatNumber(
-          product.discount.type === "percentage"
-            ? (product.price || 0) *
-                product.quantity *
-                (product.discount.amount * 0.01)
-            : (product.price || 0) * product.quantity - product.discount.amount
-        ):0
-      }
+        {product.discount
+          ? product.discount.type === "percentage"
+            ? `%${product.discount.amount}`
+            : `$${product.discount.amount}`
+          : 0}
       </td>
     </tr>
   );
 };
-
-// const ServiceTableRow = ({ service }: { service: ServiceItem }) => {
-//   return (
-//     <tr className="hover:bg-gray-50">
-//       <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
-//         {service.name}
-//       </td>
-//       {
-//         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-//           {formatNumber(service.quantity || 0)}
-//         </td>
-//       }
-//       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-//         ${formatNumber(service.price)}
-//       </td>
-//       <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-//         ${formatNumber(service.price * Number(service.quantity))}
-//       </td>
-//     </tr>
-//   );
-// };
 
 const InvoiceSubtotal = ({
   discount,
@@ -400,7 +368,7 @@ const InvoiceSubtotal = ({
   taxesUsd,
   taxPercentage,
   subTotalUsd,
-  totalPriceUsd
+  totalPriceUsd,
 }: {
   discount?: {
     amount: number;
@@ -411,29 +379,9 @@ const InvoiceSubtotal = ({
   customerNote?: string;
   taxesUsd?: number;
   taxPercentage?: number;
-  subTotalUsd:number;
-  totalPriceUsd:number
+  subTotalUsd: number;
+  totalPriceUsd: number;
 }) => {
-  // const productPrice =
-  //   products?.reduce(
-  //     (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
-  //     0
-  //   ) || 0;
-  // const servicePrice =
-  //   services?.reduce(
-  //     (acc, curr) => acc + Number(curr?.price) * Number(curr?.quantity),
-  //     0
-  //   ) || 0;
-
-  // const subTotal = productPrice + servicePrice;
-
-  // const total = () => {
-  //   if (!discount) return subTotal;
-  //   return discount.type === "fixed"
-  //     ? subTotal - discount.amount
-  //     : subTotal - subTotal * discount.amount * 0.01;
-  // };
-
   return (
     <div className="flex justify-end mt-2">
       <div className="grid grid-cols-2 gap-4 w-full max-w-4xl mx-2">
@@ -469,10 +417,6 @@ const InvoiceSubtotal = ({
             <span className="font-semibold">VAT {taxPercentage}% (USD):</span>
             <span>${taxesUsd ? formatNumber(taxesUsd, 2) : 0}</span>
           </div>
-          {/* <div className="flex justify-between">
-            <span className="font-semibold">VAT {taxPercentage}% (LBP):</span>
-            <span>L.L{taxesLbp ? formatNumber(taxesLbp, 0) : 0}</span>
-          </div> */}
 
           <div className="flex justify-between text-green-600">
             <span className="font-semibold">Total:</span>
@@ -482,10 +426,6 @@ const InvoiceSubtotal = ({
             <span className="font-semibold">Paid (USD):</span>
             <span>${amountPaidUsd ? formatNumber(amountPaidUsd, 2) : 0}</span>
           </div>
-          {/* <div className="flex justify-between">
-            <span className="font-semibold">Paid (LBP):</span>
-            <span>L.L{amountPaidLbp ? formatNumber(amountPaidLbp, 0) : 0}</span>
-          </div> */}
         </div>
       </div>
     </div>
