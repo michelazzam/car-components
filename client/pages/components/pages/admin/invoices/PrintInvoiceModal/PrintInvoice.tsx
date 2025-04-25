@@ -52,14 +52,10 @@ function PrintInvoice({
     customer,
     vehicle,
     taxesUsd,
-    // invoiceNum,
     createdAt,
-    // services,
-    // products,
     items,
     discount,
     paidAmountUsd,
-    // taxesLbp,
     subTotalUsd,
     customerNote,
     totalPriceUsd,
@@ -68,46 +64,26 @@ function PrintInvoice({
     const invoiceData = prev ? previewingInvoice : printingInvoice;
     if (!invoiceData) return {};
 
-    // const calculatedTaxesUsd =
-    //   invoiceData.taxesLbp /
-    //   Number(invoiceData.usdRate || usdRate?.usdRate || 1);
-    // const finalPrice = printingInvoice?.finalPriceUsd || 0;
-    // const totalPrice = prev ? invoiceData.totalPriceUsd : finalPrice;
-
     return {
       customer: invoiceData.customer,
       vehicle: invoiceData.vehicle,
-      // invoiceNum: invoiceData.invoiceNumber,
       createdAt: printingInvoice?.createdAt,
-      // services: invoiceData.services,
-      // products: invoiceData.products?.map((item) => ({
-      //   type: "product",
-      //   //@ts-ignore
-      //   name: prev ? item.name : item.product.name,
-      //   quantity: item.quantity,
-      //   //@ts-ignore
-      //   price: prev ? item.price : item.product.price,
-      //   amount: prev ? (item.quantity || 0) * (item.price || 0) : item.amount,
-      // })),
       items: invoiceData.items,
       discount: invoiceData.accounting.discount,
       paidAmountUsd: invoiceData.accounting.paidAmountUsd,
-      // amountPaidLbp: invoiceData.amountPaidLbp,
-      // taxesLbp: invoiceData.taxesLbp,
       subTotalUsd: invoiceData.accounting.subTotalUsd,
       taxesUsd: invoiceData.accounting.taxesUsd,
       customerNote: invoiceData.customerNote,
       totalPriceUsd: invoiceData.accounting.totalUsd,
       invoiceUsdRate: invoiceData.accounting.usdRate,
-      // usdRate?.usdRate ||
-      // invoiceData.totalPriceLbp / invoiceData.totalPriceUsd,
+
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
 
   // Check for organization and usdRate load status
-  // if (!organization || !usdRate) {
-  //   return <div className="p-5 text-center">Loading...</div>;
-  // }
+  if (!organization || !usdRate) {
+    return <div className="p-5 text-center">Loading...</div>;
+  }
 
   return (
     <div
@@ -129,7 +105,7 @@ function PrintInvoice({
             vehicle={vehicle}
             // invoiceNumber={invoiceNum}
             createdAt={createdAt}
-            invoiceUsdRate={invoiceUsdRate || 90000}
+            invoiceUsdRate={invoiceUsdRate || usdRate.usdRate}
           />
           {items && <InvoiceTable items={items} />}
           <InvoiceSubtotal
@@ -264,10 +240,6 @@ const PrintInvoiceDetails = ({
           <span className="font-bold">Invoice # TB{invoiceNumber}</span>
         ) : null}
         <br />
-        {/* <span className="font-bold">
-          Date: {dateTimeToDateFormat(new Date().toString())}
-        </span>
-        <br /> */}
         {createdAt && (
           <span className="font-bold">
             Date: {dateTimeToDateFormat(createdAt)}
@@ -355,7 +327,7 @@ const ProductTableRow = ({
           ? product.discount.type === "percentage"
             ? `%${product.discount.amount}`
             : `$${product.discount.amount}`
-          : 0}
+          : "$0"}
       </td>
     </tr>
   );
