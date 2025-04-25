@@ -19,7 +19,6 @@ import { PurchaseModule } from './purchase/purchase.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ReportModule } from './report/report.module';
-import { BackupModule } from './backup/backup.module';
 
 @Module({
   imports: [
@@ -51,7 +50,6 @@ import { BackupModule } from './backup/backup.module';
     InvoiceModule,
     AccountingModule,
     ReportModule,
-    BackupModule,
   ],
   controllers: [],
   providers: [
