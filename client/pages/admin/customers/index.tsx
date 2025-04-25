@@ -17,6 +17,8 @@ import {
 import CustomerModal from "../../components/pages/admin/customers/CustomerModal";
 import { useRouter } from "next/router";
 import { formatNumber } from "@/lib/helpers/formatNumber";
+import AddPaymentModal from "@/pages/components/pages/admin/customers/AddPaymentModal";
+import { BsCashCoin } from "react-icons/bs";
 
 const Customers = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,7 +66,7 @@ const Customers = () => {
       headerSort: false,
       formatter: (cell: any) => {
         return ReactDOMServer.renderToString(
-          <span> {formatNumber(cell.getValue(), 2)}$</span>
+          <span>{formatNumber(cell.getValue(), 2)}$</span>
         );
       },
     },
@@ -72,6 +74,7 @@ const Customers = () => {
       title: "Actions",
       field: "actions",
       headerSort: false,
+      width: 300,
       formatter: () => {
         return ReactDOMServer.renderToString(
           <div
@@ -83,6 +86,14 @@ const Customers = () => {
               className="btn btn-sm btn-primary edit-btn text-white border rounded-md p-1 bg-primary hover:brightness-110 hover:text-white"
             >
               Show Details
+            </button>
+            <button
+              id="add-payment"
+              data-hs-overlay="#add-payment-modal"
+              className="btn btn-sm text-success border border-success rounded-md p-1 hover:bg-success hover:text-white"
+              title="add payment"
+            >
+             <BsCashCoin />
             </button>
             <button
               id="edit-btn"
@@ -108,7 +119,12 @@ const Customers = () => {
 
         if (clickedButton) {
           const buttonId = clickedButton.id;
-          if (buttonId === "edit-btn" || buttonId === "delete-btn") {
+          console.log("button Id:", buttonId);
+          if (
+            buttonId === "edit-btn" ||
+            buttonId === "delete-btn" ||
+            buttonId === "add-payment"
+          ) {
             setSelectedCustomer(rowData);
           } else {
             setSelectedCustomer(rowData);
@@ -184,6 +200,11 @@ const Customers = () => {
         setCustomer={setSelectedCustomer}
       />
       {/* Add Payment Modal */}
+      <AddPaymentModal
+        triggerModalId="add-payment-modal"
+        selectedCustomer={selectedCustomer}
+        modalTitle="Add payment in USD"
+      />
 
       {
         <DeleteRecord

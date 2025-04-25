@@ -57,13 +57,14 @@ export const API = {
   addCustomer: "/customers",
   editCustomer: (id: string) => `/customers/${id}`,
   deleteCustomer: (id: string) => `/customers/${id}`,
-  addPayment: (id: string) => `/customers/pay-invoice/${id}`,
 
   //Invoices
   listInvoices: "/invoices",
   deleteInvoice: (id: string) => `/invoices/${id}`,
   addInvoice: "/invoices",
   editInvoice: (id: string) => `/invoices/${id}`,
+  addPayment:`/invoices/pay-customer-invoices`, // PUT
+
 
   // categories
   listCategory: "/categories", // GET

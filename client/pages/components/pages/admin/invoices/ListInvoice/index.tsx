@@ -363,13 +363,6 @@ function ListInvoice({ customerId }: { customerId?: string }) {
         title="Print Invoice"
         printingInvoices={selectedInvoice ? [selectedInvoice] : undefined}
       />
-
-      <AddPaymentModal
-        triggerModalId="add-payment-modal"
-        selectedInvoice={selectedInvoice}
-        modalTitle="Pay in USD / LBP"
-      />
-
       {/* for multiple invoices (the btn above the table) */}
       <PrintInvoiceModal
         triggerModalId="print-invoices-modal"
