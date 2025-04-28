@@ -3,11 +3,15 @@ import { ReportService } from './report.service';
 import { ApiTags } from '@nestjs/swagger';
 import { GetAllReportsDto } from './dto/get-all-reports.dto';
 import { GetReportsSumDto } from './dto/get-reports-sum.dto';
+import { InvoiceService } from '../invoice/invoice.service';
 
 @ApiTags('Reports')
 @Controller({ version: '1', path: 'reports' })
 export class ReportController {
-  constructor(private readonly reportService: ReportService) {}
+  constructor(
+    private readonly reportService: ReportService,
+    private readonly invoicesService: InvoiceService,
+  ) {}
 
   @Get('global')
   getGlobalAccounting() {
@@ -22,5 +26,10 @@ export class ReportController {
   @Get('sum')
   getReportsSum(@Query() dto: GetReportsSumDto) {
     return this.reportService.getReportsSum(dto);
+  }
+
+  @Get('accounts-receivable-summary')
+  getCustomersReports() {
+    return this.invoicesService.getAccountsRecievableSummary();
   }
 }

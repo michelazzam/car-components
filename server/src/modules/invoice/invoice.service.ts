@@ -126,6 +126,62 @@ export class InvoiceService {
     };
   }
 
+  async getAccountsRecievableSummary() {
+    const invoices = await this.invoiceModel.aggregate([
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customer',
+        },
+      },
+      { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          customerName: { $ifNull: ['$customer.name', 'Unknown Customer'] },
+          invoiceAmount: '$accounting.totalUsd',
+          amountPaid: '$accounting.paidAmountUsd',
+          outstandingAmount: {
+            $subtract: ['$accounting.totalUsd', '$accounting.paidAmountUsd'],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$customerName',
+          invoiceAmount: { $sum: '$invoiceAmount' },
+          amountPaid: { $sum: '$amountPaid' },
+          outstandingAmount: { $sum: '$outstandingAmount' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const rows = invoices.map((invoice) => ({
+      customerName: invoice._id,
+      invoiceAmount: invoice.invoiceAmount,
+      amountPaid: invoice.amountPaid,
+      outstandingAmount: invoice.outstandingAmount,
+    }));
+
+    const totals = rows.reduce(
+      (acc, row) => {
+        acc.totalInvoiceAmount += row.invoiceAmount;
+        acc.totalAmountPaid += row.amountPaid;
+        acc.totalOutstandingAmount += row.outstandingAmount;
+        return acc;
+      },
+      {
+        totalInvoiceAmount: 0,
+        totalAmountPaid: 0,
+        totalOutstandingAmount: 0,
+      },
+    );
+
+    return { rows, totals };
+  }
+
   async create(dto: InvoiceDto) {
     // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
