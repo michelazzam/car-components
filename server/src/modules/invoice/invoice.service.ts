@@ -102,7 +102,7 @@ export class InvoiceService {
       delete filter.$and;
     }
 
-    const [invoices, totalCount] = await Promise.all([
+    const [invoices, totalCount, totalsResult] = await Promise.all([
       this.invoiceModel
         .find(filter)
         .sort({ createdAt: -1 })
@@ -111,12 +111,37 @@ export class InvoiceService {
         .populate('customer')
         .populate('vehicle'),
       this.invoiceModel.countDocuments(filter),
+      this.invoiceModel.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            totalInvoiceAmount: { $sum: '$accounting.totalUsd' },
+            totalAmountPaid: { $sum: '$accounting.paidAmountUsd' },
+            totalOutstandingAmount: {
+              $sum: {
+                $subtract: [
+                  '$accounting.totalUsd',
+                  '$accounting.paidAmountUsd',
+                ],
+              },
+            },
+          },
+        },
+      ]),
     ]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
+    const totals = totalsResult[0] || {
+      totalCost: 0,
+      totalPrice: 0,
+      totalProfitOrLoss: 0,
+    };
+
     return {
       invoices,
+      totals,
       pagination: {
         pageIndex,
         pageSize,
