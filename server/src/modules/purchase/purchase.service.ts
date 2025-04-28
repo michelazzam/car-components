@@ -8,6 +8,7 @@ import { getFormattedDate } from 'src/utils/formatIsoDate';
 import { AccountingService } from '../accounting/accounting.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
+import { formatMoneyField } from 'src/utils/formatMoneyField';
 
 @Injectable()
 export class PurchaseService {
@@ -176,7 +177,7 @@ export class PurchaseService {
 
       // calc new cost
       const totalQuantityBought = product.quantity + item.quantityFree;
-      product.cost = item.totalPrice / totalQuantityBought;
+      product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
       await product.save();
     }
 
