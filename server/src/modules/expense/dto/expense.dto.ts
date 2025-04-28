@@ -6,6 +6,7 @@ export class ExpenseDto {
     required: true,
   })
   @IsMongoId()
+  @IsOptional()
   expenseTypeId: string;
 
   @ApiProperty({

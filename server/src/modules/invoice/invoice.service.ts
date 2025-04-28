@@ -136,7 +136,7 @@ export class InvoiceService {
     const accounting = await this.accountingService.getAccounting();
 
     // Create new invoice
-    await this.invoiceModel.create({
+    const newInvoice = await this.invoiceModel.create({
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
@@ -158,6 +158,13 @@ export class InvoiceService {
     });
 
     await this.doInvoiceEffects(updatedDto);
+
+    const populatedInvoice = await this.invoiceModel
+      .findById(newInvoice._id)
+      .populate('customer')
+      .populate('vehicle');
+
+    return populatedInvoice;
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {
