@@ -121,7 +121,7 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
               <h2 className="font-bold text-white">Invoices Summary</h2>
             </div>
 
-            <div className="py-2 px-4">
+            <div className="py-2 px-4 overflow-hidden">
               <ReactTablePaginated
                 errorMessage={error?.message}
                 data={invoicesData?.invoices || []}

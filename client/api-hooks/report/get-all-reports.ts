@@ -1,23 +1,16 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
-import { Report } from "./get-reports-by-date";
 
 export interface ReportsResponse {
-  reports: Report[];
-  pageIndex: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  totalIncome:number;
+  totalExpenses:number;
+  totalCustomersLoan:number;
+  totalSuppliersLoan:number
 }
 
-export function useGetAllReports(params: {
-  startDate: string;
-  endDate: string;
-  pageIndex: number;
-}) {
+export function useGetAllReports() {
   return useReadData<ReportsResponse>({
-    queryKey: ["reports", params],
+    queryKey: ["reports"],
     endpoint: API.getAllReports,
-    params,
   });
 }
