@@ -95,6 +95,7 @@ export const API = {
   //Reports
   getReportsByDate: "/reports", // GET
   getAllReports: "/reports/global", // GET
+  getAccountSummary:"reports/accounts-receivable-summary",
 
   // DB Backup:
   getDbBackupPath: "/db-backup/path", // GET

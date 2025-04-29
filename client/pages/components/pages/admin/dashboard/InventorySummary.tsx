@@ -18,7 +18,7 @@ function InventorySummary() {
   const tanstackColumns = [
     columnHelper.accessor("name", {
       header: "inventory",
-      cell: ({ getValue }) => <div>TB{getValue()}</div>,
+      cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
     columnHelper.accessor("quantity", {

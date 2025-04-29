@@ -82,7 +82,7 @@ const useListInvoices = ({
     paymentStatus,
     search,
     pageIndex,
-    pageSize,
+    pageSize=5,
     startDate,
     endDate,
     selectedVehicleId,

@@ -1,21 +1,58 @@
 "use client";
 import React, { Suspense } from "react";
+import { motion } from "framer-motion";
 
-import InvoicesSummary from "../components/pages/admin/dashboard/invoicesSummary";
 import InventorySummary from "../components/pages/admin/dashboard/InventorySummary";
 import ProfitAndLossSummary from "../components/pages/admin/dashboard/ProfitAndLossSummary";
-// import StatementPrinting from "../components/pages/admin/common/StatementPrinting";
+import AccountsSummary from "../components/pages/admin/dashboard/AccountsSummary";
+import InvoicesSummary from "../components/pages/admin/dashboard/InvoicesSummary";
+
+// Stagger parent container
+const container = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+// Fade-up animation
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 const Dashboard = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <InvoicesSummary />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2">
-          <InventorySummary />
+      <motion.div
+        variants={container}
+        initial="initial"
+        animate="animate"
+        className="space-y-4"
+      >
+        {/* Invoices Section */}
+        <motion.div variants={fadeUp}>
+          <InvoicesSummary />
+        </motion.div>
+
+        {/* Grid Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <motion.div variants={fadeUp} className="md:col-span-2">
+            <InventorySummary />
+          </motion.div>
+
+          <motion.div variants={fadeUp}>
+            <ProfitAndLossSummary />
+          </motion.div>
         </div>
-        <ProfitAndLossSummary />
-      </div>
+
+        {/* Accounts Summary */}
+        <motion.div variants={fadeUp}>
+          <AccountsSummary />
+        </motion.div>
+      </motion.div>
     </Suspense>
   );
 };

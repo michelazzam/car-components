@@ -21,7 +21,7 @@ function ProfitAndLossSummary() {
   const tanstackColumns = [
     columnHelper.accessor("description", {
       header: "Description",
-      cell: ({ getValue }) => <div>TB{getValue()}</div>,
+      cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
     columnHelper.accessor("amount", {
@@ -32,31 +32,27 @@ function ProfitAndLossSummary() {
     }),
   ];
   //   const { pagination, setPagination } = useReactTablePagination();
-  const {
-      data: reportsData,
-      isLoading,
-      error,
-    } = useGetAllReports();
-    const data: ProfitAndLoss[] = [
-      {
-        description: "Total Income",
-        amount: reportsData?.totalIncome || 0,
-      },
-      {
-        description: "Total Expenses",
-        amount: reportsData?.totalExpenses || 0,
-      },
-      {
-        description: "Total Customer Loan",
-        amount: reportsData?.totalCustomersLoan || 0,
-      },
-      {
-        description: "totalSuppliersLoan",
-        amount: reportsData?.totalSuppliersLoan || 0,
-      },
-    ];
-    
-    console.log("reportsData",reportsData)
+  const { data: reportsData, isLoading, error } = useGetAllReports();
+  const data: ProfitAndLoss[] = [
+    {
+      description: "Total Income",
+      amount: reportsData?.totalIncome || 0,
+    },
+    {
+      description: "Total Expenses",
+      amount: reportsData?.totalExpenses || 0,
+    },
+    {
+      description: "Total Customer Loan",
+      amount: reportsData?.totalCustomersLoan || 0,
+    },
+    {
+      description: "totalSuppliersLoan",
+      amount: reportsData?.totalSuppliersLoan || 0,
+    },
+  ];
+
+  console.log("reportsData", reportsData);
 
   // Calculate the total amount for all invoices
 
@@ -74,10 +70,11 @@ function ProfitAndLossSummary() {
                 data={data || []}
                 columns={tanstackColumns}
                 loading={isLoading}
-                paginating={false}
+                // paginating={isFetching}
                 // pagination={pagination}
                 // setPagination={setPagination}
                 totalRows={6}
+                hidePagination
               />
             </div>
           </div>

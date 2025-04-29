@@ -70,7 +70,6 @@ export default function ReactTablePaginated<DataType>({
           </div>
         )}
         {}
-        {paginating && (
           <Pagination
             table={table}
             totalRows={totalRows}
@@ -78,7 +77,6 @@ export default function ReactTablePaginated<DataType>({
             hidePagination={hidePagination}
             totalAmount={totalAmount}
           />
-        )}
       </TableStyle>
 
       {errorMessage && <ErrorAlert errorMessage={errorMessage} />}
