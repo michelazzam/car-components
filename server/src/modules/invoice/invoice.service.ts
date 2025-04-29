@@ -12,7 +12,11 @@ import {
   InvoiceCounter,
   InvoiceType,
 } from './invoice.schema';
-import { InvoiceDto } from './dto/invoice.dto';
+import {
+  InvoiceDto,
+  InvoiceDtoWithItemsDetails,
+  InvoiceItemWithDetails,
+} from './dto/invoice.dto';
 import { IService } from '../service/service.schema';
 import { IItem } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
@@ -405,7 +409,7 @@ export class InvoiceService {
     }
   }
 
-  private async doInvoiceEffects(updatedDto: InvoiceDto) {
+  private async doInvoiceEffects(updatedDto: InvoiceDtoWithItemsDetails) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -429,11 +433,15 @@ export class InvoiceService {
       });
     }
 
-    // TODO: save product cost as expenses
+    // calc total items cost amount
+    const totalProductsCost = updatedDto.items
+      .filter((item) => !!item.itemRef)
+      .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
-    // update accounting
+    // update accounting & cost of goods sold
     await this.accountingService.updateAccounting({
       totalIncome: updatedDto.paidAmountUsd,
+      costOfGoodsSold: totalProductsCost,
     });
 
     // update daily report
@@ -474,11 +482,15 @@ export class InvoiceService {
       });
     }
 
-    //TODO: revert saving product cost as expenses
+    // calc total items cost amount
+    const totalProductsCost = invoice.items
+      .filter((item) => !!item.itemRef)
+      .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
-    // decrease accounting total income
+    // decrease accounting total income + cost of goods sold
     await this.accountingService.updateAccounting({
       totalIncome: -invoice.accounting.paidAmountUsd,
+      costOfGoodsSold: -totalProductsCost,
     });
 
     // update daily report
@@ -488,7 +500,9 @@ export class InvoiceService {
     });
   }
 
-  private async validateItemsExistanceAndUpdateDto(dto: InvoiceDto) {
+  private async validateItemsExistanceAndUpdateDto(
+    dto: InvoiceDto,
+  ): Promise<InvoiceDtoWithItemsDetails> {
     // Separate items and services from the provided DTO
     const itemRefs = dto.items
       .filter((item) => item.itemRef)
@@ -501,6 +515,7 @@ export class InvoiceService {
     let dbServices: IService[] = [];
 
     // Process items if there are any
+    let itemsWithDetails: InvoiceItemWithDetails[] = [];
     if (itemRefs.length > 0) {
       // get products from db
       dbItems = await this.itemService.getManyByIds(itemRefs);
@@ -510,19 +525,18 @@ export class InvoiceService {
         throw new BadRequestException('Some items are not valid');
 
       // override the dto items array to add product fields for later reference
-      dto.items = dto.items.map((item) => {
+      itemsWithDetails = dto.items.map((item) => {
         const product = dbItems.find(
           (product) => product._id.toString() === item.itemRef,
         );
-        if (product) {
-          return {
-            ...item,
-            name: product.name,
-            cost: product.cost,
-            price: product.price,
-          };
-        }
-        return item;
+        if (!product) throw new BadRequestException('Item not found');
+
+        return {
+          ...item,
+          name: product.name,
+          cost: product.cost,
+          price: product.price,
+        };
       });
     }
 
@@ -551,7 +565,7 @@ export class InvoiceService {
       });
     }
 
-    return dto;
+    return { ...dto, items: itemsWithDetails };
   }
 
   private async generateInvoiceNumber(type: InvoiceType) {
