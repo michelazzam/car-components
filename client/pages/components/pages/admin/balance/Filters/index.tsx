@@ -5,7 +5,7 @@ import {
   useGetReportsByDate,
 } from "@/api-hooks/report/get-reports-by-date";
 import SelectMonthAndYear from "../../common/SelectMonthAndYear";
-import { formatDateWithSlashes } from "@/lib/helpers/formatDate";
+import { formatDateWithDashes } from "@/lib/helpers/formatDate";
 import {
   AllReportsResponse,
   useGetAllReports,
@@ -36,8 +36,8 @@ function Filters({
 
   //------------------- CONSTANTS -------------------
   console.log("START DATE IS ", startDate);
-  const apiStartDate = formatDateWithSlashes(startDate, "YYYY/MM/DD") || "";
-  const apiEndDate = formatDateWithSlashes(endDate, "YYYY/MM/DD") || "";
+  const apiStartDate = formatDateWithDashes(startDate, true) || "";
+  const apiEndDate = formatDateWithDashes(endDate, true) || "";
   console.log("FORMATTED START DATE IS ", apiStartDate);
   console.log("FORMATTED END DATE IS ", apiEndDate);
   //------------------- API CALLS -------------------

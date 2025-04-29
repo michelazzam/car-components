@@ -7,7 +7,7 @@ import Filters from "./Filters";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { cn } from "@/utils/cn";
 import Pagination from "@/pages/components/admin/Pagination";
-import { formatDateWithSlashes } from "@/lib/helpers/formatDate";
+import { formatDateWithDashes } from "@/lib/helpers/formatDate";
 
 function RecordsTable() {
   const columns: any = [
@@ -77,11 +77,9 @@ function RecordsTable() {
   );
   //those are used to get the data from the api
   const apiStartDate = startDate
-    ? formatDateWithSlashes(startDate, "YYYY/MM/DD") || ""
+    ? formatDateWithDashes(startDate, true) || ""
     : "";
-  const apiEndDate = endDate
-    ? formatDateWithSlashes(endDate, "YYYY/MM/DD") || ""
-    : "";
+  const apiEndDate = endDate ? formatDateWithDashes(endDate, true) || "" : "";
 
   const [pageIndex, setPageIndex] = React.useState(1);
 
