@@ -3,7 +3,7 @@
 import React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
-import { useGetAllReports } from "@/api-hooks/report/get-all-reports";
+import { useGetGlobalReports } from "@/api-hooks/report/get-global-report";
 // import {
 //   Product,
 //   useListProducts,
@@ -32,7 +32,7 @@ function ProfitAndLossSummary() {
     }),
   ];
   //   const { pagination, setPagination } = useReactTablePagination();
-  const { data: reportsData, isLoading, error } = useGetAllReports();
+  const { data: reportsData, isLoading, error } = useGetGlobalReports();
   const data: ProfitAndLoss[] = [
     {
       description: "Total Income",

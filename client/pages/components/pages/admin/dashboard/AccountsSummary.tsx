@@ -4,12 +4,13 @@ import React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import {
   ReactTablePaginated,
-//   useReactTablePagination,
+  //   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
 import {
   CustomerAccount,
   useGetAccountReports,
 } from "@/api-hooks/report/get-account-summary";
+import Link from "next/link";
 
 function AccountsSummary() {
   //------Storage---------\
@@ -43,7 +44,7 @@ function AccountsSummary() {
       ),
     }),
   ];
-//   const { pagination, setPagination } = useReactTablePagination();
+  //   const { pagination, setPagination } = useReactTablePagination();
 
   const {
     data: accountData,
@@ -73,6 +74,12 @@ function AccountsSummary() {
               <h2 className="font-bold text-white">
                 Accounts Receivable Summary
               </h2>
+              <Link
+                href={"/admin/customers"}
+                className={`absolute top-4 right-4 w-5 h-5 rounded-full ${
+                  isLoading ? "bg-danger" : "bg-green"
+                }`}
+              />
             </div>
             <div className="py-2 px-4 overflow-hidden">
               <ReactTablePaginated

@@ -10,6 +10,7 @@ import {
   Product,
   useListProducts,
 } from "@/api-hooks/products/use-list-products";
+import Link from "next/link";
 
 function InventorySummary() {
   //------Storage---------\
@@ -79,6 +80,7 @@ function InventorySummary() {
           <div className="box">
             <div className="box-header flex justify-center items-center bg-primary">
               <h2 className="font-bold text-white">Inventory Summary</h2>
+              <Link href={"/admin/inventory"} className={`absolute top-4 right-4 w-5 h-5 rounded-full ${isLoading?"bg-danger":"bg-green"}`} />
             </div>
             <div className="py-2 px-4 overflow-hidden">
               <ReactTablePaginated

@@ -8,6 +8,7 @@ import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
+import Link from "next/link";
 
 function InvoicesSummary({ customerId }: { customerId?: string }) {
 
@@ -117,8 +118,9 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12">
           <div className="box">
-            <div className="box-header flex justify-center items-center bg-primary">
+            <div className=" relative box-header flex justify-center items-center bg-primary">
               <h2 className="font-bold text-white">Invoices Summary</h2>
+              <Link href={"/admin/invoices"} className={`absolute top-4 right-4 w-5 h-5 rounded-full ${isLoading?"bg-danger":"bg-green"}`} />
             </div>
 
             <div className="py-2 px-4 overflow-hidden">
