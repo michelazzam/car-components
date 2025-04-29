@@ -1,5 +1,6 @@
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
 import { cn } from "@/utils/cn";
+import { useEffect, useState } from "react";
 import { Controller, useController } from "react-hook-form";
 
 interface CheckboxProps {
@@ -23,7 +24,19 @@ const CheckboxField: React.FC<CheckboxProps> = ({
   onValueChange,
   containerClassnames,
 }) => {
-  const { fieldState, field } = useController({ name, control });
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true); // Ensures this runs only on the client side
+  }, []);
+
+  // If we're on the server side, return null or a fallback UI
+  if (!isClient) return null;
+
+  const { fieldState, field } = useController({
+    name,
+    control: control ?? undefined,
+  });
 
   const errorMessage = fieldState.error?.message;
 
