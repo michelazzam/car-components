@@ -39,16 +39,9 @@ export class InvoiceService {
     private readonly reportService: ReportService,
   ) {}
 
-  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
-    const {
-      pageIndex,
-      search,
-      pageSize,
-      customerId,
-      type,
-      startDate,
-      endDate,
-    } = dto;
+  // 2 private functions making code cleaner
+  private buildGetInvoicesFilter(dto: GetInvoicesDto, user: ReqUserData) {
+    const { search, customerId, type, startDate, endDate } = dto;
 
     const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
 
@@ -102,6 +95,14 @@ export class InvoiceService {
       delete filter.$and;
     }
 
+    return filter;
+  }
+
+  private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
+    const { pageIndex, pageSize } = dto;
+
+    const filter = this.buildGetInvoicesFilter(dto, user);
+
     const [invoices, totalCount, totalsResult] = await Promise.all([
       this.invoiceModel
         .find(filter)
@@ -109,7 +110,8 @@ export class InvoiceService {
         .skip(pageIndex * pageSize)
         .limit(pageSize)
         .populate('customer')
-        .populate('vehicle'),
+        .populate('vehicle')
+        .lean(),
       this.invoiceModel.countDocuments(filter),
       this.invoiceModel.aggregate([
         { $match: filter },
@@ -151,6 +153,40 @@ export class InvoiceService {
     };
   }
 
+  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
+    const { invoices, pagination, totals } = await this.getInvoicesData(
+      dto,
+      user,
+    );
+
+    // Flatten the invoices so each item becomes a separate object with its respective data
+    const flattenedInvoices = invoices.reduce((acc: any, invoice) => {
+      invoice.items.forEach((item) => {
+        acc.push({
+          ...invoice,
+          item,
+          items: undefined,
+        });
+      });
+      return acc;
+    }, []);
+
+    return {
+      invoices,
+      flattenedInvoices,
+      totals,
+      pagination,
+    };
+  }
+
+  /**
+   * Fetches the accounts receivable summary, including customer information and invoice amounts.
+   *
+   * @returns {Promise<{ rows: Array<{ customerName: string, invoiceAmount: number, amountPaid: number, outstandingAmount: number }>, totals: { totalInvoiceAmount: number, totalAmountPaid: number, totalOutstandingAmount: number } }>}
+   * An object containing:
+   * - `rows`: an array of objects representing each customer's invoice details.
+   * - `totals`: an object containing the total invoice amount, total amount paid, and total outstanding amount for all customers.
+   */
   async getAccountsRecievableSummary() {
     const invoices = await this.invoiceModel.aggregate([
       {
