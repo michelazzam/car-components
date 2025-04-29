@@ -225,13 +225,25 @@ const IncreaseStockSchema = z.object({
 });
 export type IncreaseStockSchema = z.infer<typeof IncreaseStockSchema>;
 
-const ExpenseSchema = z.object({
-  expenseTypeId: z.string().min(1, "Expense type is required"),
-  amount: z.number().min(0, "Amount is required"),
-  date: z.string().min(1, "Date is required"),
-  supplierId: z.string().min(1, "Supplier is required"),
-  note: z.string().optional(),
-});
+const ExpenseSchema = z
+  .object({
+    expenseTypeId: z.string().optional(),
+    amount: z.number().min(0, "Amount is required"),
+    date: z.string().min(1, "Date is required"),
+    supplierId: z.string().optional(),
+    note: z.string().optional(),
+    // if there is supplier then we dont need expense type , else make it required
+  })
+  .refine(
+    (data) => {
+      return data.supplierId || data.expenseTypeId;
+    },
+    {
+      message: "Expense type is required",
+      path: ["expenseTypeId"],
+    }
+  );
+
 export type ExpenseSchemaType = z.infer<typeof ExpenseSchema>;
 
 const ExpenseTypeSchema = z.object({
@@ -266,11 +278,10 @@ const CustomerSchema = z.object({
   tvaNumber: z.string().optional(),
 });
 
-const AddPaymentSchema = z
-  .object({
-    customerId: z.string(),
-    amount: z.number().min(0, "Amount paid in USD is required"),
-  });
+const AddPaymentSchema = z.object({
+  customerId: z.string(),
+  amount: z.number().min(0, "Amount paid in USD is required"),
+});
 
 export type AddPaymentSchema = z.infer<typeof AddPaymentSchema>;
 export type CustomerSchema = z.infer<typeof CustomerSchema>;
@@ -322,26 +333,28 @@ const AddInvoiceSchema = z
     //     })
     //   )
     //   .optional(),
-    items: z.array(
-      z.object({
-        itemRef: z.string().optional(),
-        serviceRef: z.string().optional(),
-        quantity: z.number(),
-        discount: z
-          .object({
-            amount: z.number(),
-            type: z.string(),
-          })
-          .optional(),
-        subTotal: z.number(),
-        totalPrice: z.number(),
-      })
-    ).optional(),
-    subTotalUsd:z.number(),
-    totalUsd:z.number(),
+    items: z
+      .array(
+        z.object({
+          itemRef: z.string().optional(),
+          serviceRef: z.string().optional(),
+          quantity: z.number(),
+          discount: z
+            .object({
+              amount: z.number(),
+              type: z.string(),
+            })
+            .optional(),
+          subTotal: z.number(),
+          totalPrice: z.number(),
+        })
+      )
+      .optional(),
+    subTotalUsd: z.number(),
+    totalUsd: z.number(),
     generalNote: z.string().optional(),
     customerNote: z.string().optional(),
-    type:z.enum(["s1","s2"])
+    type: z.enum(["s1", "s2"]),
   })
   .refine(
     (data) => {
@@ -354,43 +367,43 @@ const AddInvoiceSchema = z
       message: "Vehicle ID is required.",
       path: ["vehicleId"],
     }
-  )
-  // .refine(
-  //   (data) => {
-  //     console.log("Data:", data);
+  );
+// .refine(
+//   (data) => {
+//     console.log("Data:", data);
 
-  //     // Calculate the sum of products (quantity * price)
-  //     const productTotal =
-  //       data.products?.reduce(
-  //         (sum, product) => sum + product.quantity * product.price,
-  //         0
-  //       ) || 0;
+//     // Calculate the sum of products (quantity * price)
+//     const productTotal =
+//       data.products?.reduce(
+//         (sum, product) => sum + product.quantity * product.price,
+//         0
+//       ) || 0;
 
-  //     console.log("Product Total:", productTotal);
+//     console.log("Product Total:", productTotal);
 
-  //     // Calculate the sum of services (quantity * price)
-  //     const serviceTotal =
-  //       data.services?.reduce(
-  //         (sum, service) => sum + service.quantity * service.price,
-  //         0
-  //       ) || 0;
+//     // Calculate the sum of services (quantity * price)
+//     const serviceTotal =
+//       data.services?.reduce(
+//         (sum, service) => sum + service.quantity * service.price,
+//         0
+//       ) || 0;
 
-  //     console.log("Service Total:", serviceTotal);
+//     console.log("Service Total:", serviceTotal);
 
-  //     const total = productTotal + serviceTotal;
-  //     console.log("Total:", total);
+//     const total = productTotal + serviceTotal;
+//     console.log("Total:", total);
 
-  //     if (data.discount.type === "fixed") {
-  //       return data.discount.amount <= total; // This should return false if invalid
-  //     } else {
-  //       return data.discount.amount >= 0 && data.discount.amount <= 100;
-  //     }
-  //   },
-  //   {
-  //     message: `Discount amount is not valid`,
-  //     path: ["discount", "amount"],
-  //   }
-  // );
+//     if (data.discount.type === "fixed") {
+//       return data.discount.amount <= total; // This should return false if invalid
+//     } else {
+//       return data.discount.amount >= 0 && data.discount.amount <= 100;
+//     }
+//   },
+//   {
+//     message: `Discount amount is not valid`,
+//     path: ["discount", "amount"],
+//   }
+// );
 export type AddInvoiceSchema = z.infer<typeof AddInvoiceSchema>;
 
 const DBBackupPath = z.object({

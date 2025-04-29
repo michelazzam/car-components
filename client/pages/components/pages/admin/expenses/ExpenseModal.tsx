@@ -53,8 +53,8 @@ function ExpenseModal({
     useForm<ExpenseSchemaType>({
       resolver: zodResolver(apiValidations.AddExpense),
       defaultValues: {
-        expenseTypeId: "",
-        supplierId: "",
+        expenseTypeId: undefined,
+        supplierId: undefined,
         amount: 0,
         date: "",
         note: "",
@@ -106,8 +106,19 @@ function ExpenseModal({
   const onSubmit: SubmitHandler<ExpenseSchemaType> = (
     data: ExpenseSchemaType
   ) => {
-    if (expense) editExpense(data);
-    else addExpense(data);
+    const refinedData = {
+      ...data,
+      expenseTypeId:
+        data.expenseTypeId && data.expenseTypeId.length > 0
+          ? data.expenseTypeId
+          : undefined,
+      supplierId:
+        data.supplierId && data.supplierId.length > 0
+          ? data.supplierId
+          : undefined,
+    };
+    if (expense) editExpense(refinedData);
+    else addExpense(refinedData);
   };
 
   const handleCreateOption = (data: string) => {
