@@ -39,16 +39,9 @@ export class InvoiceService {
     private readonly reportService: ReportService,
   ) {}
 
-  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
-    const {
-      pageIndex,
-      search,
-      pageSize,
-      customerId,
-      type,
-      startDate,
-      endDate,
-    } = dto;
+  // 2 private functions making code cleaner
+  private buildGetInvoicesFilter(dto: GetInvoicesDto, user: ReqUserData) {
+    const { search, customerId, type, startDate, endDate } = dto;
 
     const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
 
@@ -102,21 +95,55 @@ export class InvoiceService {
       delete filter.$and;
     }
 
-    const [invoices, totalCount] = await Promise.all([
+    return filter;
+  }
+
+  private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
+    const { pageIndex, pageSize } = dto;
+
+    const filter = this.buildGetInvoicesFilter(dto, user);
+
+    const [invoices, totalCount, totalsResult] = await Promise.all([
       this.invoiceModel
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
         .limit(pageSize)
         .populate('customer')
-        .populate('vehicle'),
+        .populate('vehicle')
+        .lean(),
       this.invoiceModel.countDocuments(filter),
+      this.invoiceModel.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            totalInvoiceAmount: { $sum: '$accounting.totalUsd' },
+            totalAmountPaid: { $sum: '$accounting.paidAmountUsd' },
+            totalOutstandingAmount: {
+              $sum: {
+                $subtract: [
+                  '$accounting.totalUsd',
+                  '$accounting.paidAmountUsd',
+                ],
+              },
+            },
+          },
+        },
+      ]),
     ]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
+    const totals = totalsResult[0] || {
+      totalCost: 0,
+      totalPrice: 0,
+      totalProfitOrLoss: 0,
+    };
+
     return {
       invoices,
+      totals,
       pagination: {
         pageIndex,
         pageSize,
@@ -124,6 +151,96 @@ export class InvoiceService {
         totalPages,
       },
     };
+  }
+
+  async getAll(dto: GetInvoicesDto, user: ReqUserData) {
+    const { invoices, pagination, totals } = await this.getInvoicesData(
+      dto,
+      user,
+    );
+
+    // Flatten the invoices so each item becomes a separate object with its respective data
+    const flattenedInvoices = invoices.reduce((acc: any, invoice) => {
+      invoice.items.forEach((item) => {
+        acc.push({
+          ...invoice,
+          item,
+          items: undefined,
+        });
+      });
+      return acc;
+    }, []);
+
+    return {
+      invoices,
+      flattenedInvoices,
+      totals,
+      pagination,
+    };
+  }
+
+  /**
+   * Fetches the accounts receivable summary, including customer information and invoice amounts.
+   *
+   * @returns {Promise<{ rows: Array<{ customerName: string, invoiceAmount: number, amountPaid: number, outstandingAmount: number }>, totals: { totalInvoiceAmount: number, totalAmountPaid: number, totalOutstandingAmount: number } }>}
+   * An object containing:
+   * - `rows`: an array of objects representing each customer's invoice details.
+   * - `totals`: an object containing the total invoice amount, total amount paid, and total outstanding amount for all customers.
+   */
+  async getAccountsRecievableSummary() {
+    const invoices = await this.invoiceModel.aggregate([
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customer',
+        },
+      },
+      { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          customerName: { $ifNull: ['$customer.name', 'Unknown Customer'] },
+          invoiceAmount: '$accounting.totalUsd',
+          amountPaid: '$accounting.paidAmountUsd',
+          outstandingAmount: {
+            $subtract: ['$accounting.totalUsd', '$accounting.paidAmountUsd'],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$customerName',
+          invoiceAmount: { $sum: '$invoiceAmount' },
+          amountPaid: { $sum: '$amountPaid' },
+          outstandingAmount: { $sum: '$outstandingAmount' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const rows = invoices.map((invoice) => ({
+      customerName: invoice._id,
+      invoiceAmount: invoice.invoiceAmount,
+      amountPaid: invoice.amountPaid,
+      outstandingAmount: invoice.outstandingAmount,
+    }));
+
+    const totals = rows.reduce(
+      (acc, row) => {
+        acc.totalInvoiceAmount += row.invoiceAmount;
+        acc.totalAmountPaid += row.amountPaid;
+        acc.totalOutstandingAmount += row.outstandingAmount;
+        return acc;
+      },
+      {
+        totalInvoiceAmount: 0,
+        totalAmountPaid: 0,
+        totalOutstandingAmount: 0,
+      },
+    );
+
+    return { rows, totals };
   }
 
   async create(dto: InvoiceDto) {
@@ -136,7 +253,7 @@ export class InvoiceService {
     const accounting = await this.accountingService.getAccounting();
 
     // Create new invoice
-    await this.invoiceModel.create({
+    const newInvoice = await this.invoiceModel.create({
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
@@ -158,6 +275,13 @@ export class InvoiceService {
     });
 
     await this.doInvoiceEffects(updatedDto);
+
+    const populatedInvoice = await this.invoiceModel
+      .findById(newInvoice._id)
+      .populate('customer')
+      .populate('vehicle');
+
+    return populatedInvoice;
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {
@@ -235,20 +359,29 @@ export class InvoiceService {
       const invoiceRemaining =
         invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
 
+      let updateFields = {
+        'accounting.paidAmountUsd': invoice.accounting.paidAmountUsd,
+        'accounting.isPaid': invoice.accounting.isPaid,
+      };
+
       // if customer paid more than invoice remaining -> invoice is paid
       if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
-        invoice.accounting.paidAmountUsd += invoiceRemaining;
-        invoice.accounting.isPaid = true;
+        updateFields['accounting.paidAmountUsd'] += invoiceRemaining;
+        updateFields['accounting.isPaid'] = true;
         remainingAmountThatCustomerPaidNow -= invoiceRemaining;
       }
       // if customer paid less than invoice remaining -> invoice is not paid
       else {
-        invoice.accounting.paidAmountUsd += remainingAmountThatCustomerPaidNow;
-        invoice.accounting.isPaid = false;
+        updateFields['accounting.paidAmountUsd'] +=
+          remainingAmountThatCustomerPaidNow;
+        updateFields['accounting.isPaid'] = false;
         remainingAmountThatCustomerPaidNow = 0;
       }
 
-      await invoice.save();
+      await this.invoiceModel.updateOne(
+        { _id: invoice._id },
+        { $set: updateFields }, // set updated fields
+      );
 
       if (remainingAmountThatCustomerPaidNow <= 0) break;
     }
