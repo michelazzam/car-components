@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -27,12 +27,13 @@ import { ItemModule } from '../item/item.module';
       },
     ]),
     AccountingModule,
-    ReportModule,
+    forwardRef(() => ReportModule), //to avoid circular dependency
     CustomerModule,
     ServiceModule,
     ItemModule,
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],
+  exports: [InvoiceService],
 })
 export class InvoiceModule {}

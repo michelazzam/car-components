@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
 export class GetExpensesDto {
   @ApiProperty({ required: true, type: Number })
@@ -15,26 +16,22 @@ export class GetExpensesDto {
 
   @ApiProperty({
     type: String,
-    example: '2024/08/01',
+    example: '2024-08-01',
     required: false,
   })
   @IsOptional()
   @IsString()
-  @Matches(/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}$/, {
-    message: 'Date must be in the format YYYY/MM/DD',
-  })
+  @IsValidDateFormat()
   startDate: string;
 
   @ApiProperty({
     type: String,
-    example: '2024/08/01',
+    example: '2024-08-01',
     required: false,
   })
   @IsOptional()
   @IsString()
-  @Matches(/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}$/, {
-    message: 'Date must be in the format YYYY/MM/DD',
-  })
+  @IsValidDateFormat()
   endDate: string;
 
   @ApiProperty({ required: false })
