@@ -12,6 +12,7 @@ const DBBackupIcon = <i className="fe fe-database side-menu__icon"></i>;
 const SupplierIcon = <i className="fe fe-truck side-menu__icon"></i>;
 const ServicesIcon = <i className="ri-service-line side-menu__icon"></i>;
 const PurchaseIcon = <i className="ri-shopping-bag-line side-menu__icon"></i>;
+const DashboardIcon = <i className="ri-file-chart-line side-menu__icon"></i>;
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -121,6 +122,16 @@ export default function useMenuItems() {
       active: pathname.startsWith("/admin/balance"),
       selected: pathname.startsWith("/admin/balance"),
       title: "Balance",
+      visible: true,
+      children: [],
+    },
+    {
+      icon: DashboardIcon,
+      path: "/admin/dashboard",
+      type: "link",
+      active: pathname.startsWith("/admin/dashboard"),
+      selected: pathname.startsWith("/admin/dashboard"),
+      title: "Dashboard",
       visible: true,
       children: [],
     },
