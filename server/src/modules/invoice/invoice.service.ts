@@ -323,20 +323,29 @@ export class InvoiceService {
       const invoiceRemaining =
         invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
 
+      let updateFields = {
+        'accounting.paidAmountUsd': invoice.accounting.paidAmountUsd,
+        'accounting.isPaid': invoice.accounting.isPaid,
+      };
+
       // if customer paid more than invoice remaining -> invoice is paid
       if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
-        invoice.accounting.paidAmountUsd += invoiceRemaining;
-        invoice.accounting.isPaid = true;
+        updateFields['accounting.paidAmountUsd'] += invoiceRemaining;
+        updateFields['accounting.isPaid'] = true;
         remainingAmountThatCustomerPaidNow -= invoiceRemaining;
       }
       // if customer paid less than invoice remaining -> invoice is not paid
       else {
-        invoice.accounting.paidAmountUsd += remainingAmountThatCustomerPaidNow;
-        invoice.accounting.isPaid = false;
+        updateFields['accounting.paidAmountUsd'] +=
+          remainingAmountThatCustomerPaidNow;
+        updateFields['accounting.isPaid'] = false;
         remainingAmountThatCustomerPaidNow = 0;
       }
 
-      await invoice.save();
+      await this.invoiceModel.updateOne(
+        { _id: invoice._id },
+        { $set: updateFields }, // set updated fields
+      );
 
       if (remainingAmountThatCustomerPaidNow <= 0) break;
     }
