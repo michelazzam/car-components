@@ -7,6 +7,7 @@ import Filters from "./Filters";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { cn } from "@/utils/cn";
 import Pagination from "@/pages/components/admin/Pagination";
+import { formatDateWithDashes } from "@/lib/helpers/formatDate";
 
 function RecordsTable() {
   const columns: any = [
@@ -75,8 +76,10 @@ function RecordsTable() {
     new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
   );
   //those are used to get the data from the api
-  const apiStartDate = startDate ? startDate.toISOString().split("T")[0] : "";
-  const apiEndDate = endDate ? endDate.toISOString().split("T")[0] : "";
+  const apiStartDate = startDate
+    ? formatDateWithDashes(startDate, true) || ""
+    : "";
+  const apiEndDate = endDate ? formatDateWithDashes(endDate, true) || "" : "";
 
   const [pageIndex, setPageIndex] = React.useState(1);
 
@@ -85,11 +88,11 @@ function RecordsTable() {
     startDate: apiStartDate,
     endDate: apiEndDate,
     pageIndex: pageIndex - 1,
+    pageSize: 10,
   });
 
   const records = reportsData?.reports;
-  const totalPages = reportsData?.totalPages;
-
+  const totalPages = reportsData?.pagination.totalPages;
   return (
     <div className="bg-white py-4 px-2">
       <Filters

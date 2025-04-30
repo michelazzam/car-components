@@ -1,13 +1,15 @@
 import Link from "next/link";
 import React, { Fragment, useEffect, useState } from "react";
-// import { connect } from "react-redux";
 import UseAuth from "@/api-hooks/useAuth";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import UsdRateModal from "@/pages/components/pages/navbar/UsdRateModal";
 import { useLogoutUser } from "@/hooks/useLogoutUser";
 import BackupDBModal from "@/pages/components/pages/navbar/BackupDB";
+import { connect } from "react-redux";
+import { ThemeChanger } from "@/shared/redux/action";
+import store from "@/shared/redux/store";
 
-const Header = () => {
+const Header = ({ local_varaiable, ThemeChanger }: any) => {
   const { user } = UseAuth();
   const { data } = useGetUsdRate();
 
@@ -50,9 +52,9 @@ const Header = () => {
     const handleResize = () => {
       const windowObject = window;
       if (windowObject.innerWidth <= 991) {
-        // ThemeChanger({ ...local_varaiable, "dataToggled": "close" })
+        ThemeChanger({ ...local_varaiable, dataToggled: "close" });
       } else {
-        // ThemeChanger({...local_varaiable,"dataToggled":""})
+        ThemeChanger({ ...local_varaiable, dataToggled: "" });
       }
     };
     handleResize(); // Check on component mount
@@ -62,170 +64,170 @@ const Header = () => {
     };
   }, []);
 
-  // function menuClose() {
-  //   const theme = store.getState();
-  //   if (window.innerWidth <= 992) {
-  //     ThemeChanger({ ...theme, dataToggled: "close" });
-  //   }
-  //   if (window.innerWidth >= 992) {
-  //     ThemeChanger({
-  //       ...theme,
-  //       dataToggled: local_varaiable.dataToggled
-  //         ? local_varaiable.dataToggled
-  //         : "",
-  //     });
-  //     // local_varaiable.dataHeaderStyles == 'dark' ? 'light' : 'dark',
-  //   }
-  // }
+  function menuClose() {
+    const theme = store.getState();
+    if (window.innerWidth <= 992) {
+      ThemeChanger({ ...theme, dataToggled: "close" });
+    }
+    if (window.innerWidth >= 992) {
+      ThemeChanger({
+        ...theme,
+        dataToggled: local_varaiable.dataToggled
+          ? local_varaiable.dataToggled
+          : "",
+      });
+      // local_varaiable.dataHeaderStyles == 'dark' ? 'light' : 'dark',
+    }
+  }
 
-  // const toggleSidebar = () => {
-  //   const theme = store.getState();
-  //   let sidemenuType = theme.dataNavLayout;
-  //   if (window.innerWidth >= 992) {
-  //     if (sidemenuType === "vertical") {
-  //       let verticalStyle = theme.dataVerticalStyle;
-  //       const navStyle = theme.dataNavStyle;
-  //       switch (verticalStyle) {
-  //         // closed
-  //         case "closed":
-  //           ThemeChanger({ ...theme, dataNavStyle: "" });
-  //           if (theme.dataToggled === "close-menu-close") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "close-menu-close" });
-  //           }
-  //           break;
-  //         // icon-overlay
-  //         case "overlay":
-  //           ThemeChanger({ ...theme, dataNavStyle: "" });
-  //           if (theme.dataToggled === "icon-overlay-close") {
-  //             ThemeChanger({ ...theme, dataToggled: "", iconOverlay: "" });
-  //           } else {
-  //             if (window.innerWidth >= 992) {
-  //               ThemeChanger({
-  //                 ...theme,
-  //                 dataToggled: "icon-overlay-close",
-  //                 iconOverlay: "",
-  //               });
-  //             }
-  //           }
-  //           break;
-  //         // icon-text
-  //         case "icontext":
-  //           ThemeChanger({ ...theme, dataNavStyle: "" });
-  //           if (theme.dataToggled === "icon-text-close") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "icon-text-close" });
-  //           }
-  //           break;
-  //         // doublemenu
-  //         case "doublemenu":
-  //           ThemeChanger({ ...theme, dataNavStyle: "" });
-  //           ThemeChanger({ ...theme, dataNavStyle: "" });
-  //           if (theme.dataToggled === "double-menu-open") {
-  //             ThemeChanger({ ...theme, dataToggled: "double-menu-close" });
-  //           } else {
-  //             let sidemenu = document.querySelector(".side-menu__item.active");
-  //             if (sidemenu) {
-  //               ThemeChanger({ ...theme, dataToggled: "double-menu-open" });
-  //               if (sidemenu.nextElementSibling) {
-  //                 sidemenu.nextElementSibling.classList.add(
-  //                   "double-menu-active"
-  //                 );
-  //               } else {
-  //                 ThemeChanger({ ...theme, dataToggled: "" });
-  //               }
-  //             }
-  //           }
-  //           // doublemenu(ThemeChanger);
-  //           break;
-  //         // detached
-  //         case "detached":
-  //           if (theme.dataToggled === "detached-close") {
-  //             ThemeChanger({ ...theme, dataToggled: "", iconOverlay: "" });
-  //           } else {
-  //             ThemeChanger({
-  //               ...theme,
-  //               dataToggled: "detached-close",
-  //               iconOverlay: "",
-  //             });
-  //           }
+  const toggleSidebar = () => {
+    const theme = store.getState();
+    let sidemenuType = theme.dataNavLayout;
+    if (window.innerWidth >= 992) {
+      if (sidemenuType === "vertical") {
+        let verticalStyle = theme.dataVerticalStyle;
+        const navStyle = theme.dataNavStyle;
+        switch (verticalStyle) {
+          // closed
+          case "closed":
+            ThemeChanger({ ...theme, dataNavStyle: "" });
+            if (theme.dataToggled === "close-menu-close") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "close-menu-close" });
+            }
+            break;
+          // icon-overlay
+          case "overlay":
+            ThemeChanger({ ...theme, dataNavStyle: "" });
+            if (theme.dataToggled === "icon-overlay-close") {
+              ThemeChanger({ ...theme, dataToggled: "", iconOverlay: "" });
+            } else {
+              if (window.innerWidth >= 992) {
+                ThemeChanger({
+                  ...theme,
+                  dataToggled: "icon-overlay-close",
+                  iconOverlay: "",
+                });
+              }
+            }
+            break;
+          // icon-text
+          case "icontext":
+            ThemeChanger({ ...theme, dataNavStyle: "" });
+            if (theme.dataToggled === "icon-text-close") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "icon-text-close" });
+            }
+            break;
+          // doublemenu
+          case "doublemenu":
+            ThemeChanger({ ...theme, dataNavStyle: "" });
+            ThemeChanger({ ...theme, dataNavStyle: "" });
+            if (theme.dataToggled === "double-menu-open") {
+              ThemeChanger({ ...theme, dataToggled: "double-menu-close" });
+            } else {
+              let sidemenu = document.querySelector(".side-menu__item.active");
+              if (sidemenu) {
+                ThemeChanger({ ...theme, dataToggled: "double-menu-open" });
+                if (sidemenu.nextElementSibling) {
+                  sidemenu.nextElementSibling.classList.add(
+                    "double-menu-active"
+                  );
+                } else {
+                  ThemeChanger({ ...theme, dataToggled: "" });
+                }
+              }
+            }
+            // doublemenu(ThemeChanger);
+            break;
+          // detached
+          case "detached":
+            if (theme.dataToggled === "detached-close") {
+              ThemeChanger({ ...theme, dataToggled: "", iconOverlay: "" });
+            } else {
+              ThemeChanger({
+                ...theme,
+                dataToggled: "detached-close",
+                iconOverlay: "",
+              });
+            }
 
-  //           break;
+            break;
 
-  //         // default
-  //         case "default":
-  //           ThemeChanger({ ...theme, dataToggled: "" });
-  //       }
-  //       switch (navStyle) {
-  //         case "menu-click":
-  //           if (theme.dataToggled === "menu-click-closed") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "menu-click-closed" });
-  //           }
-  //           break;
-  //         // icon-overlay
-  //         case "menu-hover":
-  //           if (theme.dataToggled === "menu-hover-closed") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "menu-hover-closed" });
-  //           }
-  //           break;
-  //         case "icon-click":
-  //           if (theme.dataToggled === "icon-click-closed") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "icon-click-closed" });
-  //           }
-  //           break;
-  //         case "icon-hover":
-  //           if (theme.dataToggled === "icon-hover-closed") {
-  //             ThemeChanger({ ...theme, dataToggled: "" });
-  //           } else {
-  //             ThemeChanger({ ...theme, dataToggled: "icon-hover-closed" });
-  //           }
-  //           break;
-  //       }
-  //     }
-  //   } else {
-  //     if (theme.dataToggled === "close") {
-  //       ThemeChanger({ ...theme, dataToggled: "open" });
+          // default
+          case "default":
+            ThemeChanger({ ...theme, dataToggled: "" });
+        }
+        switch (navStyle) {
+          case "menu-click":
+            if (theme.dataToggled === "menu-click-closed") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "menu-click-closed" });
+            }
+            break;
+          // icon-overlay
+          case "menu-hover":
+            if (theme.dataToggled === "menu-hover-closed") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "menu-hover-closed" });
+            }
+            break;
+          case "icon-click":
+            if (theme.dataToggled === "icon-click-closed") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "icon-click-closed" });
+            }
+            break;
+          case "icon-hover":
+            if (theme.dataToggled === "icon-hover-closed") {
+              ThemeChanger({ ...theme, dataToggled: "" });
+            } else {
+              ThemeChanger({ ...theme, dataToggled: "icon-hover-closed" });
+            }
+            break;
+        }
+      }
+    } else {
+      if (theme.dataToggled === "close") {
+        ThemeChanger({ ...theme, dataToggled: "open" });
 
-  //       setTimeout(() => {
-  //         if (theme.dataToggled == "open") {
-  //           const overlay = document.querySelector("#responsive-overlay");
+        setTimeout(() => {
+          if (theme.dataToggled == "open") {
+            const overlay = document.querySelector("#responsive-overlay");
 
-  //           if (overlay) {
-  //             overlay.classList.add("active");
-  //             overlay.addEventListener("click", () => {
-  //               const overlay = document.querySelector("#responsive-overlay");
+            if (overlay) {
+              overlay.classList.add("active");
+              overlay.addEventListener("click", () => {
+                const overlay = document.querySelector("#responsive-overlay");
 
-  //               if (overlay) {
-  //                 overlay.classList.remove("active");
-  //                 menuClose();
-  //               }
-  //             });
-  //           }
-  //         }
+                if (overlay) {
+                  overlay.classList.remove("active");
+                  menuClose();
+                }
+              });
+            }
+          }
 
-  //         window.addEventListener("resize", () => {
-  //           if (window.screen.width >= 992) {
-  //             const overlay = document.querySelector("#responsive-overlay");
+          window.addEventListener("resize", () => {
+            if (window.screen.width >= 992) {
+              const overlay = document.querySelector("#responsive-overlay");
 
-  //             if (overlay) {
-  //               overlay.classList.remove("active");
-  //             }
-  //           }
-  //         });
-  //       }, 100);
-  //     } else {
-  //       ThemeChanger({ ...theme, dataToggled: "close" });
-  //     }
-  //   }
-  // };
+              if (overlay) {
+                overlay.classList.remove("active");
+              }
+            }
+          });
+        }, 100);
+      } else {
+        ThemeChanger({ ...theme, dataToggled: "close" });
+      }
+    }
+  };
 
   useEffect(() => {
     const navbar = document?.querySelector(".header");
@@ -261,7 +263,9 @@ const Header = () => {
             <div className="header-content-left">
               <div
                 className="header-element md:px-[0.325rem] !items-center"
-                onClick={() => {}}
+                onClick={() => {
+                  toggleSidebar();
+                }}
               >
                 <Link
                   aria-label="Hide Sidebar"
@@ -327,7 +331,7 @@ const Header = () => {
   );
 };
 
-// const mapStateToProps = (state: any) => ({
-//   local_varaiable: state,
-// });
-export default Header;
+const mapStateToProps = (state: any) => ({
+  local_varaiable: state,
+});
+export default connect(mapStateToProps, { ThemeChanger })(Header);
