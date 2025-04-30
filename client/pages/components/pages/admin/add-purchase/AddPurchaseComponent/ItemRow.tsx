@@ -13,37 +13,38 @@ function ItemRow({ product }: { product: AddPurchaseItemSchemaType }) {
     },
     {
       title: "Description",
-      value: product.description,
+      value: product?.description,
     },
     {
       title: "Unit Price",
-      value: product.price + "$",
+      value: product?.price + "$",
     },
     {
       title: "Quantity",
-      value: product.quantity,
+      value: product?.quantity,
     },
     {
       title: "Quantity Free",
-      value: product.quantityFree,
+      value: product?.quantityFree,
     },
     {
       title: "Discount",
-      value: product.discount + "$",
+      value: product?.discount + "$",
     },
 
     {
       title: "Lot",
-      value: product.lotNumber,
+      value: product?.lotNumber,
     },
     {
       title: "Exp.Date",
-      value: product.expDate,
+      value: product?.expDate,
     },
   ];
 
+  if (!product) return null;
   return (
-    <div key={product.itemId} className="flex items-center gap-3 w-full">
+    <div key={product?.itemId} className="flex items-center gap-3 w-full">
       <div
         className="border shadow-sm grid grid-cols-12  p-2 w-full "
         style={{ borderRadius: "8px" }}

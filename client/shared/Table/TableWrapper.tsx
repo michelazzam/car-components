@@ -32,7 +32,7 @@ function TableWrapper({
             )}
           </div>
           <div className="box-body space-y-3">
-            <div className="overflow-hidden table-bordered">
+            <div className="overflow-hidden table-bordered rounded-sm">
               <div
                 id={id}
                 className="ti-custom-table ti-striped-table ti-custom-table-hover"

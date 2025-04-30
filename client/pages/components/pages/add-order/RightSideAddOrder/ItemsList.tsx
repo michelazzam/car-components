@@ -3,6 +3,7 @@ import { Item, usePosStore } from "@/shared/store/usePosStore";
 import IncDecButton from "../IncDecButton";
 import { FaRegTrashCan } from "react-icons/fa6";
 import AddItemDiscountModal from "./AddItemDiscountModal";
+import { CSOS } from "@/constants/preferences";
 
 function ItemsList() {
   const [selectedItem, setSelectedItem] = useState<Item>();
@@ -20,7 +21,7 @@ function ItemsList() {
       item.name || "",
       item.price || 0,
       item.productId && item.quantity !== undefined && item.stock !== undefined
-        ? item.quantity < item.stock
+        ? item.quantity < item.stock || CSOS
           ? item.quantity + 1
           : item.quantity
         : (item.quantity || 0) + 1
@@ -69,7 +70,15 @@ function ItemsList() {
               value={Number(item.quantity)}
               onChange={(val) => handleChangeValue(item, val)}
             />
-            <span className={`w-1/4 text-center ${item.discount?.amount &&  item.discount?.amount > 0?"text-danger":""}`}>{item.amount}</span>
+            <span
+              className={`w-1/4 text-center ${
+                item.discount?.amount && item.discount?.amount > 0
+                  ? "text-danger"
+                  : ""
+              }`}
+            >
+              {item.amount}
+            </span>
             <span
               className="w-1/4 flex items-center justify-center hover:cursor-pointer hover:text-danger"
               onClick={() => removeItem(item)}
@@ -80,12 +89,12 @@ function ItemsList() {
         ))}
       </div>
       {/* {selectedItem && ( */}
-        <AddItemDiscountModal
-          triggerModalId="add-item-discount"
-          modalTitle="Add Discount"
-          item={selectedItem || cart[0]}
-          setSelected={setSelectedItem}
-        />
+      <AddItemDiscountModal
+        triggerModalId="add-item-discount"
+        modalTitle="Add Discount"
+        item={selectedItem || cart[0]}
+        setSelected={setSelectedItem}
+      />
       {/* )} */}
     </div>
   );
