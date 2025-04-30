@@ -31,13 +31,14 @@ const CheckboxField: React.FC<CheckboxProps> = ({
   }, []);
 
   // If we're on the server side, return null or a fallback UI
-  if (!isClient) return null;
-
+  
   const { fieldState, field } = useController({
     name,
     control: control ?? undefined,
   });
-
+  
+  if (!isClient) return null; 
+  
   const errorMessage = fieldState.error?.message;
 
   return (
