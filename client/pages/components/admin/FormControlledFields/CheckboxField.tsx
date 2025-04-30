@@ -1,7 +1,6 @@
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
 import { cn } from "@/utils/cn";
-import { useEffect, useState } from "react";
-import { Controller, useController } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 interface CheckboxProps {
   readOnly?: boolean;
@@ -24,22 +23,6 @@ const CheckboxField: React.FC<CheckboxProps> = ({
   onValueChange,
   containerClassnames,
 }) => {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true); // Ensures this runs only on the client side
-  }, []);
-
-  // If we're on the server side, return null or a fallback UI
-  if (!isClient) return null;
-
-  const { fieldState, field } = useController({
-    name,
-    control: control ?? undefined,
-  });
-
-  const errorMessage = fieldState.error?.message;
-
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
@@ -47,39 +30,44 @@ const CheckboxField: React.FC<CheckboxProps> = ({
           <Controller
             control={control}
             name={name}
-            render={() => (
-              <div className={cn("relative")}>
-                <label
-                  className={cn(
-                    " text-sm font-medium text-gray-700 flex items-start",
-                    containerClassnames || ""
-                  )}
-                >
-                  <input
-                    readOnly={readOnly}
-                    className="form-check-input me-2 !border-gray-400 border"
-                    type="checkbox"
-                    checked={field.value}
-                    onChange={(value) => {
-                      if (onValueChange) onValueChange(!field.value);
-                      field.onChange(value);
-                    }}
-                    id={name}
-                  />
+            render={({ field, fieldState }) => {
+              const errorMessage = fieldState.error?.message;
+              return (
+                <div className={cn("relative")}>
+                  <label
+                    className={cn(
+                      " text-sm font-medium text-gray-700 flex items-start",
+                      containerClassnames || ""
+                    )}
+                  >
+                    <input
+                      readOnly={readOnly}
+                      className="form-check-input me-2 !border-gray-400 border"
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(value) => {
+                        if (onValueChange) onValueChange(!field.value);
+                        field.onChange(value);
+                      }}
+                      id={name}
+                    />
+
+                    <div>
+                      <p className=" leading-none"> {label}</p>
+                      <p className="text-gray-500 leading-10">{description}</p>
+                    </div>
+                  </label>
 
                   <div>
-                    <p className=" leading-none"> {label}</p>
-                    <p className="text-gray-500 leading-10">{description}</p>
+                    {errorMessage ? (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errorMessage}
+                      </p>
+                    ) : null}
                   </div>
-                </label>
-
-                <div>
-                  {errorMessage ? (
-                    <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
-                  ) : null}
                 </div>
-              </div>
-            )}
+              );
+            }}
           />
         </div>
       </div>
