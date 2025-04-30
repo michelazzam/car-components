@@ -1,4 +1,4 @@
-import { SelectOption } from "@/pages/components/admin/Fields/SlectField";
+import { SelectOption } from "@/components/admin/Fields/SlectField";
 
 export const CarMakes = [
   { value: "Acura", label: "Acura" },

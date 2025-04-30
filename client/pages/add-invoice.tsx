@@ -1,8 +1,8 @@
 import Seo from "@/shared/layout-components/seo/seo";
 import React, { Fragment, useEffect, useState } from "react";
-import RightSideAddOrder from "./components/pages/add-order/RightSideAddOrder";
-import ItemsList from "./components/pages/add-order/ItemsList";
-import Header from "./components/pages/add-order/Header";
+import RightSideAddOrder from "../components/pages/add-order/RightSideAddOrder";
+import ItemsList from "../components/pages/add-order/ItemsList";
+import Header from "../components/pages/add-order/Header";
 import { useListProducts } from "@/api-hooks/products/use-list-products";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useForm, FormProvider } from "react-hook-form";
@@ -25,7 +25,7 @@ const AddInvoice = () => {
     addGroupItem,
     cart,
     clearCart,
-    totalAmount
+    totalAmount,
   } = usePosStore();
 
   //--------------------API----------------------
@@ -59,12 +59,11 @@ const AddInvoice = () => {
       subTotal: item.price && item.quantity ? item.price * item.quantity : 0,
       totalPrice: item.amount ?? 0,
     }));
-  
+
     return items;
   };
-  
-  const items = processCart(cart);
 
+  const items = processCart(cart);
 
   //----------------FORM-------------------------
   const methods = useForm<AddInvoiceSchema>({
@@ -82,14 +81,14 @@ const AddInvoice = () => {
       isPaid: false,
       hasVehicle: true,
       vehicleId: "",
-      items:items,
+      items: items,
       generalNote: "",
       customerNote: "",
       invoiceNumber: 0,
-      subTotalUsd:0,
-      totalUsd:0,
-      type:"s1",
-      taxesUsd:0
+      subTotalUsd: 0,
+      totalUsd: 0,
+      type: "s1",
+      taxesUsd: 0,
     },
   });
 
@@ -114,9 +113,9 @@ const AddInvoice = () => {
       clearCart(); // Optional if you want to ensure the cart is empty
 
       // Add products and services from editingInvoice
-      const productItems:any[] = [];
-      const serviceItems:any[] = [];
-      
+      const productItems: any[] = [];
+      const serviceItems: any[] = [];
+
       editingInvoice.items.forEach((item) => {
         if (item.itemRef) {
           productItems.push(item);
@@ -124,7 +123,7 @@ const AddInvoice = () => {
           serviceItems.push(item);
         }
       });
-      
+
       if (productItems.length > 1) {
         addGroupItem("product", productItems);
       }
@@ -137,29 +136,27 @@ const AddInvoice = () => {
         editingInvoice.accounting.discount.amount,
         editingInvoice.accounting.discount.type
       );
-
     }
   }, [editingInvoice, applyDiscount, addGroupItem, clearCart, methods]);
 
   useEffect(() => {
-    methods.setValue("items", items)
+    methods.setValue("items", items);
     const subTotalUsd = cart.reduce((accumulator, currentItem) => {
       return accumulator + (currentItem.amount || 0);
     }, 0);
-    methods.setValue("subTotalUsd",subTotalUsd);
-    methods.setValue("totalUsd", totalAmount())
-  
+    methods.setValue("subTotalUsd", subTotalUsd);
+    methods.setValue("totalUsd", totalAmount());
   }, [cart, methods]);
 
   useEffect(() => {
-    if(discountStore){
-      methods.setValue("totalUsd" , totalAmount());
+    if (discountStore) {
+      methods.setValue("totalUsd", totalAmount());
     }
-  },[discountStore])
+  }, [discountStore]);
 
-  useEffect(() =>{
-   methods.setValue("taxesUsd",vatAmount)
-  },[vatAmount])
+  useEffect(() => {
+    methods.setValue("taxesUsd", vatAmount);
+  }, [vatAmount]);
 
   return (
     <Fragment>

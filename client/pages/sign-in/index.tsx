@@ -6,8 +6,8 @@ import { useLoginUser } from "@/api-hooks/auth/useLoginUser";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations } from "@/lib/apiValidations";
-import TextFieldControlled from "../components/admin/FormControlledFields/TextFieldControlled";
-import PasswordFieldControlled from "../components/admin/FormControlledFields/PasswordFieldControlled";
+import TextFieldControlled from "../../components/admin/FormControlledFields/TextFieldControlled";
+import PasswordFieldControlled from "../../components/admin/FormControlledFields/PasswordFieldControlled";
 import { cn } from "@/utils/cn";
 import bg from "../../../client/public/assets/images/signin_img.jpeg";
 

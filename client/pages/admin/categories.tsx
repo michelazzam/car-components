@@ -9,8 +9,8 @@ import {
   Category,
   useListCategories,
 } from "@/api-hooks/categories/use-list-categories";
-import AddEditCategoryModal from "../components/pages/admin/categories/AddEditCategoryModal";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import AddEditCategoryModal from "../../components/pages/admin/categories/AddEditCategoryModal";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { AiOutlineArrowLeft } from "react-icons/ai";

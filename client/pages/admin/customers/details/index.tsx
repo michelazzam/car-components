@@ -1,8 +1,8 @@
 import React, { Suspense, useState } from "react";
 import { useRouter } from "next/router";
-import TableVehicles from "../../../components/pages/admin/vehicles/VehicleTalbe";
-import CustomerHeader from "../../../components/pages/admin/customers/customerDetails/Header";
-import ListInvoice from "@/pages/components/pages/admin/invoices/ListInvoice";
+import TableVehicles from "../../../../components/pages/admin/vehicles/VehicleTalbe";
+import CustomerHeader from "../../../../components/pages/admin/customers/customerDetails/Header";
+import ListInvoice from "@/components/pages/admin/invoices/ListInvoice";
 import { useGetCustomerById } from "@/api-hooks/customer/use-get-customer-by-id";
 
 const CustomerDetails = () => {

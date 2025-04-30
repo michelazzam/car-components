@@ -5,10 +5,13 @@ import { ReactTabulator } from "react-tabulator";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import ReactDOMServer from "react-dom/server";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
-import { Service, useListServices } from "@/api-hooks/services/use-list-services";
-import AddEditServiceModal from "../components/pages/admin/service/AddEditServiceModal";
+import {
+  Service,
+  useListServices,
+} from "@/api-hooks/services/use-list-services";
+import AddEditServiceModal from "../../components/pages/admin/service/AddEditServiceModal";
 
 const Services = () => {
   const { data } = useListServices();
@@ -133,7 +136,6 @@ const Services = () => {
         modalTitle="Add Service"
         setService={setSelectedService}
       />
-
 
       {selectedService && (
         <DeleteRecord

@@ -1,6 +1,6 @@
 import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
-import { Pagination } from "@/pages/components/admin/Pagination";
+import { Pagination } from "@/components/admin/Pagination";
 
 interface Customer {
   _id: string;

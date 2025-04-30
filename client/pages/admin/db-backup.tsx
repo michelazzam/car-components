@@ -1,5 +1,5 @@
 import useGetDBBackupPath from "@/api-hooks/db-backup/use-get-DB-backup-path";
-import EditBackupPath from "../components/pages/admin/db-backup/EditBackupPath";
+import EditBackupPath from "../../components/pages/admin/db-backup/EditBackupPath";
 
 function DbBackupPage() {
   const { data, isLoading } = useGetDBBackupPath();

@@ -1,4 +1,4 @@
-import Search from "@/pages/components/admin/Search";
+import Search from "@/components/admin/Search";
 import React, { ReactNode } from "react";
 
 function TableWrapper({

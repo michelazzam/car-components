@@ -8,9 +8,9 @@ import {
   Printer,
   useListPrinters,
 } from "@/api-hooks/printers/use-list-printers";
-import AddEditPrinterModal from "../components/pages/admin/printers/AddEditPrinterModal";
+import AddEditPrinterModal from "../../components/pages/admin/printers/AddEditPrinterModal";
 import ReactDOMServer from "react-dom/server";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { API } from "@/constants/apiEndpoints";
 

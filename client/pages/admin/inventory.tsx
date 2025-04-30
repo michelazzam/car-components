@@ -9,14 +9,14 @@ import {
   Product,
   useListProducts,
 } from "@/api-hooks/products/use-list-products";
-import AddEditProductModal from "../components/pages/admin/menu/AddEditProductModal";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import AddEditProductModal from "../../components/pages/admin/menu/AddEditProductModal";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import { useDebounce } from "@/hooks/useDebounce";
-import Search from "../components/admin/Search";
-import IncreaseStockModal from "../components/pages/admin/inventory/IncreaseStock";
-import Pagination from "../components/admin/Pagination";
-import DecreaseStockModal from "../components/pages/admin/inventory/DecreaseStock";
+import Search from "../../components/admin/Search";
+import IncreaseStockModal from "../../components/pages/admin/inventory/IncreaseStock";
+import Pagination from "../../components/admin/Pagination";
+import DecreaseStockModal from "../../components/pages/admin/inventory/DecreaseStock";
 
 const Inventory = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +26,7 @@ const Inventory = () => {
   const debouncedSearch = useDebounce(search);
 
   const { data } = useListProducts({
-    pageIndex: currentPage-1,
+    pageIndex: currentPage - 1,
     search: debouncedSearch,
     pageSize: pageSize,
   });

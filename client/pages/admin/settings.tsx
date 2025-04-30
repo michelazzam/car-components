@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 import UseAuth from "@/api-hooks/useAuth";
-import OrganizationInfo from "../components/pages/admin/settings/OrganizationInfo";
-import ChangePasswordPage from "../components/pages/admin/settings/ChangePassword";
+import OrganizationInfo from "../../components/pages/admin/settings/OrganizationInfo";
+import ChangePasswordPage from "../../components/pages/admin/settings/ChangePassword";
 import { useGetOrganization } from "@/api-hooks/restaurant/use-get-organization-info";
-import EditProfile from "../components/pages/admin/settings/EditProfile";
+import EditProfile from "../../components/pages/admin/settings/EditProfile";
 
 const Settings = () => {
   const { data: organization } = useGetOrganization();
