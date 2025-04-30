@@ -2,6 +2,8 @@ import Seo from "@/shared/layout-components/seo/seo";
 import React, { Suspense } from "react";
 
 import ListInvoice from "../components/pages/admin/invoices/ListInvoice";
+import StatementPrinting from "../components/pages/admin/common/StatementPrinting";
+import { HAS_STATEMENT } from "@/constants/preferences";
 // import StatementPrinting from "../components/pages/admin/common/StatementPrinting";
 
 const Invoices = () => {
@@ -16,7 +18,7 @@ const Invoices = () => {
             </h3>
           </div>
 
-          {/* <StatementPrinting /> */}
+          {HAS_STATEMENT && <StatementPrinting />}
         </div>
 
         <ListInvoice />

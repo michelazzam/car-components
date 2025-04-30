@@ -1,5 +1,6 @@
 import React from "react";
 import StatementPrinting from "../../common/StatementPrinting";
+import { HAS_STATEMENT } from "@/constants/preferences";
 
 const CustomerHeader = ({
   view,
@@ -21,7 +22,9 @@ const CustomerHeader = ({
         <span className="text-base">{`+${customerPhone}`}</span>
       </div>
       {view === "invoices" ? (
-        <StatementPrinting customerId={customerId} />
+        <div>
+          {HAS_STATEMENT && <StatementPrinting customerId={customerId} />}
+        </div>
       ) : (
         <button
           className="ti-btn ti-btn-primary-full ti-btn-wave my-2"

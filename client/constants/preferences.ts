@@ -7,3 +7,12 @@
  * @constant {boolean}
  */
 export const CSOS = true; // Continue selling when out of stock
+
+/**
+ * Constant representing the ability to print statement.
+ *
+ * If this constant is set to `true`, the system will allow user to print statement.
+ *
+ * @constant {boolean}
+ */
+export const HAS_STATEMENT = false; // Has the ability to select invoices and print statement
