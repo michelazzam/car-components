@@ -6,6 +6,7 @@ import InventorySummary from "../components/pages/admin/dashboard/InventorySumma
 import ProfitAndLossSummary from "../components/pages/admin/dashboard/ProfitAndLossSummary";
 import AccountsSummary from "../components/pages/admin/dashboard/AccountsSummary";
 import InvoicesSummary from "../components/pages/admin/dashboard/InvoicesSummary";
+import SalesProductsSummary from "../components/pages/admin/dashboard/SalesProductsSummary";
 
 // Stagger parent container
 const container = {
@@ -32,12 +33,9 @@ const Dashboard = () => {
         animate="animate"
         className="space-y-4"
       >
-        {/* Invoices Section */}
         <motion.div variants={fadeUp}>
           <InvoicesSummary />
         </motion.div>
-
-        {/* Grid Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <motion.div variants={fadeUp} className="md:col-span-2">
             <InventorySummary />
@@ -47,10 +45,11 @@ const Dashboard = () => {
             <ProfitAndLossSummary />
           </motion.div>
         </div>
-
-        {/* Accounts Summary */}
         <motion.div variants={fadeUp}>
           <AccountsSummary />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <SalesProductsSummary />
         </motion.div>
       </motion.div>
     </Suspense>

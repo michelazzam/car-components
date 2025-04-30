@@ -66,12 +66,12 @@ export interface Invoice {
 }
 interface InvoiceResponse {
   invoices: Invoice[];
-  flattenedInvoices:FlattenedInvoice;
+  flattenedInvoices:FlattenedInvoice[];
   pageSize: number;
   totalCount: number;
   totalPages: number;
 }
-interface FlattenedInvoice {
+export interface FlattenedInvoice {
   _id: string;
   number: string;
   type: string;
@@ -79,7 +79,7 @@ interface FlattenedInvoice {
   vehicle?: Vehicle;
   accounting: Accounting;
   customerNote?: string;
-  items: GetItem[];
+  item: GetItem;
   createdAt: string;
   __v?: number;
 
