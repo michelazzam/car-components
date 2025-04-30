@@ -2,6 +2,7 @@ import React from "react";
 import { Product } from "@/api-hooks/products/use-list-products";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { cn } from "@/utils/cn";
+import { CSOS } from "@/constants/preferences";
 
 function ItemCard({ product }: { product: Product }) {
   //----------------Storage----------------------------
@@ -20,7 +21,7 @@ function ItemCard({ product }: { product: Product }) {
 
     // If product is in the cart and there's stock left, increment quantity
     if (isInCart) {
-      if (product?.quantity > Number(isInCart?.quantity)) {
+      if (product?.quantity > Number(isInCart?.quantity) || CSOS) {
         handleInc(isInCart); // Increment quantity in the cart
       }
     } else {
@@ -43,7 +44,7 @@ function ItemCard({ product }: { product: Product }) {
 
   return (
     <button
-      disabled={outOfStock}
+      disabled={outOfStock && !CSOS}
       onClick={addItemToCart}
       className={cn(
         "flex flex-col justify-between w-full h-full bg-white py-10 relative rounded-sm border disabled:opacity-80 disabled:cursor-not-allowed",
@@ -68,9 +69,9 @@ function ItemCard({ product }: { product: Product }) {
         <span
           className={cn(
             "absolute top-1 right-1",
-            product?.quantity > 0
+            product?.quantity - (isInCart?.quantity || 0) > 0
               ? "text-white rounded-lg bg-success px-2"
-              : "text-danger"
+              : "text-white rounded-lg bg-danger px-2"
           )}
         >
           {itemCartQuantity}
