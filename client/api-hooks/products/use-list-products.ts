@@ -12,6 +12,9 @@ export interface Product {
   cost:number;
   quantity:number;
   status:"new" | "used";
+  totalPrice:number;
+  totalCost:number;
+  profitOrLoss:number;
 }
 
 
