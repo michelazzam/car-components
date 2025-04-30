@@ -1,12 +1,16 @@
 import { GetItem, Invoice } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
 
-function calculateDiscountedAmount(price: number, quantity: number, discount: Discount): number {
+function calculateDiscountedAmount(price: number, quantity: number, discount?: Discount): number {
   const total = price * quantity;
-  if (discount.type === "percentage") {
-    return Number((total - (total * discount.amount) / 100).toFixed(2));
-  } else {
-    return Number((total - discount.amount).toFixed(2));
+  if(discount){
+    if (discount.type === "percentage") {
+      return Number((total - (total * discount.amount) / 100).toFixed(2));
+    } else {
+      return Number((total - discount.amount).toFixed(2));
+    }
+  }else{
+    return total
   }
 }
 
@@ -168,7 +172,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
         ...state,
         cart: state.cart.map((item: Item) =>
           item.name === name && item.price === price
-            ? { ...item, quantity, amount: item.price * quantity }
+            ? { ...item, quantity, amount: calculateDiscountedAmount(item.price , quantity, item.discount) }
             : item
         ),
       };

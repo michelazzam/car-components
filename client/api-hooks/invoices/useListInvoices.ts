@@ -66,9 +66,23 @@ export interface Invoice {
 }
 interface InvoiceResponse {
   invoices: Invoice[];
+  flattenedInvoices:FlattenedInvoice[];
   pageSize: number;
   totalCount: number;
   totalPages: number;
+}
+export interface FlattenedInvoice {
+  _id: string;
+  number: string;
+  type: string;
+  customer: Customer;
+  vehicle?: Vehicle;
+  accounting: Accounting;
+  customerNote?: string;
+  item: GetItem;
+  createdAt: string;
+  __v?: number;
+
 }
 
 const useListInvoices = ({
@@ -82,7 +96,7 @@ const useListInvoices = ({
     paymentStatus,
     search,
     pageIndex,
-    pageSize,
+    pageSize=5,
     startDate,
     endDate,
     selectedVehicleId,

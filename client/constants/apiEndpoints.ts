@@ -92,10 +92,10 @@ export const API = {
   editOrder: (id: string) => `/orders/${id}`, // PUT
 
   //Reports
+  getAccountSummary:"reports/accounts-receivable-summary",
   getReportsByDate: "/reports/sum", // GET
   getAllReports: "/reports/all", // GET
   getGlobalReports: "/reports/global", // GET
-
   // DB Backup:
   getDbBackupPath: "/db-backup/path", // GET
   updateDbBackupPath: "/db-backup/path", // PUT
