@@ -5,6 +5,9 @@ import Sidebar from "../sidebar/sidebar";
 import Header from "../header/header";
 // import Switcher from "../switcher/switcher";
 import Backtotop from "../backtotop/backtotop";
+import Switcher from "../switcher/switcher";
+import { Provider } from "react-redux";
+import store from "@/shared/redux/store";
 
 const ContentLayout = ({ children }: any) => {
   const [lateLoad, setlateLoad] = useState(false);
@@ -33,22 +36,22 @@ const ContentLayout = ({ children }: any) => {
 
   return (
     <Fragment>
-      {/* <Provider store={store}> */}
-      <div style={{ display: `${lateLoad ? "block" : "none"}` }}>
-        {/* <Switcher /> */}
-        <div className="page">
-          <Header />
-          <Sidebar />
-          <div className="content">
-            <div className="main-content" onClick={Bodyclickk}>
-              {children}
+      <Provider store={store}>
+        <div style={{ display: `${lateLoad ? "block" : "none"}` }}>
+          <Switcher />
+          <div className="page">
+            <Header />
+            <Sidebar />
+            <div className="content">
+              <div className="main-content" onClick={Bodyclickk}>
+                {children}
+              </div>
             </div>
+            {/* <Footer /> */}
           </div>
-          {/* <Footer /> */}
+          <Backtotop />
         </div>
-        <Backtotop />
-      </div>
-      {/* </Provider> */}
+      </Provider>
     </Fragment>
   );
 };

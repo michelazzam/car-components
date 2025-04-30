@@ -63,8 +63,7 @@ export const API = {
   deleteInvoice: (id: string) => `/invoices/${id}`,
   addInvoice: "/invoices",
   editInvoice: (id: string) => `/invoices/${id}`,
-  addPayment:`/invoices/pay-customer-invoices`, // PUT
-
+  addPayment: `/invoices/pay-customer-invoices`, // PUT
 
   // categories
   listCategory: "/categories", // GET
@@ -93,9 +92,10 @@ export const API = {
   editOrder: (id: string) => `/orders/${id}`, // PUT
 
   //Reports
-  getReportsByDate: "/reports", // GET
-  getAllReports: "/reports/global", // GET
   getAccountSummary:"reports/accounts-receivable-summary",
+  getReportsByDate: "/reports/sum", // GET
+  getAllReports: "/reports/all", // GET
+  getGlobalReports: "/reports/global", // GET
 
   // DB Backup:
   getDbBackupPath: "/db-backup/path", // GET

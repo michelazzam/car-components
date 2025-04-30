@@ -69,7 +69,10 @@ function formatDateToISO(date: Date | null): string | null {
  * @param  {Date | null} date
  * @returns  {string | null}
  */
-const formatDateWithSlashes = (date: Date | null | string): string | null => {
+const formatDateWithSlashes = (
+  date: Date | null | string,
+  format?: "YYYY/MM/DD" | "dd/MM/yyyy"
+): string | null => {
   if (!date) return null;
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     throw new Error("Invalid date provided");
@@ -78,7 +81,11 @@ const formatDateWithSlashes = (date: Date | null | string): string | null => {
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
   const day = String(date.getDate()).padStart(2, "0");
 
-  return `${day}/${month}/${year}`; // Format as dd/MM/yyyy
+  if (format === "YYYY/MM/DD") {
+    return `${year}/${month}/${day}`;
+  } else {
+    return `${day}/${month}/${year}`;
+  }
 };
 
 /**

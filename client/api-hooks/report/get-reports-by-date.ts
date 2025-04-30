@@ -9,9 +9,8 @@ export interface Report {
 }
 
 export interface ReportByDateResponse {
-  reports: Report[];
-  totalIncomeUsd: number;
-  totalExpensesUsd: number;
+  totalIncome: number;
+  totalExpenses: number;
 }
 
 export function useGetReportsByDate({
@@ -24,7 +23,7 @@ export function useGetReportsByDate({
   endDate: string;
 }) {
   return useReadData<ReportByDateResponse>({
-    queryKey: ["reports", startDate, endDate],
+    queryKey: ["sum-reports", startDate, endDate],
     endpoint: API.getReportsByDate,
     params: { startDate, endDate },
     enabled: startDate && endDate ? true : false,
