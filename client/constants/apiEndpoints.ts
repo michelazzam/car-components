@@ -96,7 +96,6 @@ export const API = {
   getReportsByDate: "/reports/sum", // GET
   getAllReports: "/reports/all", // GET
   getGlobalReports: "/reports/global", // GET
-
   // DB Backup:
   getDbBackupPath: "/db-backup/path", // GET
   updateDbBackupPath: "/db-backup/path", // PUT
