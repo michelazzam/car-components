@@ -1,6 +1,6 @@
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
 import { cn } from "@/utils/cn";
-import { Controller } from "react-hook-form";
+import { Controller, useController } from "react-hook-form";
 
 interface CheckboxProps {
   readOnly?: boolean;
@@ -23,6 +23,9 @@ const CheckboxField: React.FC<CheckboxProps> = ({
   onValueChange,
   containerClassnames,
 }) => {
+  if (!control) return null;
+  const { fieldState, field } = useController({ name, control });
+
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
@@ -30,7 +33,7 @@ const CheckboxField: React.FC<CheckboxProps> = ({
           <Controller
             control={control}
             name={name}
-            render={({ field, fieldState }) => {
+            render={() => {
               const errorMessage = fieldState.error?.message;
               return (
                 <div className={cn("relative")}>
