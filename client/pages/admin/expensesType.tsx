@@ -5,15 +5,15 @@ import { ReactTabulator } from "react-tabulator";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import ReactDOMServer from "react-dom/server";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
-import Search from "../components/admin/Search";
+import Search from "../../components/admin/Search";
 
 import {
   ExpenseType,
   useListExpensesType,
 } from "@/api-hooks/expensesType/use-list-expensesType";
-import ExpenseTypeModal from "../components/pages/admin/expenseType/ExpenseTypeModal";
+import ExpenseTypeModal from "../../components/pages/admin/expenseType/ExpenseTypeModal";
 
 const ExpensesType = () => {
   const [search, setSearch] = useState("");

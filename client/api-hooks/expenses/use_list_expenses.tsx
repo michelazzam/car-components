@@ -1,7 +1,7 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
 import { ExpenseType } from "../expensesType/use-list-expensesType";
-import { Pagination } from "@/pages/components/admin/Pagination";
+import { Pagination } from "@/components/admin/Pagination";
 import { Supplier } from "../supplier/use-list-supplier";
 
 export interface Expense {

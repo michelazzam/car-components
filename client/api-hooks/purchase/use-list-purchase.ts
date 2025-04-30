@@ -1,7 +1,7 @@
 import { useReadData } from "@/api-service/useReadData";
 import { Supplier } from "../supplier/use-list-supplier";
 import { API } from "@/constants/apiEndpoints";
-import { Pagination } from "@/pages/components/admin/Pagination";
+import { Pagination } from "@/components/admin/Pagination";
 
 const useListPurchase = ({
   pageSize = 10,

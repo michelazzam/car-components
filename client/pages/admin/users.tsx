@@ -6,11 +6,11 @@ import TableWrapper from "@/shared/Table/TableWrapper";
 import ReactDOMServer from "react-dom/server";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
-import UserModal from "../components/pages/admin/users/UserModal";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import UserModal from "../../components/pages/admin/users/UserModal";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import { LuUserCog2 } from "react-icons/lu";
-import EditUserPermissionsModal from "../components/pages/admin/users/EditUserPermissionsModal";
+import EditUserPermissionsModal from "../../components/pages/admin/users/EditUserPermissionsModal";
 
 const Users = () => {
   const [userEditing, setUserEditing] = useState<User>();

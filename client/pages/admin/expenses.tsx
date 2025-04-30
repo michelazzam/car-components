@@ -3,25 +3,25 @@ import Seo from "@/shared/layout-components/seo/seo";
 import React, { useEffect, useState } from "react";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import { useDebounce } from "@/hooks/useDebounce";
-import Search from "../components/admin/Search";
-import Pagination from "../components/admin/Pagination";
+import Search from "../../components/admin/Search";
+import Pagination from "../../components/admin/Pagination";
 import DatePicker from "react-datepicker";
 import {
   Expense,
   useListExpenses,
 } from "@/api-hooks/expenses/use_list_expenses";
-import ExpenseModal from "../components/pages/admin/expenses/ExpenseModal";
+import ExpenseModal from "../../components/pages/admin/expenses/ExpenseModal";
 import SelectField, {
   SelectOption,
-} from "../components/admin/Fields/SlectField";
+} from "../../components/admin/Fields/SlectField";
 import { useListExpensesType } from "@/api-hooks/expensesType/use-list-expensesType";
 import { formatDateToISO } from "@/lib/helpers/formatDate";
 import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
-import Checkbox from "../components/admin/Fields/Checkbox";
+import Checkbox from "../../components/admin/Fields/Checkbox";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 

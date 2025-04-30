@@ -5,19 +5,19 @@ import { useDebounce } from "@/hooks/useDebounce";
 import ReactDOMServer from "react-dom/server";
 import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashCan } from "react-icons/fa6";
-import Search from "../../components/admin/Search";
-import Pagination from "../../components/admin/Pagination";
-import DeleteRecord from "../../components/admin/DeleteRecord";
+import Search from "../../../components/admin/Search";
+import Pagination from "../../../components/admin/Pagination";
+import DeleteRecord from "../../../components/admin/DeleteRecord";
 import { ReactTabulator } from "react-tabulator";
 import { API } from "@/constants/apiEndpoints";
 import {
   Customer,
   useListCustomers,
 } from "@/api-hooks/customer/use-list-customer";
-import CustomerModal from "../../components/pages/admin/customers/CustomerModal";
+import CustomerModal from "../../../components/pages/admin/customers/CustomerModal";
 import { useRouter } from "next/router";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import AddPaymentModal from "@/pages/components/pages/admin/customers/AddPaymentModal";
+import AddPaymentModal from "@/components/pages/admin/customers/AddPaymentModal";
 import { BsCashCoin } from "react-icons/bs";
 
 const Customers = () => {
@@ -93,7 +93,7 @@ const Customers = () => {
               className="btn btn-sm text-success border border-success rounded-md p-1 hover:bg-success hover:text-white"
               title="add payment"
             >
-             <BsCashCoin />
+              <BsCashCoin />
             </button>
             <button
               id="edit-btn"

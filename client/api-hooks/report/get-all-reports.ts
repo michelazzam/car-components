@@ -1,7 +1,7 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
 import { Report } from "./get-reports-by-date";
-import { Pagination } from "@/pages/components/admin/Pagination";
+import { Pagination } from "@/components/admin/Pagination";
 
 export interface AllReportsResponse {
   reports: Report[];

@@ -1,16 +1,16 @@
 import Seo from "@/shared/layout-components/seo/seo";
 import Pageheader from "@/shared/layout-components/page-header/pageheader";
-import RevenueanalyticsProgress from "../components/pages/admin/balance/RevenueanalyticsProgress";
-import RecordsTable from "../components/pages/admin/balance/RecordsTable";
+import RevenueanalyticsProgress from "../../components/pages/admin/balance/RevenueanalyticsProgress";
+import RecordsTable from "../../components/pages/admin/balance/RecordsTable";
 
-import TotalsAnalytics from "../components/pages/admin/balance/TotalsAnalytics";
+import TotalsAnalytics from "../../components/pages/admin/balance/TotalsAnalytics";
 
 import "react-datepicker/dist/react-datepicker.css";
-import Filters from "../components/pages/admin/balance/Filters";
+import Filters from "../../components/pages/admin/balance/Filters";
 import { useState } from "react";
 import { ReportByDateResponse } from "@/api-hooks/report/get-reports-by-date";
 import { AllReportsResponse } from "@/api-hooks/report/get-all-reports";
-import GlobalAnalytics from "../components/pages/admin/balance/GlobalAnalytics";
+import GlobalAnalytics from "../../components/pages/admin/balance/GlobalAnalytics";
 
 const Balance = () => {
   const [totals, setTotals] = useState<ReportByDateResponse>();

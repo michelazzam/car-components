@@ -6,17 +6,17 @@ import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
 import { FaEye, FaRegTrashCan } from "react-icons/fa6";
-import AddEditSupplierModal from "../components/pages/admin/supplier/AddEditSupplierModal";
+import AddEditSupplierModal from "../../components/pages/admin/supplier/AddEditSupplierModal";
 import {
   Supplier,
   useListSupplier,
 } from "@/api-hooks/supplier/use-list-supplier";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import Pagination from "../components/admin/Pagination";
+import Pagination from "../../components/admin/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
-import DeleteRecord from "../components/admin/DeleteRecord";
+import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
-import ViewSupplierModal from "../components/pages/admin/supplier/ViewSupplierModal";
+import ViewSupplierModal from "../../components/pages/admin/supplier/ViewSupplierModal";
 
 const SupplierPage = () => {
   const [pageIndex, setPageIndex] = useState(1);
