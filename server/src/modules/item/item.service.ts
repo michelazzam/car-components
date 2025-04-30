@@ -5,6 +5,7 @@ import { FilterQuery, Model } from 'mongoose';
 import { AddItemDto } from './dto/add-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { GetItemsDto } from './dto/get-items.dto';
+import { formatMoneyField } from 'src/utils/formatMoneyField';
 
 @Injectable()
 export class ItemService {
@@ -23,20 +24,59 @@ export class ItemService {
       filter.$or = [{ name: { $regex: search, $options: 'i' } }];
     }
 
-    const [items, totalCount] = await Promise.all([
+    const [items, totalCount, totalsResult] = await Promise.all([
       this.itemModel
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
         .limit(pageSize)
-        .populate('supplier', 'name'),
+        .populate('supplier', 'name')
+        .lean(),
       this.itemModel.countDocuments(filter),
+      this.itemModel.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            totalCost: { $sum: { $multiply: ['$cost', '$quantity'] } },
+            totalPrice: { $sum: { $multiply: ['$price', '$quantity'] } },
+            totalProfitOrLoss: {
+              $sum: {
+                $subtract: [
+                  { $multiply: ['$price', '$quantity'] },
+                  { $multiply: ['$cost', '$quantity'] },
+                ],
+              },
+            },
+          },
+        },
+      ]),
     ]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
+    const totals = totalsResult[0] || {
+      totalCost: 0,
+      totalPrice: 0,
+      totalProfitOrLoss: 0,
+    };
+
+    const itemsWithCalculations = items.map((item) => {
+      const totalCost = item.cost * item.quantity;
+      const totalPrice = item.price * item.quantity;
+      const profitOrLoss = totalPrice - totalCost;
+
+      return {
+        ...item,
+        totalCost,
+        totalPrice,
+        profitOrLoss,
+      };
+    });
+
     return {
-      items,
+      items: itemsWithCalculations,
+      totals,
       pagination: {
         pageIndex,
         pageSize,
@@ -57,8 +97,8 @@ export class ItemService {
   async create(dto: AddItemDto) {
     await this.itemModel.create({
       supplier: dto.supplierId,
-      cost: dto.cost,
-      price: dto.price,
+      cost: formatMoneyField(dto.cost),
+      price: formatMoneyField(dto.price),
       quantity: dto.quantity,
       name: dto.name,
       status: dto.status,
@@ -68,8 +108,8 @@ export class ItemService {
   async edit(id: string, dto: EditItemDto) {
     const item = await this.itemModel.findByIdAndUpdate(id, {
       supplier: dto.supplierId,
-      cost: dto.cost,
-      price: dto.price,
+      cost: formatMoneyField(dto.cost),
+      price: formatMoneyField(dto.price),
       quantity: dto.quantity,
       name: dto.name,
       status: dto.status,

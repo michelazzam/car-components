@@ -6,9 +6,9 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Matches,
   ValidateNested,
 } from 'class-validator';
+import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
 class PurchaseItem {
   @ApiProperty({
@@ -82,9 +82,7 @@ export class PurchaseDto {
     required: true,
   })
   @IsString()
-  @Matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/, {
-    message: 'Date must be in the format YYYY-MM-DD',
-  })
+  @IsValidDateFormat()
   invoiceDate: string;
 
   @ApiProperty({
