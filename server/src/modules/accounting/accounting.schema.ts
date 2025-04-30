@@ -13,6 +13,9 @@ export class Accounting {
   totalExpenses: number;
 
   @Prop({ default: 0 })
+  costOfGoodsSold: number;
+
+  @Prop({ default: 0 })
   totalCustomersLoan: number;
 
   @Prop({ default: 0 })

@@ -11,8 +11,9 @@ function TotalsAnalytics({
   totals: ReportByDateResponse | undefined;
   isPending: boolean;
 }) {
-  const expenses = totals?.totalExpensesUsd || 0;
-  const income = totals?.totalIncomeUsd || 0;
+  console.log("TOTALS: ", totals);
+  const expenses = totals?.totalExpenses || 0;
+  const income = totals?.totalIncome || 0;
   const profit = income - expenses;
 
   return (

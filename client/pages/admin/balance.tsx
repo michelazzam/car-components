@@ -9,21 +9,28 @@ import "react-datepicker/dist/react-datepicker.css";
 import Filters from "../components/pages/admin/balance/Filters";
 import { useState } from "react";
 import { ReportByDateResponse } from "@/api-hooks/report/get-reports-by-date";
+import { AllReportsResponse } from "@/api-hooks/report/get-all-reports";
+import GlobalAnalytics from "../components/pages/admin/balance/GlobalAnalytics";
 
 const Balance = () => {
   const [totals, setTotals] = useState<ReportByDateResponse>();
+  const [allReports, setAllReports] = useState<AllReportsResponse>();
   const [isPending, setIsPending] = useState<boolean>(false);
 
   return (
     <div>
       <Seo title="Balance List" />
       <Pageheader currentpage="Balance" withBreadCrumbs={false} />
-
-      <Filters setIsPending={setIsPending} setTotalsReports={setTotals} />
+      <GlobalAnalytics />
+      <Filters
+        setIsPending={setIsPending}
+        setTotalsReports={setTotals}
+        setAllReports={setAllReports}
+      />
       <TotalsAnalytics totals={totals} isPending={isPending} />
       <RevenueanalyticsProgress
-        key={totals?.reports.map((report) => report.date).join(",")}
-        reports={totals?.reports || []}
+        key={allReports?.reports?.map((report) => report.date).join(",")}
+        reports={allReports?.reports || []}
       />
       <RecordsTable />
     </div>

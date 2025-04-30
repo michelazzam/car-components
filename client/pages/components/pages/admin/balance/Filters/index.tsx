@@ -5,13 +5,22 @@ import {
   useGetReportsByDate,
 } from "@/api-hooks/report/get-reports-by-date";
 import SelectMonthAndYear from "../../common/SelectMonthAndYear";
+import { formatDateWithDashes } from "@/lib/helpers/formatDate";
+import {
+  AllReportsResponse,
+  useGetAllReports,
+} from "@/api-hooks/report/get-all-reports";
 
 function Filters({
   setTotalsReports,
+  setAllReports,
   setIsPending,
 }: {
   setTotalsReports: React.Dispatch<
     React.SetStateAction<ReportByDateResponse | undefined>
+  >;
+  setAllReports: React.Dispatch<
+    React.SetStateAction<AllReportsResponse | undefined>
   >;
   setIsPending: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
@@ -26,22 +35,33 @@ function Filters({
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   //------------------- CONSTANTS -------------------
-  const apiStartDate = startDate ? startDate.toISOString().split("T")[0] : "";
-  const apiEndDate = endDate ? endDate.toISOString().split("T")[0] : "";
-
+  console.log("START DATE IS ", startDate);
+  const apiStartDate = formatDateWithDashes(startDate, true) || "";
+  const apiEndDate = formatDateWithDashes(endDate, true) || "";
+  console.log("FORMATTED START DATE IS ", apiStartDate);
+  console.log("FORMATTED END DATE IS ", apiEndDate);
   //------------------- API CALLS -------------------
   const { data: totals, isPending } = useGetReportsByDate({
     startDate: apiStartDate,
     endDate: apiEndDate,
   });
 
+  const { data: allReports } = useGetAllReports({
+    startDate: apiStartDate,
+    endDate: apiEndDate,
+    pageIndex: 0,
+    pageSize: 100,
+  });
   //------------------- EFFECTS -------------------
   useEffect(() => {
     if (totals) {
       setTotalsReports(totals);
     }
+    if (allReports) {
+      setAllReports(allReports);
+    }
     setIsPending(isPending);
-  }, [totals]);
+  }, [totals, allReports]);
 
   //------------------- HANDLERS & FUNCTIONS -------------------
   const handleDateChange = (dates: [Date | null, Date | null]) => {
@@ -64,6 +84,7 @@ function Filters({
             selectsRange={true}
             startDate={startDate}
             endDate={endDate}
+            dateFormat={"yyyy/MM/dd"}
             onChange={handleDateChange}
             isClearable={false}
           />

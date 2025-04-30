@@ -156,3 +156,14 @@ export class InvoiceDto {
   @Type(() => InvoiceItem)
   items: InvoiceItem[];
 }
+
+// New interface with added fields
+export interface InvoiceItemWithDetails extends InvoiceItem {
+  cost: number; // Additional cost field for each item
+  name: string; // Additional name field for each item
+  price: number; // Additional price field for each item
+}
+
+export interface InvoiceDtoWithItemsDetails extends Omit<InvoiceDto, 'items'> {
+  items: InvoiceItemWithDetails[];
+}
