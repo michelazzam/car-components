@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { Invoice, useListInvoices } from "@/api-hooks/invoices/useListInvoices";
@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 
 function InvoicesSummary({ customerId }: { customerId?: string }) {
-
   //----TABLE STATES------
   const [totalAmount, setTotalAmount] = useState(0);
   //------Storage---------\
@@ -20,7 +19,7 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
   const tanstackColumns = [
     columnHelper.accessor("number", {
       header: "Invoice No.",
-      cell: ({ getValue }) => <div>TB{getValue()}</div>,
+      cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
     ...(!customerId
@@ -77,19 +76,17 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
       ),
     }),
     columnHelper.display({
-        id: "outstanding",
-        header: "Outstanding",
-        cell: ({ row }) => {
-          const total = row.original.accounting.totalUsd;
-          const paid = row.original.accounting.paidAmountUsd;
-          const outstanding = total - paid;
-      
-          // Only render after client is mounted      
-          return (
-            <div>{Number(outstanding).toLocaleString("en-US")}$</div>
-          );
-        },
-      }),
+      id: "outstanding",
+      header: "Outstanding",
+      cell: ({ row }) => {
+        const total = row.original.accounting.totalUsd;
+        const paid = row.original.accounting.paidAmountUsd;
+        const outstanding = total - paid;
+
+        // Only render after client is mounted
+        return <div>{Number(outstanding).toLocaleString("en-US")}$</div>;
+      },
+    }),
   ];
   const { pagination, setPagination } = useReactTablePagination();
 
@@ -120,7 +117,12 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
           <div className="box">
             <div className=" relative box-header flex justify-center items-center bg-primary">
               <h2 className="font-bold text-white">Invoices Summary</h2>
-              <Link href={"/admin/invoices"} className={`absolute top-4 right-4 w-5 h-5 rounded-full ${isLoading?"bg-danger":"bg-green"}`} />
+              <Link
+                href={"/admin/invoices"}
+                className={`absolute top-4 right-4 w-5 h-5 rounded-full ${
+                  isLoading ? "bg-danger" : "bg-green"
+                }`}
+              />
             </div>
 
             <div className="py-2 px-4 overflow-hidden">
