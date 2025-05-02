@@ -1,10 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
-// import { connect } from "react-redux";
-// import { ThemeChanger } from "../../redux/action";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { basePath } from "@/next.config";
-// import store from "@/shared/redux/store";
 import SimpleBar from "simplebar-react";
 import Menuloop from "./menuloop";
 
@@ -16,47 +12,10 @@ const Sidebar = ({ local_varaiable }: any) => {
 
   const MenuItems = useMenuItems();
 
-  // const [menuitems, setMenuItems] = useState(MenuItems);
-
-  // useEffect(() => {
-  //   if (user) {
-  //     // Filter menu items based on user permissions
-  //     const filteredMenuItems = MenuItems.filter((menuItem) => {
-  //       const requiredPermission = pagePermissions.find((p) => {
-  //         // console.log(p.title, menuItem.title, p.title == menuItem.title);
-  //         return p.title == menuItem.title;
-  //       })?.permission;
-  //       // console.log("required permission", requiredPermission);
-  //       if (!requiredPermission) {
-  //         // console.log("no permission required");
-  //         return true;
-  //       } // If no specific permission needed, show this menu item
-  //       const permissions = user.permissions?.[requiredPermission];
-  //       const hasPermission =
-  //         (permissions &&
-  //           (permissions.create ||
-  //             permissions.read ||
-  //             permissions.update ||
-  //             permissions.delete)) ||
-  //         false;
-
-  //       // console.log("has permission", hasPermission);
-  //       return hasPermission;
-  //     });
-  //     // console.log("filtered menu items", filteredMenuItems);
-  //     setMenuItems(filteredMenuItems);
-  //   } else {
-  //     // If no user is logged in, set an empty array or handle accordingly
-  //     setMenuItems([]);
-  //   }
-  // }, [user, router.pathname]); // Depend on user to re-evaluate when user changes
-
   useEffect(() => {
     const mainContent = document.querySelector(".main-content");
     if (window.innerWidth <= 992) {
       if (mainContent) {
-        // const theme = store.getState();
-        // ThemeChanger({ ...theme, dataToggled: "close" });
       } else if (
         document.documentElement.getAttribute("data-nav-layout") == "horizontal"
       ) {
@@ -99,27 +58,6 @@ const Sidebar = ({ local_varaiable }: any) => {
     // setMenuItems((arr: any) => [...arr]);
   }
 
-  // function Onhover() {
-  //   const theme = store.getState();
-  //   if (
-  //     (theme.dataToggled == "icon-overlay-close" ||
-  //       theme.dataToggled == "detached-close") &&
-  //     theme.iconOverlay != "open"
-  //   ) {
-  //     ThemeChanger({ ...theme, iconOverlay: "open" });
-  //   }
-  // }
-  // function Outhover() {
-  //   const theme = store.getState();
-  //   if (
-  //     (theme.dataToggled == "icon-overlay-close" ||
-  //       theme.dataToggled == "detached-close") &&
-  //     theme.iconOverlay == "open"
-  //   ) {
-  //     ThemeChanger({ ...theme, iconOverlay: "" });
-  //   }
-  // }
-
   function menuClose() {
     // const theme = store.getState();
     if (window.innerWidth <= 992) {
@@ -131,13 +69,6 @@ const Sidebar = ({ local_varaiable }: any) => {
     if (overlayElement) {
       overlayElement.classList.remove("active");
     }
-    // if (
-    //   theme.dataNavLayout == "horizontal" ||
-    //   theme.dataNavStyle == "menu-click" ||
-    //   theme.dataNavStyle == "icon-click"
-    // ) {
-    //   closeMenu();
-    // }
   }
 
   const WindowPreSize =
@@ -158,10 +89,6 @@ const Sidebar = ({ local_varaiable }: any) => {
     const currentWidth = WindowPreSize[WindowPreSize.length - 1];
     const prevWidth = WindowPreSize[WindowPreSize.length - 2];
 
-    // console.log("Current Width:", currentWidth);
-    // console.log("Previous Width:", prevWidth);
-    // console.log("Current dataVerticalStyle:", theme.dataVerticalStyle);
-
     if (WindowPreSize.length > 1) {
       if (currentWidth < 992 && prevWidth >= 992) {
         // less than 992;
@@ -172,12 +99,6 @@ const Sidebar = ({ local_varaiable }: any) => {
       if (currentWidth >= 992 && prevWidth < 992) {
         // greater than 992
         console.log("Width is greater than or equal to 992");
-        // console.log("Current dataVerticalStyle:", theme.dataVerticalStyle);
-        // ThemeChanger({
-        //   ...theme,
-        //   dataToggled:
-        //     theme.dataVerticalStyle === "doublemenu" ? "double-menu-open" : "",
-        // });
       }
     }
   }
@@ -495,154 +416,6 @@ const Sidebar = ({ local_varaiable }: any) => {
   }
   const [previousUrl, setPreviousUrl] = useState("/");
 
-  function toggleSidemenu() {
-    // const theme = store.getState();
-    // let element = event.target;
-    // if ((window.screen.availWidth <= 992 || theme.dataNavStyle != "icon-hover") && (window.screen.availWidth <= 992 || theme.dataNavStyle != "menu-hover")) {
-    // if (
-    //   (theme.dataNavStyle !== "icon-hover" &&
-    //     theme.dataNavStyle !== "menu-hover") ||
-    //   window.innerWidth < 992 ||
-    //   (theme.dataNavLayout !== "horizontal" &&
-    //     theme.dataToggled !== "icon-hover-closed" &&
-    //     theme.dataToggled !== "menu-hover-closed")
-    // ) {
-    //   for (const item of menuitems) {
-    //     if (item === targetObject) {
-    //       if (theme.dataVerticalStyle == "doublemenu" && item.active) {
-    //         return;
-    //       }
-    //       item.active = !item.active;
-    //       if (item.active) {
-    //         closeOtherMenus(menuitems, item);
-    //       } else {
-    //         if (theme.dataVerticalStyle == "doublemenu") {
-    //           ThemeChanger({ ...theme, dataToggled: "double-menu-close" });
-    //         }
-    //       }
-    //       setAncestorsActive(menuitems, item);
-    //     } else if (!item.active) {
-    //       if (theme.dataVerticalStyle != "doublemenu") {
-    //         item.active = false; // Set active to false for items not matching the target
-    //       }
-    //     }
-    //     if (item.children && item.children.length > 0) {
-    //       toggleSidemenu(event, targetObject, item.children);
-    //     }
-    //   }
-    //   if (targetObject?.children && targetObject.active) {
-    //     if (
-    //       theme.dataVerticalStyle == "doublemenu" &&
-    //       theme.dataToggled != "double-menu-open"
-    //     ) {
-    //       ThemeChanger({ ...theme, dataToggled: "double-menu-open" });
-    //     }
-    //   }
-    //   if (
-    //     element &&
-    //     theme.dataNavLayout == "horizontal" &&
-    //     (theme.dataNavStyle == "menu-click" ||
-    //       theme.dataNavStyle == "icon-click")
-    //   ) {
-    //     const listItem = element.closest("li");
-    //     if (listItem) {
-    //       // Find the first sibling <ul> element
-    //       const siblingUL = listItem.querySelector("ul");
-    //       let outterUlWidth = 0;
-    //       let listItemUL = listItem.closest("ul:not(.main-menu)");
-    //       while (listItemUL) {
-    //         listItemUL = listItemUL.parentElement.closest("ul:not(.main-menu)");
-    //         if (listItemUL) {
-    //           outterUlWidth += listItemUL.clientWidth;
-    //         }
-    //       }
-    //       if (siblingUL) {
-    //         // You've found the sibling <ul> element
-    //         let siblingULRect = listItem.getBoundingClientRect();
-    //         if (theme.dir == "rtl") {
-    //           if (
-    //             siblingULRect.left - siblingULRect.width - outterUlWidth + 150 <
-    //               0 &&
-    //             outterUlWidth < window.innerWidth &&
-    //             outterUlWidth + siblingULRect.width + siblingULRect.width <
-    //               window.innerWidth
-    //           ) {
-    //             targetObject.dirchange = true;
-    //           } else {
-    //             targetObject.dirchange = false;
-    //           }
-    //         } else {
-    //           if (
-    //             outterUlWidth + siblingULRect.right + siblingULRect.width + 50 >
-    //               window.innerWidth &&
-    //             siblingULRect.right >= 0 &&
-    //             outterUlWidth + siblingULRect.width + siblingULRect.width <
-    //               window.innerWidth
-    //           ) {
-    //             targetObject.dirchange = true;
-    //           } else {
-    //             targetObject.dirchange = false;
-    //           }
-    //         }
-    //       }
-    //       setTimeout(() => {
-    //         let computedValue = siblingUL.getBoundingClientRect();
-    //         if (computedValue.bottom > window.innerHeight) {
-    //           siblingUL.style.height =
-    //             window.innerHeight - computedValue.top - 8 + "px";
-    //           siblingUL.style.overflow = "auto";
-    //         }
-    //       }, 100);
-    //     }
-    //   }
-    // }
-    // setMenuItems((arr: any) => [...arr]);
-  }
-
-  // function setAncestorsActive(MenuItems: any, targetObject: any) {
-  //   const theme = store.getState();
-  //   const parent = findParent(MenuItems, targetObject);
-  //   if (parent) {
-  //     parent.active = true;
-  //     if (parent.active) {
-  //       ThemeChanger({ ...theme, dataToggled: "double-menu-open" });
-  //     }
-
-  //     setAncestorsActive(MenuItems, parent);
-  //   } else {
-  //     if (theme.dataVerticalStyle == "doublemenu") {
-  //       ThemeChanger({ ...theme, dataToggled: "double-menu-close" });
-  //     }
-  //   }
-  // }
-  // function closeOtherMenus(MenuItems: any, targetObject: any) {
-  //   for (const item of MenuItems) {
-  //     if (item !== targetObject) {
-  //       item.active = false;
-  //       if (item.children && item.children.length > 0) {
-  //         closeOtherMenus(item.children, targetObject);
-  //       }
-  //     }
-  //   }
-  // }
-  // function findParent(MenuItems: any, targetObject: any) {
-  //   for (const item of MenuItems) {
-  //     if (item.children && item.children.includes(targetObject)) {
-  //       return item;
-  //     }
-  //     if (item.children && item.children.length > 0) {
-  //       const parent: any = findParent(
-  //         (MenuItems = item.children),
-  //         targetObject
-  //       );
-  //       if (parent) {
-  //         return parent;
-  //       }
-  //     }
-  //   }
-  //   return null;
-  // }
-
   const Sideclick = () => {
     if (window.innerWidth > 992) {
       let html = document.documentElement;
@@ -687,53 +460,7 @@ const Sidebar = ({ local_varaiable }: any) => {
       >
         <div className="main-sidebar-header ">
           <div className="flex items-center space-x-2">
-            <Link href="/add-invoice" className="header-logo">
-              <img
-                src={`${
-                  process.env.NODE_ENV === "production" ? basePath : ""
-                }/assets/images/brand-logos/thermobox-nobg.png`}
-                alt="logo"
-                className="main-logo desktop-dark"
-              />
-            </Link>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop
-                    offset="0%"
-                    style={{ stopColor: "#6a11cb", stopOpacity: 1 }}
-                  />
-                  <stop
-                    offset="100%"
-                    style={{ stopColor: "#2575fc", stopOpacity: 1 }}
-                  />
-                </linearGradient>
-              </defs>
-              <line
-                x1="20"
-                y1="20"
-                x2="80"
-                y2="80"
-                stroke="url(#grad)"
-                strokeWidth="12"
-                strokeLinecap="round"
-              />
-              <line
-                x1="80"
-                y1="20"
-                x2="20"
-                y2="80"
-                stroke="url(#grad)"
-                strokeWidth="12"
-                strokeLinecap="round"
-              />
-            </svg>
-            <Link href={"https://advanced-meta.com/"}>
+            <Link href="/add-invoice">
               <Image
                 width={30}
                 height={30}
@@ -825,11 +552,7 @@ const Sidebar = ({ local_varaiable }: any) => {
                         ""
                       )}
                       {levelone.type === "sub" ? (
-                        <Menuloop
-                          MenuItems={levelone}
-                          level={level + 1}
-                          toggleSidemenu={toggleSidemenu}
-                        />
+                        <Menuloop MenuItems={levelone} level={level + 1} />
                       ) : (
                         ""
                       )}
@@ -862,9 +585,5 @@ const Sidebar = ({ local_varaiable }: any) => {
     </Fragment>
   );
 };
-
-// const mapStateToProps = (state: any) => ({
-//   local_varaiable: state,
-// });
 
 export default Sidebar;
