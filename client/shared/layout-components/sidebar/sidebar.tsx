@@ -444,6 +444,7 @@ const Sidebar = ({ local_varaiable }: any) => {
       }
     }
   }
+
   return (
     <Fragment>
       <div
@@ -517,7 +518,7 @@ const Sidebar = ({ local_varaiable }: any) => {
                             levelone.selected ? "active" : ""
                           }`}
                         >
-                          {levelone.icon}
+                          <div>{levelone.icon}</div>
                           <span className="side-menu__label">
                             {levelone.title}{" "}
                             {levelone.badgetxt ? (

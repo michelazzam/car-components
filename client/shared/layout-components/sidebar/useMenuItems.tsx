@@ -13,6 +13,7 @@ const SupplierIcon = <i className="fe fe-truck side-menu__icon"></i>;
 const ServicesIcon = <i className="ri-service-line side-menu__icon"></i>;
 const PurchaseIcon = <i className="ri-shopping-bag-line side-menu__icon"></i>;
 const DashboardIcon = <i className="ri-file-chart-line side-menu__icon"></i>;
+
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -26,6 +27,16 @@ export default function useMenuItems() {
 
   return [
     {
+      icon: DashboardIcon,
+      path: "/admin/dashboard",
+      type: "link",
+      active: pathname.startsWith("/admin/dashboard"),
+      selected: pathname.startsWith("/admin/dashboard"),
+      title: "Dashboard",
+      visible: true,
+      children: [],
+    },
+    {
       icon: FoodMenuIcon,
       path: "/add-invoice",
       type: "link",
@@ -36,12 +47,12 @@ export default function useMenuItems() {
       children: [],
     },
     {
-      icon: UserIcon,
-      path: "/admin/users",
+      icon: CustomerIcon,
+      path: "/admin/customers",
       type: "link",
-      active: pathname.startsWith("/admin/users"),
-      selected: pathname.startsWith("/admin/users"),
-      title: "Users",
+      active: pathname.startsWith("/admin/customers"),
+      selected: pathname === "/admin/customers",
+      title: "Customers",
       visible: true,
       children: [],
     },
@@ -56,12 +67,22 @@ export default function useMenuItems() {
       visible: true,
     },
     {
-      icon: CustomerIcon,
-      path: "/admin/customers",
+      icon: PurchaseIcon,
+      path: "/admin/purchase",
       type: "link",
-      active: pathname.startsWith("/admin/customers"),
-      selected: pathname === "/admin/customers",
-      title: "Customers",
+      active: pathname.startsWith("/admin/purchase"),
+      selected: pathname.startsWith("/admin/purchase"),
+      title: "Purchases",
+      children: [],
+      visible: true,
+    },
+    {
+      icon: ArchiveIcon,
+      path: "/admin/expenses",
+      type: "link",
+      active: pathname.startsWith("/admin/expenses"),
+      selected: pathname.startsWith("/admin/expenses"),
+      title: "Expenses",
       visible: true,
       children: [],
     },
@@ -86,32 +107,12 @@ export default function useMenuItems() {
       children: [],
     },
     {
-      icon: PurchaseIcon,
-      path: "/admin/purchase",
-      type: "link",
-      active: pathname.startsWith("/admin/purchase"),
-      selected: pathname.startsWith("/admin/purchase"),
-      title: "Purchases",
-      children: [],
-      visible: true,
-    },
-    {
       icon: ServicesIcon,
       path: "/admin/services",
       type: "link",
       active: pathname.startsWith("/admin/services"),
       selected: pathname.startsWith("/admin/services"),
       title: "Services",
-      visible: true,
-      children: [],
-    },
-    {
-      icon: ArchiveIcon,
-      path: "/admin/expenses",
-      type: "link",
-      active: pathname.startsWith("/admin/expenses"),
-      selected: pathname.startsWith("/admin/expenses"),
-      title: "Expenses",
       visible: true,
       children: [],
     },
@@ -126,12 +127,22 @@ export default function useMenuItems() {
       children: [],
     },
     {
-      icon: DashboardIcon,
-      path: "/admin/dashboard",
+      icon: UserIcon,
+      path: "/admin/users",
       type: "link",
-      active: pathname.startsWith("/admin/dashboard"),
-      selected: pathname.startsWith("/admin/dashboard"),
-      title: "Dashboard",
+      active: pathname.startsWith("/admin/users"),
+      selected: pathname.startsWith("/admin/users"),
+      title: "Users",
+      visible: true,
+      children: [],
+    },
+    {
+      icon: SettingsIcon,
+      path: "/admin/settings",
+      type: "link",
+      active: pathname.startsWith("/admin/settings"),
+      selected: pathname.startsWith("/admin/settings"),
+      title: "Settings",
       visible: true,
       children: [],
     },
@@ -144,16 +155,6 @@ export default function useMenuItems() {
       title: "DB Backup",
       children: [],
       visible: user?.role === "superAmsAdmin",
-    },
-    {
-      icon: SettingsIcon,
-      path: "/admin/settings",
-      type: "link",
-      active: pathname.startsWith("/admin/settings"),
-      selected: pathname.startsWith("/admin/settings"),
-      title: "Settings",
-      visible: true,
-      children: [],
     },
   ].filter((item) => item.visible);
 }
