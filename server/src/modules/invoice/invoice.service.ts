@@ -436,6 +436,25 @@ export class InvoiceService {
         totalCustomersLoan: remainingAmount,
       });
     }
+    // if paid more, decrease customer loan if he has any
+    else if (remainingAmount < 0) {
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const customer = await this.customerService.getOneById(
+        updatedDto.customerId,
+      );
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      if (customer.loan > 0) {
+        customer.loan -= extraAmountPaid;
+        await customer.save();
+
+        // decrease total customer loans
+        await this.accountingService.updateAccounting({
+          totalCustomersLoan: -extraAmountPaid,
+        });
+      }
+    }
 
     // calc total items cost amount
     const totalProductsCost = updatedDto.items
@@ -483,6 +502,22 @@ export class InvoiceService {
       // decrease total customer loans
       await this.accountingService.updateAccounting({
         totalCustomersLoan: -remainingAmount,
+      });
+    } else {
+      // revert decreasing customer loan in case when paid he paid more than needed
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const customer = await this.customerService.getOneById(
+        invoice.customer?.toString(),
+      );
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      customer.loan += extraAmountPaid;
+      await customer.save();
+
+      // increase total customer loans
+      await this.accountingService.updateAccounting({
+        totalCustomersLoan: customer.loan,
       });
     }
 
