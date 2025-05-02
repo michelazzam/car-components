@@ -256,6 +256,8 @@ export class InvoiceService {
 
     const accounting = await this.accountingService.getAccounting();
 
+    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+
     // Create new invoice
     const newInvoice = await this.invoiceModel.create({
       customer: updatedDto.customerId,
@@ -264,7 +266,7 @@ export class InvoiceService {
       type: dto.type,
       customerNote: updatedDto.customerNote,
       accounting: {
-        isPaid: updatedDto.isPaid,
+        isPaid,
         usdRate: accounting.usdRate,
 
         discount: updatedDto.discount,
@@ -294,6 +296,8 @@ export class InvoiceService {
     // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
+    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+
     // Create new invoice
     await this.invoiceModel.findByIdAndUpdate(invoiceId, {
       customer: updatedDto.customerId,
@@ -301,7 +305,7 @@ export class InvoiceService {
       type: dto.type,
       customerNote: updatedDto.customerNote,
       accounting: {
-        isPaid: updatedDto.isPaid,
+        isPaid,
 
         discount: updatedDto.discount,
         taxesUsd: updatedDto.taxesUsd,
@@ -418,7 +422,7 @@ export class InvoiceService {
 
     // save customer loan if did not pay all
     const remainingAmount = updatedDto.totalUsd - updatedDto.paidAmountUsd;
-    if (!updatedDto.isPaid && remainingAmount > 0) {
+    if (remainingAmount > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
       );

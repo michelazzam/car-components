@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsBoolean,
   IsEnum,
   IsMongoId,
   IsNumber,
@@ -108,12 +107,6 @@ export class InvoiceDto {
   @ValidateNested()
   @Type(() => Discount)
   discount: Discount;
-
-  @ApiProperty({
-    required: true,
-  })
-  @IsBoolean()
-  isPaid: boolean;
 
   @ApiProperty({
     required: true,
