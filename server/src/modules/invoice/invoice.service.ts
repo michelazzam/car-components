@@ -581,8 +581,11 @@ export class InvoiceService {
     // Ensure two-digit sequence
     const paddedSeq = String(updatedCounter.seq).padStart(2, '0');
 
+    // Get the last two digits of the current year (e.g. 2022 -> 22)
+    const lastTwoDigitsOfYear = currentYear.toString().slice(-2);
+
     return type === 's2'
-      ? `s2${currentYear}${paddedSeq}`
-      : `${currentYear}${paddedSeq}`;
+      ? `s2-${lastTwoDigitsOfYear}${paddedSeq}`
+      : `${lastTwoDigitsOfYear}${paddedSeq}`;
   }
 }
