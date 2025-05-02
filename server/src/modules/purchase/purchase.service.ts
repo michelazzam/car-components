@@ -195,6 +195,24 @@ export class PurchaseService {
         totalSuppliersLoan: supplier.loan,
       });
     }
+
+    // if paid more, decrease supplier loan if he has any
+    else if (remainingAmount < 0) {
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const supplier = await this.supplierService.getOneById(dto.supplierId);
+      if (!supplier) throw new BadRequestException('Supplier not found');
+
+      if (supplier.loan > 0) {
+        supplier.loan = supplier.loan - extraAmountPaid;
+        await supplier.save();
+
+        // decrease total supplier loans
+        this.accountingService.updateAccounting({
+          totalSuppliersLoan: -extraAmountPaid,
+        });
+      }
+    }
   }
 
   private async revertPurchaseEffects(purchaseId: string) {
@@ -219,23 +237,44 @@ export class PurchaseService {
       await product.save();
     }
 
-    // Revert supplier loan
-    const supplier = await this.supplierService.getOneById(
-      purchase.supplier?.toString(),
-    );
-    if (!supplier) {
-      return; //ignore deleted suppliers
+    // Revert supplier loan in case didn't pay all
+    const remainingAmount = purchase.totalAmount - purchase.amountPaid;
+    if (remainingAmount > 0) {
+      const supplier = await this.supplierService.getOneById(
+        purchase.supplier?.toString(),
+      );
+      if (!supplier) {
+        return; //ignore deleted suppliers
+      }
+
+      supplier.loan -= purchase.amountPaid;
+      // Check whether loan is enough to subtract
+      if (supplier.loan < 0) supplier.loan = 0;
+
+      await supplier.save();
+
+      // decrease total supplier loans
+      this.accountingService.updateAccounting({
+        totalSuppliersLoan: -supplier.loan,
+      });
+    } else {
+      // revert decreasing supplier loan in case when paid he paid more than needed
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const supplier = await this.supplierService.getOneById(
+        purchase.supplier?.toString(),
+      );
+      if (!supplier) {
+        return; //ignore deleted suppliers
+      }
+
+      supplier.loan += extraAmountPaid;
+      await supplier.save();
+
+      // increase total supplier loans
+      this.accountingService.updateAccounting({
+        totalSuppliersLoan: supplier.loan,
+      });
     }
-
-    supplier.loan -= purchase.amountPaid;
-    // Check whether loan is enough to subtract
-    if (supplier.loan < 0) supplier.loan = 0;
-
-    await supplier.save();
-
-    // decrease total supplier loans
-    this.accountingService.updateAccounting({
-      totalSuppliersLoan: -supplier.loan,
-    });
   }
 }
