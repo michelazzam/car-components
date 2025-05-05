@@ -108,12 +108,18 @@ function RightSideAddOrder({
     if (data.items && data.items.length < 1) {
       return toast.error("please add products or services");
     }
-    console.log("isFullPaid:", isFullPaid);
+
     if (isFullPaid || data.paidAmountUsd !== 0 || data.paidAmountUsd !== 0) {
       data.isPaid = true;
     } else {
       data.isPaid = false;
     }
+
+    // set vehicleId undefined in case it's empty string
+    if (data.vehicleId === "") {
+      data.vehicleId = undefined;
+    }
+
     if (editingInvoice) {
       editInvoice(data);
     } else {
@@ -121,31 +127,6 @@ function RightSideAddOrder({
     }
     return;
   };
-
-  //-------------------Effects----------------------------------
-
-  // const setPrevInv = () => {
-  //   if (usdRate) {
-  //     setPreviewingInvoice({
-  //       customerNote: getValues("customerNote"),
-  //       invoiceNumber: getValues("invoiceNumber"),
-  //       discount: {
-  //         amount: discountStore.amount,
-  //         type: discountStore.type,
-  //       },
-  //       totalPriceUsd: totalAmount(),
-  //       paidAmountUsd: getValues("paidAmountUsd"),
-  //       totalPriceLbp: Number(totalAmount()) * usdRate.usdRate,
-  //       taxesLbp: Number(vatAmount) * usdRate.usdRate,
-  //       customer: {
-  //         name: getValues("customer")?.label || "",
-  //         address: getValues("customer")?.address,
-  //         tvaNumber: getValues("customer")?.tvaNumber,
-  //       },
-  //       vehicle: getValues("vehicle"),
-  //     });
-  //   }
-  // };
 
   useEffect(() => {
     let totalWithDiscount = 0;

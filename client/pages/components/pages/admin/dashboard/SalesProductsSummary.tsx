@@ -18,9 +18,9 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       header: "Product",
     }),
     columnHelper.accessor("number", {
-        header: "Invoice No.",
-        cell: ({ getValue }) => <div>TB-{getValue()}</div>,
-      }),
+      header: "Invoice No.",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
 
     columnHelper.accessor("item.quantity", {
       header: "Stock Quantity",
@@ -33,7 +33,9 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       header: "Total Value",
       cell: ({ getValue }) => (
         <div>
-          <div>{(getValue().cost * getValue().quantity).toLocaleString("en-US")}$</div>
+          <div>
+            {(getValue().cost * getValue().quantity).toLocaleString("en-US")}$
+          </div>
         </div>
       ),
     }),
@@ -45,7 +47,9 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       header: "Total Sales Value",
       cell: ({ getValue }) => (
         <div>
-          <div>{(getValue().price * getValue().quantity).toLocaleString("en-US")}$</div>
+          <div>
+            {(getValue().price * getValue().quantity).toLocaleString("en-US")}$
+          </div>
         </div>
       ),
     }),
@@ -54,7 +58,11 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       cell: ({ getValue }) => (
         <div>
           <div>
-            {((getValue().price - getValue().cost) * getValue().quantity).toLocaleString("en-US")}$
+            {(
+              (getValue().price - getValue().cost) *
+              getValue().quantity
+            ).toLocaleString("en-US")}
+            $
           </div>
         </div>
       ),

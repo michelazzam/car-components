@@ -26,7 +26,7 @@ function SelectMonthAndYear({
       label: (startYear + i).toString(),
       value: (startYear + i).toString(),
     })
-  );
+  ).sort((a, b) => b.label.localeCompare(a.label)); //sort in descending order
 
   const monthsOptions: Option[] = Array.from({ length: 12 }, (_, i) => ({
     //here let the lavel be MMM

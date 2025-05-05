@@ -20,7 +20,7 @@ import {
 import { IService } from '../service/service.schema';
 import { IItem } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
-import { getFormattedDate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
@@ -28,6 +28,7 @@ import { ReportService } from '../report/report.service';
 import { CustomerService } from '../customer/customer.service';
 import { ServiceService } from '../service/service.service';
 import { ItemService } from '../item/item.service';
+import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -191,8 +192,33 @@ export class InvoiceService {
    * - `rows`: an array of objects representing each customer's invoice details.
    * - `totals`: an object containing the total invoice amount, total amount paid, and total outstanding amount for all customers.
    */
-  async getAccountsRecievableSummary() {
+  async getAccountsRecievableSummary(dto: GetAccountsRecievableDto) {
+    const { startDate, endDate } = dto;
+
+    const matchCondition: any = {};
+
+    // Convert startDate and endDate to Date objects if they are strings
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    // If startDate is provided, add it to the match condition
+    if (start) {
+      start.setHours(0, 0, 0, 0); // Set start date to midnight
+      matchCondition.createdAt = { $gte: start };
+    }
+
+    // If endDate is provided, add it to the match condition
+    if (end) {
+      end.setHours(23, 59, 59, 999); // Set end date to the last millisecond of the day
+      matchCondition.createdAt = matchCondition.createdAt
+        ? { ...matchCondition.createdAt, $lte: end }
+        : { $lte: end };
+    }
+
     const invoices = await this.invoiceModel.aggregate([
+      {
+        $match: matchCondition,
+      },
       {
         $lookup: {
           from: 'customers',
@@ -256,6 +282,8 @@ export class InvoiceService {
 
     const accounting = await this.accountingService.getAccounting();
 
+    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+
     // Create new invoice
     const newInvoice = await this.invoiceModel.create({
       customer: updatedDto.customerId,
@@ -264,7 +292,7 @@ export class InvoiceService {
       type: dto.type,
       customerNote: updatedDto.customerNote,
       accounting: {
-        isPaid: updatedDto.isPaid,
+        isPaid,
         usdRate: accounting.usdRate,
 
         discount: updatedDto.discount,
@@ -294,6 +322,8 @@ export class InvoiceService {
     // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
+    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+
     // Create new invoice
     await this.invoiceModel.findByIdAndUpdate(invoiceId, {
       customer: updatedDto.customerId,
@@ -301,7 +331,7 @@ export class InvoiceService {
       type: dto.type,
       customerNote: updatedDto.customerNote,
       accounting: {
-        isPaid: updatedDto.isPaid,
+        isPaid,
 
         discount: updatedDto.discount,
         taxesUsd: updatedDto.taxesUsd,
@@ -418,7 +448,7 @@ export class InvoiceService {
 
     // save customer loan if did not pay all
     const remainingAmount = updatedDto.totalUsd - updatedDto.paidAmountUsd;
-    if (!updatedDto.isPaid && remainingAmount > 0) {
+    if (remainingAmount > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
       );
@@ -431,6 +461,25 @@ export class InvoiceService {
       await this.accountingService.updateAccounting({
         totalCustomersLoan: remainingAmount,
       });
+    }
+    // if paid more, decrease customer loan if he has any
+    else if (remainingAmount < 0) {
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const customer = await this.customerService.getOneById(
+        updatedDto.customerId,
+      );
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      if (customer.loan > 0) {
+        customer.loan -= extraAmountPaid;
+        await customer.save();
+
+        // decrease total customer loans
+        await this.accountingService.updateAccounting({
+          totalCustomersLoan: -extraAmountPaid,
+        });
+      }
     }
 
     // calc total items cost amount
@@ -479,6 +528,22 @@ export class InvoiceService {
       // decrease total customer loans
       await this.accountingService.updateAccounting({
         totalCustomersLoan: -remainingAmount,
+      });
+    } else {
+      // revert decreasing customer loan in case when paid he paid more than needed
+      const extraAmountPaid = Math.abs(remainingAmount);
+
+      const customer = await this.customerService.getOneById(
+        invoice.customer?.toString(),
+      );
+      if (!customer) throw new BadRequestException('Customer not found');
+
+      customer.loan += extraAmountPaid;
+      await customer.save();
+
+      // increase total customer loans
+      await this.accountingService.updateAccounting({
+        totalCustomersLoan: customer.loan,
       });
     }
 
@@ -581,8 +646,11 @@ export class InvoiceService {
     // Ensure two-digit sequence
     const paddedSeq = String(updatedCounter.seq).padStart(2, '0');
 
+    // Get the last two digits of the current year (e.g. 2022 -> 22)
+    const lastTwoDigitsOfYear = currentYear.toString().slice(-2);
+
     return type === 's2'
-      ? `s2${currentYear}${paddedSeq}`
-      : `${currentYear}${paddedSeq}`;
+      ? `s2-${lastTwoDigitsOfYear}${paddedSeq}`
+      : `${lastTwoDigitsOfYear}${paddedSeq}`;
   }
 }

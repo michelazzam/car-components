@@ -35,11 +35,10 @@ function Filters({
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   //------------------- CONSTANTS -------------------
-  console.log("START DATE IS ", startDate);
+
   const apiStartDate = formatDateWithDashes(startDate, true) || "";
   const apiEndDate = formatDateWithDashes(endDate, true) || "";
-  console.log("FORMATTED START DATE IS ", apiStartDate);
-  console.log("FORMATTED END DATE IS ", apiEndDate);
+
   //------------------- API CALLS -------------------
   const { data: totals, isPending } = useGetReportsByDate({
     startDate: apiStartDate,
@@ -52,6 +51,7 @@ function Filters({
     pageIndex: 0,
     pageSize: 100,
   });
+
   //------------------- EFFECTS -------------------
   useEffect(() => {
     if (totals) {

@@ -10,9 +10,10 @@ const useLoginUser = ({
   return usePostData<LoginUserData, ResponseData>({
     queryKeysToInvalidate: [["auth"]],
     endpoint: "/users/login",
+    hideSuccessToast: true,
     callBackOnSuccess: (data) => {
       callBackOnSuccess && callBackOnSuccess();
-      setAccessToken(data.accessToken); // This is now safe to call
+      setAccessToken(data.accessToken);
     },
   });
 };
