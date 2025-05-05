@@ -2,7 +2,10 @@ import Pageheader from "@/shared/layout-components/page-header/pageheader";
 import Seo from "@/shared/layout-components/seo/seo";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import React, { useState } from "react";
-import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
+import {
+  ReactTablePaginated,
+  useReactTablePagination,
+} from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
 import { FaEye, FaRegTrashCan } from "react-icons/fa6";
@@ -12,15 +15,13 @@ import {
   useListSupplier,
 } from "@/api-hooks/supplier/use-list-supplier";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import Pagination from "../../components/admin/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import ViewSupplierModal from "../../components/pages/admin/supplier/ViewSupplierModal";
 
 const SupplierPage = () => {
-  const [pageIndex, setPageIndex] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { pagination, setPagination } = useReactTablePagination();
 
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
@@ -31,8 +32,8 @@ const SupplierPage = () => {
     isFetching,
     error,
   } = useListSupplier({
-    pageSize: pageSize,
-    pageIndex: pageIndex - 1,
+    pageSize: pagination.pageSize,
+    pageIndex: pagination.pageIndex,
     search: debouncedSearch,
   });
   const suppliers = suppliersResponse?.suppliers;
@@ -145,18 +146,11 @@ const SupplierPage = () => {
           errorMessage={error?.message}
           data={suppliers || []}
           columns={tanstackColumns}
-          hidePagination
+          pagination={pagination}
+          setPagination={setPagination}
           loading={isLoading}
           paginating={isFetching}
           totalRows={suppliersResponse?.pagination.totalCount || 0}
-        />
-
-        <Pagination
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          currentPage={pageIndex}
-          setCurrentPage={setPageIndex}
-          totalPages={suppliersResponse?.pagination.totalPages || 0}
         />
       </TableWrapper>
 
