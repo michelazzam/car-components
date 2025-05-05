@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IReport, Report } from './report.schema';
 import { FilterQuery, Model } from 'mongoose';
-import { getFormattedDate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { AccountingService } from '../accounting/accounting.service';
 import { GetAllReportsDto } from './dto/get-all-reports.dto';
 import { GetReportsSumDto } from './dto/get-reports-sum.dto';
