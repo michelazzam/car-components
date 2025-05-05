@@ -70,7 +70,7 @@ function AddPaymentModal({
   return (
     <Modal
       id={triggerModalId}
-      size="md"
+      size="xs"
       onClose={() => {
         reset();
       }}
