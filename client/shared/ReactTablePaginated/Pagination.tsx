@@ -12,13 +12,13 @@ export default function Pagination({
   totalRows,
   paginating,
   hidePagination,
-  totalAmount,
+  renderInTheBottom,
 }: {
   table: any;
   totalRows: number;
   paginating?: boolean;
   hidePagination?: boolean;
-  totalAmount?: string;
+  renderInTheBottom?: React.ReactNode;
 }) {
   const doesCurrentPagePassedLastPage =
     table.getState().pagination?.pageIndex + 1 > table.getPageCount();
@@ -33,11 +33,7 @@ export default function Pagination({
   return (
     <div className="flex justify-between items-center p-3.5">
       <p className="text-xs text-gray-500">{totalRows} row(s)</p>
-      {totalAmount && (
-        <span className=" text-success font-bold">
-          Total Amount: {totalAmount}
-        </span>
-      )}
+      {renderInTheBottom && renderInTheBottom}
       {!hidePagination ? (
         <div className="flex items-center space-x-6">
           {paginating && (

@@ -7,7 +7,6 @@ import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
 import { useDebounce } from "@/hooks/useDebounce";
 import Search from "../../components/admin/Search";
-import Pagination from "../../components/admin/Pagination";
 import DatePicker from "react-datepicker";
 import {
   Expense,
@@ -23,19 +22,22 @@ import Link from "next/link";
 import { createColumnHelper } from "@tanstack/react-table";
 import Checkbox from "../../components/admin/Fields/Checkbox";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
+import {
+  ReactTablePaginated,
+  useReactTablePagination,
+} from "@/shared/ReactTablePaginated";
 
 const Expenses = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [selectedExpenses, setSelectedExpenses] = useState<Expense[]>([]);
   const [selectedExpenseType, setSelectedExpenseType] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [totalAmount, setTotalAmount] = useState(0);
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const debouncedSearch = useDebounce(search);
+
+  const { pagination, setPagination } = useReactTablePagination();
 
   //-----------------API Calls--------------------
   const {
@@ -44,8 +46,8 @@ const Expenses = () => {
     isLoading,
     error,
   } = useListExpenses({
-    pageSize: pageSize,
-    pageIndex: currentPage - 1,
+    pageSize: pagination.pageSize,
+    pageIndex: pagination.pageIndex,
     search: debouncedSearch,
     //convert the start date to the format of YYYY-MM-DD
     startDate: formatDateToISO(startDate) || undefined,
@@ -223,7 +225,7 @@ const Expenses = () => {
                         setSelectedExpenseType(v.value);
                       else setSelectedExpenseType("");
                     }}
-                    placeholder="Search Type"
+                    placeholder="Filter by Type"
                   />
                 </div>
 
@@ -237,7 +239,7 @@ const Expenses = () => {
 
                       <DatePicker
                         className="ti-form-input ltr:rounded-l-none rtl:rounded-r-none focus:z-10"
-                        placeholderText="Choose Date"
+                        placeholderText="Filter by Date"
                         selectsRange={true}
                         startDate={startDate}
                         endDate={endDate}
@@ -254,14 +256,14 @@ const Expenses = () => {
                     </div>
                   </div>
                 </div>
-                <div className="col-span-3 flex justify-end items-center pb-3">
-                  <Link
-                    href="/admin/expensesType"
-                    className="text-blue-500 underline"
-                  >
-                    Manage Expense Types
-                  </Link>
-                </div>
+              </div>
+              <div className="flex justify-end items-center pb-3">
+                <Link
+                  href="/admin/expensesType"
+                  className="text-blue-500 underline"
+                >
+                  Manage Expense Types
+                </Link>
               </div>
             </div>
             <div className="py-2 px-4">
@@ -271,16 +273,14 @@ const Expenses = () => {
                 columns={tanstackColumns}
                 loading={isLoading}
                 paginating={isFetching}
-                hidePagination
+                pagination={pagination}
+                setPagination={setPagination}
                 totalRows={expensesData?.pagination.totalCount || 0}
-                totalAmount={formatNumber(totalAmount, 2) + "$"}
-              />
-              <Pagination
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={expensesData?.pagination.totalPages || 0}
+                renderInTheBottom={
+                  <span className=" text-success font-bold">
+                    Total Amount: {totalAmount} $
+                  </span>
+                }
               />
             </div>
           </div>

@@ -110,7 +110,6 @@ const ExpensesType = () => {
         buttonTitle="Add Expense Type"
       />
 
-      {/* Temp using it directly instead of the reusable component since i need to add link to the categories page */}
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12">
           <div className="box">

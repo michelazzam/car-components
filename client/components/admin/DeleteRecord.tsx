@@ -26,7 +26,7 @@ export default function DeleteRecord({
   };
 
   return (
-    <Modal id="delete-record-modal" size="md">
+    <Modal id="delete-record-modal" size="xs">
       <Modal.Header title="Delete Record" id="delete-record-modal" />
       <Modal.Body>
         <div className="flex flex-col items-center justify-center">

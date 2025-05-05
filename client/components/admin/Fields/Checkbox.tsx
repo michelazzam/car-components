@@ -9,7 +9,7 @@ function Checkbox({
   isChecked,
   setIsChecked,
 }: {
-  id?:string
+  id?: string;
   readOnly?: boolean;
   label?: string;
   description?: string;
@@ -20,7 +20,7 @@ function Checkbox({
   return (
     <>
       <div className="" id={id}>
-        <label className=" text-sm font-medium text-gray-700 flex items-center">
+        <label className=" text-sm font-medium text-gray-700 flex items-center cursor-pointer">
           <input
             readOnly={readOnly}
             className="form-check-input me-2 !border-gray-400 border cursor-pointer"
