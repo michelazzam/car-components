@@ -11,13 +11,16 @@ import {
 import DateRangeField, {
   DateRange,
 } from "@/components/admin/Fields/DateRangeField";
-
+import { PiExportLight } from "react-icons/pi";
+import Pagination from "@/components/admin/Pagination";
+import ExportSalesProductsModal from "./ExportSalesProductsModal";
 function SalesProductsSummary({ customerId }: { customerId?: string }) {
   const [dates, setDates] = useState<DateRange>({
     startDate: null,
     endDate: null,
   });
-
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(1);
   //------Storage---------\
 
   const columnHelper = createColumnHelper<FlattenedInvoice>();
@@ -42,7 +45,8 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       cell: ({ getValue }) => (
         <div>
           <div>
-            {(getValue().cost * getValue().quantity)?.toLocaleString("en-US")}$
+            {(getValue()?.cost * getValue()?.quantity)?.toLocaleString("en-US")}
+            $
           </div>
         </div>
       ),
@@ -56,7 +60,10 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       cell: ({ getValue }) => (
         <div>
           <div>
-            {(getValue().price * getValue().quantity)?.toLocaleString("en-US")}$
+            {(getValue()?.price * getValue()?.quantity)?.toLocaleString(
+              "en-US"
+            )}
+            $
           </div>
         </div>
       ),
@@ -67,8 +74,8 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
         <div>
           <div>
             {(
-              (getValue().price - getValue().cost) *
-              getValue().quantity
+              (getValue()?.price - getValue()?.cost) *
+              getValue()?.quantity
             )?.toLocaleString("en-US")}
             $
           </div>
@@ -87,6 +94,8 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
     customerId,
     startDateState: dates.startDate ?? undefined,
     endDateState: dates.endDate ?? undefined,
+    localPageIndex: pageIndex - 1,
+    localPageSize: pageSize,
   });
 
   return (
@@ -98,30 +107,55 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
               <h2 className="font-bold text-white">Sales Products Summary</h2>
             </div>
             <div className="py-2 px-4">
-              <div className="w-[20rem]">
-                <DateRangeField
-                  dates={dates}
-                  setDates={setDates}
-                  label="Date Range"
-                  colSpan={6}
-                  marginBottom="mb-5"
+              <div className="flex justify-between items-center">
+                <div className="w-[20rem]">
+                  <DateRangeField
+                    dates={dates}
+                    setDates={setDates}
+                    label="Date Range"
+                    colSpan={6}
+                    marginBottom="mb-5"
+                  />
+                </div>
+                <button
+                  className="ti ti-btn ti-btn-secondary h-fit"
+                  data-hs-overlay="#export-salesProductsModal"
+                >
+                  <PiExportLight size={20} />
+                </button>
+              </div>
+              <div>
+                <ReactTablePaginated
+                  errorMessage={error?.message}
+                  data={invoicesData?.flattenedInvoices || []}
+                  columns={tanstackColumns}
+                  loading={isLoading}
+                  paginating={isFetching}
+                  hidePagination
+                  pagination={pagination}
+                  setPagination={setPagination}
+                  totalRows={invoicesData?.pagination.totalCount || 0}
+                  // totalAmount={totalAmount.toFixed(2) + "$"}
+                />
+
+                <Pagination
+                  totalPages={invoicesData?.pagination.totalPages || 0}
+                  currentPage={pageIndex}
+                  setCurrentPage={setPageIndex}
+                  pageSize={pageSize}
+                  setPageSize={setPageSize}
                 />
               </div>
-              <ReactTablePaginated
-                errorMessage={error?.message}
-                data={invoicesData?.flattenedInvoices || []}
-                columns={tanstackColumns}
-                loading={isLoading}
-                paginating={isFetching}
-                pagination={pagination}
-                setPagination={setPagination}
-                totalRows={invoicesData?.pagination.totalCount || 0}
-                // totalAmount={totalAmount.toFixed(2) + "$"}
-              />
             </div>
           </div>
         </div>
       </div>
+      <ExportSalesProductsModal
+        totalCount={invoicesData?.pagination.totalCount || 0}
+        columns={tanstackColumns}
+        startDate={dates.startDate}
+        endDate={dates.endDate}
+      />
     </div>
   );
 }

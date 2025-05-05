@@ -144,7 +144,7 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
             </div>
 
             <div className="py-2 px-4 overflow-hidden">
-              <div className="flex justify-between">
+              <div className="flex justify-between  items-center">
                 <div className="w-[20rem]">
                   <DateRangeField
                     dates={dates}
@@ -155,7 +155,7 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
                   />
                 </div>
                 <button
-                  className="btn btn-sm btn-outline-info "
+                  className="ti ti-btn ti-btn-secondary h-fit"
                   data-hs-overlay="#export-invoicesModal"
                 >
                   <PiExportLight size={20} />
@@ -172,7 +172,7 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
                   setPagination={setPagination}
                   hidePagination
                   totalRows={invoicesData?.pagination.totalCount || 0}
-                  totalAmount={totalAmount.toFixed(2) + "$"}
+                  // totalAmount={totalAmount.toFixed(2) + "$"}
                 />
                 <Pagination
                   totalPages={invoicesData?.pagination.totalPages || 0}

@@ -4,7 +4,7 @@ import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import React from "react";
 import * as XLSX from "xlsx"; // Import XLSX for Excel export
 
-function ExportInvoicesModal({
+function ExportSalesProductsModal({
   totalCount,
   startDate,
   endDate,
@@ -27,22 +27,35 @@ function ExportInvoicesModal({
 
   const exportToExcel = () => {
     const invoices = invoicesData?.invoices || [];
+    const flattenedInvoices = invoicesData?.flattenedInvoices || [];
     if (invoices.length === 0) return;
 
+    //product
+    //invoice no
+    //stock quantity
+    //unit cost
+    //total value
+    //sales price
+    //total sales value
+    //profit/loss
+
     // Map the data to a format suitable for Excel
-    const sheetData = invoices.map((invoice: any) => ({
+    const sheetData = flattenedInvoices.map((invoice: any) => ({
+      Product: invoice.item.name,
       "Invoice No.": invoice.number,
-      Customer: invoice.customer?.name || "N/A",
-      Amount: invoice.accounting.totalUsd,
-      "Received Amount": invoice.accounting.paidAmountUsd,
-      Status: invoice.accounting.isPaid ? "Paid" : "Unpaid",
-      "Issued Date": new Intl.DateTimeFormat("en-US", {
-        year: "2-digit",
-        month: "short",
-        day: "2-digit",
-      }).format(new Date(invoice.createdAt)),
-      Outstanding:
-        invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd,
+      "Stock Quantity": invoice.item.quantity,
+      "Unit Cost": invoice.item.cost?.toLocaleString("en-US"),
+      "Total Value": (
+        invoice.item.cost * invoice.item.quantity
+      )?.toLocaleString("en-US"),
+      "Sales Price": invoice.item.price,
+      "Total Sales Value": (
+        invoice.item.price * invoice.item.quantity
+      )?.toLocaleString("en-US"),
+      "Profit/Loss": (
+        (invoice.item.price - invoice.item.cost) *
+        invoice.item.quantity
+      )?.toLocaleString("en-US"),
     }));
 
     // Create a worksheet from the data
@@ -50,15 +63,15 @@ function ExportInvoicesModal({
 
     // Create a workbook with the worksheet
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Invoices");
+    XLSX.utils.book_append_sheet(wb, ws, "Sales Products Summary");
 
     // Write the workbook to a file
-    XLSX.writeFile(wb, "invoices_summary.xlsx");
+    XLSX.writeFile(wb, "sales-products-summary.xlsx");
   };
 
   return (
-    <Modal size="xl" id="export-invoicesModal">
-      <Modal.Header id="export-invoicesModal" title="Invoice Details" />
+    <Modal size="xl" id="export-salesProductsModal">
+      <Modal.Header id="export-salesProductsModal" title="Invoice Details" />
       <Modal.Body>
         <div>
           <ReactTablePaginated
@@ -66,7 +79,7 @@ function ExportInvoicesModal({
               pageIndex: 1,
               pageSize: totalCount,
             }}
-            data={invoicesData?.invoices || []}
+            data={invoicesData?.flattenedInvoices || []}
             hidePagination
             columns={columns}
             loading={isLoading}
@@ -87,4 +100,4 @@ function ExportInvoicesModal({
   );
 }
 
-export default ExportInvoicesModal;
+export default ExportSalesProductsModal;

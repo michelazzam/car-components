@@ -3,12 +3,9 @@
 import React from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
-import { useGetGlobalReports } from "@/api-hooks/report/get-global-report";
-// import {
-//   Product,
-//   useListProducts,
-// } from "@/api-hooks/products/use-list-products";
-
+import { PiExportLight } from "react-icons/pi";
+import * as XLSX from "xlsx"; // Import XLSX for Excel export
+import { useGetGlobalReports } from "@/api-hooks/report/get-global-reports";
 interface ProfitAndLoss {
   description: string;
   amount: number;
@@ -54,7 +51,26 @@ function ProfitAndLossSummary() {
   ];
 
   // Calculate the total amount for all invoices
+  const exportAsExcel = () => {
+    const profitAndLoss = data || [];
+    if (profitAndLoss.length === 0) return;
 
+    // Map the data to a format suitable for Excel
+    const sheetData = profitAndLoss.map((item: any) => ({
+      Description: item.description,
+      Amount: item.amount,
+    }));
+
+    // Create a worksheet from the data
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+
+    // Create a workbook with the worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ProfitAndLoss");
+
+    // Write the workbook to a file
+    XLSX.writeFile(wb, "profit_and_loss.xlsx");
+  };
   return (
     <div className="mt-2">
       <div className="grid grid-cols-12 gap-6">
@@ -63,15 +79,23 @@ function ProfitAndLossSummary() {
             <div className="box-header flex justify-center items-center bg-primary">
               <h2 className="font-bold text-white">Profit & Loss Summary</h2>
             </div>
+
             <div className="py-2 px-4 overflow-hidden">
+              <div className="flex justify-end">
+                <button
+                  className="ti ti-btn ti-btn-secondary h-fit"
+                  onClick={() => {
+                    exportAsExcel();
+                  }}
+                >
+                  <PiExportLight size={20} />
+                </button>
+              </div>
               <ReactTablePaginated
                 errorMessage={error?.message}
                 data={data || []}
                 columns={tanstackColumns}
                 loading={isLoading}
-                // paginating={isFetching}
-                // pagination={pagination}
-                // setPagination={setPagination}
                 totalRows={6}
                 hidePagination
               />
