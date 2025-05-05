@@ -35,14 +35,14 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
     }),
     columnHelper.accessor("item.cost", {
       header: "Unit Cost",
-      cell: ({ getValue }) => <div>{getValue().toLocaleString("en-US")}$</div>,
+      cell: ({ getValue }) => <div>{getValue()?.toLocaleString("en-US")}$</div>,
     }),
     columnHelper.accessor("item", {
       header: "Total Value",
       cell: ({ getValue }) => (
         <div>
           <div>
-            {(getValue().cost * getValue().quantity).toLocaleString("en-US")}$
+            {(getValue().cost * getValue().quantity)?.toLocaleString("en-US")}$
           </div>
         </div>
       ),
@@ -56,7 +56,7 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
       cell: ({ getValue }) => (
         <div>
           <div>
-            {(getValue().price * getValue().quantity).toLocaleString("en-US")}$
+            {(getValue().price * getValue().quantity)?.toLocaleString("en-US")}$
           </div>
         </div>
       ),
@@ -69,7 +69,7 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
             {(
               (getValue().price - getValue().cost) *
               getValue().quantity
-            ).toLocaleString("en-US")}
+            )?.toLocaleString("en-US")}
             $
           </div>
         </div>
@@ -115,7 +115,7 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
                 paginating={isFetching}
                 pagination={pagination}
                 setPagination={setPagination}
-                totalRows={invoicesData?.totalCount || 0}
+                totalRows={invoicesData?.pagination.totalCount || 0}
                 // totalAmount={totalAmount.toFixed(2) + "$"}
               />
             </div>

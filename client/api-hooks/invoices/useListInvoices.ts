@@ -2,6 +2,7 @@ import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
 import { useDebounce } from "@/hooks/useDebounce";
 import useListInvoicesQueryStrings from "@/shared/helper-hooks/useListInvoicesQueryStrings";
+import { Pagination } from "@/components/admin/Pagination";
 
 export interface Discount {
   amount: number;
@@ -67,9 +68,7 @@ export interface Invoice {
 interface InvoiceResponse {
   invoices: Invoice[];
   flattenedInvoices: FlattenedInvoice[];
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
+  pagination: Pagination;
 }
 export interface FlattenedInvoice {
   _id: string;
@@ -87,11 +86,13 @@ export interface FlattenedInvoice {
 const useListInvoices = ({
   customerId,
   localPageSize,
+  localPageIndex,
   startDateState,
   endDateState,
 }: {
   customerId?: string;
   localPageSize?: number | null;
+  localPageIndex?: number;
   startDateState?: string;
   endDateState?: string;
 }) => {
@@ -121,7 +122,7 @@ const useListInvoices = ({
       endDateState.toString() !== "");
 
   const params = {
-    pageIndex: pageIndex,
+    pageIndex: localPageIndex ?? pageIndex,
     search: debouncedSearch?.toString(),
     startDate: areBothDatesProvided
       ? startDateState || startDate?.toString()
@@ -131,12 +132,13 @@ const useListInvoices = ({
       : undefined,
     customerId: customerId,
     pageSize: localPageSize ?? pageSize,
+
     isPaid: isPaid,
     vehicleId: selectedVehicleId,
   };
 
   return useReadData<InvoiceResponse>({
-    queryKey: ["invoices", params],
+    queryKey: ["invoices", JSON.stringify(params)],
     endpoint: API.listInvoices,
     keepPreviousData: true,
     params,
