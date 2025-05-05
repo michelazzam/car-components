@@ -10,7 +10,7 @@ export interface Discount {
 
 export interface GetItem {
   itemRef?: string;
-  serviceRef?:string;
+  serviceRef?: string;
   quantity: number;
   name: string;
   price: number;
@@ -66,7 +66,7 @@ export interface Invoice {
 }
 interface InvoiceResponse {
   invoices: Invoice[];
-  flattenedInvoices:FlattenedInvoice[];
+  flattenedInvoices: FlattenedInvoice[];
   pageSize: number;
   totalCount: number;
   totalPages: number;
@@ -82,21 +82,24 @@ export interface FlattenedInvoice {
   item: GetItem;
   createdAt: string;
   __v?: number;
-
 }
 
 const useListInvoices = ({
   customerId,
   localPageSize,
+  startDateState,
+  endDateState,
 }: {
   customerId?: string;
   localPageSize?: number | null;
+  startDateState?: string;
+  endDateState?: string;
 }) => {
   const {
     paymentStatus,
     search,
     pageIndex,
-    pageSize=5,
+    pageSize = 5,
     startDate,
     endDate,
     selectedVehicleId,
@@ -108,16 +111,24 @@ const useListInvoices = ({
 
   // do not add the startDate/endDate unless they are both provided
   const areBothDatesProvided =
-    startDate &&
-    endDate &&
-    startDate.toString() !== "" &&
-    endDate.toString() !== "";
+    (startDate &&
+      endDate &&
+      startDate.toString() !== "" &&
+      endDate.toString() !== "") ||
+    (startDateState &&
+      endDateState &&
+      startDateState.toString() !== "" &&
+      endDateState.toString() !== "");
 
   const params = {
     pageIndex: pageIndex,
     search: debouncedSearch?.toString(),
-    startDate: areBothDatesProvided && startDate?.toString(),
-    endDate: areBothDatesProvided && endDate?.toString(),
+    startDate: areBothDatesProvided
+      ? startDateState || startDate?.toString()
+      : undefined,
+    endDate: areBothDatesProvided
+      ? endDateState || endDate?.toString()
+      : undefined,
     customerId: customerId,
     pageSize: localPageSize ?? pageSize,
     isPaid: isPaid,

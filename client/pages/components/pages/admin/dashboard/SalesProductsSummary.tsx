@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FlattenedInvoice,
   useListInvoices,
@@ -8,8 +8,16 @@ import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
+import DateRangeField, {
+  DateRange,
+} from "@/components/admin/Fields/DateRangeField";
 
 function SalesProductsSummary({ customerId }: { customerId?: string }) {
+  const [dates, setDates] = useState<DateRange>({
+    startDate: null,
+    endDate: null,
+  });
+
   //------Storage---------\
 
   const columnHelper = createColumnHelper<FlattenedInvoice>();
@@ -75,7 +83,11 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
     isLoading,
     isFetching,
     error,
-  } = useListInvoices({ customerId });
+  } = useListInvoices({
+    customerId,
+    startDateState: dates.startDate ?? undefined,
+    endDateState: dates.endDate ?? undefined,
+  });
 
   return (
     <div>
@@ -86,6 +98,15 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
               <h2 className="font-bold text-white">Sales Products Summary</h2>
             </div>
             <div className="py-2 px-4">
+              <div className="w-[20rem]">
+                <DateRangeField
+                  dates={dates}
+                  setDates={setDates}
+                  label="Date Range"
+                  colSpan={6}
+                  marginBottom="mb-5"
+                />
+              </div>
               <ReactTablePaginated
                 errorMessage={error?.message}
                 data={invoicesData?.flattenedInvoices || []}

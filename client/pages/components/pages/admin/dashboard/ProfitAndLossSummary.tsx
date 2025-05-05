@@ -32,6 +32,7 @@ function ProfitAndLossSummary() {
     }),
   ];
   //   const { pagination, setPagination } = useReactTablePagination();
+
   const { data: reportsData, isLoading, error } = useGetGlobalReports();
   const data: ProfitAndLoss[] = [
     {
@@ -51,8 +52,6 @@ function ProfitAndLossSummary() {
       amount: reportsData?.totalSuppliersLoan || 0,
     },
   ];
-
-  console.log("reportsData", reportsData);
 
   // Calculate the total amount for all invoices
 

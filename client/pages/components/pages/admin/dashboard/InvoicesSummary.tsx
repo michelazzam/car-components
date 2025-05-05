@@ -9,8 +9,26 @@ import {
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
 import Link from "next/link";
+import DateRangeField, {
+  DateRange,
+} from "@/components/admin/Fields/DateRangeField";
 
 function InvoicesSummary({ customerId }: { customerId?: string }) {
+  const [dates, setDates] = useState<DateRange>({
+    startDate: null,
+    endDate: null,
+  });
+  const {
+    data: invoicesData,
+    isLoading,
+    isFetching,
+    error,
+  } = useListInvoices({
+    customerId,
+    startDateState: dates.startDate ?? undefined,
+    endDateState: dates.endDate ?? undefined,
+  });
+
   //----TABLE STATES------
   const [totalAmount, setTotalAmount] = useState(0);
   //------Storage---------\
@@ -90,13 +108,6 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
   ];
   const { pagination, setPagination } = useReactTablePagination();
 
-  const {
-    data: invoicesData,
-    isLoading,
-    isFetching,
-    error,
-  } = useListInvoices({ customerId });
-
   // Calculate the total amount for all invoices
   useEffect(() => {
     const calculateTotalAmount = () => {
@@ -126,6 +137,15 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
             </div>
 
             <div className="py-2 px-4 overflow-hidden">
+              <div className="w-[20rem]">
+                <DateRangeField
+                  dates={dates}
+                  setDates={setDates}
+                  label="Date Range"
+                  colSpan={6}
+                  marginBottom="mb-5"
+                />
+              </div>
               <ReactTablePaginated
                 errorMessage={error?.message}
                 data={invoicesData?.invoices || []}
