@@ -32,6 +32,7 @@ function Header({
 
   const debouncedSearch = useDebounce(customerSearch);
   const vehiclesDebouncedSearch = useDebounce(vehicleSearch);
+
   //-------------------APIS Call-----------------------------
   const { data: customers } = useListCustomers({
     pageIndex: 0,
@@ -42,6 +43,10 @@ function Header({
     customerId: customerId,
     search: vehiclesDebouncedSearch,
   });
+
+  const selectedCustomer = customers?.customers?.find(
+    (option) => option._id === customerId
+  );
 
   //-------------------------Options--------------------------
   const customerOptions = customers?.customers.map((customer) => {
@@ -62,6 +67,7 @@ function Header({
       model: vehicle.model,
     };
   });
+
   // If the car is on a page that needs pagination to reach
   if (editingInvoice && editingInvoice.vehicle) {
     vehicleOptions?.push({
@@ -157,6 +163,7 @@ function Header({
       <VehicleModal
         triggerModalId="add-vehicle-modal"
         modalTitle="Add Vehicle"
+        selectedCustomer={selectedCustomer}
       />
       <ServiceModal
         triggerModalId="add-services-modal"
