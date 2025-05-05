@@ -113,7 +113,27 @@ const formatDateWithDashes = (
   return `${day}-${month}-${year}`; // Format as dd/MM/yyyy
 };
 
+function safeParseDate(dateStr: string | undefined): Date | null {
+  if (!dateStr) {
+    return null;
+  }
+  //check if it is good then return directly
+  if (!isNaN(Date.parse(dateStr))) {
+    return new Date(dateStr);
+  }
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    // Rearrange the parts to form YYYY-MM-DD
+    const formattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    const date = new Date(formattedDateStr);
+    return isNaN(date.getTime()) ? null : date;
+  } else {
+    return null;
+  }
+}
+
 export {
+  safeParseDate,
   formatDate,
   dateTimeToDateFormat,
   formatTime,
