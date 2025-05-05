@@ -17,7 +17,7 @@ export default function StatementPrinting({
     localPageSize: pageSize,
   });
   const invoices = invoicesData?.invoices;
-  const totalInvoicesInDB = invoicesData?.totalCount;
+  const totalInvoicesInDB = invoicesData?.pagination.totalCount;
   const [showIn, setShowIn] = useState<"lbp" | "usd" | "usd_vat">("usd");
 
   return (
