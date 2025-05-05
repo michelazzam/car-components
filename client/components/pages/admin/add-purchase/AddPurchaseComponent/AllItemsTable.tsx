@@ -39,6 +39,10 @@ function AllItemsTable() {
       header: "Exp.Date",
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
+    columnHelper.accessor("totalPrice", {
+      header: "totalPrice",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
     columnHelper.display({
       id: "actions",
       header: "",
