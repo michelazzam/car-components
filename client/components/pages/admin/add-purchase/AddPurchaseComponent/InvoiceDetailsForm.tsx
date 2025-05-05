@@ -7,6 +7,8 @@ import TextFieldControlled from "@/components/admin/FormControlledFields/TextFie
 import { usePurchase } from "@/shared/store/usePurchaseStore";
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import Link from "next/link";
+import { FaPlus } from "react-icons/fa6";
 
 function InvoiceDetailsForm() {
   const { control } = useFormContext<AddPurchaseSchemaType>();
@@ -34,6 +36,7 @@ function InvoiceDetailsForm() {
         onObjectChange={(value) => {
           setSupplier(value);
         }}
+        AddButton={<AddButton />}
         options={suppliersOptions || []}
       />
 
@@ -71,3 +74,15 @@ function InvoiceDetailsForm() {
 }
 
 export default InvoiceDetailsForm;
+const AddButton = () => {
+  return (
+    <Link
+      href={"#"}
+      data-bs-toggle="modal"
+      data-hs-overlay="#add-supplier-modal"
+      className="ti-btn ti-btn-icon flex items-center justify-center ti-btn-primary !mb-0"
+    >
+      <FaPlus />
+    </Link>
+  );
+};
