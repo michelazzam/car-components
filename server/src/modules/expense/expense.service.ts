@@ -8,7 +8,7 @@ import { Expense, IExpense } from './expense.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { ExpenseDto } from './dto/expense.dto';
 import { GetExpensesDto } from './dto/get-expenses.dto';
-import { getFormattedDate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { AccountingService } from '../accounting/accounting.service';
 import { ReportService } from '../report/report.service';
 import { SupplierService } from '../supplier/supplier.service';

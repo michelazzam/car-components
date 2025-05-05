@@ -20,7 +20,7 @@ import {
 import { IService } from '../service/service.schema';
 import { IItem } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
-import { getFormattedDate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
@@ -28,6 +28,7 @@ import { ReportService } from '../report/report.service';
 import { CustomerService } from '../customer/customer.service';
 import { ServiceService } from '../service/service.service';
 import { ItemService } from '../item/item.service';
+import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -191,8 +192,33 @@ export class InvoiceService {
    * - `rows`: an array of objects representing each customer's invoice details.
    * - `totals`: an object containing the total invoice amount, total amount paid, and total outstanding amount for all customers.
    */
-  async getAccountsRecievableSummary() {
+  async getAccountsRecievableSummary(dto: GetAccountsRecievableDto) {
+    const { startDate, endDate } = dto;
+
+    const matchCondition: any = {};
+
+    // Convert startDate and endDate to Date objects if they are strings
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    // If startDate is provided, add it to the match condition
+    if (start) {
+      start.setHours(0, 0, 0, 0); // Set start date to midnight
+      matchCondition.createdAt = { $gte: start };
+    }
+
+    // If endDate is provided, add it to the match condition
+    if (end) {
+      end.setHours(23, 59, 59, 999); // Set end date to the last millisecond of the day
+      matchCondition.createdAt = matchCondition.createdAt
+        ? { ...matchCondition.createdAt, $lte: end }
+        : { $lte: end };
+    }
+
     const invoices = await this.invoiceModel.aggregate([
+      {
+        $match: matchCondition,
+      },
       {
         $lookup: {
           from: 'customers',

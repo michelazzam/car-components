@@ -1,24 +1,21 @@
-"use client";
 import UseAuth from "@/api-hooks/useAuth";
 import { useRouter } from "next/router";
 import React, { Fragment, useEffect } from "react";
 
 const Main = () => {
-  // const [loading, setLoading] = useState(true);
-  const { user, isLoading } = UseAuth();
+  const { user } = UseAuth();
+
   const router = useRouter();
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (user) {
-        console.log("I AM A USER");
         if (user.role === "user") {
           router.push("/add-invoice");
         } else {
-          router.push("/admin/balance");
+          router.push("/admin/dashboard");
         }
       } else {
-        console.log("I AM NOT A USER");
-        console.log("IS LOADING ", isLoading);
         router.push("/sign-in");
       }
       // setLoading(false);
@@ -38,6 +35,7 @@ const Main = () => {
     </Fragment>
   );
 };
+
 Main.layout = "Contentlayout";
 
 export default Main;

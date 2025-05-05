@@ -4,7 +4,7 @@ import { IPurchase, Purchase } from './purchase.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { PurchaseDto } from './dto/purchase.dto';
 import { GetPurchaseDto } from './dto/get-purchase.dto';
-import { getFormattedDate } from 'src/utils/formatIsoDate';
+import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { AccountingService } from '../accounting/accounting.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
