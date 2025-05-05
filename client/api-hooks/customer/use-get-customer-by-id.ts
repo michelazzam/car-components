@@ -3,7 +3,7 @@ import { useReadData } from "../../api-service/useReadData";
 import { Vehicle } from "../vehicles/use_list_vehicles";
 import { Customer } from "./use-list-customer";
 
-interface SingleCustomer extends Customer {
+export interface SingleCustomer extends Customer {
   vehicles: Vehicle[];
 }
 
