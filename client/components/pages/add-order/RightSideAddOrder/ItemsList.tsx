@@ -16,7 +16,6 @@ function ItemsList() {
   };
 
   const handleInc = (item: Item) => {
-    console.log("hasan test item data:", item);
     setQuantity(
       item.name || "",
       item.price || 0,
@@ -27,23 +26,25 @@ function ItemsList() {
         : (item.quantity || 0) + 1
     );
   };
+
   const handleChangeValue = (item: Item, val: number) => {
     setQuantity(item.name || "", item.price || 0, +val);
   };
 
-  console.log(cart);
   return (
     <div className="col-span-2">
       <div className="flex items-center justify-between ">
         <div>
           <p>Products & Services Added</p>
         </div>
-        <span
-          onClick={() => clearCart()}
-          className="text-danger hover:cursor-pointer"
-        >
-          Clear all X
-        </span>
+        {cart.length > 0 && (
+          <span
+            onClick={() => clearCart()}
+            className="text-danger hover:cursor-pointer"
+          >
+            Clear all X
+          </span>
+        )}
       </div>
       <div className="col-span-2 h-[27vh] overflow-y-auto">
         {cart.map((item) => (

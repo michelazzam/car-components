@@ -225,6 +225,7 @@ function RightSideAddOrder({
           label="Amount Paid in USD"
           colSpan={2}
           prefix="$"
+          readOnly={isFullPaid}
         />
         {/*  */}
         <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
