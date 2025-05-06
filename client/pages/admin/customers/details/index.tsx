@@ -9,26 +9,17 @@ const CustomerDetails = () => {
   const [view, setView] = useState<"invoices" | "vehicles">("invoices");
 
   const router = useRouter();
-  const { customerId, cN, cE, cP } = router.query;
+  const { customerId } = router.query;
 
-  const customerName = cN as string;
-  const customerPhone = cP as string;
-  const customerEmail = cE as string;
   const { data: customer } = useGetCustomerById({
     customerId: customerId as string,
   });
+
   if (!customer) return <div>Loading...</div>;
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      {typeof customerName === "string" && typeof customerId === "string" && (
-        <CustomerHeader
-          customerName={customerName}
-          customerPhone={customerPhone}
-          customerEmail={customerEmail}
-          customerId={customerId}
-          view={view}
-        />
-      )}
+      {customer && <CustomerHeader customer={customer} view={view} />}
       <div className="flex gap-3 items-center border-b-2 border-gray-300 mb-3">
         <button
           className={`text-gray-500 text-lg font-bold p-3 border-b-2  ${

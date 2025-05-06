@@ -15,7 +15,6 @@ export interface Customer {
   createdAt: string;
   updatedAt: string;
   vehicles: Vehicle[];
-
   __v: number;
 }
 

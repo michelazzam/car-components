@@ -288,7 +288,6 @@ export type CustomerSchema = z.infer<typeof CustomerSchema>;
 // Add Invoice Schema
 const AddInvoiceSchema = z
   .object({
-    invoiceNumber: z.number().optional(),
     driverName: z.string().optional(),
     discount: z.object({
       amount: z.number().min(0, "Discount amount cannot be negative"),
@@ -315,24 +314,6 @@ const AddInvoiceSchema = z
     hasVehicle: z.boolean(),
     vehicleId: z.string().optional(),
     taxesUsd: z.number(),
-    // products: z
-    //   .array(
-    //     z.object({
-    //       productId: z.string().min(1, "Product ID is required"),
-    //       quantity: z.number().min(1, "Quantity must be at least 1"),
-    //       price: z.number().min(0, "Price must be non-negative"),
-    //     })
-    //   )
-    //   .optional(),
-    // services: z
-    //   .array(
-    //     z.object({
-    //       name: z.string().min(1, "Service name is required"),
-    //       quantity: z.number().min(1, "Quantity must be at least 1"),
-    //       price: z.number().min(0, "Price must be non-negative"),
-    //     })
-    //   )
-    //   .optional(),
     items: z
       .array(
         z.object({
@@ -352,7 +333,6 @@ const AddInvoiceSchema = z
       .optional(),
     subTotalUsd: z.number(),
     totalUsd: z.number(),
-    generalNote: z.string().optional(),
     customerNote: z.string().optional(),
     type: z.enum(["s1", "s2"]),
   })
@@ -368,42 +348,7 @@ const AddInvoiceSchema = z
       path: ["vehicleId"],
     }
   );
-// .refine(
-//   (data) => {
-//     console.log("Data:", data);
 
-//     // Calculate the sum of products (quantity * price)
-//     const productTotal =
-//       data.products?.reduce(
-//         (sum, product) => sum + product.quantity * product.price,
-//         0
-//       ) || 0;
-
-//     console.log("Product Total:", productTotal);
-
-//     // Calculate the sum of services (quantity * price)
-//     const serviceTotal =
-//       data.services?.reduce(
-//         (sum, service) => sum + service.quantity * service.price,
-//         0
-//       ) || 0;
-
-//     console.log("Service Total:", serviceTotal);
-
-//     const total = productTotal + serviceTotal;
-//     console.log("Total:", total);
-
-//     if (data.discount.type === "fixed") {
-//       return data.discount.amount <= total; // This should return false if invalid
-//     } else {
-//       return data.discount.amount >= 0 && data.discount.amount <= 100;
-//     }
-//   },
-//   {
-//     message: `Discount amount is not valid`,
-//     path: ["discount", "amount"],
-//   }
-// );
 export type AddInvoiceSchema = z.infer<typeof AddInvoiceSchema>;
 
 const DBBackupPath = z.object({

@@ -2,11 +2,13 @@ import Pageheader from "@/shared/layout-components/page-header/pageheader";
 import Seo from "@/shared/layout-components/seo/seo";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import React, { useState } from "react";
-import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
+import {
+  ReactTablePaginated,
+  useReactTablePagination,
+} from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
 import { FaEye, FaRegTrashCan } from "react-icons/fa6";
-import Pagination from "../../../components/admin/Pagination";
 import { useDebounce } from "@/hooks/useDebounce";
 import DeleteRecord from "../../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
@@ -18,12 +20,12 @@ import Link from "next/link";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
 
 const PurchasePage = () => {
-  const [pageIndex, setPageIndex] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { pageIndex, pageSize, pagination, setPagination } =
+    useReactTablePagination();
 
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
-  const { setEditingPurchase } = usePurchase();
+
   const {
     data: purchasesResponse,
     isLoading,
@@ -31,7 +33,7 @@ const PurchasePage = () => {
     error,
   } = useListPurchase({
     pageSize: pageSize,
-    pageIndex: pageIndex - 1,
+    pageIndex: pageIndex,
     search: debouncedSearch,
   });
   const purchases = purchasesResponse?.purchases;
@@ -39,6 +41,7 @@ const PurchasePage = () => {
   const [selectedPurchase, setSelectedPurchase] = useState<
     Purchase | undefined
   >();
+  const { setEditingPurchase } = usePurchase();
 
   //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Purchase>();
@@ -137,18 +140,11 @@ const PurchasePage = () => {
           errorMessage={error?.message}
           data={purchases || []}
           columns={tanstackColumns}
-          hidePagination
           loading={isLoading}
           paginating={isFetching}
+          pagination={pagination}
+          setPagination={setPagination}
           totalRows={purchasesResponse?.pagination.totalCount || 0}
-        />
-
-        <Pagination
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          currentPage={pageIndex}
-          setCurrentPage={setPageIndex}
-          totalPages={purchasesResponse?.pagination.totalPages || 0}
         />
       </TableWrapper>
 

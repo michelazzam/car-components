@@ -1,16 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ISupplier, Supplier } from './supplier.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { GetSuppliersDto } from './dto/get-suppliers.dto';
 import { AddSupplierDto } from './dto/add-supplier.dto';
 import { EditSupplierDto } from './dto/edit-supplier.dto';
+import { IPurchase, Purchase } from '../purchase/purchase.schema';
+import { Expense, IExpense } from '../expense/expense.schema';
 
 @Injectable()
 export class SupplierService {
   constructor(
     @InjectModel(Supplier.name)
     private supplierModel: Model<ISupplier>,
+    @InjectModel(Purchase.name)
+    private purchaseModel: Model<IPurchase>,
+    @InjectModel(Expense.name)
+    private expenseModel: Model<IExpense>,
   ) {}
 
   getOneById(id: string) {
@@ -68,6 +78,20 @@ export class SupplierService {
   }
 
   async deleteSupplier(id: string) {
+    // do not allow deleting if used by any expense
+    const expense = await this.expenseModel.findOne({ supplier: id });
+    if (expense)
+      throw new BadRequestException(
+        'Can not delete Supplier that is used by an expense',
+      );
+
+    // // do not allow deleting if used by any purchase
+    const purchase = await this.purchaseModel.findOne({ supplier: id });
+    if (purchase)
+      throw new BadRequestException(
+        'Can not delete Supplier that is used by a purchase',
+      );
+
     const supplier = await this.supplierModel.findOneAndDelete({ _id: id });
 
     if (!supplier) throw new NotFoundException('Supplier not found');

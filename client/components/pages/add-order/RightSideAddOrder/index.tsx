@@ -146,8 +146,6 @@ function RightSideAddOrder({
     setVatAmount(Number(vat));
   }, [discountStore.amount, discountStore.type, cartSum()]);
 
-  // totalAmount() from usePosStore represent the
-
   const resetForm = () => {
     reset({
       driverName: "",
@@ -160,9 +158,7 @@ function RightSideAddOrder({
       isPaid: false,
       hasVehicle: true,
       vehicleId: "",
-      generalNote: "",
       customerNote: "",
-      invoiceNumber: 0,
       items: [],
     });
   };
@@ -184,7 +180,7 @@ function RightSideAddOrder({
       <div className="grid grid-cols-2 gap-x-2 items-center justify-between ">
         <button
           type="button"
-          className=" col-span-2 p-2  rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary mb-1"
+          className="col-span-2 p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary mb-2"
           data-hs-overlay="#general-invoice-info-modal"
         >
           General Info
@@ -193,17 +189,11 @@ function RightSideAddOrder({
           control={control}
           label="Customer Type"
           name="type"
-          colSpan={1}
+          colSpan={2}
           creatable={false}
           options={customerTypeOption}
         />
-        <NumberFieldControlled
-          control={control}
-          name="paidAmountUsd"
-          label="USD"
-          colSpan={1}
-          prefix="$"
-        />
+
         {/* items list */}
         <ItemsList />
         {/* items list */}
@@ -228,6 +218,14 @@ function RightSideAddOrder({
             const type = val === "fixed" ? "fixed" : "percentage";
             applyDiscount(discountStore.amount, type);
           }} // Pass type correctly
+        />
+        <NumberFieldControlled
+          control={control}
+          name="paidAmountUsd"
+          label="Amount Paid in USD"
+          colSpan={2}
+          prefix="$"
+          readOnly={isFullPaid}
         />
         {/*  */}
         <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
@@ -335,12 +333,6 @@ function RightSideAddOrder({
         title="New Inovice"
         printingInvoices={invoice ? [invoice] : undefined}
       />
-      {/* <PrintInvoiceModal
-        triggerModalId="preview-invoice"
-        title="New Inovice"
-        previewingInvoice={previewingInvoice}
-        prev={true}
-      /> */}
     </form>
   );
 }

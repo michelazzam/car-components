@@ -19,7 +19,7 @@ export default function ReactTablePaginated<DataType>({
   setPagination,
   hidePagination,
   errorMessage,
-  totalAmount,
+  renderInTheBottom,
 }: {
   columns: ColumnDef<DataType, any>[];
   data: DataType[];
@@ -33,7 +33,7 @@ export default function ReactTablePaginated<DataType>({
   setPagination?: (updater: OnChangeFn<PaginationState>) => void;
   hidePagination?: boolean;
   errorMessage?: string | undefined;
-  totalAmount?: string;
+  renderInTheBottom?: React.ReactNode;
 }) {
   const table = useMyReactTable<DataType>({
     columns,
@@ -70,13 +70,13 @@ export default function ReactTablePaginated<DataType>({
           </div>
         )}
         {}
-          <Pagination
-            table={table}
-            totalRows={totalRows}
-            paginating={paginating}
-            hidePagination={hidePagination}
-            totalAmount={totalAmount}
-          />
+        <Pagination
+          table={table}
+          totalRows={totalRows}
+          paginating={paginating}
+          hidePagination={hidePagination}
+          renderInTheBottom={renderInTheBottom}
+        />
       </TableStyle>
 
       {errorMessage && <ErrorAlert errorMessage={errorMessage} />}
