@@ -17,5 +17,6 @@ import { SupplierModule } from '../supplier/supplier.module';
   ],
   controllers: [ExpenseController],
   providers: [ExpenseService],
+  exports: [ExpenseService],
 })
 export class ExpenseModule {}

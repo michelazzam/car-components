@@ -3,6 +3,7 @@ import { ExpenseTypeService } from './expense-type.service';
 import { ExpenseTypeController } from './expense-type.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ExpenseType, ExpenseTypeSchema } from './expense-type.schema';
+import { ExpenseModule } from '../expense/expense.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { ExpenseType, ExpenseTypeSchema } from './expense-type.schema';
     MongooseModule.forFeature([
       { name: ExpenseType.name, schema: ExpenseTypeSchema },
     ]),
+    ExpenseModule,
   ],
   controllers: [ExpenseTypeController],
   providers: [ExpenseTypeService],

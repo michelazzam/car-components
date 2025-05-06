@@ -143,6 +143,10 @@ export class ExpenseService {
     return expense;
   }
 
+  async findOneByExpenseType(expenseTypeId: string) {
+    return this.expenseModel.findOne({ expenseType: expenseTypeId });
+  }
+
   private async doExpenseEffects(dto: ExpenseDto) {
     // subtract supplier loan
     if (dto.supplierId) {
