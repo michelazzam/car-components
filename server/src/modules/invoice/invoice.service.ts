@@ -441,6 +441,10 @@ export class InvoiceService {
     }
   }
 
+  findOneByCustomer(customerId: string) {
+    return this.invoiceModel.findOne({ customer: customerId });
+  }
+
   private async doInvoiceEffects(updatedDto: InvoiceDtoWithItemsDetails) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);

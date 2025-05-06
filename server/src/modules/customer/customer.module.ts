@@ -8,6 +8,7 @@ import {
   Vehicle,
   VehicleSchema,
 } from './customer.schema';
+import { Invoice, InvoiceSchema } from '../invoice/invoice.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,10 @@ import {
     MongooseModule.forFeature([
       { name: Customer.name, schema: CustomerSchema },
       { name: Vehicle.name, schema: VehicleSchema },
+      {
+        name: Invoice.name,
+        schema: InvoiceSchema,
+      },
     ]),
   ],
   controllers: [CustomerController],

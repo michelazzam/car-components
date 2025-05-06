@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ExpenseType, IExpenseType } from './expense-type.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -36,7 +40,7 @@ export class ExpenseTypeService {
     // do not allow deleting if used by any expense
     const expense = await this.expenseService.findOneByExpenseType(id);
     if (expense)
-      throw new NotFoundException(
+      throw new BadRequestException(
         'Can not delete Expense type that is used by an expense',
       );
 
