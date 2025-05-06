@@ -9,8 +9,34 @@ import {
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
 import Link from "next/link";
+import DateRangeField, {
+  DateRange,
+} from "@/components/admin/Fields/DateRangeField";
+import { PiExportLight } from "react-icons/pi";
+import Pagination from "@/components/admin/Pagination";
+import ExportInvoicesModal from "./ExportInvoicesModal";
 
 function InvoicesSummary({ customerId }: { customerId?: string }) {
+  const [dates, setDates] = useState<DateRange>({
+    startDate: null,
+    endDate: null,
+  });
+  const { pagination, setPagination } = useReactTablePagination();
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(1);
+  const {
+    data: invoicesData,
+    isLoading,
+    isFetching,
+    error,
+  } = useListInvoices({
+    customerId,
+    startDateState: dates.startDate ?? undefined,
+    endDateState: dates.endDate ?? undefined,
+    localPageSize: pageSize,
+    localPageIndex: pageIndex - 1,
+  });
+
   //----TABLE STATES------
   const [totalAmount, setTotalAmount] = useState(0);
   //------Storage---------\
@@ -88,14 +114,6 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
       },
     }),
   ];
-  const { pagination, setPagination } = useReactTablePagination();
-
-  const {
-    data: invoicesData,
-    isLoading,
-    isFetching,
-    error,
-  } = useListInvoices({ customerId });
 
   // Calculate the total amount for all invoices
   useEffect(() => {
@@ -126,21 +144,54 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
             </div>
 
             <div className="py-2 px-4 overflow-hidden">
-              <ReactTablePaginated
-                errorMessage={error?.message}
-                data={invoicesData?.invoices || []}
-                columns={tanstackColumns}
-                loading={isLoading}
-                paginating={isFetching}
-                pagination={pagination}
-                setPagination={setPagination}
-                totalRows={invoicesData?.totalCount || 0}
-                totalAmount={totalAmount.toFixed(2) + "$"}
-              />
+              <div className="flex justify-between  items-center">
+                <div className="w-[20rem]">
+                  <DateRangeField
+                    dates={dates}
+                    setDates={setDates}
+                    label="Date Range"
+                    colSpan={6}
+                    marginBottom="mb-5"
+                  />
+                </div>
+                <button
+                  className="ti ti-btn ti-btn-secondary h-fit"
+                  data-hs-overlay="#export-invoicesModal"
+                >
+                  <PiExportLight size={20} />
+                </button>
+              </div>
+              <div>
+                <ReactTablePaginated
+                  errorMessage={error?.message}
+                  data={invoicesData?.invoices || []}
+                  columns={tanstackColumns}
+                  loading={isLoading}
+                  paginating={isFetching}
+                  pagination={pagination}
+                  setPagination={setPagination}
+                  hidePagination
+                  totalRows={invoicesData?.pagination.totalCount || 0}
+                  totalAmount={totalAmount.toFixed(2) + "$"}
+                />
+                <Pagination
+                  totalPages={invoicesData?.pagination.totalPages || 0}
+                  currentPage={pageIndex}
+                  setCurrentPage={setPageIndex}
+                  pageSize={pageSize}
+                  setPageSize={setPageSize}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <ExportInvoicesModal
+        totalCount={invoicesData?.pagination.totalCount || 0}
+        startDate={dates.startDate}
+        endDate={dates.endDate}
+        columns={tanstackColumns}
+      />
     </div>
   );
 }

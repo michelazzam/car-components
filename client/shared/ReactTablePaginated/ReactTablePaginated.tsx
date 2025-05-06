@@ -19,7 +19,9 @@ export default function ReactTablePaginated<DataType>({
   setPagination,
   hidePagination,
   errorMessage,
+  estimatedPageSize = 10,
   renderInTheBottom,
+  totalAmount,
 }: {
   columns: ColumnDef<DataType, any>[];
   data: DataType[];
@@ -33,7 +35,9 @@ export default function ReactTablePaginated<DataType>({
   setPagination?: (updater: OnChangeFn<PaginationState>) => void;
   hidePagination?: boolean;
   errorMessage?: string | undefined;
+  estimatedPageSize?: number;
   renderInTheBottom?: React.ReactNode;
+  totalAmount?: string;
 }) {
   const table = useMyReactTable<DataType>({
     columns,
@@ -50,13 +54,9 @@ export default function ReactTablePaginated<DataType>({
           <TableHead table={table} />
           {loading ? (
             <>
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
-              <SkeletonLoader columnsLength={columns.length} />
+              {Array.from({ length: estimatedPageSize }).map(() => (
+                <SkeletonLoader columnsLength={columns.length} />
+              ))}
             </>
           ) : (
             <TableBody table={table} />
@@ -76,6 +76,7 @@ export default function ReactTablePaginated<DataType>({
           paginating={paginating}
           hidePagination={hidePagination}
           renderInTheBottom={renderInTheBottom}
+          totalAmount={totalAmount}
         />
       </TableStyle>
 

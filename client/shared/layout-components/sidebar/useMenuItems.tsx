@@ -13,7 +13,7 @@ const SupplierIcon = <i className="fe fe-truck side-menu__icon"></i>;
 const ServicesIcon = <i className="ri-service-line side-menu__icon"></i>;
 const PurchaseIcon = <i className="ri-shopping-bag-line side-menu__icon"></i>;
 const DashboardIcon = <i className="ri-file-chart-line side-menu__icon"></i>;
-
+const BillingIcon = <i className="bx bx-receipt side-menu__icon"></i>;
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -155,6 +155,16 @@ export default function useMenuItems() {
       title: "DB Backup",
       children: [],
       visible: user?.role === "superAmsAdmin",
+    },
+    {
+      icon: BillingIcon,
+      path: "/admin/ams/billing",
+      type: "link",
+      active: pathname.startsWith("/admin/ams/billing"),
+      selected: pathname.startsWith("/admin/ams/billing"),
+      title: "Billing",
+      children: [],
+      visible: !(user?.role === "user"),
     },
   ].filter((item) => item.visible);
 }

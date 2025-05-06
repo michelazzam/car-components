@@ -17,7 +17,7 @@ export type AddPurchaseT = {
   supplierId: string;
   invoiceDate: string;
   invoiceNumber: string;
-  customerConsultant: string;
+  customerConsultant?: string;
   phoneNumber: string;
   vatPercent: number;
   vatLBP: number;

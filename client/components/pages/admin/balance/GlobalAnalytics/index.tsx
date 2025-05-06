@@ -26,6 +26,7 @@ function GlobalAnalytics() {
         Icon={LuTrendingUp}
       />
       <TotalCard
+        link={"/admin/expenses"}
         variant={"warning"}
         isLoadingData={isPending}
         title={"Total Expenses"}
@@ -40,12 +41,14 @@ function GlobalAnalytics() {
         Icon={LuTrendingUp}
       />
       <TotalCard
+        link={"/admin/customers"}
         isLoadingData={isPending}
         title={"Total Customer Loan"}
         value={"$" + formatNumber(totalCustomersLoan, 2)}
         Icon={LuUserPlus}
       />
       <TotalCard
+        link={"/admin/supplier"}
         isLoadingData={isPending}
         title={"Total Supplier Loan"}
         value={"$" + formatNumber(totalSuppliersLoan, 2)}

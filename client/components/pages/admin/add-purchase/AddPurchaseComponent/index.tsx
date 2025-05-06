@@ -11,6 +11,7 @@ import { usePurchase } from "@/shared/store/usePurchaseStore";
 import ExpenseModal from "../../expenses/ExpenseModal";
 import { useRouter } from "next/router";
 import AllItemsTable from "./AllItemsTable";
+import AddEditSupplierModal from "../../supplier/AddEditSupplierModal";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STATES--------------------------------------
@@ -172,6 +173,7 @@ const CustomAddPurchaseComponent = () => {
             });
           }}
         />
+        <AddEditSupplierModal triggerModalId="add-supplier-modal" />
       </div>
       {/* Add Purchase */}
     </>

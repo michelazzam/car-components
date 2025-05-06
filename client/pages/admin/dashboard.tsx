@@ -2,11 +2,11 @@
 import React, { Suspense } from "react";
 import { motion } from "framer-motion";
 
-import InventorySummary from "../components/pages/admin/dashboard/InventorySummary";
-import ProfitAndLossSummary from "../components/pages/admin/dashboard/ProfitAndLossSummary";
-import AccountsSummary from "../components/pages/admin/dashboard/AccountsSummary";
-import InvoicesSummary from "../components/pages/admin/dashboard/InvoicesSummary";
-import SalesProductsSummary from "../components/pages/admin/dashboard/SalesProductsSummary";
+import InventorySummary from "../../components/pages/admin/dashboard/InventorySummary";
+import ProfitAndLossSummary from "../../components/pages/admin/dashboard/ProfitAndLossSummary";
+import AccountsSummary from "../../components/pages/admin/dashboard/AccountsReceivableSummary";
+import InvoicesSummary from "../../components/pages/admin/dashboard/InvoicesSummary";
+import SalesProductsSummary from "@/components/pages/admin/dashboard/SalesProductsSummary";
 
 // Stagger parent container
 const container = {

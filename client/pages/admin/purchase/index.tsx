@@ -18,6 +18,7 @@ import {
 } from "@/api-hooks/purchase/use-list-purchase";
 import Link from "next/link";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
+import ViewPurchaseModal from "@/components/pages/admin/purchase/ViewPurchaseModal";
 
 const PurchasePage = () => {
   const { pageIndex, pageSize, pagination, setPagination } =
@@ -152,6 +153,7 @@ const PurchasePage = () => {
         endpoint={API.deletePurchase(selectedPurchase?._id || "")}
         queryKeysToInvalidate={[["purchases"]]}
       />
+      <ViewPurchaseModal purchase={selectedPurchase} />
     </div>
   );
 };

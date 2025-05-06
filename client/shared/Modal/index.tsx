@@ -157,16 +157,20 @@ const ModalHeader = ({ title, id }: { title: string; id: string }) => {
 const ModalBody = ({
   children,
   maxHeight = "80vh",
+  paddingX = "px-4",
+  paddingY = "py-4",
 }: {
   children: ReactNode;
   maxHeight?: string;
+  paddingX?: string;
+  paddingY?: string;
 }) => {
   return (
     <div
       style={{
         maxHeight: maxHeight,
       }}
-      className="ti-modal-body overflow-y-scroll custom-scrollbar-container"
+      className={`ti-modal-body overflow-y-scroll custom-scrollbar-container ${paddingX} ${paddingY}`}
     >
       {children}
     </div>

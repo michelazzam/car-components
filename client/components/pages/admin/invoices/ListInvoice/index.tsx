@@ -344,7 +344,7 @@ function ListInvoice({ customerId }: { customerId?: string }) {
                 paginating={isFetching}
                 pagination={pagination}
                 setPagination={setPagination}
-                totalRows={invoicesData?.totalCount || 0}
+                totalRows={invoicesData?.pagination.totalCount || 0}
                 totalAmount={totalAmount.toFixed(2) + "$"}
               />
             </div>

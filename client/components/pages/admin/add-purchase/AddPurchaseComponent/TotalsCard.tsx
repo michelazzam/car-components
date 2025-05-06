@@ -42,7 +42,7 @@ function TotalsCard() {
   }, [usdRateData]);
 
   useEffect(() => {
-    if (vat) setValue("vatPercent", vat);
+    if (vat) setValue("vatPercent", Number(vat));
   }, [organization]);
 
   //----------------------------------CONSTANTS--------------------------------------

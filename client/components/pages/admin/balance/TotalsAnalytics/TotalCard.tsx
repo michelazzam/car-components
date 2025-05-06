@@ -1,19 +1,21 @@
 import { cn } from "@/utils/cn";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { IconType } from "react-icons/lib";
-
 function TotalCard({
   title,
   value,
   Icon,
   isLoadingData,
   variant = "info",
+  link,
 }: {
   title: string;
   value: string;
   Icon: IconType;
   isLoadingData: boolean;
   variant?: "info" | "danger" | "success" | "warning";
+  link?: string;
 }) {
   const [isClient, setIsClient] = useState(false);
 
@@ -22,7 +24,15 @@ function TotalCard({
   }, []);
 
   return (
-    <div className="lg:col-span-4  col-span-12">
+    <Link
+      href={link ?? ""}
+      className={cn(
+        "lg:col-span-4  col-span-12",
+        link
+          ? "cursor-pointer hover:scale-[1.02] transition-all"
+          : "cursor-default"
+      )}
+    >
       <div
         className={cn(
           "box overflow-hidden border",
@@ -66,7 +76,7 @@ function TotalCard({
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
