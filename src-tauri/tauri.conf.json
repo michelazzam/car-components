@@ -1,0 +1,46 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "car-components",
+  "version": "0.1.0",
+  "identifier": "com.ams.carcomponents",
+  "build": {
+    "frontendDist": "../client/out",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "npm run dev:client & npm run dev:server"
+  },
+
+  "app": {
+    "windows": [
+      {
+        "title": "car-components",
+        "width": 800,
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["../client/out/**/*"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "fs": {
+      "scope": ["$APPDATA/**", "$HOME/projects/car-components/**"]
+    }
+  }
+}
