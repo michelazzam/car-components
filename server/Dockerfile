@@ -4,5 +4,5 @@ WORKDIR /usr/src/app
 COPY ./compiled ./compiled
 RUN chmod +x compiled/main
 
-EXPOSE 3000
+EXPOSE 8000
 ENTRYPOINT ["./compiled/main"]
