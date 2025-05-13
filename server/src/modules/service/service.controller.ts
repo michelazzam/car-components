@@ -28,9 +28,9 @@ export class ServiceController {
   @Permissions('Services', 'create')
   @Post()
   async create(@Body() dto: AddServiceDto) {
-    await this.serviceService.create(dto);
+    const service = await this.serviceService.create(dto);
 
-    return { message: 'Service added successfully' };
+    return { message: 'Service added successfully', data: service };
   }
 
   @Permissions('Services', 'update')
