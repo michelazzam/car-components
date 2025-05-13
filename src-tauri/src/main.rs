@@ -1,31 +1,36 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::{Builder, generate_context, Manager};
+// just import the Builder for the log plugin
+use tauri_plugin_log::Builder as LogBuilder;
 
 fn main() {
-  // start with a plain Builder
-  let mut builder = Builder::default();
+  // 1) Base Tauri builder with the log plugin (defaults to console + file)
+  let mut builder = Builder::default()
+    .plugin(LogBuilder::default().build());
 
-  // only in release (i.e. when debug_assertions = false) do we spawn the side-car binary
+  // 2) In production-only (i.e. cargo tauri build / release) spawn your side‐car
   if !cfg!(debug_assertions) {
     builder = builder.setup(|app| {
-      // resource_dir() is where your `src-tauri/bin/server` lives after `tauri build`
-      let resource_dir = app
-        .path()
-        .resource_dir()
-        .expect("failed to get resource dir");
-     let server_exe = {
-      let name = if cfg!(windows) { "server.exe" } else { "server" };
-       resource_dir.join("bin").join(name)
-};
-      std::process::Command::new(server_exe)
-        .spawn()
-        .expect("failed to launch local API server");
-      Ok(())
-    });
+      let r = app.path().resource_dir().unwrap();
+
+  // point at your portable Node
+  let node = r.join("bin").join("node").join("node.exe");
+  let script = r.join("bin").join("server").join("dist").join("main.js");
+
+  assert!(node.exists(),  "node.exe not found at {}",  node.display());
+  assert!(script.exists(), "main.js not found at {}", script.display());
+
+  std::process::Command::new(node)
+    .arg(script)
+    .spawn()
+    .expect("failed to launch Node.js server");
+
+  Ok(())
+});
   }
 
-  // finally run
+  // 3) run the app
   builder
     .run(generate_context!())
     .expect("error running app");
