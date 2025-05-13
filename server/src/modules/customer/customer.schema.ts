@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
+export const odometerUnits = ['km', 'mile'] as const;
+export type OdometerUnit = (typeof odometerUnits)[number];
+
 @Schema({ timestamps: true })
 export class Vehicle {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer' })
@@ -17,6 +20,9 @@ export class Vehicle {
 
   @Prop({ required: true })
   odometer: number;
+
+  @Prop({ enum: odometerUnits, required: true, default: 'km' })
+  unit: OdometerUnit;
 }
 export const VehicleSchema = SchemaFactory.createForClass(Vehicle);
 export type IVehicle = HydratedDocument<Vehicle>;
