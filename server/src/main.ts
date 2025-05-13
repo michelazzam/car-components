@@ -3,6 +3,12 @@ import { MainModule } from './modules/main.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { startSwagger } from './config/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as nodeCrypto from 'crypto';
+if (typeof (globalThis as any).crypto === 'undefined') {
+  (globalThis as any).crypto = {
+    randomUUID: (): string => nodeCrypto.randomUUID(),
+  };
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(MainModule);
