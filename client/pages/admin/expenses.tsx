@@ -277,7 +277,7 @@ const Expenses = () => {
                 setPagination={setPagination}
                 totalRows={expensesData?.pagination.totalCount || 0}
                 renderInTheBottom={
-                  <span className=" text-success font-bold">
+                  <span className="text-success font-bold">
                     Total Amount: {totalAmount} $
                   </span>
                 }
