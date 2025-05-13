@@ -8,7 +8,7 @@
     "dev:server": "npm run start:dev --prefix server",
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
-    "tauri:dev": "concurrently \"npm:dev:client\" \"npm:dev:server\" \"tauri dev\"",
+    "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
