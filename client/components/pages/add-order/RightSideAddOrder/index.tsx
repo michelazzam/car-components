@@ -52,7 +52,9 @@ function RightSideAddOrder({
   const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
-  const { handleSubmit, control, watch, setValue, reset } = formContext;
+  const { handleSubmit, control, watch, setValue, reset, getValues } =
+    formContext;
+  const isB2C = getValues("type") === "s2";
 
   const { hasVehicle } = watch();
 
@@ -119,7 +121,9 @@ function RightSideAddOrder({
     if (data.vehicleId === "") {
       data.vehicleId = undefined;
     }
-
+    if (data.type === "s2") {
+      data.taxesUsd = 0;
+    }
     if (editingInvoice) {
       editInvoice(data);
     } else {
@@ -239,13 +243,17 @@ function RightSideAddOrder({
               discountStore.type === "fixed" ? "$" : "%"
             }${discountStore.amount || 0}`}</span>
           </div>
-          <div className="flex items-center justify-between mt-1">
-            <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
-            <span>${vatAmount}</span>
-          </div>
+          {!isB2C && (
+            <>
+              <div className="flex items-center justify-between mt-1">
+                <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
+                <span>${vatAmount}</span>
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between mt-1">
             <span>Total</span>
-            <span>${totalAmount()}</span>
+            <span>${totalAmount(!isB2C)}</span>
           </div>
         </div>
         {/*  */}
@@ -260,7 +268,7 @@ function RightSideAddOrder({
                   setValue("paidAmountUsd", 0);
                   setIsFullPaid(false);
                 } else {
-                  setValue("paidAmountUsd", +totalAmount());
+                  setValue("paidAmountUsd", +totalAmount(!isB2C));
                   setIsFullPaid(true);
                 }
               }}
