@@ -71,6 +71,12 @@ function ListPurchase({
               );
             },
           }),
+          columnHelper.accessor("supplier.name", {
+            header: "Supplier",
+            cell: ({ getValue }) => {
+              return <div>{getValue()}</div>;
+            },
+          }),
         ]
       : []),
 
