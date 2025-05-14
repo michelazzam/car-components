@@ -30,7 +30,7 @@ export class ItemController {
   @Permissions('Inventory', 'read')
   @Get(':id')
   async getSingleItem(@Param('id') id: string) {
-    return this.itemService.getSingleItem(id);
+    return this.itemService.getOneById(id);
   }
 
   @Permissions('Inventory', 'create')

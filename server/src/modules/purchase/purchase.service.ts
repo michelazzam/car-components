@@ -21,7 +21,15 @@ export class PurchaseService {
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
-    const { pageIndex, search, pageSize, supplierId, startDate, endDate } = dto;
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      supplierId,
+      startDate,
+      endDate,
+      itemId,
+    } = dto;
 
     const filter: FilterQuery<IPurchase> = { $and: [{ $or: [] }] };
 
@@ -37,6 +45,13 @@ export class PurchaseService {
     if (supplierId) {
       // @ts-ignore
       filter.$and[0].$or.push({ supplier: supplierId });
+    }
+
+    if (itemId) {
+      // @ts-ignore
+      filter.$and.push({
+        'items.item': itemId,
+      });
     }
 
     // Add date range filter
