@@ -1,4 +1,5 @@
 import { useGetProductById } from "@/api-hooks/products/use-get-product-by-id";
+import ItemHeader from "@/components/pages/admin/inventory/single-item/ItemHeader";
 import ListInvoice from "@/components/pages/admin/invoices/ListInvoice";
 import ListPurchase from "@/components/pages/admin/purchase/ListPurchase";
 import { useRouter } from "next/router";
@@ -22,7 +23,7 @@ const ProductDetails = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      {/* {customer && <CustomerHeader customer={customer} view={view} />} */}
+      {item && <ItemHeader item={item} />}
       <div className="flex gap-3 items-center border-b-2 border-gray-300 mb-3">
         <button
           className={`text-gray-500 text-lg font-bold p-3 border-b-2  ${
