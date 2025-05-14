@@ -193,6 +193,8 @@ export class InvoiceService {
    * - `totals`: an object containing the total invoice amount, total amount paid, and total outstanding amount for all customers.
    */
   async getAccountsRecievableSummary(dto: GetAccountsRecievableDto) {
+    // TODO: add pagination on customers not on invoices.
+    // -> I didn't know how to do it and chatGPT also
     const { startDate, endDate } = dto;
 
     const matchCondition: any = {};
@@ -437,6 +439,10 @@ export class InvoiceService {
         totalIncome: customerPaidAmount,
       });
     }
+  }
+
+  findOneByCustomer(customerId: string) {
+    return this.invoiceModel.findOne({ customer: customerId });
   }
 
   private async doInvoiceEffects(updatedDto: InvoiceDtoWithItemsDetails) {

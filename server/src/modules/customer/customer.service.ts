@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Customer, ICustomer, IVehicle, Vehicle } from './customer.schema';
 import { FilterQuery, Model } from 'mongoose';
@@ -8,6 +12,7 @@ import { GetCustomersDto } from './dto/get-customers.dto';
 import { AddVehicleDto } from './dto/add-vehicle.dto';
 import { EditVehicleDto } from './dto/edit-vehicle.dto';
 import { GetVehiclesDto } from './dto/get-vehicles.dto';
+import { IInvoice, Invoice } from '../invoice/invoice.schema';
 
 @Injectable()
 export class CustomerService {
@@ -16,6 +21,8 @@ export class CustomerService {
     private customerModel: Model<ICustomer>,
     @InjectModel(Vehicle.name)
     private vehicleModel: Model<IVehicle>,
+    @InjectModel(Invoice.name)
+    private invoiceModel: Model<IInvoice>,
   ) {}
 
   //-----------------------------GET SINGLE CUSTOMER-----------------------------
@@ -80,6 +87,13 @@ export class CustomerService {
 
   //-----------------------------DELETE CUSTOMER-----------------------------
   async deleteCustomer(id: string) {
+    // do not allow deleting if used by any invoice
+    const invoice = await this.invoiceModel.findOne({ customer: id });
+    if (invoice)
+      throw new BadRequestException(
+        'Can not delete Customer that is linked to an invoice',
+      );
+
     const customer = await this.customerModel.findOneAndDelete({ _id: id });
 
     if (!customer) throw new NotFoundException('Customer not found');

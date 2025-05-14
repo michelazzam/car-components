@@ -28,7 +28,7 @@ import { ItemModule } from '../item/item.module';
     ]),
     AccountingModule,
     forwardRef(() => ReportModule), //to avoid circular dependency
-    CustomerModule,
+    forwardRef(() => CustomerModule),
     ServiceModule,
     ItemModule,
   ],
