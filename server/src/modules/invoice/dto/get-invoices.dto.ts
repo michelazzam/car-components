@@ -43,6 +43,10 @@ export class GetInvoicesDto {
   @IsOptional()
   customerId?: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  itemId?: string;
+
   @ApiProperty({ required: false, enum: invoiceTypes })
   @IsOptional()
   @IsEnum(invoiceTypes)

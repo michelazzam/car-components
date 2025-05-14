@@ -172,7 +172,11 @@ function InvoicesSummary({ customerId }: { customerId?: string }) {
                   setPagination={setPagination}
                   hidePagination
                   totalRows={invoicesData?.pagination.totalCount || 0}
-                  totalAmount={totalAmount.toFixed(2) + "$"}
+                  renderInTheBottom={
+                    <span className="text-success font-bold">
+                      Total Amount: {totalAmount.toFixed(2)} $
+                    </span>
+                  }
                 />
                 <Pagination
                   totalPages={invoicesData?.pagination.totalPages || 0}

@@ -1,11 +1,13 @@
 import { usePostData } from "@/api-service/usePostData";
 import { API } from "@/constants/apiEndpoints";
+import { OdometerUnit } from "./use_list_vehicles";
 
 export interface AddEditVehicleBodyParam {
   make: string;
   model: string;
   odometer?: number;
   number: string;
+  unit: OdometerUnit;
 }
 
 const useAddVehicle = ({

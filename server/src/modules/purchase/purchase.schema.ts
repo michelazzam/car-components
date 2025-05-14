@@ -12,7 +12,7 @@ export class Purchase {
   @Prop({ required: true })
   invoiceDate: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   customerConsultant: string;
 
   @Prop({ required: true })

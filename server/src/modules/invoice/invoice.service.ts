@@ -46,7 +46,7 @@ export class InvoiceService {
 
   // 2 private functions making code cleaner
   private buildGetInvoicesFilter(dto: GetInvoicesDto, user: ReqUserData) {
-    const { search, customerId, type, startDate, endDate } = dto;
+    const { search, customerId, type, startDate, endDate, itemId } = dto;
 
     const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
 
@@ -72,6 +72,13 @@ export class InvoiceService {
     if (customerId) {
       // @ts-ignore
       filter.$and[0].$or.push({ customer: customerId });
+    }
+
+    if (itemId) {
+      // @ts-ignore
+      filter.$and.push({
+        'items.itemRef': itemId,
+      });
     }
 
     // Add date range filter

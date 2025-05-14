@@ -105,7 +105,7 @@ export class CustomerService {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const { make, model, number, odometer } = dto;
+    const { make, model, number, odometer, unit } = dto;
 
     // create the vehicle
     const vehicle = await this.vehicleModel.create({
@@ -113,6 +113,7 @@ export class CustomerService {
       model,
       number,
       odometer,
+      unit,
       customer: customer._id,
     });
 
@@ -183,7 +184,7 @@ export class CustomerService {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const { make, model, number, odometer } = dto;
+    const { make, model, number, odometer, unit } = dto;
 
     // update the vehicle
     await this.vehicleModel.findByIdAndUpdate(vehicleId, {
@@ -191,6 +192,7 @@ export class CustomerService {
       model,
       number,
       odometer,
+      unit,
     });
   }
 

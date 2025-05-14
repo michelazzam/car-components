@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsNumber, IsString, MinLength } from 'class-validator';
+import { OdometerUnit, odometerUnits } from '../customer.schema';
 
 export class AddVehicleDto {
   @ApiProperty({
@@ -27,4 +28,12 @@ export class AddVehicleDto {
   @ApiProperty({ required: false })
   @IsNumber()
   odometer: number;
+
+  @ApiProperty({
+    required: true,
+    type: String,
+    enum: odometerUnits,
+  })
+  @IsEnum(odometerUnits)
+  unit: OdometerUnit;
 }

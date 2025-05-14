@@ -254,6 +254,7 @@ const VehicleSchema = z.object({
   make: z.string().min(1, "make is required"),
   model: z.string().min(1, "model is required"),
   odometer: z.number().nonnegative().optional(),
+  unit: z.enum(["km", "mile"]),
   number: z.string().min(1, "number is required"),
 });
 export type VehicleSchema = z.infer<typeof VehicleSchema>;

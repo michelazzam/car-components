@@ -1,17 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IItem, Item } from './item.schema';
-import { FilterQuery, Model } from 'mongoose';
+import mongoose, { FilterQuery, Model } from 'mongoose';
 import { AddItemDto } from './dto/add-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { GetItemsDto } from './dto/get-items.dto';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
+import { IPurchase, Purchase } from '../purchase/purchase.schema';
 
 @Injectable()
 export class ItemService {
   constructor(
     @InjectModel(Item.name)
     private itemModel: Model<IItem>,
+    @InjectModel(Purchase.name)
+    private purchaseModel: Model<IPurchase>,
   ) {}
 
   async getAll(dto: GetItemsDto) {
@@ -84,6 +87,54 @@ export class ItemService {
         totalPages,
       },
     };
+  }
+
+  async getSingleItem(itemId: string) {
+    const item = await this.itemModel.findById(itemId);
+    if (!item) throw new NotFoundException(`Item with id ${itemId} not found`);
+
+    const suppliers = await this.getSuppliersByItem(itemId);
+
+    return {
+      item,
+      suppliers,
+    };
+  }
+
+  async getSuppliersByItem(itemId: string) {
+    const objectId = new mongoose.Types.ObjectId(itemId);
+
+    const result = await this.purchaseModel.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.item': objectId } },
+      {
+        $group: {
+          _id: '$supplier',
+          totalQuantity: { $sum: '$items.quantity' },
+          totalQuantityFree: { $sum: '$items.quantityFree' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'suppliers',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'supplier',
+        },
+      },
+      { $unwind: '$supplier' },
+      {
+        $project: {
+          _id: 0,
+          supplierId: '$supplier._id',
+          supplierName: '$supplier.name',
+          totalQuantity: 1,
+          totalQuantityFree: 1,
+        },
+      },
+    ]);
+
+    return result;
   }
 
   getOneById(id: string) {
