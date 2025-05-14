@@ -27,7 +27,9 @@
       }
     }
   },
+
   "bundle": {
+    "externalBin": ["bin/server"],
     "active": true,
     "targets": "all",
     "icon": [
