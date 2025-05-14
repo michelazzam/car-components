@@ -41,4 +41,8 @@ export class GetPurchaseDto {
   @ApiProperty({ required: false })
   @IsOptional()
   supplierId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  itemId?: string;
 }
