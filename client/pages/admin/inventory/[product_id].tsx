@@ -11,7 +11,7 @@ const ProductDetails = () => {
   const { product_id } = router.query;
 
   const {
-    data: productResponse,
+    data: item,
     isPending,
     error,
   } = useGetProductById({
@@ -50,15 +50,9 @@ const ProductDetails = () => {
         </button>
       </div>
       {view === "suppliers" ? (
-        <ListPurchase
-          productId={product_id as string}
-          product={productResponse.item}
-        />
+        <ListPurchase productId={product_id as string} product={item} />
       ) : (
-        <ListInvoice
-          productId={product_id as string}
-          product={productResponse.item}
-        />
+        <ListInvoice productId={product_id as string} product={item} />
       )}
     </Suspense>
   );
