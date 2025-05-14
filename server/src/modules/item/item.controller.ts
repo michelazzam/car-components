@@ -27,6 +27,12 @@ export class ItemController {
     return this.itemService.getAll(dto);
   }
 
+  @Permissions('Inventory', 'read')
+  @Get(':id')
+  async getSingleItem(@Param('id') id: string) {
+    return this.itemService.getSingleItem(id);
+  }
+
   @Permissions('Inventory', 'create')
   @Post()
   async create(@Body() dto: AddItemDto) {
