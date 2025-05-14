@@ -6,7 +6,7 @@ import ListInvoice from "@/components/pages/admin/invoices/ListInvoice";
 import { useGetCustomerById } from "@/api-hooks/customer/use-get-customer-by-id";
 
 const CustomerDetails = () => {
-  const [view, setView] = useState<"invoices" | "suppliers">("invoices");
+  const [view, setView] = useState<"invoices" | "vehicles">("invoices");
 
   const router = useRouter();
   const { customerId } = router.query;
@@ -35,19 +35,19 @@ const CustomerDetails = () => {
         </button>
         <button
           className={`text-gray-500 font-bold p-3 text-lg border-b-2  ${
-            view === "suppliers"
+            view === "vehicles"
               ? "text-gray-950 border-gray-500"
               : "border-transparent"
           }`}
           onClick={() => {
-            !(view === "suppliers") && [setView("vehicles")];
+            !(view === "vehicles") && [setView("vehicles")];
           }}
         >
           Vehicles
         </button>
       </div>
       {typeof customerId === "string" ? (
-        view === "suppliers" ? (
+        view === "vehicles" ? (
           <TableVehicles customer={customer} />
         ) : (
           <ListInvoice customerId={customerId} />
