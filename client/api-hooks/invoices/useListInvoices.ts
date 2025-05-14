@@ -85,12 +85,14 @@ export interface FlattenedInvoice {
 
 const useListInvoices = ({
   customerId,
+  itemId,
   localPageSize,
   localPageIndex,
   startDateState,
   endDateState,
 }: {
   customerId?: string;
+  itemId?: string;
   localPageSize?: number | null;
   localPageIndex?: number;
   startDateState?: string;
@@ -131,6 +133,7 @@ const useListInvoices = ({
       ? endDateState || endDate?.toString()
       : undefined,
     customerId: customerId,
+    itemId: itemId,
     pageSize: localPageSize ?? pageSize,
 
     isPaid: isPaid,
