@@ -140,10 +140,10 @@ function ListPurchase({
     itemId: productId,
     search: search as string,
     startDate: startDate
-      ? formatDateWithDashes(new Date(startDate), true)
+      ? formatDateWithDashes(new Date(startDate), true) ?? undefined
       : undefined,
     endDate: endDate
-      ? formatDateWithDashes(new Date(endDate), true)
+      ? formatDateWithDashes(new Date(endDate), true) ?? undefined
       : undefined,
   });
 
