@@ -14,21 +14,8 @@ async function bootstrap() {
   const app = await NestFactory.create(MainModule);
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:3003',
-      'http://localhost:3004',
-      'http://localhost:3005',
-      'http://localhost:3006',
-      'http://localhost:3007',
-      'http://localhost:3008',
-      //allow all origins
-      '*',
-    ],
+    origin: ['http://tauri.localhost', '*'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'PUT'],
-    credentials: true,
   });
 
   // global pipe to transform field types into their needed types

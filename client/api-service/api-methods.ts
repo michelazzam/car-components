@@ -16,6 +16,8 @@ export const sendToApi = async (
   data: any,
   method: "POST" | "PUT" | "DELETE"
 ) => {
+  //get the origin that is sending the request
+  const origin = window.location.origin;
   try {
     let result;
     if (method === "POST") result = await axiosClient.post(endpoint, data);
@@ -26,6 +28,12 @@ export const sendToApi = async (
       });
     return result?.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Cannot send request");
+    throw new Error(
+      error.response?.data?.message ||
+        `Cannot Send request \n 
+The endpont is : ${endpoint} \n 
+The data is : ${JSON.stringify(data)} \n 
+The origin is : ${origin}`
+    );
   }
 };
