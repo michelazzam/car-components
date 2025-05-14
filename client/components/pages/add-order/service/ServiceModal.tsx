@@ -43,6 +43,7 @@ const ServiceModal = ({
       return {
         label: exp?.name,
         value: exp?._id,
+        price: exp?.price,
       };
     });
 
@@ -217,6 +218,9 @@ const ServiceModal = ({
                 colSpan={4}
                 creatable={true}
                 handleCreate={handleCreateOption}
+                onObjectChange={(obj) => {
+                  setValue("price", obj.price);
+                }}
                 // onInputChange={(value) => setSearchQuery(value)}
                 treatAsObject
               />
@@ -226,22 +230,18 @@ const ServiceModal = ({
                 label="Quantity"
                 colSpan={4}
               />
-              <NumberFieldControlled
-                control={control}
-                name="price"
-                label="Price"
-                colSpan={4}
-                prefix="$"
-                onChangeValue={(val) => {
-                  setValue("price", Number(val));
-                }}
-                // onKeyDown={(e:any) => {
-                //   if (e.key === "Enter") {
-                //     e.preventDefault();
-                //     document.getElementById("submitButton")?.click();
-                //   }
-                // }}
-              />
+              <div className="col-span-4 relative">
+                <NumberFieldControlled
+                  control={control}
+                  name="price"
+                  label="Price (per unit)"
+                  colSpan={4}
+                  prefix="$"
+                  onChangeValue={(val) => {
+                    setValue("price", Number(val));
+                  }}
+                />
+              </div>
               <div className="col-span-12 flex items-center justify-center">
                 <button
                   id="submitButton"

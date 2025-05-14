@@ -89,7 +89,7 @@ const AddInvoice = () => {
       taxesUsd: 0,
     },
   });
-
+  const isB2C = methods.watch("type") === "s2";
   //-----------------Effects-----------------------------
   useEffect(() => {
     if (editingInvoice) {
@@ -143,12 +143,12 @@ const AddInvoice = () => {
       return accumulator + (currentItem.amount || 0);
     }, 0);
     methods.setValue("subTotalUsd", subTotalUsd);
-    methods.setValue("totalUsd", totalAmount());
+    methods.setValue("totalUsd", totalAmount(!isB2C));
   }, [cart, methods]);
 
   useEffect(() => {
     if (discountStore) {
-      methods.setValue("totalUsd", totalAmount());
+      methods.setValue("totalUsd", totalAmount(!isB2C));
     }
   }, [discountStore]);
 
