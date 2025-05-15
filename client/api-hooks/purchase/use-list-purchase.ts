@@ -4,19 +4,28 @@ import { API } from "@/constants/apiEndpoints";
 import { Pagination } from "@/components/admin/Pagination";
 
 const useListPurchase = ({
+  itemId,
   pageSize = 10,
   pageIndex = 0,
   search,
+  startDate,
+  endDate,
 }: {
   pageSize?: number;
   pageIndex?: number;
   search?: string;
+  itemId?: string;
+  startDate?: string;
+  endDate?: string;
 }) => {
   return useReadData<PurchaseResponse>({
-    queryKey: ["purchases", { pageSize, pageIndex, search }],
+    queryKey: [
+      "purchases",
+      { pageSize, pageIndex, search, itemId, startDate, endDate },
+    ],
     endpoint: API.listPurchase,
     keepPreviousData: true,
-    params: { pageSize, pageIndex, search },
+    params: { pageSize, pageIndex, search, itemId, startDate, endDate },
   });
 };
 

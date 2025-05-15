@@ -21,6 +21,7 @@ import {
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
 import Checkbox from "@/components/admin/Fields/Checkbox";
+import { Product } from "@/api-hooks/products/use-list-products";
 
 const paidStatuses = [
   {
@@ -33,7 +34,15 @@ const paidStatuses = [
   },
 ];
 
-function ListInvoice({ customerId }: { customerId?: string }) {
+function ListInvoice({
+  customerId,
+  productId,
+  product,
+}: {
+  customerId?: string;
+  productId?: string;
+  product?: Product;
+}) {
   const {
     paymentStatus,
     setPaymentStatus,
@@ -106,8 +115,26 @@ function ListInvoice({ customerId }: { customerId?: string }) {
         ]
       : []),
 
+    ...(productId
+      ? [
+          columnHelper.accessor("items", {
+            header: product?.name,
+            cell: ({ getValue }) => {
+              const item = getValue().find(
+                (item) => item.itemRef === productId
+              );
+              return (
+                <div>
+                  {item?.quantity}pc / {item?.price}$
+                </div>
+              );
+            },
+          }),
+        ]
+      : []),
+
     columnHelper.accessor("accounting.totalUsd", {
-      header: "Amount",
+      header: productId ? "Total Amount" : "Amount",
       cell: ({ getValue }) => (
         <div>{Number(getValue()).toLocaleString("en-US")}$</div>
       ),
@@ -203,8 +230,9 @@ function ListInvoice({ customerId }: { customerId?: string }) {
     data: invoicesData,
     isLoading,
     isFetching,
+
     error,
-  } = useListInvoices({ customerId });
+  } = useListInvoices({ customerId, itemId: productId });
   const router = useRouter();
 
   // Calculate the total amount for all invoices

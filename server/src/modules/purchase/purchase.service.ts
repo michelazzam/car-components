@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
-import { FilterQuery, Model } from 'mongoose';
+import mongoose, { FilterQuery, Model } from 'mongoose';
 import { PurchaseDto } from './dto/purchase.dto';
 import { GetPurchaseDto } from './dto/get-purchase.dto';
 import { getFormattedDate } from 'src/utils/getFormattedDate';
@@ -21,7 +21,15 @@ export class PurchaseService {
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
-    const { pageIndex, search, pageSize, supplierId, startDate, endDate } = dto;
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      supplierId,
+      startDate,
+      endDate,
+      itemId,
+    } = dto;
 
     const filter: FilterQuery<IPurchase> = { $and: [{ $or: [] }] };
 
@@ -37,6 +45,13 @@ export class PurchaseService {
     if (supplierId) {
       // @ts-ignore
       filter.$and[0].$or.push({ supplier: supplierId });
+    }
+
+    if (itemId) {
+      // @ts-ignore
+      filter.$and.push({
+        'items.item': new mongoose.Types.ObjectId(itemId),
+      });
     }
 
     // Add date range filter
