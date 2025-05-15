@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "pkg": "pkg dist/main.js --target node16-${npm_config_platform}-x64 --output ../src-tauri/bin/server",
+    "prepkg": "nest build",
+    "pkg": "npm run pkg:win",
     "pkg:win": "pkg dist/main.js --target node18-win-x64 --output ../src-tauri/bin/server-x86_64-pc-windows-msvc.exe",
     "pkg:mac": "pkg dist/main.js --target node16-macos-x64 --output ../src-tauri/bin/server",
     "pkg:linux": "pkg dist/main.js --target node16-linux-x64 --output ../src-tauri/bin/server",
