@@ -22,7 +22,11 @@ async function checkForUpdates() {
 function UpdatesButton() {
   const [hasUpdates, setHasUpdates] = useState(false);
   useEffect(() => {
-    checkForUpdates().then(setHasUpdates);
+    if (process.env.NODE_ENV === "development") {
+      return;
+    } else {
+      checkForUpdates().then(setHasUpdates);
+    }
   }, []);
 
   if (!hasUpdates) return null;
