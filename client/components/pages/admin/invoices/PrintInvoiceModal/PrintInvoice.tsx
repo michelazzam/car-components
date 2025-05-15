@@ -9,7 +9,6 @@ import {
 } from "@/api-hooks/invoices/useListInvoices";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
-import Image from "next/image";
 import numWords from "num-words";
 // import {
 //   CustomerPrev,
@@ -76,7 +75,6 @@ function PrintInvoice({
       customerNote: invoiceData.customerNote,
       totalPriceUsd: invoiceData.accounting.totalUsd,
       invoiceUsdRate: invoiceData.accounting.usdRate,
-
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
 
@@ -143,7 +141,7 @@ const PrintHeader = ({
 }) => (
   <div
     className="
-  flex justify-between px-4 py-2 border-b border-gray-200"
+  grid grid-cols-10 px-4 py-2 border-b border-gray-200"
   >
     <div className="col-span-4">
       <h4 className="text-lg font-semibold">{organization?.name}</h4>
@@ -165,17 +163,9 @@ const PrintHeader = ({
         )}
       </p>
     </div>
-    <div className="col-span-2">
-      <Image
-        width={100}
-        height={100}
-        src="/assets/images/brand-logos/logo_thermobox.jpg"
-        alt="organization Logo"
-        // className="w-full object-cover"
-      />
-    </div>
-    <div className="col-span-4">
-      <h3 className="text-2xl font-bold">{title}</h3>
+
+    <div className="col-span-6">
+      <h3 className="text-5xl font-bold">{title}</h3>
     </div>
   </div>
 );

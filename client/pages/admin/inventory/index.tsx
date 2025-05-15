@@ -7,18 +7,21 @@ import {
   Product,
   useListProducts,
 } from "@/api-hooks/products/use-list-products";
-import AddEditProductModal from "../../components/pages/admin/menu/AddEditProductModal";
-import DeleteRecord from "../../components/admin/DeleteRecord";
+
 import { API } from "@/constants/apiEndpoints";
 import { useDebounce } from "@/hooks/useDebounce";
-import IncreaseStockModal from "../../components/pages/admin/inventory/IncreaseStock";
-import DecreaseStockModal from "../../components/pages/admin/inventory/DecreaseStock";
+
 import { createColumnHelper } from "@tanstack/react-table";
 import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
 import TableWrapper from "@/shared/Table/TableWrapper";
+import AddEditProductModal from "@/components/pages/admin/menu/AddEditProductModal";
+import IncreaseStockModal from "@/components/pages/admin/inventory/IncreaseStock";
+import DecreaseStockModal from "@/components/pages/admin/inventory/DecreaseStock";
+import DeleteRecord from "@/components/admin/DeleteRecord";
+import Link from "next/link";
 
 const Inventory = () => {
   const { pagination, setPagination } = useReactTablePagination();
@@ -68,6 +71,13 @@ const Inventory = () => {
           className="flex align-middle gap-2"
           style={{ display: "flex", justifyContent: "space-around" }}
         >
+          <Link
+            href={`/admin/inventory/${row.original._id}`}
+            className="btn btn-sm btn-primary delete-btn text-primary border border-primary rounded-md p-1 hover:bg-primary hover:text-white"
+          >
+            Show Details
+          </Link>
+
           <button
             id="edit-btn"
             onClick={() => setSelectedProduct(row.original)}

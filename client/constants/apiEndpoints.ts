@@ -18,6 +18,7 @@ export const API = {
   editProduct: (id: string) => `/items/${id}`, // PUT
   deleteProduct: (id: string) => `/items/${id} `, // DELETE
   increaseStock: (id: string) => `/items/${id}/stock`, // PUT
+  getProductById: (id: string) => `/items/${id}`, // GET
 
   //purchase
   listPurchase: "/purchase",
@@ -92,7 +93,7 @@ export const API = {
   editOrder: (id: string) => `/orders/${id}`, // PUT
 
   //Reports
-  getAccountSummary:"reports/accounts-receivable-summary",
+  getAccountSummary: "reports/accounts-receivable-summary",
   getReportsByDate: "/reports/sum", // GET
   getAllReports: "/reports/all", // GET
   getGlobalReports: "/reports/global", // GET
