@@ -1,30 +1,29 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use tauri_plugin_shell::init as shell_plugin;
-use std::io;
-use std::io::Write;
-use tauri_plugin_shell::ShellExt;
-use tauri_plugin_shell::process::CommandEvent;
 use dotenv::dotenv;
+use std::env;
+use tauri_plugin_shell::init as shell_plugin;
+use tauri_plugin_shell::ShellExt;
 fn main() {
     dotenv().ok();
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(shell_plugin())
         .setup(|app| {
-         
-         
+            let node_env = env::var("NODE_ENV").expect("NODE_ENV must be set");
+            let port = env::var("PORT").expect("PORT must be set");
+            let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+            let backup_database_url =
+                env::var("BACKUP_DATABASE_URL").expect("BACKUP_DATABASE_URL must be set");
+
             let sidecar_command = app.shell().sidecar("server").unwrap();
-            let (mut rx, mut child) = sidecar_command
-                .env("NODE_ENV", dotenv!("NODE_ENV"))
-                .env("PORT", dotenv!("PORT"))
-                .env("DATABASE_URL", dotenv!("DATABASE_URL"))
-                .env("BACKUP_DATABASE_URL", dotenv!("BACKUP_DATABASE_URL"))
-                .args(["--port", dotenv!("PORT")])
+            let (mut _rx, mut _child) = sidecar_command
+                .env("NODE_ENV", node_env)
+                .env("PORT", port)
+                .env("DATABASE_URL", database_url)
+                .env("BACKUP_DATABASE_URL", backup_database_url)
+                .args(["--port", "8000"])
                 .spawn()
                 .expect("failed to spawn sidecar");
-
-        
-            
 
             Ok(())
         })
