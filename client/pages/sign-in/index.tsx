@@ -53,25 +53,6 @@ const Firebaselogin = () => {
         <div className="flex justify-center authentication authentication-basic items-center h-full text-defaultsize text-defaulttextcolor">
           <div className="w-[80%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] xxl:w-[30%] ">
             <div className="box !p-[2rem]">
-              <div className="my-[2.5rem] flex justify-center">
-                <Link href="/components/dashboards/crm/">
-                  <img
-                    src={`${
-                      process.env.NODE_ENV === "production" ? basePath : ""
-                    }/assets/images/brand-logos/thermobox-nobg.png`}
-                    alt="logo"
-                    className="desktop-logo w-20 h-20"
-                  />
-                  <img
-                    src={`${
-                      process.env.NODE_ENV === "production" ? basePath : ""
-                    }/assets/images/brand-logos/thermobox-nobg.png`}
-                    alt="logo"
-                    className="desktop-dark"
-                  />
-                </Link>
-              </div>
-
               <div
                 className="box-body "
                 role="tabpanel"
