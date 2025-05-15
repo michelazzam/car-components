@@ -11,6 +11,7 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
     "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
     "client": "cd client && npm run dev",
     "client:prod": "cd client && npm start",

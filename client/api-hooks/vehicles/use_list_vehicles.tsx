@@ -7,6 +7,8 @@ interface Customer {
   name: string;
 }
 
+export type OdometerUnit = "km" | "mile";
+
 export interface Vehicle {
   _id: string;
   number: string;
@@ -14,6 +16,7 @@ export interface Vehicle {
   model: string;
   lastServiceDate: string;
   odometer: number;
+  unit: OdometerUnit;
   customer: Customer;
 }
 

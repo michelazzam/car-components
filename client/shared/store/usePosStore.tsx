@@ -1,16 +1,20 @@
 import { GetItem, Invoice } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
 
-function calculateDiscountedAmount(price: number, quantity: number, discount?: Discount): number {
+function calculateDiscountedAmount(
+  price: number,
+  quantity: number,
+  discount?: Discount
+): number {
   const total = price * quantity;
-  if(discount){
+  if (discount) {
     if (discount.type === "percentage") {
       return Number((total - (total * discount.amount) / 100).toFixed(2));
     } else {
       return Number((total - discount.amount).toFixed(2));
     }
-  }else{
-    return total
+  } else {
+    return total;
   }
 }
 
@@ -29,7 +33,7 @@ export interface Item {
     price: number;
   };
   stock?: number;
-  discount?:Discount;
+  discount?: Discount;
 }
 
 export interface Discount {
@@ -54,9 +58,9 @@ interface PosState {
   addToCart: (type: "product" | "service", item: Item) => void;
   addGroupItem: (type: "product" | "service", items: GetItem[]) => void;
   removeItem: (item: Item) => void;
-  totalAmount: () => number;
+  totalAmount: (isVatActive: boolean) => number;
   setQuantity: (name: string, price: number, quantity: number) => void;
-  addItemDiscount:(prodcutId:string, discount:Discount) => void;
+  addItemDiscount: (prodcutId: string, discount: Discount) => void;
 }
 
 export const usePosStore = create<PosState>()((set, get) => ({
@@ -109,18 +113,19 @@ export const usePosStore = create<PosState>()((set, get) => ({
     if (items) {
       const itemsToAdd = items.map((element) => ({
         type,
-        name:element.name,
-        price:element.price,
+        name: element.name,
+        price: element.price,
         quantity: element.quantity,
-        amount:element.discount?
-        (element.price * element.quantity - (element.discount.type === "percentage"?element.price *element.quantity * (element.discount.amount * 0.01):element.discount.amount)):
-        (element.price * element.quantity),
-        discount:element.discount,
-        productId:
-          type === "product"?
-          element.itemRef:
-          element.serviceRef
-            
+        amount: element.discount
+          ? element.price * element.quantity -
+            (element.discount.type === "percentage"
+              ? element.price *
+                element.quantity *
+                (element.discount.amount * 0.01)
+              : element.discount.amount)
+          : element.price * element.quantity,
+        discount: element.discount,
+        productId: type === "product" ? element.itemRef : element.serviceRef,
       }));
       set((state) => ({
         cart: [...state.cart, ...itemsToAdd],
@@ -137,7 +142,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
     }));
   },
 
-  totalAmount: () => {
+  totalAmount: (isVatActive: boolean) => {
     const { cart, vatAmount, discountStore } = get();
 
     let totalItemsAmount = Number(
@@ -145,7 +150,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
     );
 
     // Ensure vatAmount and discountStore.amount are valid numbers
-    const validVatAmount = Number(vatAmount) || 0;
+    const validVatAmount = isVatActive ? Number(vatAmount) || 0 : 0;
     const discountAmount = Number(discountStore.amount) || 0;
 
     if (discountStore.type === "percentage") {
@@ -172,21 +177,33 @@ export const usePosStore = create<PosState>()((set, get) => ({
         ...state,
         cart: state.cart.map((item: Item) =>
           item.name === name && item.price === price
-            ? { ...item, quantity, amount: calculateDiscountedAmount(item.price , quantity, item.discount) }
+            ? {
+                ...item,
+                quantity,
+                amount: calculateDiscountedAmount(
+                  item.price,
+                  quantity,
+                  item.discount
+                ),
+              }
             : item
         ),
       };
     });
   },
-  
-  addItemDiscount: (productId:string, discount: Discount) => {
+
+  addItemDiscount: (productId: string, discount: Discount) => {
     set((state) => ({
       cart: state.cart.map((item) =>
         item.productId === productId
           ? {
               ...item,
               discount,
-              amount: calculateDiscountedAmount(item.price!, item.quantity!, discount),
+              amount: calculateDiscountedAmount(
+                item.price!,
+                item.quantity!,
+                discount
+              ),
             }
           : item
       ),

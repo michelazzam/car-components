@@ -135,7 +135,6 @@ function SalesProductsSummary({ customerId }: { customerId?: string }) {
                   pagination={pagination}
                   setPagination={setPagination}
                   totalRows={invoicesData?.pagination.totalCount || 0}
-                  // totalAmount={totalAmount.toFixed(2) + "$"}
                 />
 
                 <Pagination

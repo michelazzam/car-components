@@ -95,6 +95,7 @@ function VehicleModal({
         make: "",
         odometer: 0,
         number: "",
+        unit: "km",
       },
     });
   const selectedMake = watch("make");
@@ -109,6 +110,7 @@ function VehicleModal({
         make: vehicle?.make,
         odometer: vehicle?.odometer,
         number: vehicle?.number,
+        unit: vehicle?.unit,
       });
     } else {
       reset({
@@ -116,6 +118,7 @@ function VehicleModal({
         make: "",
         odometer: 0,
         number: "",
+        unit: "km",
       });
     }
   }, [vehicle]);
@@ -203,14 +206,25 @@ function VehicleModal({
             name="number"
             label="Vehicle No."
             placeholder="123456"
-            colSpan={6}
+            colSpan={4}
+          />
+          <SelectFieldControlled
+            options={[
+              { label: "Km", value: "km" },
+              { label: "Mile", value: "mile" },
+            ]}
+            control={control}
+            name="unit"
+            label="Odometer Unit"
+            placeholder="Km or Mile"
+            colSpan={4}
           />
           <NumberFieldControlled
             control={control}
             name="odometer"
             label="Odometer"
             placeholder="123456"
-            colSpan={6}
+            colSpan={4}
             prefix="km"
           />
         </form>
