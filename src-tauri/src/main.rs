@@ -16,7 +16,7 @@ fn main() {
             let (mut rx, mut child) = sidecar_command
                 .env("NODE_ENV", "development")
                 .env("PORT", "8000")
-                .env("DATABASE_URL", "mongodb+srv://server:OU3crtDe7ZEQjsMF@staging.fcatdcw.mongodb.net/?retryWrites=true&w=majority&appName=staging")
+                .env("DATABASE_URL", "mongodb://localhost:27017")
                 .env("BACKUP_DATABASE_URL", "mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
                 .args(["--port", "8000"])
                 .spawn()
