@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import TotalsCard from "./TotalsCard";
 import AddItemForm from "./AddItemForm";
@@ -76,6 +76,13 @@ const CustomAddPurchaseComponent = () => {
     setEditingPurchase(undefined);
     router.push("/admin/purchase");
   };
+
+  // +clear the purchase when page unmounts
+  useEffect(() => {
+    return () => {
+      clearPurchase();
+    };
+  }, []);
 
   const onSubmitAddEdit = (data: AddPurchaseSchemaType) => {
     const newData = {
