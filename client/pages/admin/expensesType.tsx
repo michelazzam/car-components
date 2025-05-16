@@ -14,6 +14,7 @@ import {
   useListExpensesType,
 } from "@/api-hooks/expensesType/use-list-expensesType";
 import ExpenseTypeModal from "../../components/pages/admin/expenseType/ExpenseTypeModal";
+import BackBtn from "@/components/common/BackBtn";
 
 const ExpensesType = () => {
   const [search, setSearch] = useState("");
@@ -101,7 +102,9 @@ const ExpensesType = () => {
   ];
 
   return (
-    <div>
+    <div className="mt-5">
+      <BackBtn />
+
       <Seo title={"Expenses List"} />
       <Pageheader
         currentpage="Expenses Type List"

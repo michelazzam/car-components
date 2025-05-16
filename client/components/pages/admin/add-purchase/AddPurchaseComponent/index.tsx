@@ -115,7 +115,7 @@ const CustomAddPurchaseComponent = () => {
   return (
     <>
       {/*Add Purchase */}
-      <div className=" my-[1.5rem]">
+      <div className="mb-[1.5rem]">
         <FormProvider {...methods}>
           <form
             ref={addPurchaseFormRef}
