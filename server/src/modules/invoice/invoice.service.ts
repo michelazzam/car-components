@@ -46,7 +46,8 @@ export class InvoiceService {
 
   // 2 private functions making code cleaner
   private buildGetInvoicesFilter(dto: GetInvoicesDto, user: ReqUserData) {
-    const { search, customerId, type, startDate, endDate, itemId } = dto;
+    const { search, customerId, type, startDate, endDate, itemId, isPaid } =
+      dto;
 
     const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
 
@@ -58,6 +59,14 @@ export class InvoiceService {
         generalNote: { $regex: search, $options: 'i' },
         customerNote: { $regex: search, $options: 'i' },
       });
+    }
+
+    if (isPaid === 'true') {
+      // @ts-ignore
+      filter.$and[0].$or.push({ 'accounting.isPaid': true });
+    } else if (isPaid === 'false') {
+      // @ts-ignore
+      filter.$and[0].$or.push({ 'accounting.isPaid': false });
     }
 
     // for "specialAccess" user, only s1 invoices
@@ -111,9 +120,9 @@ export class InvoiceService {
   }
 
   private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
-    const { pageIndex, pageSize } = dto;
-
     const filter = this.buildGetInvoicesFilter(dto, user);
+
+    const { pageIndex, pageSize } = dto;
 
     const [invoices, totalCount, totalsResult] = await Promise.all([
       this.invoiceModel
@@ -291,10 +300,10 @@ export class InvoiceService {
 
     const accounting = await this.accountingService.getAccounting();
 
-    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+    const isPaid = updatedDto.totalUsd <= updatedDto.paidAmountUsd;
 
     // Create new invoice
-    const newInvoice = await this.invoiceModel.create({
+    await this.invoiceModel.create({
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
@@ -310,19 +319,13 @@ export class InvoiceService {
         subTotalUsd: updatedDto.subTotalUsd,
         totalUsd: updatedDto.totalUsd,
 
-        paidAmountUsd: updatedDto.paidAmountUsd,
+        // in case the paid amount is larger than the total amount, do not add it to the paid amount
+        paidAmountUsd: isPaid ? updatedDto.totalUsd : updatedDto.paidAmountUsd,
       },
       items: updatedDto.items,
     });
 
     await this.doInvoiceEffects(updatedDto);
-
-    const populatedInvoice = await this.invoiceModel
-      .findById(newInvoice._id)
-      .populate('customer')
-      .populate('vehicle');
-
-    return populatedInvoice;
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {
@@ -431,11 +434,12 @@ export class InvoiceService {
 
     if (customerPaidAmount > 0) {
       // Decrease customer loan
-      customer.loan = customer.loan - customerPaidAmount;
+      const minLoan = Math.max(customer.loan - customerPaidAmount, 0);
+      customer.loan = minLoan;
       await customer.save();
 
       // Update accounting
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalIncome: customerPaidAmount, // increase total income
         totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
       });
@@ -471,11 +475,11 @@ export class InvoiceService {
       await customer.save();
 
       // increase total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: remainingAmount,
       });
     }
-    // if paid more, decrease customer loan if he has any
+    // if paid more, decrease customer loan if he has any + pay old customer invoices
     else if (remainingAmount < 0) {
       const extraAmountPaid = Math.abs(remainingAmount);
 
@@ -485,14 +489,21 @@ export class InvoiceService {
       if (!customer) throw new BadRequestException('Customer not found');
 
       if (customer.loan > 0) {
-        customer.loan -= extraAmountPaid;
+        const minLoan = Math.max(customer.loan - extraAmountPaid, 0);
+        customer.loan = minLoan;
         await customer.save();
 
         // decrease total customer loans
-        await this.accountingService.updateAccounting({
+        await this.accountingService.incAccountingNumberFields({
           totalCustomersLoan: -extraAmountPaid,
         });
       }
+
+      // pay old customer invoices
+      await this.payCustomerInvoices({
+        customerId: customer._id?.toString(),
+        amount: extraAmountPaid,
+      });
     }
 
     // calc total items cost amount
@@ -501,7 +512,7 @@ export class InvoiceService {
       .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
     // update accounting & cost of goods sold
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalIncome: updatedDto.paidAmountUsd,
       costOfGoodsSold: totalProductsCost,
     });
@@ -535,11 +546,12 @@ export class InvoiceService {
       );
       if (!customer) throw new BadRequestException('Customer not found');
 
-      customer.loan = customer.loan - remainingAmount;
+      const minLoan = Math.max(customer.loan - remainingAmount, 0);
+      customer.loan = minLoan;
       await customer.save();
 
       // decrease total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: -remainingAmount,
       });
     } else {
@@ -555,7 +567,7 @@ export class InvoiceService {
       await customer.save();
 
       // increase total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: customer.loan,
       });
     }
@@ -566,7 +578,7 @@ export class InvoiceService {
       .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
     // decrease accounting total income + cost of goods sold
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalIncome: -invoice.accounting.paidAmountUsd,
       costOfGoodsSold: -totalProductsCost,
     });

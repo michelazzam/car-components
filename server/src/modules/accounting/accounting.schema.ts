@@ -20,6 +20,12 @@ export class Accounting {
 
   @Prop({ default: 0 })
   totalSuppliersLoan: number;
+
+  @Prop({ default: 0 })
+  caisse: number;
+
+  @Prop({ default: false })
+  isCaisseOpen: boolean;
 }
 
 export type IAccounting = HydratedDocument<Accounting>;

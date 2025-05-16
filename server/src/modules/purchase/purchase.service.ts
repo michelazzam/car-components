@@ -206,7 +206,7 @@ export class PurchaseService {
       await supplier.save();
 
       // increase total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
     }
@@ -219,11 +219,12 @@ export class PurchaseService {
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       if (supplier.loan > 0) {
-        supplier.loan = supplier.loan - extraAmountPaid;
+        const minLoan = Math.max(supplier.loan - extraAmountPaid, 0);
+        supplier.loan = minLoan;
         await supplier.save();
 
         // decrease total supplier loans
-        this.accountingService.updateAccounting({
+        this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: -extraAmountPaid,
         });
       }
@@ -262,14 +263,12 @@ export class PurchaseService {
         return; //ignore deleted suppliers
       }
 
-      supplier.loan -= purchase.amountPaid;
-      // Check whether loan is enough to subtract
-      if (supplier.loan < 0) supplier.loan = 0;
-
+      const minLoan = Math.max(supplier.loan - purchase.amountPaid, 0);
+      supplier.loan = minLoan;
       await supplier.save();
 
       // decrease total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: -supplier.loan,
       });
     } else {
@@ -287,7 +286,7 @@ export class PurchaseService {
       await supplier.save();
 
       // increase total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
     }

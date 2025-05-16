@@ -1,16 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Matches,
-} from 'class-validator';
-import { invoiceTypes } from '../invoice.schema';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
-export class GetInvoicesDto {
+export class GetCaisseHistoryDto {
   @ApiProperty({ required: true, type: Number })
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10), { toClassOnly: true })
@@ -40,27 +33,4 @@ export class GetInvoicesDto {
   @IsString()
   @IsValidDateFormat()
   endDate: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  search?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  customerId?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  itemId?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @Matches(/^(true|false)$/)
-  isPaid: string;
-
-  @ApiProperty({ required: false, enum: invoiceTypes })
-  @IsOptional()
-  @IsEnum(invoiceTypes)
-  type?: string;
 }

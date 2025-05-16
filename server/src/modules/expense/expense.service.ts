@@ -169,7 +169,7 @@ export class ExpenseService {
     });
 
     // update accounting
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalExpenses: dto.amount, //increase total expenses
       totalSuppliersLoan: -dto.amount, //decrease total suppliers loan
     });
@@ -199,7 +199,7 @@ export class ExpenseService {
     });
 
     // update accounting
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalExpenses: -expense.amount, // decrease total expenses
       totalSuppliersLoan: expense.amount, // re-add total suppliers loan
     });
