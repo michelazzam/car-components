@@ -206,7 +206,7 @@ export class PurchaseService {
       await supplier.save();
 
       // increase total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
     }
@@ -224,7 +224,7 @@ export class PurchaseService {
         await supplier.save();
 
         // decrease total supplier loans
-        this.accountingService.updateAccounting({
+        this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: -extraAmountPaid,
         });
       }
@@ -268,7 +268,7 @@ export class PurchaseService {
       await supplier.save();
 
       // decrease total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: -supplier.loan,
       });
     } else {
@@ -286,7 +286,7 @@ export class PurchaseService {
       await supplier.save();
 
       // increase total supplier loans
-      this.accountingService.updateAccounting({
+      this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
     }

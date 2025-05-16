@@ -439,7 +439,7 @@ export class InvoiceService {
       await customer.save();
 
       // Update accounting
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalIncome: customerPaidAmount, // increase total income
         totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
       });
@@ -475,7 +475,7 @@ export class InvoiceService {
       await customer.save();
 
       // increase total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: remainingAmount,
       });
     }
@@ -494,7 +494,7 @@ export class InvoiceService {
         await customer.save();
 
         // decrease total customer loans
-        await this.accountingService.updateAccounting({
+        await this.accountingService.incAccountingNumberFields({
           totalCustomersLoan: -extraAmountPaid,
         });
       }
@@ -512,7 +512,7 @@ export class InvoiceService {
       .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
     // update accounting & cost of goods sold
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalIncome: updatedDto.paidAmountUsd,
       costOfGoodsSold: totalProductsCost,
     });
@@ -551,7 +551,7 @@ export class InvoiceService {
       await customer.save();
 
       // decrease total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: -remainingAmount,
       });
     } else {
@@ -567,7 +567,7 @@ export class InvoiceService {
       await customer.save();
 
       // increase total customer loans
-      await this.accountingService.updateAccounting({
+      await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: customer.loan,
       });
     }
@@ -578,7 +578,7 @@ export class InvoiceService {
       .reduce((acc, item) => acc + item.quantity * item.cost, 0);
 
     // decrease accounting total income + cost of goods sold
-    await this.accountingService.updateAccounting({
+    await this.accountingService.incAccountingNumberFields({
       totalIncome: -invoice.accounting.paidAmountUsd,
       costOfGoodsSold: -totalProductsCost,
     });
