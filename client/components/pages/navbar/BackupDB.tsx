@@ -2,7 +2,7 @@ import { usePostData } from "@/api-service/usePostData";
 import { API } from "@/constants/apiEndpoints";
 import Modal from "@/shared/Modal";
 import { useRef } from "react";
-import { MdOutlineBackup } from "react-icons/md";
+import { FaRegTrashCan } from "react-icons/fa6";
 
 export default function BackupDBModal() {
   const cancelFormRef = useRef<HTMLButtonElement>(null);
@@ -19,11 +19,11 @@ export default function BackupDBModal() {
   };
 
   return (
-    <Modal id="backup-db-modal" size="xs">
+    <Modal id="backup-db-modal" size="sm">
       <Modal.Header title="Backup Database" id="backup-db-modal" />
       <Modal.Body>
         <div className="flex flex-col items-center justify-center">
-          <MdOutlineBackup size={45} className="text-blue-500" />
+          <FaRegTrashCan size={45} className="text-blue-500" />
           <strong className="mt-3 text-lg font-bold">
             Are you sure you want to backup the database?
           </strong>
