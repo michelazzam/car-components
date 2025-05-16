@@ -20,7 +20,7 @@ const UserSchema = z.object({
         message: "Invalid email format",
       }
     ),
-  password: z.string().optional(),
+  password: z.string().min(5, "Length > 5").optional(),
   salary: z.number(),
   role: z.string().min(1, "Role is required"),
 });

@@ -45,6 +45,7 @@ const UserModal = ({
       cancelFormRef.current?.click();
     },
   });
+
   //-------------------------Form-----------------------------------
   const { control, handleSubmit, reset } = useForm<AddUserSchema>({
     resolver: zodResolver(apiValidations.AddUser),
@@ -53,7 +54,7 @@ const UserModal = ({
       email: "",
       salary: 0,
       role: "",
-      password: "",
+      password: undefined,
     },
   });
 
@@ -63,8 +64,8 @@ const UserModal = ({
         username: userEditing.username,
         email: userEditing.email,
         salary: userEditing.salary,
-
         role: userEditing.role,
+        password: undefined,
       });
     }
   }, [userEditing]);
