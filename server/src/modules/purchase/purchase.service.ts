@@ -188,10 +188,10 @@ export class PurchaseService {
       const product = await this.itemService.getOneById(item.itemId);
       if (!product) throw new BadRequestException('Product not found');
 
-      product.quantity += item.quantity;
+      const totalQuantityBought = item.quantity + item.quantityFree;
+      product.quantity += totalQuantityBought;
 
       // calc new cost
-      const totalQuantityBought = product.quantity + item.quantityFree;
       product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
       await product.save();
     }
@@ -250,7 +250,8 @@ export class PurchaseService {
       }
 
       // Revert quantity
-      product.quantity -= item.quantity;
+      const totalQuantityBought = item.quantity + item.quantityFree;
+      product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase
       product.cost = item.currentItemCost;
