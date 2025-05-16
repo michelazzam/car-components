@@ -93,7 +93,10 @@ function AddEditSupplierModal({
 
   return (
     <Modal id={triggerModalId} size="md">
-      <Modal.Header title="Add Item" id={triggerModalId} />
+      <Modal.Header
+        title={`${isEditing ? "Edit" : "Add"} Supplier`}
+        id={triggerModalId}
+      />
       <Modal.Body>
         <form
           ref={formRef}

@@ -4,6 +4,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { startSwagger } from './config/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as nodeCrypto from 'crypto';
+import { GlobalExceptionFilter } from './middleware/global-exception-filter.middleware';
 if (typeof (globalThis as any).crypto === 'undefined') {
   (globalThis as any).crypto = {
     randomUUID: (): string => nodeCrypto.randomUUID(),
@@ -20,6 +21,8 @@ async function bootstrap() {
 
   // global pipe to transform field types into their needed types
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.enableVersioning({
     type: VersioningType.URI,

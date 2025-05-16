@@ -20,7 +20,7 @@ const SUPPLIER_SECTIONS = [
     title: "Financial Information",
     fields: [
       { label: "Amount Due", key: "amountDue", formatter: formatCurrency },
-      { label: "Capital", key: "capital", formatter: formatCurrency },
+      { label: "Capital", key: "capital" },
       { label: "Loan", key: "loan", formatter: formatCurrency },
     ],
   },

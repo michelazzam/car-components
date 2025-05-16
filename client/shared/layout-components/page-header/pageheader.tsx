@@ -17,7 +17,7 @@ const Pageheader = ({
 }) => {
   return (
     <Fragment>
-      <div className="block justify-between page-header md:flex">
+      <div className="block justify-between py-3 md:flex">
         <div>
           <h3 className="!text-defaulttextcolor dark:!text-defaulttextcolor/70 dark:text-white dark:hover:text-white text-[1.125rem] font-semibold">
             {currentpage}

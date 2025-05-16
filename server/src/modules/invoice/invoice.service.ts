@@ -334,7 +334,7 @@ export class InvoiceService {
     // items existance validation
     const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
 
-    const isPaid = updatedDto.totalUsd === updatedDto.paidAmountUsd;
+    const isPaid = updatedDto.totalUsd <= updatedDto.paidAmountUsd;
 
     // Create new invoice
     await this.invoiceModel.findByIdAndUpdate(invoiceId, {
@@ -351,7 +351,8 @@ export class InvoiceService {
         subTotalUsd: updatedDto.subTotalUsd,
         totalUsd: updatedDto.totalUsd,
 
-        paidAmountUsd: updatedDto.paidAmountUsd,
+        // in case the paid amount is larger than the total amount, do not add it to the paid amount
+        paidAmountUsd: isPaid ? updatedDto.totalUsd : updatedDto.paidAmountUsd,
       },
       items: updatedDto.items,
     });
@@ -385,7 +386,10 @@ export class InvoiceService {
    *
    * @returns {Promise<void>} Resolves when all updates are completed.
    */
-  async payCustomerInvoices(dto: PayCustomerInvoicesDto) {
+  async payCustomerInvoices(
+    dto: PayCustomerInvoicesDto,
+    doNotAddToCaisse?: boolean,
+  ) {
     const { customerId, amount: customerPaidAmount } = dto;
 
     // validate customer exists
@@ -442,6 +446,7 @@ export class InvoiceService {
       await this.accountingService.incAccountingNumberFields({
         totalIncome: customerPaidAmount, // increase total income
         totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
+        caisse: doNotAddToCaisse ? 0 : customerPaidAmount, // increase caisse
       });
 
       // update daily report
@@ -464,25 +469,26 @@ export class InvoiceService {
     }
 
     // save customer loan if did not pay all
-    const remainingAmount = updatedDto.totalUsd - updatedDto.paidAmountUsd;
-    if (remainingAmount > 0) {
+    const remainingAmountToBePaid =
+      updatedDto.totalUsd - updatedDto.paidAmountUsd;
+    const extraAmountPaid = Math.abs(remainingAmountToBePaid);
+
+    if (remainingAmountToBePaid > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
       );
       if (!customer) throw new BadRequestException('Customer not found');
 
-      customer.loan = customer.loan + remainingAmount;
+      customer.loan = customer.loan + remainingAmountToBePaid;
       await customer.save();
 
       // increase total customer loans
       await this.accountingService.incAccountingNumberFields({
-        totalCustomersLoan: remainingAmount,
+        totalCustomersLoan: remainingAmountToBePaid,
       });
     }
     // if paid more, decrease customer loan if he has any + pay old customer invoices
-    else if (remainingAmount < 0) {
-      const extraAmountPaid = Math.abs(remainingAmount);
-
+    else if (extraAmountPaid > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
       );
@@ -500,10 +506,13 @@ export class InvoiceService {
       }
 
       // pay old customer invoices
-      await this.payCustomerInvoices({
-        customerId: customer._id?.toString(),
-        amount: extraAmountPaid,
-      });
+      await this.payCustomerInvoices(
+        {
+          customerId: customer._id?.toString(),
+          amount: extraAmountPaid,
+        },
+        true, // do not add to caisse since we are adding it before this step
+      );
     }
 
     // calc total items cost amount
@@ -515,6 +524,7 @@ export class InvoiceService {
     await this.accountingService.incAccountingNumberFields({
       totalIncome: updatedDto.paidAmountUsd,
       costOfGoodsSold: totalProductsCost,
+      caisse: updatedDto.paidAmountUsd, // increase caisse
     });
 
     // update daily report
@@ -581,6 +591,7 @@ export class InvoiceService {
     await this.accountingService.incAccountingNumberFields({
       totalIncome: -invoice.accounting.paidAmountUsd,
       costOfGoodsSold: -totalProductsCost,
+      caisse: -invoice.accounting.paidAmountUsd, // decrease caisse
     });
 
     // update daily report

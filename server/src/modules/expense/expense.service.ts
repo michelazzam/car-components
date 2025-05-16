@@ -157,7 +157,8 @@ export class ExpenseService {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
       if (!supplier) throw new NotFoundException('Supplier not found');
 
-      supplier.loan -= dto.amount;
+      const minLoan = Math.max(supplier.loan - dto.amount, 0);
+      supplier.loan = minLoan;
       await supplier.save();
     }
 
@@ -171,7 +172,8 @@ export class ExpenseService {
     // update accounting
     await this.accountingService.incAccountingNumberFields({
       totalExpenses: dto.amount, //increase total expenses
-      totalSuppliersLoan: -dto.amount, //decrease total suppliers loan
+      totalSuppliersLoan: dto.supplierId ? -dto.amount : 0, //decrease total suppliers loan
+      caisse: -dto.amount, //decrease caisse
     });
   }
 
@@ -182,15 +184,18 @@ export class ExpenseService {
     }
 
     // Increase supplier loan
-    const supplier = await this.supplierervice.getOneById(
-      expense.supplier?.toString(),
-    );
-    if (!supplier) {
-      return; //ignore deleted suppliers
-    }
+    if (expense.supplier) {
+      const supplier = await this.supplierervice.getOneById(
+        expense.supplier?.toString(),
+      );
 
-    supplier.loan += expense.amount;
-    await supplier.save();
+      if (supplier) {
+        supplier.loan += expense.amount;
+        await supplier.save();
+      }
+
+      //ignore deleted suppliers
+    }
 
     // update daily report
     await this.reportService.syncDailyReport({
@@ -201,7 +206,8 @@ export class ExpenseService {
     // update accounting
     await this.accountingService.incAccountingNumberFields({
       totalExpenses: -expense.amount, // decrease total expenses
-      totalSuppliersLoan: expense.amount, // re-add total suppliers loan
+      totalSuppliersLoan: expense.supplier ? expense.amount : 0, // re-add total suppliers loan
+      caisse: expense.amount, // re-add caisse
     });
   }
 }

@@ -188,10 +188,10 @@ export class PurchaseService {
       const product = await this.itemService.getOneById(item.itemId);
       if (!product) throw new BadRequestException('Product not found');
 
-      product.quantity += item.quantity;
+      const totalQuantityBought = item.quantity + item.quantityFree;
+      product.quantity += totalQuantityBought;
 
       // calc new cost
-      const totalQuantityBought = product.quantity + item.quantityFree;
       product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
       await product.save();
     }
@@ -229,6 +229,11 @@ export class PurchaseService {
         });
       }
     }
+
+    // decrease caisse
+    await this.accountingService.incAccountingNumberFields({
+      caisse: -dto.amountPaid,
+    });
   }
 
   private async revertPurchaseEffects(purchaseId: string) {
@@ -245,7 +250,8 @@ export class PurchaseService {
       }
 
       // Revert quantity
-      product.quantity -= item.quantity;
+      const totalQuantityBought = item.quantity + item.quantityFree;
+      product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase
       product.cost = item.currentItemCost;
@@ -259,18 +265,18 @@ export class PurchaseService {
       const supplier = await this.supplierService.getOneById(
         purchase.supplier?.toString(),
       );
-      if (!supplier) {
-        return; //ignore deleted suppliers
+
+      if (supplier) {
+        const minLoan = Math.max(supplier.loan - purchase.amountPaid, 0);
+        supplier.loan = minLoan;
+        await supplier.save();
+
+        // decrease total supplier loans
+        this.accountingService.incAccountingNumberFields({
+          totalSuppliersLoan: -supplier.loan,
+        });
       }
-
-      const minLoan = Math.max(supplier.loan - purchase.amountPaid, 0);
-      supplier.loan = minLoan;
-      await supplier.save();
-
-      // decrease total supplier loans
-      this.accountingService.incAccountingNumberFields({
-        totalSuppliersLoan: -supplier.loan,
-      });
+      //ignore deleted suppliers
     } else {
       // revert decreasing supplier loan in case when paid he paid more than needed
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -278,17 +284,22 @@ export class PurchaseService {
       const supplier = await this.supplierService.getOneById(
         purchase.supplier?.toString(),
       );
-      if (!supplier) {
-        return; //ignore deleted suppliers
+
+      if (supplier) {
+        supplier.loan += extraAmountPaid;
+        await supplier.save();
+
+        // increase total supplier loans
+        this.accountingService.incAccountingNumberFields({
+          totalSuppliersLoan: supplier.loan,
+        });
       }
-
-      supplier.loan += extraAmountPaid;
-      await supplier.save();
-
-      // increase total supplier loans
-      this.accountingService.incAccountingNumberFields({
-        totalSuppliersLoan: supplier.loan,
-      });
+      //ignore deleted suppliers
     }
+
+    // increase caisse
+    await this.accountingService.incAccountingNumberFields({
+      caisse: purchase.amountPaid,
+    });
   }
 }
