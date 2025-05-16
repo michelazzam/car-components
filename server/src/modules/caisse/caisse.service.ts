@@ -26,6 +26,8 @@ export class CaisseService {
       caisse: amount,
       isCaisseOpen: true,
     });
+
+    await this.createOrUpdateCaisseHistory(amount, 'opening');
   }
 
   async closeCaisse(dto: CloseOpenCaisseDto) {
@@ -39,6 +41,8 @@ export class CaisseService {
       caisse: amount,
       isCaisseOpen: false,
     });
+
+    await this.createOrUpdateCaisseHistory(amount, 'closing');
   }
 
   async getCaisseStatus() {
@@ -100,5 +104,28 @@ export class CaisseService {
         totalPages,
       },
     };
+  }
+
+  private createOrUpdateCaisseHistory(
+    amount: number,
+    status: 'closing' | 'opening',
+  ) {
+    const today = getFormattedDate(new Date());
+
+    return this.caisseHistoryModel.findOneAndUpdate(
+      { date: today },
+      {
+        $set: {
+          date: today,
+          openedAmount: status === 'opening' ? amount : 0,
+          closedAmount: status === 'closing' ? amount : 0,
+          openedAt: status === 'opening' ? new Date() : null,
+          closedAt: status === 'closing' ? new Date() : null,
+        },
+      },
+      {
+        upsert: true,
+      },
+    );
   }
 }
