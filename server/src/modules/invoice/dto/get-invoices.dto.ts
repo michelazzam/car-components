@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { invoiceTypes } from '../invoice.schema';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
@@ -46,6 +52,12 @@ export class GetInvoicesDto {
   @ApiProperty({ required: false })
   @IsOptional()
   itemId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^(true|false)$/)
+  isPaid: string;
 
   @ApiProperty({ required: false, enum: invoiceTypes })
   @IsOptional()
