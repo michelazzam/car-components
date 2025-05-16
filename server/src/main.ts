@@ -3,14 +3,19 @@ import { MainModule } from './modules/main.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { startSwagger } from './config/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as nodeCrypto from 'crypto';
+if (typeof (globalThis as any).crypto === 'undefined') {
+  (globalThis as any).crypto = {
+    randomUUID: (): string => nodeCrypto.randomUUID(),
+  };
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(MainModule);
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://tauri.localhost', 'http://localhost:3000', '*'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'PUT'],
-    credentials: true,
   });
 
   // global pipe to transform field types into their needed types

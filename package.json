@@ -4,15 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run start:dev --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "tauri:dev": "tauri dev",
+    "tauri:key": "powershell -Command \"$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content -Raw '.\\src-tauri\\~\\.tauri\\myapp.key'; npm run tauri:build\"",
+    "tauri:build": "tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
     "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
     "client": "cd client && npm run dev",
-    "build:client": "cd client && npm run build",
     "client:prod": "cd client && npm start",
     "server": "cd server && npm run dev",
-    "build:server": "cd server && npm run build",
-    "server:prod": "cd server && npm start"
+    "server:prod": "cd server && npm start",
+    "server:pkg": "npm run pkg --prefix server",
+    "tauri:prod": "npm run server:pkg && npm run tauri:build "
   },
   "repository": {
     "type": "git",
@@ -27,6 +34,15 @@
   },
   "homepage": "https://github.com/michelazzam/Car-Components#readme",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@nestjs/cli": "^11.0.7",
+    "@tauri-apps/cli": "^2.5.0",
+    "concurrently": "^9.1.2",
+    "pkg": "^5.8.1",
+    "ts-node-dev": "^2.0.0"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-dialog": "^2.2.1",
+    "@tauri-apps/plugin-process": "^2.2.1",
+    "@tauri-apps/plugin-updater": "^2.7.1"
   }
 }

@@ -8,6 +8,7 @@ import BackupDBModal from "@/components/pages/navbar/BackupDB";
 import { connect } from "react-redux";
 import { ThemeChanger } from "@/shared/redux/action";
 import store from "@/shared/redux/store";
+import UpdatesButton from "./UpdatesButton";
 
 const Header = ({ local_varaiable, ThemeChanger }: any) => {
   const { user } = UseAuth();
@@ -275,6 +276,7 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
                   <span></span>
                 </Link>
               </div>
+              <UpdatesButton />
             </div>
             <div className="header-content-right">
               <button
