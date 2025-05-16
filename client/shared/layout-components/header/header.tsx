@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import { ThemeChanger } from "@/shared/redux/action";
 import store from "@/shared/redux/store";
 import UpdatesButton from "./UpdatesButton";
+import { MdOutlineBackup } from "react-icons/md";
 
 const Header = ({ local_varaiable, ThemeChanger }: any) => {
   const { user } = UseAuth();
@@ -304,7 +305,7 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
               </div>
               {isAdmin && (
                 <button data-hs-overlay="#backup-db-modal">
-                  <i className="fe fe-database mt-0.5 mr-1"></i>
+                  <MdOutlineBackup size={27} />
                 </button>
               )}
               <div className="header-element md:!px-[0.65rem] px-2 !items-center [--placement:bottom-left]">
