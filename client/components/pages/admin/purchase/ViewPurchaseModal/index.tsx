@@ -21,7 +21,7 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
 
   return (
     <Modal id="view-purchase-modal">
-      <Modal.Header id="view-purchase-modal-header" title="Invoice" />
+      <Modal.Header id="view-purchase-modal" title="Invoice" />
 
       {/* remove default padding so we control it ourselves */}
       <Modal.Body paddingX="!px-0">
