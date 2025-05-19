@@ -44,6 +44,11 @@ export const userPermissions = {
     read: true,
     update: true,
   },
+  VehicleMakes: {
+    create: true,
+    read: true,
+    update: true,
+  },
 } as const;
 
 // Type for the keys (resource names)
