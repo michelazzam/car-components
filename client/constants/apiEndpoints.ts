@@ -100,7 +100,7 @@ export const API = {
   // DB Backup:
   getDbBackupPath: "/backup/path", // GET
   updateDbBackupPath: "/backup/path", // PUT
-  backupDB: "/backup/backup", // PUT
+  backupDB: "/backup/trigger-backup", // POST
 
   // Service:
   getAllServices: "/services", // GET
