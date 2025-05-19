@@ -318,6 +318,7 @@ const AddInvoiceSchema = z
             })
             .optional(),
           subTotal: z.number(),
+          price: z.number(),
           totalPrice: z.number(),
         })
       )

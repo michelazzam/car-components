@@ -62,6 +62,12 @@ class InvoiceItem {
 
   @ApiProperty({
     required: true,
+  })
+  @IsNumber()
+  price: number;
+
+  @ApiProperty({
+    required: true,
     type: Discount,
   })
   @ValidateNested()
@@ -154,7 +160,6 @@ export class InvoiceDto {
 export interface InvoiceItemWithDetails extends InvoiceItem {
   cost: number; // Additional cost field for each item
   name: string; // Additional name field for each item
-  price: number; // Additional price field for each item
 }
 
 export interface InvoiceDtoWithItemsDetails extends Omit<InvoiceDto, 'items'> {

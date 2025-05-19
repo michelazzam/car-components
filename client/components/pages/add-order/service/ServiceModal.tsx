@@ -104,12 +104,11 @@ const ServiceModal = ({
   };
 
   const onSubmit = (data: ServiceSchema) => {
-    console.log(editingService);
     if (editingService) {
       const newServices = services.map((item) =>
         item === editingService ? data : item
       );
-      console.log(newServices);
+
       setServices(newServices);
       setEditingService(undefined);
       reset({
@@ -136,6 +135,7 @@ const ServiceModal = ({
         _id: services[i].name.value,
       });
     }
+
     setServices([]);
     cancelFormRef.current?.click();
   };

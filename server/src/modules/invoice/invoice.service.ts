@@ -605,12 +605,10 @@ export class InvoiceService {
     dto: InvoiceDto,
   ): Promise<InvoiceDtoWithItemsDetails> {
     // Separate items and services from the provided DTO
-    const itemRefs = dto.items
-      .filter((item) => item.itemRef)
-      .map((item) => item.itemRef);
-    const serviceRefs = dto.items
-      .filter((item) => item.serviceRef)
-      .map((item) => item.serviceRef);
+    const itemsOnly = dto.items.filter((item) => !!item.itemRef);
+    const itemRefs = itemsOnly.map((item) => item.itemRef);
+    const servicesOnly = dto.items.filter((item) => !!item.serviceRef);
+    const serviceRefs = servicesOnly.map((item) => item.serviceRef);
 
     let dbItems: IItem[] = [];
     let dbServices: IService[] = [];
@@ -626,10 +624,10 @@ export class InvoiceService {
         throw new BadRequestException('Some items are not valid');
 
       // override the dto items array to add product fields for later reference
-      itemsWithDetails = dto.items.map((item) => {
-        const product = dbItems.find(
-          (product) => product._id.toString() === item.itemRef,
-        );
+      itemsWithDetails = itemsOnly.map((item) => {
+        const product = dbItems.find((product) => {
+          return product._id.toString() === item.itemRef;
+        });
         if (!product) throw new BadRequestException('Item not found');
 
         return {
@@ -641,6 +639,7 @@ export class InvoiceService {
       });
     }
 
+    let servicesWithDetails: any[] = [];
     // Process services if there are any
     if (serviceRefs.length > 0) {
       // get services from db
@@ -651,22 +650,21 @@ export class InvoiceService {
         throw new BadRequestException('Some services are not valid');
 
       // override the dto items array to add service fields for later reference
-      dto.items = dto.items.map((item) => {
+      servicesWithDetails = servicesOnly.map((item) => {
         const service = dbServices.find(
           (service) => service._id.toString() === item.serviceRef,
         );
-        if (service) {
-          return {
-            ...item,
-            name: service.name,
-            price: service.price,
-          };
-        }
-        return item;
+        if (!service) throw new BadRequestException('Service not found');
+
+        return {
+          ...item,
+          name: service.name,
+          price: item.price,
+        };
       });
     }
 
-    return { ...dto, items: itemsWithDetails };
+    return { ...dto, items: [...itemsWithDetails, ...servicesWithDetails] };
   }
 
   private async generateInvoiceNumber(type: InvoiceType) {
