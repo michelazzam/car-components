@@ -133,11 +133,6 @@ const EditUserPermissionsModal = ({
           update: editingUser?.permissions?.Accounting?.update,
           read: editingUser?.permissions?.Accounting?.read,
         },
-        Balance: {
-          create: editingUser?.permissions?.Balance?.create,
-          update: editingUser?.permissions?.Balance?.update,
-          read: editingUser?.permissions?.Balance?.read,
-        },
       });
     }
   }, [editingUser]);
@@ -154,7 +149,6 @@ const EditUserPermissionsModal = ({
         Organization: data.Organization,
         Expenses: data.Expenses,
         Accounting: data.Accounting,
-        Balance: data.Balance,
       },
     });
   };
@@ -374,11 +368,6 @@ const permissions: PermissionEntry[] = [
   {
     label: "Accounting",
     value: "Accounting",
-    permissions: ["create", "update", "read"],
-  },
-  {
-    label: "Balance",
-    value: "Balance",
     permissions: ["create", "update", "read"],
   },
 ];
