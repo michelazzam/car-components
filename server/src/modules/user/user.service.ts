@@ -16,6 +16,7 @@ import { AddUserDto } from './dto/add-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 import { ReqUserData } from './interfaces/req-user-data.interface';
+import { EditProfileDto } from './dto/edit-profile.dto';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -161,6 +162,13 @@ export class UserService implements OnModuleInit {
       isActive: false,
       username: `${user.username}-${userId}`,
       email: `${user.email}-${userId}`,
+    });
+  }
+
+  async editMyProfile(userId: string, dto: EditProfileDto) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      username: dto.username,
+      email: dto.email,
     });
   }
 

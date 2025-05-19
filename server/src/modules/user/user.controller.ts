@@ -20,6 +20,7 @@ import { EditUserDto } from './dto/edit-user.dto';
 import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 import { User } from './decorators/user.decorator';
 import { ReqUserData } from './interfaces/req-user-data.interface';
+import { EditProfileDto } from './dto/edit-profile.dto';
 
 @ApiTags('User')
 @Controller({ version: '1', path: 'users' })
@@ -60,6 +61,13 @@ export class UserController {
     @Param('id') id: string,
   ) {
     await this.userService.editUserPermissions(id, dto);
+
+    return { message: 'Permissions updated successfully' };
+  }
+
+  @Put('edit-profile')
+  async editProfile(@Body() dto: EditProfileDto, @User() user: ReqUserData) {
+    await this.userService.editMyProfile(user._id.toString(), dto);
 
     return { message: 'Permissions updated successfully' };
   }

@@ -8,6 +8,6 @@ export const useEditProfile = ({
 }) =>
   useUpdateData({
     endpoint: API.editProfile,
-    queryKeysToInvalidate: [["users"]],
+    queryKeysToInvalidate: [["auth"]],
     callBackOnSuccess,
   });
