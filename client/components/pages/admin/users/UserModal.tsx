@@ -110,6 +110,7 @@ const UserModal = ({
                 label="User Name*"
                 name="username"
                 placeholder="joe"
+                dontCapitalize
                 colSpan={6}
               />
               <TextFieldControlled
