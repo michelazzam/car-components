@@ -8,6 +8,6 @@ export const useChangePassword = ({
 }) =>
   useUpdateData({
     endpoint: API.changePassword,
-    queryKeysToInvalidate: [["users"]],
+    queryKeysToInvalidate: [["auth"]],
     callBackOnSuccess,
   });
