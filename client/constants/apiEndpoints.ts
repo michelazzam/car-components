@@ -81,6 +81,13 @@ export const API = {
   //usdRate
   getUsdRate: "/accounting/usd-rate",
   editUsdRate: "/accounting/usd-rate",
+
+  //caisse
+  closeCaisse: "/caisse/close-caisse",
+  openCaisse: "/caisse/open-caisse",
+  getCaisseStatus: "/caisse",
+  listCaisse: "/caisse/history",
+
   // Restaurant
   getOrganization: `/organization`, // GET
   editOrganization: `/organization/update`, // PUT
