@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 const FIRST_FAILD_ATTEMPTS_COUNT = 3;
 const SECOND_FAILD_ATTEMPTS_COUNT = 5;
@@ -113,6 +114,7 @@ export class RateLimiterService {
    * - The block has expired (blockExpiresAt < now)
    * - AND there are no current failed attempts
    */
+  @Cron(CronExpression.EVERY_DAY_AT_10AM)
   clearExpiredIpRecords(): void {
     const now = Date.now();
 

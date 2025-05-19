@@ -1,21 +1,27 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { BackupService } from './backup.service';
-import { IsPublic } from '../user/decorators/isPublic.decorator';
 import { ApiTags } from '@nestjs/swagger';
-// import { Cron, CronExpression } from '@nestjs/schedule';
+import { UpdateLocalBackupPathDto } from './dto/update-local-backup-path.dto';
 
 @ApiTags('DB Backup')
-@Controller('backup')
+@Controller({ version: '1', path: 'backup' })
 export class BackupController {
   constructor(private readonly backupService: BackupService) {}
 
-  // uncomment for testing purposes:
+  @Get('path')
+  async getLocalBackupPath() {
+    return await this.backupService.getLocalBackupPath();
+  }
 
-  // @Cron(CronExpression.EVERY_10_SECONDS)
-  @IsPublic()
-  // @Get('trigger-backup')
-  async backupNow() {
-    await this.backupService.runIncrementalBackup();
-    return { success: true };
+  @Put('path')
+  async updateLocalBackupPath(@Body() dto: UpdateLocalBackupPathDto) {
+    await this.backupService.updateLocalBackupPath(dto);
+    return { message: 'Path updated successfully' };
+  }
+
+  @Post('trigger-backup')
+  async backupDB() {
+    await this.backupService.backupDB();
+    return { message: 'Database backed up successfully' };
   }
 }

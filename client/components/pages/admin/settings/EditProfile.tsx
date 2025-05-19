@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import PhoneCodePickerControlled from "../../../admin/FormControlledFields/PhoneCodePickerControlled";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiValidations, ProfileSchema } from "@/lib/apiValidations";
 import { useForm } from "react-hook-form";
@@ -30,10 +29,8 @@ const EditProfile: React.FC<EditProfileProps> = ({
   } = useForm<ProfileSchema>({
     resolver: zodResolver(apiValidations.ProfileSchema),
     defaultValues: {
-      fullName: "",
       username: "",
-      phoneNumber: "",
-      address: "",
+      email: "",
     },
   });
 
@@ -54,8 +51,7 @@ const EditProfile: React.FC<EditProfileProps> = ({
     if (user) {
       reset({
         username: user.username,
-        address: user.address,
-        phoneNumber: user.phoneNumber,
+        email: user.email,
       });
     }
   }, [user]);
@@ -63,7 +59,6 @@ const EditProfile: React.FC<EditProfileProps> = ({
   //-----------------------Functions-------------------------------------------
 
   const onSubmitEdit = (data: ProfileSchema) => {
-    console.log(data);
     mutation.mutate(data);
   };
 
@@ -72,8 +67,7 @@ const EditProfile: React.FC<EditProfileProps> = ({
     if (user) {
       reset({
         username: user.username,
-        address: user.address,
-        phoneNumber: user.phoneNumber,
+        email: user.email,
       });
     }
   };
@@ -101,34 +95,22 @@ const EditProfile: React.FC<EditProfileProps> = ({
       <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
         <TextFieldControlled
           control={control}
-          label="Full Name*"
-          name="fullName"
-          placeholder="joe G"
-          colSpan={12}
-          readOnly={!editable}
-        />
-        <TextFieldControlled
-          control={control}
           label="User Name*"
           name="username"
           placeholder="joe"
           colSpan={6}
           readOnly={!editable}
-        />
-        <PhoneCodePickerControlled
-          control={control}
-          label="Phone Number"
-          name="phoneNumber"
-          colSpan={6}
-          disabled={!editable}
+          dontCapitalize
         />
         <TextFieldControlled
           control={control}
-          label="Address"
-          name="address"
+          label="Email"
+          name="email"
+          type="email"
           placeholder=""
-          colSpan={12}
+          colSpan={6}
           readOnly={!editable}
+          dontCapitalize
         />
 
         <div className="relative col-span-12">

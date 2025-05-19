@@ -16,6 +16,10 @@ import { AddUserDto } from './dto/add-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 import { ReqUserData } from './interfaces/req-user-data.interface';
+import { EditProfileDto } from './dto/edit-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ResetPasswordTokensService } from './services/reset-password-tokens.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -24,6 +28,7 @@ export class UserService implements OnModuleInit {
     private readonly hashingService: HashingService,
     private readonly jwtGeneratorService: JwtGeneratorService,
     private readonly rateLimiterService: RateLimiterService,
+    private readonly resetPasswordTokensService: ResetPasswordTokensService,
   ) {}
 
   // on server start
@@ -162,6 +167,68 @@ export class UserService implements OnModuleInit {
       username: `${user.username}-${userId}`,
       email: `${user.email}-${userId}`,
     });
+  }
+
+  async editMyProfile(userId: string, dto: EditProfileDto) {
+    await this.userModel.findByIdAndUpdate(userId, {
+      username: dto.username,
+      email: dto.email,
+    });
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const validPassword = await this.hashingService.comparePassword({
+      hashedPassword: user.password,
+      password: dto.currentPassword,
+    });
+    if (!validPassword)
+      throw new BadRequestException('Invalid current password');
+
+    // hash the new password and save it
+    let hashedPassword = await this.hashingService.hashPassword(
+      dto.newPassword,
+    );
+    user.password = hashedPassword;
+    await user.save();
+  }
+
+  async forgetPassword(email: string) {
+    const user = await this.userModel.findOne({ email }).lean();
+    if (!user) throw new NotFoundException('User with this email not found');
+
+    // generate token then send it by email
+    const { token } = await this.resetPasswordTokensService.generateToken(
+      user._id?.toString(),
+      user.email,
+    );
+
+    console.log({ token });
+
+    //TODO: send token by email
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { token, newPassword } = dto;
+
+    // verify token
+    const resetPasswordToken =
+      this.resetPasswordTokensService.verifytoken(token);
+    if (!resetPasswordToken) throw new BadRequestException('Invalid token');
+
+    // find user
+    const user = await this.userModel.findById(resetPasswordToken.userId);
+    if (!user) throw new BadRequestException('User not found');
+
+    // hash the new password and save it
+    let hashedPassword = await this.hashingService.hashPassword(newPassword);
+    user.password = hashedPassword;
+    await user.save();
+
+    // clear the token
+    this.resetPasswordTokensService.deleteToken(user.email, token);
   }
 
   async findAll() {

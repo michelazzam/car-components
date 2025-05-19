@@ -3,6 +3,7 @@ import { Controller, useController } from "react-hook-form";
 import { IconType } from "react-icons/lib";
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
 import { capitalizeWord } from "@/utils/capitalize-word";
+import { InputHTMLAttributes } from "react";
 
 interface TextFieldProps {
   readOnly?: boolean;
@@ -18,6 +19,7 @@ interface TextFieldProps {
   onClickActionButton?: () => void;
   ActionButtonIcon?: IconType;
   dontCapitalize?: boolean;
+  type?: InputHTMLAttributes<HTMLInputElement>["type"];
 }
 
 const TextFieldControlled: React.FC<TextFieldProps> = ({
@@ -35,6 +37,7 @@ const TextFieldControlled: React.FC<TextFieldProps> = ({
   onClickActionButton,
   ActionButtonIcon,
   dontCapitalize = false,
+  type,
 }) => {
   if (!control) return null;
   const { fieldState, field } = useController({ name, control });
@@ -66,6 +69,7 @@ const TextFieldControlled: React.FC<TextFieldProps> = ({
                   <input
                     placeholder={placeholder}
                     value={field.value}
+                    type={type}
                     onChange={(e) => {
                       if (dontCapitalize) field.onChange(e.target.value);
                       else field.onChange(capitalizeWord(e.target.value || ""));

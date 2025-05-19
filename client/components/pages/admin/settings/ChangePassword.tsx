@@ -35,15 +35,15 @@ const ChangePasswordPage: React.FC<ChangePasswordProps> = ({
     callBackOnSuccess: () => {
       reset();
       setShowEditPasswordPage(false);
-      // closeModal();
     },
   });
 
   const onSubmitEdit = (data: ChangePassword) => {
-    console.log(data);
     mutation.mutate(data);
   };
+
   const onInvalid = (errors: any) => console.error(errors);
+
   return (
     <>
       <div className=" w-full">

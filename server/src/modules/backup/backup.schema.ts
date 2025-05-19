@@ -4,7 +4,10 @@ import { HydratedDocument } from 'mongoose';
 @Schema({ timestamps: true })
 export class Backup {
   @Prop({ required: true })
-  lastBackup: Date;
+  lastCloudBackup: Date;
+
+  @Prop()
+  localBackupPath: string;
 }
 
 export type IBackup = HydratedDocument<Backup>;
