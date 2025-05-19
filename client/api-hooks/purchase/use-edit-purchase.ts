@@ -11,7 +11,7 @@ export const useEditPurchase = ({
 }) => {
   return useUpdateData<AddPurchaseT>({
     endpoint: API.editPurchase(id),
-    queryKeysToInvalidate: [["purchases"]],
+    queryKeysToInvalidate: [["purchases"], ["caisse"]],
     callBackOnSuccess,
   });
 };

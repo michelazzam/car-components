@@ -3,7 +3,8 @@ import { API } from "@/constants/apiEndpoints";
 
 export interface AddEditProductBodyParam {
   name: string;
-  supplierId:string;
+  supplierId: string;
+  note?: string;
   cost: number;
   price: number;
   quantity: number;

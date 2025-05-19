@@ -9,6 +9,9 @@ export class Item {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: false })
+  note: string;
+
   @Prop({ default: 0, required: true })
   cost: number;
 

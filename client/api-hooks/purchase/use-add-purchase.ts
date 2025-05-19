@@ -8,7 +8,7 @@ export const useAddPurchase = ({
 }) => {
   return usePostData<AddPurchaseT>({
     endpoint: API.addPurchase,
-    queryKeysToInvalidate: [["purchases"]],
+    queryKeysToInvalidate: [["purchases"], ["caisse"]],
     callBackOnSuccess,
   });
 };

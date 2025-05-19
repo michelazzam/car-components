@@ -15,6 +15,12 @@ export class AddItemDto {
   @IsString()
   name: string;
 
+  @ApiProperty({
+    required: false,
+  })
+  @IsString()
+  note: string;
+
   @ApiProperty({ required: false })
   @IsMongoId()
   @IsOptional()

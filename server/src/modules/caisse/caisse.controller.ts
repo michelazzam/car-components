@@ -14,7 +14,7 @@ export class CaisseController {
     return await this.caisseService.getCaisseStatus();
   }
 
-  @Get('histroy')
+  @Get('history')
   getAllReports(@Query() dto: GetCaisseHistoryDto) {
     return this.caisseService.getCaisseHistory(dto);
   }

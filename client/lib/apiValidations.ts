@@ -123,6 +123,7 @@ const ProductSchema = z.object({
   supplierId: z.string().min(1, "Name is required"),
   price: z.number().min(1, "Price is required"),
   cost: z.number(),
+  note: z.string().optional(),
   quantity: z.number(),
   status: z.enum(itemStatuses),
 });

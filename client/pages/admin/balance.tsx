@@ -11,6 +11,7 @@ import { useState } from "react";
 import { ReportByDateResponse } from "@/api-hooks/report/get-reports-by-date";
 import { AllReportsResponse } from "@/api-hooks/report/get-all-reports";
 import GlobalAnalytics from "../../components/pages/admin/balance/GlobalAnalytics";
+import CaisseHistoryTable from "@/components/pages/admin/balance/CaisseHistoryTable";
 
 const Balance = () => {
   const [totals, setTotals] = useState<ReportByDateResponse>();
@@ -33,6 +34,7 @@ const Balance = () => {
         reports={allReports?.reports || []}
       />
       <RecordsTable />
+      <CaisseHistoryTable />
     </div>
   );
 };

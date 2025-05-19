@@ -113,7 +113,6 @@ const AddInvoice = () => {
       // Add products and services from editingInvoice
       const productItems: any[] = [];
       const serviceItems: any[] = [];
-
       editingInvoice.items.forEach((item) => {
         if (item.itemRef) {
           productItems.push(item);
@@ -122,10 +121,10 @@ const AddInvoice = () => {
         }
       });
 
-      if (productItems.length > 1) {
+      if (productItems.length > 0) {
         addGroupItem("product", productItems);
       }
-      if (serviceItems.length > 1) {
+      if (serviceItems.length > 0) {
         addGroupItem("service", serviceItems);
       }
 

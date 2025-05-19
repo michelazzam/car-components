@@ -27,10 +27,9 @@ export type Permissions = {
   Purchases: PermissionAction;
   Services: PermissionAction;
   Suppliers: PermissionAction;
-  Balance: PermissionAction;
   Organization: PermissionAction;
   Expenses: PermissionAction;
-  Accounting:PermissionAction;
+  Accounting: PermissionAction;
 };
 
 export const userRoles = [

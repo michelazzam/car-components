@@ -10,13 +10,17 @@ import { ThemeChanger } from "@/shared/redux/action";
 import store from "@/shared/redux/store";
 import UpdatesButton from "./UpdatesButton";
 import { MdOutlineBackup } from "react-icons/md";
+import { useGetCaisse } from "@/api-hooks/caisse/use-get-caisse";
+import OpenCloseCaisseModal from "@/components/pages/navbar/OpenCloseCaisseModal";
+import { cn } from "@/utils/cn";
 
 const Header = ({ local_varaiable, ThemeChanger }: any) => {
   const { user } = UseAuth();
   const { data } = useGetUsdRate();
-
+  const canReadCaisse = user?.permissions?.Accounting?.read;
+  const canOpenCloseCaisse = user?.permissions?.Accounting?.update;
   const isAdmin = user?.role === "admin" || user?.role === "superAmsAdmin";
-
+  const { data: caisseStatus } = useGetCaisse();
   //----------------------- HOOKS -------------------
   const logout = useLogoutUser();
 
@@ -280,6 +284,30 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
               <UpdatesButton />
             </div>
             <div className="header-content-right">
+              {canReadCaisse && (
+                <button
+                  className="flex items-center ms-2 font-medium"
+                  data-hs-overlay={
+                    canOpenCloseCaisse ? "#open-close-caisse" : undefined
+                  }
+                >
+                  <div
+                    className={cn(
+                      "border  p-2 rounded-md   hover:text-white",
+                      caisseStatus?.isCaisseOpen
+                        ? "border-danger text-danger hover:bg-danger"
+                        : "border-primary text-primary hover:bg-primary"
+                    )}
+                  >
+                    {canOpenCloseCaisse
+                      ? caisseStatus?.isCaisseOpen
+                        ? "Close "
+                        : "Open "
+                      : ""}
+                    {"Caisse "}: {caisseStatus?.caisse}$
+                  </div>
+                </button>
+              )}
               <button
                 className="flex items-center ms-2 font-medium"
                 data-hs-overlay="#edit-rate"
@@ -289,6 +317,7 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
                   <span>{data?.usdRate}</span>
                 </div>
               </button>
+
               <div className="header-element header-fullscreen py-[1rem] md:px-[0.65rem] px-2">
                 <Link
                   aria-label="anchor"
@@ -330,6 +359,10 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
       </div>
       <UsdRateModal triggerModalId={"edit-rate"} title={"Edit Rate"} />
       <BackupDBModal />
+      <OpenCloseCaisseModal
+        triggerModalId={"open-close-caisse"}
+        title={caisseStatus?.isCaisseOpen ? "Close Caisse" : "Open Caisse"}
+      />
     </Fragment>
   );
 };

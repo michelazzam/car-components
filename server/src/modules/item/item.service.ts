@@ -97,6 +97,7 @@ export class ItemService {
   async create(dto: AddItemDto) {
     await this.itemModel.create({
       supplier: dto.supplierId,
+      note: dto.note,
       cost: formatMoneyField(dto.cost),
       price: formatMoneyField(dto.price),
       quantity: dto.quantity,
@@ -109,6 +110,7 @@ export class ItemService {
     const item = await this.itemModel.findByIdAndUpdate(id, {
       supplier: dto.supplierId,
       cost: formatMoneyField(dto.cost),
+      note: dto.note,
       price: formatMoneyField(dto.price),
       quantity: dto.quantity,
       name: dto.name,

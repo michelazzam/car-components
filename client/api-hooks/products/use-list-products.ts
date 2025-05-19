@@ -5,6 +5,7 @@ import { API } from "@/constants/apiEndpoints";
 export interface Product {
   _id: string;
   name: string;
+  note?: string;
   supplier: {
     _id: string;
     name: string;

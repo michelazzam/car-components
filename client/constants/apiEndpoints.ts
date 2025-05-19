@@ -52,6 +52,19 @@ export const API = {
   deleteVehicle: (vehicleId: string, customerId: string) =>
     `/customers/${customerId}/vehicle/${vehicleId}`, //DELETE
 
+  // Makes
+  addMake: "/makes", //POST
+  listMakes: "/makes", //GET
+  editMake: (makeId: string) => `/makes/${makeId}`, //PUT
+  deleteMake: (makeId: string) => `/makes/${makeId}`, // DELETE
+
+  //MODELS
+  addModelByMakeId: (makeId: number) => `/makes/model/${makeId}`, //POST
+  listModelsOfMake: (makeId: number) => `/makes/model/${makeId}`, //GET
+  listMakesAndModels: "/makes/model/make-model", //GET
+  editModel: (modelId: string) => `/makes/model/${modelId}`, //PUT
+  deleteModel: (modelId: string) => `/makes/model/${modelId}`, //DELETE
+
   // Customers
   getCustomerById: (id: string) => `/customers/${id}`,
   listCustomers: "/customers",
@@ -81,6 +94,13 @@ export const API = {
   //usdRate
   getUsdRate: "/accounting/usd-rate",
   editUsdRate: "/accounting/usd-rate",
+
+  //caisse
+  closeCaisse: "/caisse/close-caisse",
+  openCaisse: "/caisse/open-caisse",
+  getCaisse: "/caisse",
+  listCaisse: "/caisse/history",
+
   // Restaurant
   getOrganization: `/organization`, // GET
   editOrganization: `/organization/update`, // PUT

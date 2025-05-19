@@ -83,6 +83,7 @@ function AddEditProductModal({
     resolver: zodResolver(apiValidations.AddEditProduct),
     defaultValues: {
       name: product?.name || "",
+      note: product?.note || "",
       supplierId: product?.supplier._id || "",
       price: product?.price || 0,
       cost: product?.cost || 0,
@@ -113,6 +114,7 @@ function AddEditProductModal({
     if (product) {
       reset({
         name: product?.name,
+        note: product?.note,
         supplierId: product?.supplier._id,
         price: product?.price,
         cost: product?.cost,
@@ -122,6 +124,7 @@ function AddEditProductModal({
     } else {
       reset({
         name: "",
+        note: "",
         supplierId: "",
         price: 0,
         cost: 0,
@@ -195,7 +198,7 @@ function AddEditProductModal({
           {/* in case of editing a product, we don't need to show the stock field */}
           <NumberFieldControlled
             control={control}
-            readOnly={product ? true : false}
+            // readOnly={product ? true : false}
             label="Quantity"
             name="quantity"
             colSpan={6}
@@ -214,6 +217,13 @@ function AddEditProductModal({
             // onObjectChange={(e) => {
             //   setValue("supplierId", e);
             // }}
+          />
+          <TextFieldControlled
+            control={control}
+            name="note"
+            label="Note"
+            placeholder="note"
+            colSpan={12}
           />
         </form>
       </Modal.Body>
