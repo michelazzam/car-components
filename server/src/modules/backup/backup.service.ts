@@ -4,6 +4,7 @@ import { EnvConfigService } from 'src/config/env.validation';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Backup, IBackup } from './backup.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UpdateLocalBackupPathDto } from './dto/update-local-backup-path.dto';
 
 @Injectable()
 export class BackupService {
@@ -21,11 +22,13 @@ export class BackupService {
       const lastBackup = await this.backupModel.findOne().lean();
 
       if (!lastBackup) {
-        const lb = await this.backupModel.create({ lastBackup: new Date() });
-        return lb.lastBackup;
+        const lb = await this.backupModel.create({
+          lastCloudBackup: new Date(),
+        });
+        return lb.lastCloudBackup;
       }
 
-      return lastBackup?.lastBackup;
+      return lastBackup?.lastCloudBackup;
     } catch (error) {
       console.log(error);
     }
@@ -34,14 +37,14 @@ export class BackupService {
   private async setLastCloudBackupDate(date: Date) {
     await this.backupModel.findOneAndUpdate(
       {},
-      { $set: { lastBackup: date } },
+      { $set: { lastCloudBackup: date } },
       { upsert: true },
     );
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_10AM)
   async runIncrementalCloudBackup() {
-    const lastBackup = await this.getLastCloudBackupDate();
+    const lastCloudBackup = await this.getLastCloudBackupDate();
     const now = new Date();
 
     // Create backup DB connection
@@ -58,7 +61,7 @@ export class BackupService {
 
         const updatedDocs = await localModel
           .find({
-            updatedAt: { $gt: lastBackup },
+            updatedAt: { $gt: lastCloudBackup },
           })
           .lean();
 
@@ -79,5 +82,18 @@ export class BackupService {
       // Always close the connection after use
       await backupConnection.close();
     }
+  }
+
+  async getLocalBackupPath() {
+    const backup = await this.backupModel.findOne().lean();
+    return { path: backup?.localBackupPath || '' };
+  }
+
+  async updateLocalBackupPath(dto: UpdateLocalBackupPathDto) {
+    await this.backupModel.findOneAndUpdate(
+      {},
+      { $set: { localBackupPath: dto.path } },
+      { upsert: true },
+    );
   }
 }
