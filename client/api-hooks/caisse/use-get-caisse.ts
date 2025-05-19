@@ -1,11 +1,12 @@
 import { useReadData } from "@/api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
 
-export const useGetCaisseStatus = () => {
+export const useGetCaisse = () => {
   return useReadData<{
-    amount: number;
+    isCaisseOpen: boolean;
+    caisse: number;
   }>({
-    queryKey: ["caisse-status"],
-    endpoint: API.getCaisseStatus,
+    queryKey: ["caisse"],
+    endpoint: API.getCaisse,
   });
 };

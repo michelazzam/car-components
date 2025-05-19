@@ -85,7 +85,7 @@ export const API = {
   //caisse
   closeCaisse: "/caisse/close-caisse",
   openCaisse: "/caisse/open-caisse",
-  getCaisseStatus: "/caisse",
+  getCaisse: "/caisse",
   listCaisse: "/caisse/history",
 
   // Restaurant

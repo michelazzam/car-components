@@ -1,8 +1,6 @@
-
 import { API } from "@/constants/apiEndpoints";
 import { useUpdateData } from "@/api-service/useUpdateData";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
-
 
 const useEditInvoice = ({
   id,
@@ -12,7 +10,7 @@ const useEditInvoice = ({
   callBackOnSuccess?: (data: any) => void;
 }) => {
   return useUpdateData<AddInvoiceSchema>({
-    queryKeysToInvalidate: [["orders"]],
+    queryKeysToInvalidate: [["invoices"], ["caisse"]],
     endpoint: API.editInvoice(id),
     callBackOnSuccess: callBackOnSuccess,
   });
