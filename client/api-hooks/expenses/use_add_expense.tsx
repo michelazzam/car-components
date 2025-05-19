@@ -15,7 +15,7 @@ const useAddExpense = ({
   callBackOnSuccess?: () => void;
 }) => {
   return usePostData<AddEditExpenseBodyParam>({
-    queryKeysToInvalidate: [["expenses"]],
+    queryKeysToInvalidate: [["expenses"], ["caisse"]],
     endpoint: API.addExpense,
     callBackOnSuccess: callBackOnSuccess,
   });
