@@ -21,6 +21,7 @@ import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 import { User } from './decorators/user.decorator';
 import { ReqUserData } from './interfaces/req-user-data.interface';
 import { EditProfileDto } from './dto/edit-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('User')
 @Controller({ version: '1', path: 'users' })
@@ -70,6 +71,16 @@ export class UserController {
     await this.userService.editMyProfile(user._id.toString(), dto);
 
     return { message: 'Permissions updated successfully' };
+  }
+
+  @Put('change-password')
+  async changePassword(
+    @Body() dto: ChangePasswordDto,
+    @User() user: ReqUserData,
+  ) {
+    await this.userService.changePassword(user._id.toString(), dto);
+
+    return { message: 'Password changed successfully' };
   }
 
   @Roles('admin', 'superAmsAdmin')

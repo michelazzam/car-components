@@ -17,6 +17,7 @@ import { EditUserDto } from './dto/edit-user.dto';
 import { EditUserPermissionsDto } from './dto/edit-user-permissions.dto';
 import { ReqUserData } from './interfaces/req-user-data.interface';
 import { EditProfileDto } from './dto/edit-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService implements OnModuleInit {
@@ -170,6 +171,25 @@ export class UserService implements OnModuleInit {
       username: dto.username,
       email: dto.email,
     });
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const validPassword = await this.hashingService.comparePassword({
+      hashedPassword: user.password,
+      password: dto.currentPassword,
+    });
+    if (!validPassword)
+      throw new BadRequestException('Invalid current password');
+
+    // hash the new password and save it
+    let hashedPassword = await this.hashingService.hashPassword(
+      dto.newPassword,
+    );
+    user.password = hashedPassword;
+    await user.save();
   }
 
   async findAll() {
