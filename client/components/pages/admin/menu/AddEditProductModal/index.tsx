@@ -198,7 +198,7 @@ function AddEditProductModal({
           {/* in case of editing a product, we don't need to show the stock field */}
           <NumberFieldControlled
             control={control}
-            // readOnly={product ? true : false}
+            readOnly={product ? true : false}
             label="Quantity"
             name="quantity"
             colSpan={6}
