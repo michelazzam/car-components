@@ -22,6 +22,8 @@ import { User } from './decorators/user.decorator';
 import { ReqUserData } from './interfaces/req-user-data.interface';
 import { EditProfileDto } from './dto/edit-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgetPasswordDto } from './dto/forget-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('User')
 @Controller({ version: '1', path: 'users' })
@@ -89,6 +91,24 @@ export class UserController {
     await this.userService.deleteUser(id, user);
 
     return { message: 'User deleted successfully' };
+  }
+
+  @IsPublic()
+  @Post('forget-password')
+  async forgetPassword(@Body() dto: ForgetPasswordDto) {
+    await this.userService.forgetPassword(dto.email);
+
+    return {
+      message: 'Password reset instructions sent to your email successfully',
+    };
+  }
+
+  @IsPublic()
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.userService.resetPassword(dto);
+
+    return { message: 'Password reset successfully' };
   }
 
   @Get('authenticate')
