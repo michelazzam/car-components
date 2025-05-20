@@ -225,7 +225,7 @@ function VehicleModal({
             label="Odometer"
             placeholder="123456"
             colSpan={4}
-            prefix="km"
+            prefix={watch("unit") + "s "}
           />
         </form>
       </Modal.Body>
