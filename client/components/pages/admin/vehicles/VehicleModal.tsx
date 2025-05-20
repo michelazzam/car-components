@@ -17,7 +17,10 @@ import { SelectOption } from "@/components/admin/Fields/SlectField";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
 import { TiInfo } from "react-icons/ti";
 import SelectFieldControlled from "@/components/admin/FormControlledFields/SelectFieldControlled";
-import { CarMakes, CarModels } from "@/lib/constants/carMakeModalNames";
+import { useListMakes } from "@/api-hooks/vehicles/makes/use-list-makes";
+import { VehicleMakeType } from "@/types/vehicle";
+import { useAddMake } from "@/api-hooks/vehicles/makes/use-add-make";
+import { useAddModelToMake } from "@/api-hooks/vehicles/makes/model/use-add-model-to-make";
 
 function VehicleModal({
   vehicle,
@@ -43,11 +46,49 @@ function VehicleModal({
     selectedCustomer
       ? {
           label: selectedCustomer.name,
-          value: selectedCustomer._id,
+          value: selectedCustomer.name,
         }
       : undefined
   );
+
+  //---------------------------FORM---------------------------------
+  const { handleSubmit, control, reset, watch, setValue } =
+    useForm<VehicleSchema>({
+      resolver: zodResolver(apiValidations.VehicleSchema),
+      defaultValues: {
+        model: "",
+        make: "",
+        odometer: 0,
+        number: "",
+        unit: "km",
+      },
+    });
+  const selectedMake = watch("make");
+  console.log("SELECTED MAKE IS ", selectedMake);
+
   //---------------------------API----------------------------------
+
+  const { data: makes } = useListMakes();
+  const makesOptions = makes?.map((make: VehicleMakeType) => {
+    return {
+      label: make.name,
+      value: make.name,
+      models: make.models,
+    };
+  });
+
+  const { mutate: addMake } = useAddMake({
+    callBackOnSuccess: (d) => {
+      setValue("make", d.name);
+    },
+  });
+  const selectedMakeId = makes?.find((m) => m.name === selectedMake)?._id;
+  const { mutate: addModel } = useAddModelToMake({
+    makeId: selectedMakeId || "",
+    callBackOnSuccess: (model) => {
+      setValue("model", model.name);
+    },
+  });
 
   const [customerSearch, setCustomerSearch] = useState("");
   const { data: customers } = useListCustomers({
@@ -85,20 +126,6 @@ function VehicleModal({
       value: customer._id,
     };
   });
-
-  //---------------------------FORM---------------------------------
-  const { handleSubmit, control, reset, watch, setValue } =
-    useForm<VehicleSchema>({
-      resolver: zodResolver(apiValidations.VehicleSchema),
-      defaultValues: {
-        model: "",
-        make: "",
-        odometer: 0,
-        number: "",
-        unit: "km",
-      },
-    });
-  const selectedMake = watch("make");
 
   //-----------------------------------Options----------------
 
@@ -180,7 +207,13 @@ function VehicleModal({
           className="grid grid-cols-12 gap-x-2 items-center"
         >
           <SelectFieldControlled
-            options={CarMakes}
+            creatable
+            handleCreate={(value) => {
+              addMake({
+                name: value,
+              });
+            }}
+            options={makesOptions || []}
             control={control}
             name="make"
             onChangeValue={(opt) => {
@@ -189,16 +222,30 @@ function VehicleModal({
               }
             }}
             label="Vehicle Make"
-            placeholder="brand name"
+            placeholder="Make"
             colSpan={6}
           />
 
           <SelectFieldControlled
-            options={CarModels[selectedMake] ?? []}
+            creatable
+            handleCreate={(value) => {
+              addModel({
+                name: value,
+              });
+            }}
+            options={
+              makes
+                ?.find((m) => m.name === selectedMake)
+                ?.models.map((model) => ({
+                  label: model.name,
+                  value: model.name,
+                })) || []
+            }
             control={control}
+            disabled={!selectedMake}
             name="model"
             label="Vehicle Model"
-            placeholder="brand name"
+            placeholder={selectedMake ? "Model" : "Please Select Make First"}
             colSpan={6}
           />
           <TextFieldControlled
