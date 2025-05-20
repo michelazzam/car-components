@@ -20,8 +20,8 @@ export class BackupController {
   }
 
   @Post('trigger-backup')
-  async backupDB() {
-    await this.backupService.backupDB();
+  async triggerLocalBackup() {
+    await this.backupService.triggerLocalBackup();
     return { message: 'Database backed up successfully' };
   }
 }

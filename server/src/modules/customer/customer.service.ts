@@ -201,6 +201,13 @@ export class CustomerService {
     const customer = await this.customerModel.findById(customerId);
     if (!customer) throw new NotFoundException('Customer not found');
 
+    // do not allow deleting if used by any invoice
+    const invoice = await this.invoiceModel.findOne({ vehicle: vehicleId });
+    if (invoice)
+      throw new BadRequestException(
+        'Can not delete Vehicle that is linked to an invoice',
+      );
+
     // remove the vehicle from the customer
     customer.vehicles = customer.vehicles.filter(
       (v) => v.toString() !== vehicleId,

@@ -10,7 +10,7 @@
     "prepkg": "nest build",
     "pkg": "npm run pkg:win",
     "pkg:win": "pkg dist/main.js --target node18-win-x64 --output ../src-tauri/bin/server-x86_64-pc-windows-msvc.exe",
-    "pkg:mac": "pkg dist/main.js --target node16-macos-x64 --output ../src-tauri/bin/server",
+    "pkg:mac": "pkg dist/main.js --target node16-macos-x64 --output ../src-tauri/bin/server-aarch64-apple-darwin",
     "pkg:linux": "pkg dist/main.js --target node16-linux-x64 --output ../src-tauri/bin/server",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start:dev": "nest start --watch",
