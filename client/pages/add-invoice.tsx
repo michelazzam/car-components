@@ -41,6 +41,7 @@ const AddInvoice = () => {
       amount: number;
       type: string;
     };
+    price: number;
     subTotal: number;
     totalPrice: number;
   };
@@ -58,6 +59,7 @@ const AddInvoice = () => {
         : undefined,
       subTotal: item.price && item.quantity ? item.price * item.quantity : 0,
       totalPrice: item.amount ?? 0,
+      price: item.price || 0,
     }));
 
     return items;
