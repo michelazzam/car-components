@@ -99,18 +99,8 @@ const EditUserPermissions = z.object({
 });
 
 const ProfileSchema = z.object({
-  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email(),
   username: z.string().min(1, "Username is required"),
-  phoneNumber: z
-    .string()
-    .min(11, "Phone number must be at least 11 characters long")
-    .optional()
-    .or(z.literal("")),
-  address: z
-    .string()
-    .min(5, "Address must be at least 5 characters long")
-    .optional()
-    .or(z.literal("")),
 });
 export type ProfileSchema = z.infer<typeof ProfileSchema>;
 

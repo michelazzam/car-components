@@ -16,13 +16,6 @@ export default function UseAuth() {
     enabled: !!accessToken,
   });
 
-  // // update token in local storage
-  // useEffect(() => {
-  //   if (data?.token) {
-  //     setAccessToken(data.token);
-  //   }
-  // }, [data]);
-
   return {
     user: data?.user,
     isAuthenticated: !!data?.user,

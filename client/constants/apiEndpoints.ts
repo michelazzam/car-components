@@ -118,9 +118,9 @@ export const API = {
   getAllReports: "/reports/all", // GET
   getGlobalReports: "/reports/global", // GET
   // DB Backup:
-  getDbBackupPath: "/db-backup/path", // GET
-  updateDbBackupPath: "/db-backup/path", // PUT
-  backupDB: "/db-backup/backup", // PUT
+  getDbBackupPath: "/backup/path", // GET
+  updateDbBackupPath: "/backup/path", // PUT
+  backupDB: "/backup/trigger-backup", // POST
 
   // Service:
   getAllServices: "/services", // GET

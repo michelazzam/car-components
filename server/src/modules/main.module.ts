@@ -7,7 +7,6 @@ import { EnvConfigService, validateEnv } from 'src/config/env.validation';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './user/guards/auth.guard';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CronService } from 'src/cron-jobs/cron.service';
 import { OrganizationModule } from './organization/organization.module';
 import { CustomerModule } from './customer/customer.module';
 import { SupplierModule } from './supplier/supplier.module';
@@ -20,6 +19,7 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ReportModule } from './report/report.module';
 import { CaisseModule } from './caisse/caisse.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
   imports: [
@@ -52,6 +52,7 @@ import { CaisseModule } from './caisse/caisse.module';
     AccountingModule,
     ReportModule,
     CaisseModule,
+    BackupModule,
   ],
   controllers: [],
   providers: [
@@ -60,9 +61,6 @@ import { CaisseModule } from './caisse/caisse.module';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-
-    // register cron jobs
-    CronService,
   ],
 })
 export class MainModule implements NestModule {
