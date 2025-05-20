@@ -4,12 +4,12 @@ import { check } from "@tauri-apps/plugin-updater";
 import { ask } from "@tauri-apps/plugin-dialog";
 
 async function checkForUpdates() {
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
   console.log("THE TOKEN IS ", token);
   console.log("CHECKING FOR UPDATES");
   const update = await check({
     headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
     },
   });

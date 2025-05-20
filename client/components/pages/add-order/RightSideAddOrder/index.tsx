@@ -17,6 +17,8 @@ import { FaEye, FaPrint } from "react-icons/fa6";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
 // import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
+import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
+import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 // import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 
 function RightSideAddOrder({
@@ -28,7 +30,7 @@ function RightSideAddOrder({
   const [invoice, setInvoice] = useState();
   const [isPrint, setIsPrint] = useState(false);
   const [isFullPaid, setIsFullPaid] = useState(false);
-  // const [previewingInvoice, setPreviewingInvoice] = useState<Invoice>();
+  const [previewingInvoice, setPreviewingInvoice] = useState<Invoice>();
 
   //--------------------Refs-------------------------------------
   const printRef = useRef<HTMLFormElement>(null);
@@ -42,7 +44,7 @@ function RightSideAddOrder({
     discountStore,
     vatAmount,
     editingInvoice,
-    // cart,
+    cart,
   } = usePosStore();
 
   //---------------------Router----------------------------------------
@@ -60,6 +62,7 @@ function RightSideAddOrder({
 
   //-----------------------API Calls------------------------------------
 
+  const { data: usdRate } = useGetUsdRate();
   const { data: organization } = useGetOrganization();
   // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
@@ -81,6 +84,7 @@ function RightSideAddOrder({
 
   const mutation = useAddInvoice({
     callBackOnSuccess: (resp: any) => {
+      console.log("RESP IS : ", resp);
       successFunction();
       setInvoice(resp);
       if (isPrint) {
@@ -175,6 +179,64 @@ function RightSideAddOrder({
 
   const onInvalid = (errors: any) => console.error(errors);
 
+  const setPrevInv = () => {
+    if (usdRate) {
+      setPreviewingInvoice({
+        _id: "",
+        type: "",
+        accounting: {
+          isPaid: false,
+          usdRate: usdRate.usdRate,
+          discount: discountStore,
+          taxesUsd: getValues("taxesUsd"),
+          subTotalUsd: getValues("subTotalUsd"),
+          totalUsd: getValues("totalUsd"),
+          paidAmountUsd: getValues("paidAmountUsd"),
+        },
+        createdAt: "",
+
+        customerNote: getValues("customerNote"),
+        number: editingInvoice?.number || "",
+
+        // discount: {
+        //   amount: discountStore.amount,
+        //   type: discountStore.type,
+        // },
+
+        items: cart.map((item) => {
+          const subtotal = (item.amount || 0) * (item.quantity || 0);
+          const discountAmount = item?.discount?.amount || 0;
+          const discount =
+            item.discount?.type === "fixed"
+              ? discountAmount
+              : (discountAmount / 100) * subtotal;
+          return {
+            price: item.amount || 0,
+            quantity: item.quantity || 0,
+            name: item.name || "",
+            subTotal: subtotal,
+            cost: 0,
+            totalPrice: subtotal - discount,
+          };
+        }),
+        // totalPriceLbp: Number(totalAmount) * usdRate.usdRate,
+        // taxesLbp: Number(vatAmount) * usdRate.usdRate,
+        customer: {
+          name: getValues("customer")?.label || "",
+          phoneNumber: getValues("customer")?.phone,
+          address: getValues("customer")?.address,
+          tvaNumber: getValues("customer")?.tvaNumber,
+        },
+        // vehicle: getValues("vehicle"),
+        vehicle: {
+          ...getValues("vehicle"),
+          model: getValues("vehicle")?.model || "NA",
+          _id: "",
+          number: "",
+        },
+      });
+    }
+  };
   return (
     <form
       onSubmit={handleSubmit(onSubmit, onInvalid)}
@@ -303,9 +365,10 @@ function RightSideAddOrder({
             </button>
           )}
           <div className="flex items-center gap-2">
+            {/* View Invoice  */}
             <button
               type="button"
-              // onClick={() => setPrevInv()}
+              onClick={() => setPrevInv()}
               data-hs-overlay="#preview-invoice"
               className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
             >
@@ -341,6 +404,15 @@ function RightSideAddOrder({
         title="New Inovice"
         printingInvoices={invoice ? [invoice] : undefined}
       />
+
+      {previewingInvoice && (
+        <PrintInvoiceModal
+          triggerModalId="preview-invoice"
+          title="Preview Inovice"
+          previewingInvoice={previewingInvoice}
+          prev
+        />
+      )}
     </form>
   );
 }

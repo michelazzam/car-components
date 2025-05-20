@@ -3,6 +3,7 @@ import StatementPrinting from "../../common/StatementPrinting";
 import { HAS_STATEMENT } from "@/constants/preferences";
 import { SingleCustomer } from "@/api-hooks/customer/use-get-customer-by-id";
 import BackBtn from "@/components/common/BackBtn";
+import { formatNumber } from "@/lib/helpers/formatNumber";
 
 const CustomerHeader = ({
   view,
@@ -25,7 +26,9 @@ const CustomerHeader = ({
           {customer.loan > 0 && (
             <div>
               <p className="font-bold text-lg capitalize">Loan</p>
-              <span className="text-base">{customer.loan} $</span>
+              <span className="text-base">
+                {formatNumber(customer?.loan, 2)} $
+              </span>
             </div>
           )}
         </section>
