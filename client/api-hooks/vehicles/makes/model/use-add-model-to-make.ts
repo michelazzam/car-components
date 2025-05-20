@@ -10,6 +10,7 @@ export const useAddModelToMake = ({
   return usePostData<AddEditModelToMakeBody>({
     endpoint: API.addModelByMakeId(makeId),
     callBackOnSuccess,
+    queryKeysToInvalidate: [["makes"], ["models"], [makeId]],
   });
 };
 

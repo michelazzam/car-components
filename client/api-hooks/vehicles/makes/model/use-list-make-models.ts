@@ -5,6 +5,6 @@ import { VehicleMakeType } from "@/types/vehicle";
 export const useListMakeModels = ({ makeId }: { makeId: string }) => {
   return useReadData<VehicleMakeType>({
     endpoint: API.singleMake(makeId),
-    queryKey: ["models", makeId],
+    queryKey: [makeId],
   });
 };

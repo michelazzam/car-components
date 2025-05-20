@@ -14,7 +14,7 @@ const ServicesIcon = <i className="ri-service-line side-menu__icon"></i>;
 const PurchaseIcon = <i className="ri-shopping-bag-line side-menu__icon"></i>;
 const DashboardIcon = <i className="ri-file-chart-line side-menu__icon"></i>;
 const BillingIcon = <i className="bx bx-receipt side-menu__icon"></i>;
-// const CarIcon = <i className="ri-car-line side-menu__icon"></i>;
+const CarIcon = <i className="ri-car-line side-menu__icon"></i>;
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -117,16 +117,16 @@ export default function useMenuItems() {
       visible: true,
       children: [],
     },
-    // {
-    //   icon: CarIcon,
-    //   path: "/admin/makes",
-    //   type: "link",
-    //   active: pathname.startsWith("/admin/makes"),
-    //   selected: pathname.startsWith("/admin/makes"),
-    //   title: "Makes",
-    //   visible: true,
-    //   children: [],
-    // },
+    {
+      icon: CarIcon,
+      path: "/admin/makes",
+      type: "link",
+      active: pathname.startsWith("/admin/makes"),
+      selected: pathname.startsWith("/admin/makes"),
+      title: "Makes",
+      visible: true,
+      children: [],
+    },
     {
       icon: BalanceIcon,
       path: "/admin/balance",

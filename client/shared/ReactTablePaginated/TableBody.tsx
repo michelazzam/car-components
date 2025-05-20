@@ -15,7 +15,7 @@ export default function TableBody({ table }: { table: any }) {
               <td
                 key={cell.id}
                 className={cn(
-                  "whitespace-nowrap p-2 text-start text-sm font-medium text-gray-900"
+                  "whitespace-nowrap p-2 text-start text-sm font-medium text-gray-900 "
                 )}
               >
                 {cellValue !== null ? (

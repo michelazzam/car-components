@@ -13,6 +13,6 @@ export const useEditModel = ({
   return useUpdateData<AddEditModelToMakeBody>({
     endpoint: API.editModel(makeId, modelId),
     callBackOnSuccess,
-    queryKeysToInvalidate: [["models", makeId], ["makes"]],
+    queryKeysToInvalidate: [["models"], [makeId], ["makes"]],
   });
 };

@@ -165,6 +165,17 @@ const AddPurchaseSchema = z.object({
 });
 export type AddPurchaseSchemaType = z.infer<typeof AddPurchaseSchema>;
 
+//------------MAKE MODELS
+
+const MakeSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+export type MakeSchemaType = z.infer<typeof MakeSchema>;
+
+const ModelSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+export type ModelSchemaType = z.infer<typeof ModelSchema>;
 //-------------SERVICE
 const ServiceSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -354,6 +365,7 @@ export const apiValidations = {
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,
   AddEditService: ServiceSchema,
+  MakeSchema: MakeSchema,
   AddEditPrinter: PrinterSchema,
   AddEditCategory: CategorySchema,
   changePassword: ChangePassword,
