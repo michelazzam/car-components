@@ -32,9 +32,12 @@ export class InvoiceController {
   @Permissions('Invoices', 'create')
   @Post()
   async create(@Body() createInvoiceDto: InvoiceDto) {
-    await this.invoiceService.create(createInvoiceDto);
+    const createdInvoice = await this.invoiceService.create(createInvoiceDto);
 
-    return { message: 'Invoice saved successfully' };
+    return {
+      data: createdInvoice,
+      message: 'Invoice saved successfully',
+    };
   }
 
   @Permissions('Invoices', 'update')

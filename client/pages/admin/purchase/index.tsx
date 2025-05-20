@@ -56,6 +56,10 @@ const PurchasePage = () => {
     columnHelper.accessor("invoiceDate", {
       header: "Invoice Date",
     }),
+    columnHelper.accessor("supplier.name", {
+      header: "Supplier Name",
+      cell: ({ getValue }) => <div>{getValue()}</div>,
+    }),
 
     columnHelper.accessor("customerConsultant", {
       header: "Customer Consultant",

@@ -21,6 +21,7 @@ export default function ReactTablePaginated<DataType>({
   errorMessage,
   estimatedPageSize = 10,
   renderInTheBottom,
+  overflowX,
 }: {
   columns: ColumnDef<DataType, any>[];
   data: DataType[];
@@ -36,6 +37,7 @@ export default function ReactTablePaginated<DataType>({
   errorMessage?: string | undefined;
   estimatedPageSize?: number;
   renderInTheBottom?: React.ReactNode;
+  overflowX?: string;
 }) {
   const table = useMyReactTable<DataType>({
     columns,
@@ -47,7 +49,7 @@ export default function ReactTablePaginated<DataType>({
 
   return (
     <>
-      <TableStyle>
+      <TableStyle overflowX={overflowX}>
         <table className="min-w-full">
           <TableHead table={table} />
           {loading ? (

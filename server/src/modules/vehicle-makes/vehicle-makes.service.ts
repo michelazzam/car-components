@@ -43,7 +43,13 @@ export class VehicleMakesService {
     if (!make) throw new NotFoundException('Make not found');
 
     make.models.push(dto);
-    return make.save();
+    const savedMake = await make.save();
+    const modelName = dto.name;
+
+    const createdModel = savedMake.models.find(
+      (model) => model.name === modelName,
+    );
+    return createdModel;
   }
 
   async editModel(makeId: string, id: string, dto: ModelDto) {

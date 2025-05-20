@@ -1,7 +1,8 @@
+import SingleMakePageComponent from "@/components/pages/admin/makes-models/SingleMakePageComponent";
 import React from "react";
 
 function SingleMakePage() {
-  return <div>SingleMakePage</div>;
+  return <SingleMakePageComponent />;
 }
 
 export default SingleMakePage;

@@ -5,15 +5,15 @@ import { VehicleMakeType } from "@/types/vehicle";
 export const useAddMake = ({
   callBackOnSuccess,
 }: {
-  callBackOnSuccess?: () => void;
+  callBackOnSuccess?: (d: VehicleMakeType) => void;
 }) => {
-  return usePostData<AddMakeBody>({
+  return usePostData<AddEditMakeBody, VehicleMakeType>({
     endpoint: API.addMake,
     callBackOnSuccess,
+    queryKeysToInvalidate: [["makes"]],
   });
 };
 
-export type AddMakeBody = Omit<
-  VehicleMakeType,
-  "models" | "totalModels" | "id"
->;
+export type AddEditMakeBody = {
+  name: string;
+};

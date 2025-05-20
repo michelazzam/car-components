@@ -303,7 +303,7 @@ export class InvoiceService {
     const isPaid = updatedDto.totalUsd <= updatedDto.paidAmountUsd;
 
     // Create new invoice
-    await this.invoiceModel.create({
+    const createdInvoice = await this.invoiceModel.create({
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
@@ -326,6 +326,7 @@ export class InvoiceService {
     });
 
     await this.doInvoiceEffects(updatedDto);
+    return createdInvoice;
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {

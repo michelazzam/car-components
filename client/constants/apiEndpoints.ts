@@ -53,17 +53,19 @@ export const API = {
     `/customers/${customerId}/vehicle/${vehicleId}`, //DELETE
 
   // Makes
-  addMake: "/makes", //POST
-  listMakes: "/makes", //GET
-  editMake: (makeId: string) => `/makes/${makeId}`, //PUT
-  deleteMake: (makeId: string) => `/makes/${makeId}`, // DELETE
+  addMake: "/makes", //POST✅
+  listMakes: "/makes", //GET ✅
+  editMake: (makeId: string) => `/makes/${makeId}`, //PUT✅
+  deleteMake: (makeId: string) => `/makes/${makeId}`, // DELETE✅
 
   //MODELS
-  addModelByMakeId: (makeId: number) => `/makes/model/${makeId}`, //POST
-  listModelsOfMake: (makeId: number) => `/makes/model/${makeId}`, //GET
-  listMakesAndModels: "/makes/model/make-model", //GET
-  editModel: (modelId: string) => `/makes/model/${modelId}`, //PUT
-  deleteModel: (modelId: string) => `/makes/model/${modelId}`, //DELETE
+  addModelByMakeId: (makeId: string) => `/makes/models/${makeId}`, //POST✅
+  singleMake: (makeId: string) => `/makes/models/${makeId}`, //GET
+
+  editModel: (makeId: string, modelId: string) =>
+    `/makes/models/${makeId}/${modelId}`, //PUT✅
+  deleteModel: (makeId: string, modelId: string) =>
+    `/makes/models/${makeId}/${modelId}`, //DELETE ✅
 
   // Customers
   getCustomerById: (id: string) => `/customers/${id}`,
