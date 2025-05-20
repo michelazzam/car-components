@@ -20,6 +20,7 @@ import { AccountingModule } from './accounting/accounting.module';
 import { ReportModule } from './report/report.module';
 import { CaisseModule } from './caisse/caisse.module';
 import { BackupModule } from './backup/backup.module';
+import { VehicleMakesModule } from './vehicle-makes/vehicle-makes.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BackupModule } from './backup/backup.module';
     ReportModule,
     CaisseModule,
     BackupModule,
+    VehicleMakesModule,
   ],
   controllers: [],
   providers: [

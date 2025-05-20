@@ -149,7 +149,7 @@ export class BackupService {
       let newBackupDir = `${currentDate.getFullYear()}-${
         currentDate.getMonth() + 1
       }-${currentDate.getDate()}`;
-      let newBackupPath = `${backupDirPath}-mongodump/${newBackupDir}`;
+      let newBackupPath = `${backupDirPath}mongodump/${newBackupDir}`;
 
       if (backupOptions.removeOldBackup) {
         let beforeDate = new Date(currentDate.getTime());
@@ -167,8 +167,6 @@ export class BackupService {
       }
 
       const cmd = `mongodump --uri ${this.configService.get('DATABASE_URL')!} --out ${newBackupPath}`;
-
-      console.log('Starting database backup');
 
       exec(cmd, (error) => {
         if (error) {

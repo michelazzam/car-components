@@ -119,8 +119,8 @@ export class CaisseService {
           date: today,
           openedAmount: status === 'opening' ? amount : 0,
           closedAmount: status === 'closing' ? amount : 0,
-          openedAt: status === 'opening' ? new Date() : null,
-          closedAt: status === 'closing' ? new Date() : null,
+          openedAt: status === 'opening' ? new Date() : undefined,
+          closedAt: status === 'closing' ? new Date() : undefined,
         },
       },
       {

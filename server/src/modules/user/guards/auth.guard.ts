@@ -83,6 +83,11 @@ export class AuthGuard implements CanActivate {
           const { moduleName, moduleAction } = requiredPermissions;
           const userPermissions = user.permissions;
 
+          // if admin/superAdmin, skip permission check
+          if (user.role === 'admin' || user.role === 'superAmsAdmin') {
+            return true;
+          }
+
           // Check if the user has the required permission for the given module and action
           if (
             !userPermissions?.[moduleName] ||
