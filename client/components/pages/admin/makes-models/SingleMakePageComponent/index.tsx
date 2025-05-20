@@ -37,7 +37,7 @@ function SingleMakePageComponent() {
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
     columnHelper.accessor("models", {
-      header: "Models Amount",
+      header: "Models",
 
       cell: ({ getValue }) => {
         const models = getValue();
