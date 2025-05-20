@@ -60,8 +60,10 @@ function ExpenseModal({
         note: "",
       },
     });
+
   const amount = watch("amount");
   const note = watch("note");
+
   //---------------------------API----------------------------------
   const [search, setSearch] = useState("");
   const debouncedSupplierSearch = useDebounce(search);
@@ -70,6 +72,7 @@ function ExpenseModal({
     pageSize: 50,
     search: debouncedSupplierSearch,
   });
+
   const suppliersOptions = suppliersResponse?.suppliers?.map((supplier) => ({
     label: supplier.name,
     value: supplier._id,

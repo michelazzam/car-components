@@ -85,6 +85,7 @@ export class ExpenseService {
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
         .limit(pageSize)
+        .populate('supplier')
         .populate('expenseType'),
       this.expenseModel.countDocuments(filter),
     ]);
