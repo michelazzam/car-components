@@ -42,7 +42,7 @@ const PurchasePage = () => {
   const [selectedPurchase, setSelectedPurchase] = useState<
     Purchase | undefined
   >();
-  const { setEditingPurchase } = usePurchase();
+  const { setEditingPurchase, clearPurchase } = usePurchase();
 
   //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Purchase>();
@@ -128,6 +128,7 @@ const PurchasePage = () => {
         <Link
           onClick={() => {
             setEditingPurchase(undefined);
+            clearPurchase();
           }}
           className="ti-btn ti-btn-primary-full ti-btn-wave rounded-md"
           href={"/admin/purchase/add-edit-purchase"}

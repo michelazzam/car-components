@@ -5,7 +5,7 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Backup, IBackup } from './backup.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { UpdateLocalBackupPathDto } from './dto/update-local-backup-path.dto';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import * as fs from 'fs';
 
 @Injectable()
@@ -131,7 +131,7 @@ export class BackupService {
    * - host: string
    * - database: string
    */
-  backupDB = () => {
+  triggerLocalBackup = (): Promise<string> => {
     const backupOptions = {
       removeOldBackup: true,
       keepLastDaysBackup: 2,
@@ -166,9 +166,15 @@ export class BackupService {
         }
       }
 
-      const cmd = `mongodump --uri ${this.configService.get('DATABASE_URL')!} --out ${newBackupPath}`;
+      const mongodumpPath = 'mongodump'; // or full path to mongodump if needed
+      const args = [
+        '--uri',
+        this.configService.get('DATABASE_URL')!,
+        '--out',
+        newBackupPath,
+      ];
 
-      exec(cmd, (error) => {
+      execFile(mongodumpPath, args, (error) => {
         if (error) {
           console.error('Database backup failed', error);
           reject(error);

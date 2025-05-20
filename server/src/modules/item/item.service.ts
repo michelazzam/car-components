@@ -21,7 +21,10 @@ export class ItemService {
 
     // Add search filter
     if (search) {
-      filter.$or = [{ name: { $regex: search, $options: 'i' } }];
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { note: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const [items, totalCount, totalsResult] = await Promise.all([

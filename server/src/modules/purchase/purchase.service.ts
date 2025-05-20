@@ -267,7 +267,8 @@ export class PurchaseService {
       );
 
       if (supplier) {
-        const minLoan = Math.max(supplier.loan - purchase.amountPaid, 0);
+        const minLoan = Math.max(supplier.loan - remainingAmount, 0);
+
         supplier.loan = minLoan;
         await supplier.save();
 
