@@ -1,19 +1,18 @@
 import { usePostData } from "@/api-service/usePostData";
 import { API } from "@/constants/apiEndpoints";
-import { VehicleMakeType } from "@/types/vehicle";
 
 export const useAddMake = ({
   callBackOnSuccess,
 }: {
   callBackOnSuccess?: () => void;
 }) => {
-  return usePostData<AddMakeBody>({
+  return usePostData<AddEditMakeBody>({
     endpoint: API.addMake,
     callBackOnSuccess,
+    queryKeysToInvalidate: [["makes"]],
   });
 };
 
-export type AddMakeBody = Omit<
-  VehicleMakeType,
-  "models" | "totalModels" | "id"
->;
+export type AddEditMakeBody = {
+  name: string;
+};

@@ -1,11 +1,12 @@
 export type VehicleMakeType = {
-  id: string;
+  _id: string;
   name: string;
-  totalModels: number;
-  models?: VehicleModelType[];
+  models: VehicleModelType[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type VehicleModelType = {
-  id: string;
+  _id: string;
   name: string;
 };
