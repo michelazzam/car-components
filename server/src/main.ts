@@ -15,7 +15,12 @@ async function bootstrap() {
   const app = await NestFactory.create(MainModule);
 
   app.enableCors({
-    origin: ['http://tauri.localhost', 'http://localhost:3000', '*'],
+    origin: [
+      'http://tauri.localhost',
+      'tauri://localhost',
+      'http://localhost:3000',
+      '*',
+    ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'PUT'],
   });
 
