@@ -4,7 +4,7 @@ import { API } from "@/constants/apiEndpoints";
 export interface AddPaymentParam {
   customerId: string;
   amount: number;
-  discount: number;
+  discount?: number;
 }
 
 const useAddPayment = ({

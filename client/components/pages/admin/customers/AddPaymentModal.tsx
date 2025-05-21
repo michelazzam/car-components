@@ -9,6 +9,7 @@ import { Customer } from "@/api-hooks/customer/use-list-customer";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { FaCalculator } from "react-icons/fa6";
 import Tooltip from "@/components/common/ui/tooltip";
+import { cn } from "@/utils/cn";
 
 function AddPaymentModal({
   triggerModalId,
@@ -44,14 +45,18 @@ function AddPaymentModal({
     reset,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<AddPaymentSchema, AddPaymentFormErrors>({
     resolver: zodResolver(apiValidations.AddPaymentSchema),
     defaultValues: {
       customerId: "",
       amount: 0,
+      discount: 0,
     },
   });
+  const watchDiscount = watch("discount");
+  const watchAmount = watch("amount");
 
   const onSubmit = (data: AddPaymentSchema) => {
     if (selectedCustomer) {
@@ -70,7 +75,9 @@ function AddPaymentModal({
 
   // when pressing enter in the input field, we need to add the ingredient
   const onInvalid = (errors: any) => console.error(errors);
-  console.log("LOAN AMOUNT:", selectedCustomer?.loan);
+  const remaining =
+    (selectedCustomer?.loan || 0) - watchAmount - (watchDiscount || 0);
+  console.log("REMAINING AMOUNT", remaining);
   return (
     <Modal
       id={triggerModalId}
@@ -87,8 +94,19 @@ function AddPaymentModal({
           className="grid grid-cols-12 gap-x-2 items-center"
         >
           <div className="col-span-12 mb-2">
-            <p className="text-danger">
-              Loan Amount: {formatNumber(selectedCustomer?.loan || 0, 2)}$
+            <p className="">
+              Loan Amount:{" "}
+              <span className="text-danger">
+                {formatNumber(selectedCustomer?.loan || 0, 2)}$
+              </span>
+            </p>
+            <p className="">
+              The Remaining Amount will be:{" "}
+              <span
+                className={cn(remaining > 0 ? "text-danger" : "text-success")}
+              >
+                {formatNumber(remaining, 2)}$
+              </span>
             </p>
           </div>
           <NumberFieldControlled
