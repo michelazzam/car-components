@@ -10,7 +10,7 @@
     "build:server": "npm run build --prefix server",
     "tauri:dev": "tauri dev",
     "tauri:key": "powershell -Command \"$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content -Raw '.\\src-tauri\\~\\.tauri\\myapp.key'; npm run tauri:build -- --debug\"",
-    "tauri:build-debug": "npm run tauri:key",
+    "tauri:build-debug": "npm run tauri:build --debug",
     "tauri:build": "tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
