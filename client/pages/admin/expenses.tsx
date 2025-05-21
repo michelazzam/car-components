@@ -26,6 +26,7 @@ import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
+import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 
 const Expenses = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
@@ -39,7 +40,19 @@ const Expenses = () => {
 
   const { pagination, setPagination } = useReactTablePagination();
 
+  const [selectedSupplierOption, setSelectedSupplierOption] = useState<
+    SelectOption | undefined
+  >();
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const debouncedSupplierSearch = useDebounce(supplierSearch);
+
   //-----------------API Calls--------------------
+  const { data: suppliersData } = useListSupplier({
+    pageIndex: 0,
+    pageSize: 30,
+    search: debouncedSupplierSearch,
+  });
+
   const {
     data: expensesData,
     isFetching,
@@ -52,7 +65,7 @@ const Expenses = () => {
     //convert the start date to the format of YYYY-MM-DD
     startDate: formatDateToISO(startDate) || undefined,
     endDate: formatDateToISO(endDate) || undefined,
-
+    supplierId: selectedSupplierOption?.value as string,
     expenseTypeId: selectedExpenseType,
   });
 
@@ -256,6 +269,29 @@ const Expenses = () => {
                     </div>
                   </div>
                 </div>
+                <SelectField
+                  width="w-[20rem]"
+                  marginBottom="mb-0 -mt-1"
+                  isClearable
+                  options={
+                    suppliersData?.suppliers.map((supplier: any) => ({
+                      label: supplier.name,
+                      value: supplier._id,
+                    })) || []
+                  }
+                  placeholder={"Filter by supplier"}
+                  onChangeValue={(opt) => {
+                    if (opt) {
+                      setSelectedSupplierOption(opt);
+                    } else {
+                      setSelectedSupplierOption(undefined);
+                    }
+                  }}
+                  value={selectedSupplierOption}
+                  onInputChange={(e) => {
+                    setSupplierSearch(e);
+                  }}
+                />
               </div>
               <div className="flex justify-end items-center pb-3">
                 <Link

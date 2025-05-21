@@ -1,6 +1,5 @@
 import Pageheader from "@/shared/layout-components/page-header/pageheader";
 import Seo from "@/shared/layout-components/seo/seo";
-import TableWrapper from "@/shared/Table/TableWrapper";
 import React, { useState } from "react";
 import {
   ReactTablePaginated,
@@ -19,6 +18,11 @@ import {
 import Link from "next/link";
 import { usePurchase } from "@/shared/store/usePurchaseStore";
 import ViewPurchaseModal from "@/components/pages/admin/purchase/ViewPurchaseModal";
+import Search from "@/components/admin/Search";
+import SelectField, {
+  SelectOption,
+} from "@/components/admin/Fields/SlectField";
+import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 
 const PurchasePage = () => {
   const { pageIndex, pageSize, pagination, setPagination } =
@@ -27,6 +31,17 @@ const PurchasePage = () => {
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
 
+  const [selectedSupplierOption, setSelectedSupplierOption] = useState<
+    SelectOption | undefined
+  >();
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const debouncedSupplierSearch = useDebounce(supplierSearch);
+
+  const { data: suppliersData } = useListSupplier({
+    pageIndex: 0,
+    pageSize: 30,
+    search: debouncedSupplierSearch,
+  });
   const {
     data: purchasesResponse,
     isLoading,
@@ -36,6 +51,7 @@ const PurchasePage = () => {
     pageSize: pageSize,
     pageIndex: pageIndex,
     search: debouncedSearch,
+    supplierId: selectedSupplierOption?.value as string,
   });
   const purchases = purchasesResponse?.purchases;
 
@@ -67,6 +83,11 @@ const PurchasePage = () => {
 
     columnHelper.accessor("phoneNumber", {
       header: "Phone Number",
+      cell: ({ getValue }) => {
+        const phone = getValue();
+
+        return <div>{phone && phone.length > 0 ? phone : "---"}</div>;
+      },
     }),
 
     columnHelper.accessor("vatPercent", {
@@ -114,10 +135,6 @@ const PurchasePage = () => {
     }),
   ];
 
-  const onSearchValueChange = (value: string) => {
-    setSearchValue(value);
-  };
-
   return (
     <div>
       <Seo title={"Purchases List"} />
@@ -137,22 +154,51 @@ const PurchasePage = () => {
         </Link>
       </div>
 
-      <TableWrapper
-        id="purchases-table"
-        searchValue={searchValue}
-        onSearchValueChange={onSearchValueChange}
-      >
-        <ReactTablePaginated
-          errorMessage={error?.message}
-          data={purchases || []}
-          columns={tanstackColumns}
-          loading={isLoading}
-          paginating={isFetching}
-          pagination={pagination}
-          setPagination={setPagination}
-          totalRows={purchasesResponse?.pagination.totalCount || 0}
-        />
-      </TableWrapper>
+      <div className="box ">
+        <div className="box-header ">
+          <div className="flex gap-x-2 items-center">
+            <Search
+              value={searchValue}
+              onChangeSearch={(v) => setSearchValue(v)}
+            />
+            <SelectField
+              width="w-[20rem]"
+              marginBottom="mb-0 -mt-1"
+              isClearable
+              options={
+                suppliersData?.suppliers.map((supplier: any) => ({
+                  label: supplier.name,
+                  value: supplier._id,
+                })) || []
+              }
+              placeholder={"Filter by supplier"}
+              onChangeValue={(opt) => {
+                if (opt) {
+                  setSelectedSupplierOption(opt);
+                } else {
+                  setSelectedSupplierOption(undefined);
+                }
+              }}
+              value={selectedSupplierOption}
+              onInputChange={(e) => {
+                setSupplierSearch(e);
+              }}
+            />
+          </div>
+        </div>
+        <div className="box-body">
+          <ReactTablePaginated
+            errorMessage={error?.message}
+            data={purchases || []}
+            columns={tanstackColumns}
+            loading={isLoading}
+            paginating={isFetching}
+            pagination={pagination}
+            setPagination={setPagination}
+            totalRows={purchasesResponse?.pagination.totalCount || 0}
+          />
+        </div>
+      </div>
 
       <DeleteRecord
         endpoint={API.deletePurchase(selectedPurchase?._id || "")}

@@ -104,7 +104,7 @@ function ListInvoice({
 
     columnHelper.accessor("number", {
       header: "Invoice No.",
-      cell: ({ getValue }) => <div>TB{getValue()}</div>,
+      cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
 
     ...(!customerId

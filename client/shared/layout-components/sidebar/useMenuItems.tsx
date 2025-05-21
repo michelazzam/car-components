@@ -123,7 +123,7 @@ export default function useMenuItems() {
       type: "link",
       active: pathname.startsWith("/admin/makes"),
       selected: pathname.startsWith("/admin/makes"),
-      title: "Makes",
+      title: "Car Models",
       visible: true,
       children: [],
     },

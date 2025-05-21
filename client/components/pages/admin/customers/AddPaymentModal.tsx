@@ -6,6 +6,10 @@ import { AddPaymentSchema, apiValidations } from "@/lib/apiValidations";
 import { useAddPayment } from "@/api-hooks/customer/use-add-payment";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
 import { Customer } from "@/api-hooks/customer/use-list-customer";
+import { formatNumber } from "@/lib/helpers/formatNumber";
+import { FaCalculator } from "react-icons/fa6";
+import Tooltip from "@/components/common/Tooltip";
+import { cn } from "@/utils/cn";
 
 function AddPaymentModal({
   triggerModalId,
@@ -40,14 +44,19 @@ function AddPaymentModal({
     control,
     reset,
     setValue,
+    getValues,
+    watch,
     formState: { errors },
   } = useForm<AddPaymentSchema, AddPaymentFormErrors>({
     resolver: zodResolver(apiValidations.AddPaymentSchema),
     defaultValues: {
       customerId: "",
       amount: 0,
+      discount: 0,
     },
   });
+  const watchDiscount = watch("discount");
+  const watchAmount = watch("amount");
 
   const onSubmit = (data: AddPaymentSchema) => {
     if (selectedCustomer) {
@@ -66,11 +75,13 @@ function AddPaymentModal({
 
   // when pressing enter in the input field, we need to add the ingredient
   const onInvalid = (errors: any) => console.error(errors);
-
+  const remaining =
+    (selectedCustomer?.loan || 0) - watchAmount - (watchDiscount || 0);
+  console.log("REMAINING AMOUNT", remaining);
   return (
     <Modal
       id={triggerModalId}
-      size="xs"
+      size="sm"
       onClose={() => {
         reset();
       }}
@@ -82,6 +93,22 @@ function AddPaymentModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
+          <div className="col-span-12 mb-2">
+            <p className="">
+              Loan Amount:{" "}
+              <span className="text-danger">
+                {formatNumber(selectedCustomer?.loan || 0, 2)}$
+              </span>
+            </p>
+            <p className="">
+              The Remaining Amount will be:{" "}
+              <span
+                className={cn(remaining > 0 ? "text-danger" : "text-success")}
+              >
+                {formatNumber(remaining, 2)}$
+              </span>
+            </p>
+          </div>
           <NumberFieldControlled
             control={control}
             name="amount"
@@ -90,6 +117,32 @@ function AddPaymentModal({
             colSpan={6}
             prefix="$"
           />
+          <div className="relative col-span-6">
+            <NumberFieldControlled
+              decimalsLimit={2}
+              control={control}
+              name="discount"
+              label="Discount Amount in USD"
+              placeholder="xxx $"
+              colSpan={6}
+              prefix="$"
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue(
+                  "discount",
+                  (selectedCustomer?.loan || 0) - getValues().amount || 0
+                );
+              }}
+              className="ti ti-btn ti-btn-secondary absolute top-1/2 right-2 -translate-y-1/2"
+            >
+              <Tooltip content="Apply Full Paid" position="top">
+                <FaCalculator />
+              </Tooltip>
+            </button>
+          </div>
           {/* Displaying refine error */}
 
           <div className="h-4 col-span-12">

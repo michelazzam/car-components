@@ -59,6 +59,7 @@ function PrintInvoice({
     customerNote,
     totalPriceUsd,
     invoiceUsdRate,
+    type,
   } = useMemo(() => {
     const invoiceData = prev ? previewingInvoice : printingInvoice;
     if (!invoiceData) return {};
@@ -75,6 +76,7 @@ function PrintInvoice({
       customerNote: invoiceData.customerNote,
       totalPriceUsd: invoiceData.accounting.totalUsd,
       invoiceUsdRate: invoiceData.accounting.usdRate,
+      type: invoiceData.type,
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
 
@@ -102,12 +104,14 @@ function PrintInvoice({
             customer={customer}
             vehicle={vehicle}
             // invoiceNumber={invoiceNum}
+            isB2b={type === "s1"}
             createdAt={createdAt}
             invoiceUsdRate={invoiceUsdRate || usdRate.usdRate}
           />
           {items && <InvoiceTable items={items} />}
           <InvoiceSubtotal
             discount={discount}
+            noTax={noTax}
             subTotalUsd={subTotalUsd || 0}
             totalPriceUsd={totalPriceUsd || 0}
             customerNote={customerNote}
@@ -156,7 +160,7 @@ const PrintHeader = ({
           </>
         )}
         {organization?.address}
-        {noTax !== false && (
+        {!noTax && (
           <span className="block text-xs mt-2 font-bold">
             VAT # {organization?.tvaNumber}
           </span>
@@ -176,74 +180,82 @@ const PrintInvoiceDetails = ({
   invoiceNumber,
   createdAt,
   invoiceUsdRate,
+  isB2b,
 }: {
   customer?: any;
   vehicle?: any;
   invoiceNumber?: number;
   createdAt?: string;
   invoiceUsdRate: number;
-}) => (
-  <div className="grid grid-cols-12 px-4 py-2">
-    {/* Customer and Vehicle Details */}
-    <div className="col-span-4">
-      <p>
-        <span className="font-light text-gray-600">Customer:</span>
-        <br />
-        {customer?.name && (
-          <h4 className="text-lg font-semibold">{customer.name}</h4>
-        )}
-        {customer?.address && (
-          <h4 className="text-xs">
-            Address <span className="font-bold">{customer.address}</span>
-          </h4>
-        )}
-        {customer?.phone && (
-          <h4 className="text-xs">
-            Phone <span className="font-bold">{customer.phone}</span>
-          </h4>
-        )}
-        {customer?.tvaNumber && (
-          <h4 className="text-xs">
-            FN# <span className="font-bold">{customer.tvaNumber}</span>
-          </h4>
-        )}
-        {vehicle && (
-          <>
-            {vehicle.vehicleNb && (
-              <h4 className="text-xs">
-                Vehicle Number{" "}
-                <span className="font-bold">{vehicle.vehicleNb}</span>
-              </h4>
-            )}
-            {vehicle.model && (
-              <h4 className="text-xs">
-                Vehicle Model <span className="font-bold">{vehicle.model}</span>
-              </h4>
-            )}
-          </>
-        )}
-      </p>
-    </div>
-    <div className="col-span-8 flex justify-end">
-      <p>
-        {invoiceNumber ? (
-          <span className="font-bold">Invoice # TB{invoiceNumber}</span>
-        ) : null}
-        <br />
-        {createdAt && (
-          <span className="font-bold">
-            Date: {dateTimeToDateFormat(createdAt)}
-            <br />
-          </span>
-        )}
+  isB2b: boolean;
+}) => {
+  console.log("IS B2b", isB2b);
+  console.log("SHOULD HAVE VAT", isB2b ? true : false);
+  return (
+    <div className="grid grid-cols-12 px-4 py-2">
+      {/* Customer and Vehicle Details */}
+      <div className="col-span-4">
+        <p>
+          <span className="font-light text-gray-600">Customer:</span>
+          <br />
+          {customer?.name && (
+            <h4 className="text-lg font-semibold">{customer.name}</h4>
+          )}
+          {customer?.address && (
+            <h4 className="text-xs">
+              Address <span className="font-bold">{customer.address}</span>
+            </h4>
+          )}
+          {customer?.phone && (
+            <h4 className="text-xs">
+              Phone <span className="font-bold">{customer.phone}</span>
+            </h4>
+          )}
+          {customer?.tvaNumber && (
+            <h4 className="text-xs">
+              FN# <span className="font-bold">{customer.tvaNumber}</span>
+            </h4>
+          )}
+          {vehicle && (
+            <>
+              {vehicle.vehicleNb && (
+                <h4 className="text-xs">
+                  Vehicle Number{" "}
+                  <span className="font-bold">{vehicle.vehicleNb}</span>
+                </h4>
+              )}
+              {vehicle.model && (
+                <h4 className="text-xs">
+                  Vehicle Model{" "}
+                  <span className="font-bold">{vehicle.model}</span>
+                </h4>
+              )}
+            </>
+          )}
+        </p>
+      </div>
+      <div className="col-span-8 flex justify-end">
+        <p>
+          {invoiceNumber ? (
+            <span className="font-bold">Invoice # TB{invoiceNumber}</span>
+          ) : null}
+          <br />
+          {createdAt && (
+            <span className="font-bold">
+              Date: {dateTimeToDateFormat(createdAt)}
+              <br />
+            </span>
+          )}
 
-        <span className="font-bold">
-          VAT Rate: 1$ = {formatNumber(invoiceUsdRate, 0)}LBP
-        </span>
-      </p>
+          <span className="font-bold">
+            {isB2b ? "VAT" : "USD"} Rate: 1$ = {formatNumber(invoiceUsdRate, 0)}
+            LBP
+          </span>
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 const InvoiceTable = ({ items }: { items: GetItem[] }) => {
   return (
     <div className="mt-2 flex flex-col">
@@ -331,6 +343,7 @@ const InvoiceSubtotal = ({
   taxPercentage,
   subTotalUsd,
   totalPriceUsd,
+  noTax,
 }: {
   discount?: {
     amount: number;
@@ -343,6 +356,7 @@ const InvoiceSubtotal = ({
   taxPercentage?: number;
   subTotalUsd: number;
   totalPriceUsd: number;
+  noTax: boolean;
 }) => {
   return (
     <div className="flex justify-end mt-2">
@@ -375,10 +389,12 @@ const InvoiceSubtotal = ({
             </div>
           )}
 
-          <div className="flex justify-between">
-            <span className="font-semibold">VAT {taxPercentage}% (USD):</span>
-            <span>${taxesUsd ? formatNumber(taxesUsd, 2) : 0}</span>
-          </div>
+          {!noTax && (
+            <div className="flex justify-between">
+              <span className="font-semibold">VAT {taxPercentage}% (USD):</span>
+              <span>${taxesUsd ? formatNumber(taxesUsd, 2) : 0}</span>
+            </div>
+          )}
 
           <div className="flex justify-between text-green-600">
             <span className="font-semibold">Total:</span>

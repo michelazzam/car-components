@@ -20,7 +20,7 @@ function PrintInvoiceModal({
   previewingInvoice?: Invoice;
   prev?: boolean;
 }) {
-  const [noTaxt, setNoTax] = useState(true);
+  const [noTax, setNoTax] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const cancelFormRef = useRef<HTMLButtonElement>(null);
@@ -80,11 +80,11 @@ function PrintInvoiceModal({
     <Modal
       id={triggerModalId}
       size="md"
-      onClose={() => {
-        console.log("close");
-      }}
+      onClose={() => {}}
       onOpen={() => {
-        console.log("open");
+        console.log("INVOICE TYPE IS :", printingInvoices?.[0]?.type);
+        console.log("IS CUSTOMER", printingInvoices?.[0]?.type === "s2");
+        console.log("PREVIEWING INVOICE TYPE IS :", previewingInvoice?.type);
       }}
     >
       <Modal.Header title={title} id={triggerModalId} />
@@ -104,7 +104,7 @@ function PrintInvoiceModal({
                 <PrintInvoice
                   printingInvoice={invoice}
                   previewingInvoice={undefined}
-                  noTax={noTaxt}
+                  noTax={noTax || invoice.type === "s2"}
                   prev={prev}
                   printA5={false}
                 />
@@ -116,7 +116,7 @@ function PrintInvoiceModal({
             <PrintInvoice
               printingInvoice={undefined}
               previewingInvoice={previewingInvoice}
-              noTax={noTaxt}
+              noTax={noTax || previewingInvoice?.type === "s2"}
               prev={prev}
               printA5={false}
             />
@@ -127,8 +127,8 @@ function PrintInvoiceModal({
       <Modal.Footer>
         <Checkbox
           label="No VAT"
-          isChecked={!noTaxt}
-          onValueChange={() => setNoTax(!noTaxt)}
+          isChecked={noTax}
+          onValueChange={() => setNoTax(!noTax)}
         />
         <button
           ref={cancelFormRef}

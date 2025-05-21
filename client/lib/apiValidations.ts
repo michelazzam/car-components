@@ -156,7 +156,7 @@ const AddPurchaseSchema = z.object({
   invoiceDate: z.string().min(1, { message: "required" }),
   invoiceNumber: z.string().min(1, { message: "required" }),
   customerConsultant: z.string().optional(),
-  phoneNumber: z.string().min(1, { message: "required" }),
+  phoneNumber: z.string().optional(),
   vatPercent: z.number().min(0),
   vatLBP: z.number().min(0),
   totalAmount: z.number().optional(),
@@ -283,7 +283,8 @@ const CustomerSchema = z.object({
 
 const AddPaymentSchema = z.object({
   customerId: z.string(),
-  amount: z.number().min(0, "Amount paid in USD is required"),
+  amount: z.number().min(1, "Amount paid in USD is required"),
+  discount: z.number().min(0, "Discount amount cannot be negative").optional(),
 });
 
 export type AddPaymentSchema = z.infer<typeof AddPaymentSchema>;

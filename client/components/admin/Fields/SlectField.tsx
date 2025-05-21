@@ -23,6 +23,7 @@ interface SelectFieldProps {
   handleCreate?: (value: string) => void;
   isClearable?: boolean;
   marginBottom?: string;
+  width?: string;
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({
@@ -39,6 +40,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   handleCreate = () => {},
   isClearable = false, // Default value for clearable
   marginBottom = "mb-5",
+  width = "",
 }) => {
   const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
     initialValue
@@ -69,7 +71,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   };
 
   return (
-    <div className={tailwindColsClasses[colSpan]}>
+    <div className={cn(tailwindColsClasses[colSpan], width)}>
       <div className={cn(marginBottom)}>
         {label && (
           <label className="block text-sm font-medium text-gray-700">

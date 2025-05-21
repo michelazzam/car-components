@@ -6,8 +6,7 @@
   "build": {
     "frontendDist": "../client/out",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "npm run dev:client",
-    "beforeBuildCommand": "npm run build:client"
+    "beforeDevCommand": "npm run dev:client"
   },
 
   "app": {
@@ -20,6 +19,7 @@
         "fullscreen": false
       }
     ],
+
     "security": {
       "csp": null,
       "assetProtocol": {
@@ -49,7 +49,9 @@
       "endpoints": [
         "https://github.com/michelazzam/car-components/releases/latest/download/latest.json"
       ],
-      "dialog": true
+      "dialog": {
+        "active": true
+      }
     },
     "fs": {
       "scope": ["$APPDATA/**", "$HOME/projects/car-components/**"]
