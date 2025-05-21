@@ -18,7 +18,7 @@ export type AddPurchaseT = {
   invoiceDate: string;
   invoiceNumber: string;
   customerConsultant?: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   vatPercent: number;
   vatLBP: number;
   totalAmount: number;
