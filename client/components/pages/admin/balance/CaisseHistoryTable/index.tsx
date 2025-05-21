@@ -32,7 +32,13 @@ function CaisseHistoryTable() {
     }),
     columnHelper.accessor("openedAt", {
       header: "Opened At",
-      cell: ({ getValue }) => <div> {getValue()}</div>,
+      cell: ({ row }) => (
+        <div>
+          {row.original.openedAt
+            ? new Date(row.original.openedAt).toLocaleString()
+            : "N/A"}
+        </div>
+      ),
     }),
     columnHelper.accessor("openedAmount", {
       header: "Opened Amount",
@@ -40,7 +46,17 @@ function CaisseHistoryTable() {
     }),
     columnHelper.accessor("closedAt", {
       header: "Closed At",
-      cell: ({ getValue }) => <div> {getValue()}</div>,
+      cell: ({ row }) => (
+        <div>
+          {row.original.closedAt
+            ? new Date(row.original.closedAt).toLocaleString()
+            : "N/A"}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("expectedAmountToClose", {
+      header: "Expected Amount To Close",
+      cell: ({ getValue }) => <div> {formatNumber(getValue(), 2)}$</div>,
     }),
     columnHelper.accessor("closedAmount", {
       header: "Closed Amount",
