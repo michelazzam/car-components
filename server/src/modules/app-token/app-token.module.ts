@@ -3,6 +3,7 @@ import { AppTokenService } from './app-token.service';
 import { AppTokenController } from './app-token.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppToken, AppTokenSchema } from './app-token.schema';
+import { EnvConfigService } from 'src/config/env.validation';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { AppToken, AppTokenSchema } from './app-token.schema';
     ]),
   ],
   controllers: [AppTokenController],
-  providers: [AppTokenService],
+  providers: [AppTokenService, EnvConfigService],
 })
 export class AppTokenModule {}

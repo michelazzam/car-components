@@ -7,9 +7,6 @@ export class AppToken {
   token: string;
 
   @Prop({ required: true })
-  deviceId: string;
-
-  @Prop({ required: true })
   lastValidatedAt: Date;
 }
 
