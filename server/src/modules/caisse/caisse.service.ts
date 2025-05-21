@@ -27,7 +27,11 @@ export class CaisseService {
       isCaisseOpen: true,
     });
 
-    await this.createOrUpdateCaisseHistory(amount, 'opening');
+    await this.createOrUpdateCaisseHistory(
+      amount,
+      accounting.caisse,
+      'opening',
+    );
   }
 
   async closeCaisse(dto: CloseOpenCaisseDto) {
@@ -42,7 +46,11 @@ export class CaisseService {
       isCaisseOpen: false,
     });
 
-    await this.createOrUpdateCaisseHistory(amount, 'closing');
+    await this.createOrUpdateCaisseHistory(
+      amount,
+      accounting.caisse,
+      'closing',
+    );
   }
 
   async getCaisseStatus() {
@@ -108,6 +116,7 @@ export class CaisseService {
 
   private createOrUpdateCaisseHistory(
     amount: number,
+    exepectedAmountToClose: number,
     status: 'closing' | 'opening',
   ) {
     const today = getFormattedDate(new Date());
@@ -117,8 +126,10 @@ export class CaisseService {
       {
         $set: {
           date: today,
-          openedAmount: status === 'opening' ? amount : 0,
-          closedAmount: status === 'closing' ? amount : 0,
+          openedAmount: status === 'opening' ? amount : undefined,
+          closedAmount: status === 'closing' ? amount : undefined,
+          expectedAmountToClose:
+            status === 'closing' ? exepectedAmountToClose : undefined,
           openedAt: status === 'opening' ? new Date() : undefined,
           closedAt: status === 'closing' ? new Date() : undefined,
         },

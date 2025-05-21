@@ -21,6 +21,7 @@ import { ReportModule } from './report/report.module';
 import { CaisseModule } from './caisse/caisse.module';
 import { BackupModule } from './backup/backup.module';
 import { VehicleMakesModule } from './vehicle-makes/vehicle-makes.module';
+import { AppTokenModule } from './app-token/app-token.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { VehicleMakesModule } from './vehicle-makes/vehicle-makes.module';
     CaisseModule,
     BackupModule,
     VehicleMakesModule,
+    AppTokenModule,
   ],
   controllers: [],
   providers: [

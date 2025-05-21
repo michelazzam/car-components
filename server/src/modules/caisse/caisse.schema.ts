@@ -12,6 +12,9 @@ export class CaisseHistory {
   @Prop({ default: 0 })
   closedAmount: number;
 
+  @Prop({ default: 0 })
+  expectedAmountToClose: number;
+
   @Prop()
   openedAt: Date;
 
