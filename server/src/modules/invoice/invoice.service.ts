@@ -53,10 +53,17 @@ export class InvoiceService {
 
     if (search) {
       // @ts-ignore
+      filter.$and[0].$or.push({ number: { $regex: search, $options: 'i' } });
+      // @ts-ignore
       filter.$and[0].$or.push({
-        number: { $regex: search, $options: 'i' },
         driverName: { $regex: search, $options: 'i' },
+      });
+      // @ts-ignore
+      filter.$and[0].$or.push({
         generalNote: { $regex: search, $options: 'i' },
+      });
+      // @ts-ignore
+      filter.$and[0].$or.push({
         customerNote: { $regex: search, $options: 'i' },
       });
     }

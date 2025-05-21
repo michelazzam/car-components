@@ -37,7 +37,13 @@ export class PurchaseService {
       // @ts-ignore
       filter.$and[0].$or.push({
         invoiceNumber: { $regex: search, $options: 'i' },
+      });
+      // @ts-ignore
+      filter.$and[0].$or.push({
         customerConsultant: { $regex: search, $options: 'i' },
+      });
+      // @ts-ignore
+      filter.$and[0].$or.push({
         phoneNumber: { $regex: search, $options: 'i' },
       });
     }
