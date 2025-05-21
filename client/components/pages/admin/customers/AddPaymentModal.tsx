@@ -8,7 +8,7 @@ import NumberFieldControlled from "@/components/admin/FormControlledFields/Numbe
 import { Customer } from "@/api-hooks/customer/use-list-customer";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { FaCalculator } from "react-icons/fa6";
-import Tooltip from "@/components/common/ui/tooltip";
+import Tooltip from "@/components/common/Tooltip";
 import { cn } from "@/utils/cn";
 
 function AddPaymentModal({

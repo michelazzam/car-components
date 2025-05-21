@@ -3,7 +3,7 @@ import { Product } from "@/api-hooks/products/use-list-products";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { cn } from "@/utils/cn";
 import { CSOS } from "@/constants/preferences";
-import Tooltip from "@/components/common/ui/tooltip";
+import Tooltip from "@/components/common/Tooltip";
 
 function ItemCard({ product }: { product: Product }) {
   //----------------Storage----------------------------
