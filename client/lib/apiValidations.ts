@@ -156,7 +156,7 @@ const AddPurchaseSchema = z.object({
   invoiceDate: z.string().min(1, { message: "required" }),
   invoiceNumber: z.string().min(1, { message: "required" }),
   customerConsultant: z.string().optional(),
-  phoneNumber: z.string().min(1, { message: "required" }),
+  phoneNumber: z.string().optional(),
   vatPercent: z.number().min(0),
   vatLBP: z.number().min(0),
   totalAmount: z.number().optional(),

@@ -101,6 +101,7 @@ export class PurchaseDto {
     required: true,
   })
   @IsString()
+  @IsOptional()
   phoneNumber: string;
 
   @ApiProperty({

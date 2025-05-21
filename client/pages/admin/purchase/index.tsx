@@ -67,6 +67,11 @@ const PurchasePage = () => {
 
     columnHelper.accessor("phoneNumber", {
       header: "Phone Number",
+      cell: ({ getValue }) => {
+        const phone = getValue();
+
+        return <div>{phone && phone.length > 0 ? phone : "---"}</div>;
+      },
     }),
 
     columnHelper.accessor("vatPercent", {
