@@ -21,8 +21,9 @@ export const useListCaisseRecords = (params: {
 export type CaisseHistoryRecord = {
   _id: string;
   date: string;
-  closedAmount: number;
   openedAmount: number;
+  closedAmount: number;
+  expectedAmountToClose: number;
   closedAt: string | null;
   openedAt: string | null;
   createdAt: string;
