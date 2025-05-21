@@ -283,7 +283,8 @@ const CustomerSchema = z.object({
 
 const AddPaymentSchema = z.object({
   customerId: z.string(),
-  amount: z.number().min(0, "Amount paid in USD is required"),
+  amount: z.number().min(1, "Amount paid in USD is required"),
+  discount: z.number().min(0, "Discount amount cannot be negative").optional(),
 });
 
 export type AddPaymentSchema = z.infer<typeof AddPaymentSchema>;

@@ -6,6 +6,9 @@ import { AddPaymentSchema, apiValidations } from "@/lib/apiValidations";
 import { useAddPayment } from "@/api-hooks/customer/use-add-payment";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
 import { Customer } from "@/api-hooks/customer/use-list-customer";
+import { formatNumber } from "@/lib/helpers/formatNumber";
+import { FaCalculator } from "react-icons/fa6";
+import Tooltip from "@/components/common/ui/tooltip";
 
 function AddPaymentModal({
   triggerModalId,
@@ -40,6 +43,7 @@ function AddPaymentModal({
     control,
     reset,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<AddPaymentSchema, AddPaymentFormErrors>({
     resolver: zodResolver(apiValidations.AddPaymentSchema),
@@ -66,11 +70,11 @@ function AddPaymentModal({
 
   // when pressing enter in the input field, we need to add the ingredient
   const onInvalid = (errors: any) => console.error(errors);
-
+  console.log("LOAN AMOUNT:", selectedCustomer?.loan);
   return (
     <Modal
       id={triggerModalId}
-      size="xs"
+      size="sm"
       onClose={() => {
         reset();
       }}
@@ -82,6 +86,11 @@ function AddPaymentModal({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className="grid grid-cols-12 gap-x-2 items-center"
         >
+          <div className="col-span-12 mb-2">
+            <p className="text-danger">
+              Loan Amount: {formatNumber(selectedCustomer?.loan || 0, 2)}$
+            </p>
+          </div>
           <NumberFieldControlled
             control={control}
             name="amount"
@@ -90,6 +99,32 @@ function AddPaymentModal({
             colSpan={6}
             prefix="$"
           />
+          <div className="relative col-span-6">
+            <NumberFieldControlled
+              decimalsLimit={2}
+              control={control}
+              name="discount"
+              label="Discount Amount in USD"
+              placeholder="xxx $"
+              colSpan={6}
+              prefix="$"
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setValue(
+                  "discount",
+                  (selectedCustomer?.loan || 0) - getValues().amount || 0
+                );
+              }}
+              className="ti ti-btn ti-btn-secondary absolute top-1/2 right-2 -translate-y-1/2"
+            >
+              <Tooltip content="Apply Full Paid" position="top">
+                <FaCalculator />
+              </Tooltip>
+            </button>
+          </div>
           {/* Displaying refine error */}
 
           <div className="h-4 col-span-12">

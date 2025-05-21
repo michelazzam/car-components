@@ -25,7 +25,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         absolute ${positionClasses[position]}
         px-3 py-1.5
         bg-gray-800 text-white text-sm rounded-lg
-        w-[1000px] max-w-[50vw] text-wrap
+        w-fit max-w-[50vw] text-wrap
         whitespace-nowrap
         opacity-0 group-hover:opacity-100
         transition-opacity duration-200
