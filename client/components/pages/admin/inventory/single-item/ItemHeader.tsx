@@ -21,12 +21,15 @@ function ItemHeader({ item }: { item: Product }) {
           <p className="">Status</p>
         </div>
       </div>
-      <div className="box-body grid grid-cols-5 gap-x-4 text-lg font-bold !text-primary ">
-        <p className="">{item.name}</p>
-        <p className="">{item.cost}</p>
-        <p className="">{item.price}</p>
-        <p className="">{item.quantity}</p>
-        <p className="">{item.status}</p>
+      <div className="box-body">
+        <div className="grid grid-cols-5 gap-x-4 text-lg font-bold !text-primary ">
+          <p className="">{item.name}</p>
+          <p className="">{item.cost}</p>
+          <p className="">{item.price}</p>
+          <p className="">{item.quantity}</p>
+          <p className="">{item.status}</p>
+        </div>
+        <p className="text-gray-600 mt-4">Note: {item.note}</p>
       </div>
     </div>
   );
