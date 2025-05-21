@@ -45,7 +45,7 @@ function ProfitAndLossSummary() {
       amount: reportsData?.totalCustomersLoan || 0,
     },
     {
-      description: "totalSuppliersLoan",
+      description: "Total Suppliers Loan",
       amount: reportsData?.totalSuppliersLoan || 0,
     },
   ];
