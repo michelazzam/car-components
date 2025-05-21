@@ -391,13 +391,14 @@ export class InvoiceService {
     dto: PayCustomerInvoicesDto,
     doNotAddToCaisse?: boolean,
   ) {
-    const { customerId, amount: customerPaidAmount } = dto;
+    const { customerId, amount: customerPaidAmount, discount } = dto;
 
     // validate customer exists
     const customer = await this.customerService.getOneById(customerId);
     if (!customer) throw new BadRequestException('Customer not found');
 
     let remainingAmountThatCustomerPaidNow = customerPaidAmount;
+    let remainingDiscountAmount = discount;
 
     const unpaidInvoices = await this.invoiceModel
       .find({
@@ -410,43 +411,67 @@ export class InvoiceService {
       const invoiceRemaining =
         invoice.accounting.totalUsd - invoice.accounting.paidAmountUsd;
 
-      let updateFields = {
+      let fieldsToUpdate = {
         'accounting.paidAmountUsd': invoice.accounting.paidAmountUsd,
         'accounting.isPaid': invoice.accounting.isPaid,
+        'accounting.discount.type': 'fixed',
+        'accounting.discount.amount': invoice.accounting.discount.amount || 0,
       };
 
       // if customer paid more than invoice remaining -> invoice is paid
       if (remainingAmountThatCustomerPaidNow >= invoiceRemaining) {
-        updateFields['accounting.paidAmountUsd'] += invoiceRemaining;
-        updateFields['accounting.isPaid'] = true;
+        fieldsToUpdate['accounting.paidAmountUsd'] += invoiceRemaining;
+        fieldsToUpdate['accounting.isPaid'] = true;
         remainingAmountThatCustomerPaidNow -= invoiceRemaining;
       }
       // if customer paid less than invoice remaining -> invoice is not paid
       else {
-        updateFields['accounting.paidAmountUsd'] +=
-          remainingAmountThatCustomerPaidNow;
-        updateFields['accounting.isPaid'] = false;
-        remainingAmountThatCustomerPaidNow = 0;
+        // if has discount merge it with the remaining amount paid
+        if (
+          remainingAmountThatCustomerPaidNow + remainingDiscountAmount >=
+          invoiceRemaining
+        ) {
+          fieldsToUpdate['accounting.paidAmountUsd'] +=
+            remainingAmountThatCustomerPaidNow;
+          fieldsToUpdate['accounting.isPaid'] = true;
+
+          const discountAmountDeducted =
+            invoiceRemaining - remainingAmountThatCustomerPaidNow;
+          fieldsToUpdate['accounting.discount.amount'] +=
+            discountAmountDeducted;
+
+          remainingAmountThatCustomerPaidNow = 0;
+          remainingDiscountAmount -= discountAmountDeducted;
+        } else {
+          fieldsToUpdate['accounting.paidAmountUsd'] +=
+            remainingAmountThatCustomerPaidNow;
+          fieldsToUpdate['accounting.isPaid'] = false;
+          remainingAmountThatCustomerPaidNow = 0;
+        }
       }
 
       await this.invoiceModel.updateOne(
         { _id: invoice._id },
-        { $set: updateFields }, // set updated fields
+        { $set: fieldsToUpdate }, // set updated fields
       );
 
       if (remainingAmountThatCustomerPaidNow <= 0) break;
     }
 
+    // effects of paying customer invoices
     if (customerPaidAmount > 0) {
       // Decrease customer loan
-      const minLoan = Math.max(customer.loan - customerPaidAmount, 0);
+      const minLoan = Math.max(
+        customer.loan - (customerPaidAmount + discount),
+        0,
+      );
       customer.loan = minLoan;
       await customer.save();
 
       // Update accounting
       await this.accountingService.incAccountingNumberFields({
         totalIncome: customerPaidAmount, // increase total income
-        totalCustomersLoan: -customerPaidAmount, // decrease total customers loan
+        totalCustomersLoan: -(customerPaidAmount + discount), // decrease total customers loan
         caisse: doNotAddToCaisse ? 0 : customerPaidAmount, // increase caisse
       });
 
@@ -511,6 +536,7 @@ export class InvoiceService {
         {
           customerId: customer._id?.toString(),
           amount: extraAmountPaid,
+          discount: 0,
         },
         true, // do not add to caisse since we are adding it before this step
       );
