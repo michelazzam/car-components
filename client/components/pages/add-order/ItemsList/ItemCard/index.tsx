@@ -3,6 +3,7 @@ import { Product } from "@/api-hooks/products/use-list-products";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { cn } from "@/utils/cn";
 import { CSOS } from "@/constants/preferences";
+import Tooltip from "@/components/common/ui/tooltip";
 
 function ItemCard({ product }: { product: Product }) {
   //----------------Storage----------------------------
@@ -77,12 +78,17 @@ function ItemCard({ product }: { product: Product }) {
           {itemCartQuantity}
         </span>
       )}
-      <div className="flex-grow flex flex-col justify-center items-center w-full text-center p-2">
-        <h3 className="font-semibold text-[.875rem] block text-truncate">
-          {product?.name}
-        </h3>
-        <div className="text-success text-lg font-bold">$ {product?.price}</div>
-      </div>
+      <Tooltip content={product?.note || product.name}>
+        <div className="flex-grow flex flex-col justify-center items-center w-full text-center p-2">
+          <h3 className="font-semibold text-[.875rem] block text-truncate">
+            {product?.name}
+          </h3>
+          <div className="text-success text-lg font-bold">
+            $ {product?.price}
+          </div>
+          <p className="line-clamp-2">{product?.note}</p>
+        </div>
+      </Tooltip>
     </button>
   );
 }
