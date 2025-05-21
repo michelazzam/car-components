@@ -27,6 +27,7 @@ const useListExpenses = (params: {
   search?: string;
   startDate?: string;
   endDate?: string;
+  supplierId?: string;
   expenseTypeId?: string;
 }) => {
   return useReadData<ExpensesResponse>({
