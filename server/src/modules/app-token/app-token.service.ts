@@ -20,10 +20,17 @@ export class AppTokenService {
     await this.validateTokenWithServer(token);
 
     // if passed the validation, save the token to the database
-    await this.appTokenModel.create({ token, lastValidatedAt: new Date() });
+    const existingToken = await this.appTokenModel.findOne();
+    if (existingToken) {
+      await this.appTokenModel.findOneAndUpdate(
+        { _id: existingToken._id },
+        { token, lastValidatedAt: new Date() },
+      );
+    } else
+      await this.appTokenModel.create({ token, lastValidatedAt: new Date() });
   }
 
-  async isValid() {
+  async isTokenValid() {
     // find the token from db to check if the app has contacted our server
     const tokenObj = await this.appTokenModel.findOne();
     if (!tokenObj) return { isValid: false };
@@ -48,13 +55,33 @@ export class AppTokenService {
     return { isValid, token: tokenObj.token };
   }
 
+  async getBilling() {
+    try {
+      const tokenObj = await this.appTokenModel.findOne();
+      if (!tokenObj) throw new BadRequestException('Token not found');
+
+      const response = await axios.get(
+        `${this.configService.get('AMS_SERVER_URL')}/get-client-invoices`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenObj.token}`,
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      console.log(error.response);
+      throw new BadRequestException(error.response.data.message);
+    }
+  }
+
   private async validateTokenWithServer(token: string) {
     try {
       const response = await axios.post(
         `${this.configService.get('AMS_SERVER_URL')}/projects/validate-token?token=${token}`,
       );
 
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw new BadRequestException(error.response.data.message);
