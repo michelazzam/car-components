@@ -3,17 +3,36 @@ import { check } from "@tauri-apps/plugin-updater";
 import { ask } from "@tauri-apps/plugin-dialog";
 import PulsingCircle from "@/components/common/animations/PulsingCircle";
 
-async function checkForUpdates(): Promise<boolean> {
+async function checkForUpdatesAndUpdate(): Promise<boolean> {
   console.log("CHECKING FOR UPDATES");
   const update = await check();
+  let downloaded = 0;
+  let contentLength = 0;
 
   if (update) {
     console.log("Update found", update);
     const proceed = await ask(
       "A new version is available. Do you want to update?"
     );
+
     if (proceed) {
-      await update.downloadAndInstall();
+      await update.downloadAndInstall((event) => {
+        switch (event.event) {
+          case "Started":
+            contentLength = event.data.contentLength || 0;
+            console.log(
+              `started downloading ${event.data.contentLength} bytes`
+            );
+            break;
+          case "Progress":
+            downloaded += event.data.chunkLength;
+            console.log(`downloaded ${downloaded} from ${contentLength}`);
+            break;
+          case "Finished":
+            console.log("download finished");
+            break;
+        }
+      });
       window.location.reload();
       return true;
     }
@@ -22,6 +41,12 @@ async function checkForUpdates(): Promise<boolean> {
     console.log("No update found");
     return false;
   }
+}
+
+async function checkForUpdates(): Promise<boolean> {
+  const update = await check();
+  if (update) return true;
+  return false;
 }
 
 function UpdatesButton() {
@@ -34,9 +59,14 @@ function UpdatesButton() {
     if (!isProduction) return;
 
     setChecking(true);
-    checkForUpdates()
-      .then(setHasUpdates)
-      .finally(() => setChecking(false));
+    checkForUpdates().then((hasUpdates) => {
+      if (hasUpdates) {
+        setHasUpdates(true);
+      } else {
+        setHasUpdates(false);
+      }
+      setChecking(false);
+    });
   }, []);
 
   if (!isProduction) return null;
@@ -48,7 +78,7 @@ function UpdatesButton() {
         disabled={checking}
         onClick={() => {
           setChecking(true);
-          checkForUpdates()
+          checkForUpdatesAndUpdate()
             .then(setHasUpdates)
             .finally(() => setChecking(false));
         }}
