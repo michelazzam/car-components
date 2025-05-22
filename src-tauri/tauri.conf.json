@@ -7,7 +7,7 @@
     "frontendDist": "../client/out",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "npm run dev:client",
-    "beforeBundleCommand": "npm run build:client"
+    "beforeBuildCommand": "npm run build:client"
   },
 
   "app": {
