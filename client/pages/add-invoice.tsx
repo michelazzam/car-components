@@ -107,6 +107,7 @@ const AddInvoice = () => {
         isPaid: editingInvoice.accounting.isPaid,
         hasVehicle: editingInvoice.vehicle?._id ? true : false,
         customerNote: editingInvoice.customerNote,
+        type: editingInvoice.type,
       });
 
       // Clear cart before adding items
@@ -144,8 +145,9 @@ const AddInvoice = () => {
       return accumulator + (currentItem.amount || 0);
     }, 0);
     methods.setValue("subTotalUsd", subTotalUsd);
+    console.log("SETTING TOTAL USD TO : ", totalAmount(!isB2C));
     methods.setValue("totalUsd", totalAmount(!isB2C));
-  }, [cart, methods]);
+  }, [cart, methods, isB2C]);
 
   useEffect(() => {
     if (discountStore) {

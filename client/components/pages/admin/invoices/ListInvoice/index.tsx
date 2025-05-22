@@ -194,6 +194,7 @@ function ListInvoice({
             onClick={() => {
               setSelectedInvoice(row.original);
               setEditingInvoice(row.original);
+
               router.push("/add-invoice");
             }}
           >
