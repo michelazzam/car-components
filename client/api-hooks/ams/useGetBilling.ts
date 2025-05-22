@@ -1,5 +1,5 @@
 import { Billing } from "@/pages/admin/ams/billing";
-import { useReadData } from "../useReadData";
+import { useReadData } from "../../api-service/useReadData";
 import { API } from "@/constants/apiEndpoints";
 
 export const useGetBilling = () => {

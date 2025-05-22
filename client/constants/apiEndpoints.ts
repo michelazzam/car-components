@@ -137,6 +137,8 @@ export const API = {
   editSupplier: (id: string) => `/suppliers/${id}`, //PUT
   deleteSupplier: (id: string) => `/suppliers/${id}`, //DELETE
 
-  // config:
+  // ams:
   getBilling: "/app-token/billing",
+  checkLicense: "/app-token/validate",
+  validateLicense: "/app-token/validate",
 };

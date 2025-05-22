@@ -35,24 +35,33 @@ export class AppTokenService {
     const tokenObj = await this.appTokenModel.findOne();
     if (!tokenObj) return { isValid: false };
 
-    // if there is internet, validate with our server
-    const hasInternet = await this.hasInternetConnection();
-    if (hasInternet) {
-      await this.validateTokenWithServer(tokenObj.token);
-
-      // update the lastValidatedAt field
-      await this.appTokenModel.findOneAndUpdate(
-        { _id: tokenObj._id },
-        { lastValidatedAt: new Date() },
-      );
-    }
-
     // check if the lastValidatedAt is less than 20 days ago
     const isValid =
       tokenObj!.lastValidatedAt >
       new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
 
-    return { isValid, token: tokenObj.token };
+    if (!isValid) {
+      // if false & there is internet try to validate it again
+      const hasInternet = await this.hasInternetConnection();
+      if (hasInternet) {
+        await this.validateTokenWithServer(tokenObj.token);
+
+        // update the lastValidatedAt field
+        await this.appTokenModel.findOneAndUpdate(
+          { _id: tokenObj._id },
+          { lastValidatedAt: new Date() },
+        );
+
+        return { isValid: true };
+      } else {
+        return {
+          isValid: false,
+          message: 'Please connect to the internet to validate your license.',
+        };
+      }
+    }
+
+    return { isValid: true };
   }
 
   async getBilling() {

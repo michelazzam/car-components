@@ -3,7 +3,7 @@ import Seo from "@/shared/layout-components/seo/seo";
 import React, { useState } from "react";
 import { ReactTabulator } from "react-tabulator";
 import ReactDOMServer from "react-dom/server";
-import { useGetBilling } from "@/api-service/billing/useFetchData";
+import { useGetBilling } from "@/api-hooks/ams/useGetBilling";
 import PrintBillingInvoiceModal from "@/components/pages/ams/PrintBillingInvoiceModal";
 import { cn } from "@/utils/cn";
 
