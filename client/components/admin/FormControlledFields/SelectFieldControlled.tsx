@@ -50,7 +50,7 @@ const SelectFieldControlled: React.FC<SelectFieldProps> = ({
   const [allOptions, setAllOptions] = useState<SelectOption[]>([]);
   const { fieldState, field } = useController({ name, control });
   const errorMessage = fieldState.error?.message;
-
+  console.log("FIELD VALUE IS : ", field.value);
   // Update local cache whenever options change
   useEffect(() => {
     const updatedOptions = new Set([...allOptions, ...options]);
