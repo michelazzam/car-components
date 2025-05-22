@@ -96,6 +96,13 @@ const EditUserPermissions = z.object({
       read: z.boolean().optional(),
     })
     .optional(),
+  VehicleMakes: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 const ProfileSchema = z.object({
