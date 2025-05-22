@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { itemStatuses } from "./constants/item";
 
+const validateTokenSchema = z.object({
+  token: z.string().min(1, "Required"),
+});
+
 const loginSchema = z.object({
   username: z.string().min(1, "Required"),
   password: z.string().min(5, "Length > 5"),
@@ -369,6 +373,7 @@ const DBBackupPath = z.object({
 export type DBBackupPath = z.infer<typeof DBBackupPath>;
 
 export const apiValidations = {
+  validateToken: validateTokenSchema,
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,

@@ -12,12 +12,17 @@ export class AppTokenController {
 
   @Get('validate')
   findAll() {
-    return this.appTokenService.isValid();
+    return this.appTokenService.isTokenValid();
   }
 
   @Post('validate')
   async validateToken(@Body() dto: ValidateAppTokenDto) {
     await this.appTokenService.validateTokenAndSave(dto);
     return { message: 'License validated successfully' };
+  }
+
+  @Get('billing')
+  async getBilling() {
+    return await this.appTokenService.getBilling();
   }
 }

@@ -3,7 +3,7 @@ import Seo from "@/shared/layout-components/seo/seo";
 import React, { useState } from "react";
 import { ReactTabulator } from "react-tabulator";
 import ReactDOMServer from "react-dom/server";
-import { useFetchData } from "@/api-service/billing/useFetchData";
+import { useGetBilling } from "@/api-hooks/ams/useGetBilling";
 import PrintBillingInvoiceModal from "@/components/pages/ams/PrintBillingInvoiceModal";
 import { cn } from "@/utils/cn";
 
@@ -67,13 +67,10 @@ export interface Billing {
 }
 
 const billing = () => {
-  //---------------CHECK USER PERMISSIONS----------------
   const [selectedInvoice, setSelectedInvoice] = useState<Billing | undefined>();
   const [isReceipt, setIsReceipt] = useState(false);
 
-  const { data, error, isPending } = useFetchData();
-  console.log("ERROR:", error);
-  console.log("data billing:", data);
+  const { data, isPending, error } = useGetBilling();
 
   const columns: any = [
     { title: "Invoice #", field: "number", headerSort: false },
@@ -190,14 +187,56 @@ const billing = () => {
     },
   ];
 
-  const hasPaidAllInvoices = data?.every(
-    (invoice) => invoice.status === "paid"
-  );
+  const hasPaidAllInvoices =
+    data && data?.length > 0
+      ? data?.every((invoice) => invoice.status === "paid")
+      : false;
 
   return (
     <div>
       <Seo title={"Billing"} />
       <Pageheader currentpage="Billing(AMS)" withBreadCrumbs={false} />
+      {isPending && (
+        <div
+          className={cn(
+            "flex flex-col justify-center items-center py-32 w-full  rounded-md ",
+            isPending ? "bg-info/10 animate-pulse" : "bg-success/10"
+          )}
+        >
+          {!isPending && <i className="bx bx-party text-7xl text-success"></i>}
+          <p
+            className={cn(
+              "text-3xl font-semibold",
+              isPending ? "text-info" : "text-success"
+            )}
+          >
+            {isPending
+              ? "Loading billings..."
+              : "  Congratulations! You have no billings yet..."}
+          </p>
+        </div>
+      )}
+
+      {!isPending && data && data.length === 0 && (
+        <div
+          className={cn(
+            "flex flex-col justify-center items-center py-32 w-full  rounded-md ",
+            "bg-success/10"
+          )}
+        >
+          <i className="bx bx-party text-7xl text-success"></i>
+          <p className={cn("text-3xl font-semibold text-success")}>
+            You have no billings yet...
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex  gap-x-4 justify-center items-center py-4 w-full bg-danger/10 rounded-md mb-4 ">
+          <p className=" font-semibold text-lg text-danger">{error.message}</p>
+        </div>
+      )}
+
       {hasPaidAllInvoices && (
         <div className="flex  gap-x-4 justify-center items-center py-4 w-full bg-success/10 rounded-md mb-4 ">
           <i className="bx bx-party text-lg text-success"></i>
@@ -206,7 +245,8 @@ const billing = () => {
           </p>
         </div>
       )}
-      {data && data.length !== 0 && !isPending ? (
+
+      {!error && data && data.length !== 0 && !isPending && (
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-12">
             <div className="box">
@@ -230,30 +270,8 @@ const billing = () => {
             </div>
           </div>
         </div>
-      ) : (
-        <>
-          <div
-            className={cn(
-              "flex flex-col justify-center items-center py-32 w-full  rounded-md ",
-              isPending ? "bg-info/10 animate-pulse" : "bg-success/10"
-            )}
-          >
-            {!isPending && (
-              <i className="bx bx-party text-7xl text-success"></i>
-            )}
-            <p
-              className={cn(
-                "text-3xl font-semibold",
-                isPending ? "text-info" : "text-success"
-              )}
-            >
-              {isPending
-                ? "Loading billings..."
-                : "  Congratulations! You have no billings yet..."}
-            </p>
-          </div>
-        </>
       )}
+
       {selectedInvoice && (
         <PrintBillingInvoiceModal
           triggerModalId="print-invoice-modal"

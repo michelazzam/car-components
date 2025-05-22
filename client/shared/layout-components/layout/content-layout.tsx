@@ -1,9 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import Sidebar from "../sidebar/sidebar";
-// import { Provider } from "react-redux";
-// import store from "@/shared/redux/store";
 import Header from "../header/header";
-// import Switcher from "../switcher/switcher";
 import Backtotop from "../backtotop/backtotop";
 import Switcher from "../switcher/switcher";
 import { Provider } from "react-redux";
@@ -47,7 +44,6 @@ const ContentLayout = ({ children }: any) => {
                 {children}
               </div>
             </div>
-            {/* <Footer /> */}
           </div>
           <Backtotop />
         </div>
