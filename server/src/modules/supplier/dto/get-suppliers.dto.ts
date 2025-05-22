@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
-import { Trim } from 'src/decorators/trim.decorator';
 
 export class GetSuppliersDto {
   @ApiProperty({ required: true, type: Number })
@@ -16,6 +15,5 @@ export class GetSuppliersDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Trim()
   search?: string;
 }

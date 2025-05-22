@@ -18,6 +18,7 @@ const Main = () => {
       } else {
         router.push("/sign-in");
       }
+      // setLoading(false);
     }, 1000);
 
     return () => clearTimeout(timeout);

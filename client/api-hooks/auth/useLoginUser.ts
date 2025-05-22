@@ -1,7 +1,6 @@
 import { usePostData } from "@/api-service/usePostData";
 import { setAccessToken } from "@/utils/auth-storage";
 import { User } from "../users/use-list-users";
-import { API } from "@/constants/apiEndpoints";
 
 const useLoginUser = ({
   callBackOnSuccess,
@@ -10,7 +9,7 @@ const useLoginUser = ({
 }) => {
   return usePostData<LoginUserData, ResponseData>({
     queryKeysToInvalidate: [["auth"]],
-    endpoint: API.login,
+    endpoint: "/users/login",
     hideSuccessToast: true,
     callBackOnSuccess: (data) => {
       callBackOnSuccess && callBackOnSuccess();

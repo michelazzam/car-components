@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  IsMongoId,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  Min,
+} from 'class-validator';
 
 export class PayCustomerInvoicesDto {
   @ApiProperty({ required: true })
@@ -14,6 +20,6 @@ export class PayCustomerInvoicesDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
-  @Min(0)
+  @IsPositive()
   discount: number = 0;
 }

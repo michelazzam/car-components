@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 import { invoiceTypes } from '../invoice.schema';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
-import { Trim } from 'src/decorators/trim.decorator';
 
 export class GetInvoicesDto {
   @ApiProperty({ required: true, type: Number })
@@ -44,7 +43,6 @@ export class GetInvoicesDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @Trim()
   search?: string;
 
   @ApiProperty({ required: false })
