@@ -1,6 +1,6 @@
 import Modal from "@/shared/Modal";
 import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
@@ -14,6 +14,8 @@ import {
   useListServices,
 } from "@/api-hooks/services/use-list-services";
 import { useAddService } from "@/api-hooks/services/use-add-service";
+import { AddInvoiceSchema } from "@/lib/apiValidations";
+import toast from "react-hot-toast";
 interface ServiceSchema {
   name: {
     label: string;
@@ -30,6 +32,18 @@ const ServiceModal = ({
   triggerModalId: string;
   modalTitle: string;
 }) => {
+  const formContext = useFormContext<AddInvoiceSchema>();
+  const { getValues } = formContext;
+  const servicesIdsNotAllowed = getValues()
+    ?.items?.map((item) => {
+      if (item.serviceRef !== undefined) {
+        return item.serviceRef;
+      } else {
+        return;
+      }
+    })
+    .filter((item) => item !== undefined);
+
   //------------------------State-----------------------------------
   const [services, setServices] = useState<ServiceSchema[]>([]);
   const [editingService, setEditingService] = useState<
@@ -104,6 +118,25 @@ const ServiceModal = ({
   };
 
   const onSubmit = (data: ServiceSchema) => {
+    const isDuplicate = services?.some((item) => {
+      if (item.name.value === data.name.value) {
+        toast.error("You can't add the same service twice");
+        return true;
+      }
+
+      return false;
+    });
+    if (isDuplicate) {
+      return;
+    }
+
+    if (servicesIdsNotAllowed?.includes(data.name.value)) {
+      toast.error(
+        "You can't add the same service " + data.name.label + " twice"
+      );
+      return;
+    }
+
     if (editingService) {
       const newServices = services.map((item) =>
         item === editingService ? data : item
@@ -127,6 +160,20 @@ const ServiceModal = ({
 
   //-----------------ADDING SERVICES TO STORE----------------
   const submitServices = () => {
+    const hasAtLeastOneDuplicate = services?.some((item) => {
+      if (servicesIdsNotAllowed?.includes(item.name.value)) {
+        toast.error(
+          "You can't add the same service " + item.name.label + " twice"
+        );
+        return true;
+      }
+      return false;
+    });
+
+    if (hasAtLeastOneDuplicate) {
+      return;
+    }
+
     for (let i = 0; i < services.length; i++) {
       addToCart("service", {
         name: services[i].name.label,
@@ -181,33 +228,35 @@ const ServiceModal = ({
               </div>
             )}
             {services.length > 0 &&
-              services.map((service, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-12 gap-x-2 items-center justify-between mb-2"
-                >
-                  <span className="col-span-3">{service.name.label}</span>
-                  <span className="col-span-3">{service.quantity}</span>
-                  <span className="col-span-3">${service.price}</span>
-                  <div className="col-span-3 gap-2">
-                    <button
-                      id="edit-btn"
-                      type="button"
-                      className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white me-2"
-                      onClick={() => handleEdit(service)}
-                    >
-                      <FaRegEdit />
-                    </button>
-                    <button
-                      id="delete-btn"
-                      className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
-                      onClick={() => handleDelete(service)}
-                    >
-                      <FaRegTrashCan />
-                    </button>
+              services.map((service, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="grid grid-cols-12 gap-x-2 items-center justify-between mb-2"
+                  >
+                    <span className="col-span-3">{service.name.label}</span>
+                    <span className="col-span-3">{service.quantity}</span>
+                    <span className="col-span-3">${service.price}</span>
+                    <div className="col-span-3 gap-2">
+                      <button
+                        id="edit-btn"
+                        type="button"
+                        className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white me-2"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <FaRegEdit />
+                      </button>
+                      <button
+                        id="delete-btn"
+                        className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
+                        onClick={() => handleDelete(service)}
+                      >
+                        <FaRegTrashCan />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
               <SelectFieldControlled
                 control={control}
