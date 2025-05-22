@@ -56,7 +56,7 @@ export interface Accounting {
 export interface Invoice {
   _id: string;
   number: string;
-  type: string;
+  type: "s1" | "s2";
   customer: Customer;
   vehicle?: Vehicle;
   accounting: Accounting;
