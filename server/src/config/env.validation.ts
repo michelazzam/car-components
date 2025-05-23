@@ -31,6 +31,12 @@ export class EnvironmentVariables {
 
   @IsString()
   AMS_SERVER_URL: string;
+
+  @IsString()
+  TELEGRAM_API_TOKEN: string;
+
+  @IsString()
+  CHAT_ID: string;
 }
 
 // To be used when we want to get env variables in our Modules

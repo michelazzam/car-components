@@ -23,6 +23,8 @@ import { BackupModule } from './backup/backup.module';
 import { VehicleMakesModule } from './vehicle-makes/vehicle-makes.module';
 import { AppTokenModule } from './app-token/app-token.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
+import { TelegramService } from 'src/lib/telegram.service';
+import { GlobalExceptionFilter } from 'src/middleware/global-exception-filter.middleware';
 
 @Module({
   imports: [
@@ -67,6 +69,9 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    EnvConfigService,
+    GlobalExceptionFilter,
+    TelegramService,
   ],
 })
 export class MainModule implements NestModule {

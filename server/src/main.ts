@@ -28,7 +28,7 @@ async function bootstrap() {
   // global pipe to transform field types into their needed types
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(app.get(GlobalExceptionFilter));
 
   app.enableVersioning({
     type: VersioningType.URI,
