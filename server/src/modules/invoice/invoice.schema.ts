@@ -21,6 +21,9 @@ export class Invoice {
   @Prop({ enum: invoiceTypes, required: true })
   type: InvoiceType;
 
+  @Prop()
+  paymentMethods: string[];
+
   @Prop({ required: true, type: Object })
   accounting: {
     isPaid: boolean;
