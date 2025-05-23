@@ -22,7 +22,10 @@ export class Invoice {
   type: InvoiceType;
 
   @Prop()
-  paymentMethods: string[];
+  paymentMethods: {
+    method: string;
+    note?: string;
+  }[];
 
   @Prop({ required: true, type: Object })
   accounting: {

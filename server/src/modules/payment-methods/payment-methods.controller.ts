@@ -11,9 +11,7 @@ import { PaymentMethodsService } from './payment-methods.service';
 import { CreatePaymentMethodDto } from './dto/create-payment-method.dto';
 import { UpdatePaymentMethodDto } from './dto/update-payment-method.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { IsPublic } from '../user/decorators/isPublic.decorator';
 
-@IsPublic()
 @ApiTags('Payment Methods')
 @Controller({ version: '1', path: 'payment-methods' })
 export class PaymentMethodsController {
