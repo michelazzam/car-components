@@ -137,25 +137,39 @@ const ProductSchema = z.object({
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
 //-------------PURCHASE
-const AddPurchaseItemSchema = z.object({
-  itemId: z.string().min(1, { message: "Please select a product" }),
-  description: z.string(),
-  name: z.string().optional(),
-  price: z.number(),
-  quantity: z.number(),
-  quantityFree: z.number(),
-  discount: z.number(),
-  lotNumber: z.string(),
-  expDate: z.string(),
-  totalPrice: z.number(),
-  discountType: z.enum(["fixed", "percentage"]),
-  supplier: z
-    .object({
-      value: z.string(),
-      label: z.string(),
-    })
-    .optional(),
-});
+const AddPurchaseItemSchema = z
+  .object({
+    itemId: z.string().min(1, { message: "Please select a product" }),
+    description: z.string(),
+    name: z.string().optional(),
+    price: z.number(),
+    quantity: z.number(),
+    quantityFree: z.number(),
+    discount: z.number(),
+    lotNumber: z.string(),
+    expDate: z.string(),
+    totalPrice: z.number(),
+    discountType: z.enum(["fixed", "percentage"]),
+    supplier: z
+      .object({
+        value: z.string(),
+        label: z.string(),
+      })
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Ensure either quantity or quantityFree is > 0
+      console.log("DATA.quantity", data.quantity);
+      console.log("DATA.quantityFree", data.quantityFree);
+
+      return data.quantity > 0 || data.quantityFree > 0;
+    },
+    {
+      message: "Required",
+      path: ["quantity"], // You can choose which path to attach error to; or use both separately below
+    }
+  );
 export type AddPurchaseItemSchemaType = z.infer<typeof AddPurchaseItemSchema>;
 
 const AddPurchaseSchema = z.object({
