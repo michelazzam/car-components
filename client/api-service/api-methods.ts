@@ -32,7 +32,6 @@ export const sendToApi = async (
       error.response?.data?.message ||
         `Cannot Send request \n 
 The endpont is : ${endpoint} \n 
-The data is : ${JSON.stringify(data)} \n 
 The origin is : ${origin}`
     );
   }
