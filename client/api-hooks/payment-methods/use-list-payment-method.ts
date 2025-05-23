@@ -4,10 +4,9 @@ import { API } from "@/constants/apiEndpoints";
 export interface PaymentMethod {
   _id: string;
   method: string;
-  note?: string;
 }
 
-export const useListPaymentMethods = () => {
+export const useListPaymentMethods = ({}) => {
   return useReadData<PaymentMethod[]>({
     queryKey: ["payment-methods"],
     endpoint: API.listPaymentMethod,

@@ -6,7 +6,7 @@ export interface AddPaymentMethodBody {
   method: string;
 }
 
-export const useAddService = ({
+export const useAddPaymentMethod = ({
   callBackOnSuccess,
 }: {
   callBackOnSuccess?: (res: PaymentMethod) => void;

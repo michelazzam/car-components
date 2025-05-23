@@ -2,7 +2,7 @@ import { API } from "@/constants/apiEndpoints";
 import { useUpdateData } from "@/api-service/useUpdateData";
 import { AddPaymentMethodBody } from "./use-add-payment-method";
 
-const useEditService = ({
+const useEditPaymentMethod = ({
   id,
   callBackOnSuccess,
 }: {
@@ -16,4 +16,4 @@ const useEditService = ({
   });
 };
 
-export { useEditService };
+export { useEditPaymentMethod };

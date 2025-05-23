@@ -140,6 +140,6 @@ export const API = {
   //Payment method:
   listPaymentMethod: "/payment-methods", //GET
   addPaymentMethod: "/payment-methods", //POST
-  getSinglePaymentMethod: (id: string) => `/payment-methods/${id}`, //GET
   editPaymentMethod: (id: string) => `/payment-methods/${id}`, //PUT
+  deletePaymentMethod: (id: string) => `/payment-methods/${id}`, //DELETE
 };

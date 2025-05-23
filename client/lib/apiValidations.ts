@@ -136,6 +136,12 @@ const ProductSchema = z.object({
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
+const PaymentMethodSchema = z.object({
+  method: z.string().min(1, "Name is required"),
+  note: z.string().optional(),
+});
+export type PaymentMethodSchemaType = z.infer<typeof PaymentMethodSchema>;
+
 //-------------PURCHASE
 const AddPurchaseItemSchema = z
   .object({
@@ -386,6 +392,7 @@ export const apiValidations = {
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,
+  PaymentMethodSchema,
   AddEditService: ServiceSchema,
   MakeSchema: MakeSchema,
   AddEditPrinter: PrinterSchema,
