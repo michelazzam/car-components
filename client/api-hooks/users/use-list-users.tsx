@@ -30,6 +30,7 @@ export type Permissions = {
   Organization: PermissionAction;
   Expenses: PermissionAction;
   Accounting: PermissionAction;
+  VehicleMakes: PermissionAction;
 };
 
 export const userRoles = [

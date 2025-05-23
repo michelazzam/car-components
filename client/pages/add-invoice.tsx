@@ -72,6 +72,7 @@ const AddInvoice = () => {
     resolver: zodResolver(apiValidations.AddInvoiceSchema),
     defaultValues: {
       driverName: "",
+      paymentMethods: [],
       discount: {
         amount: 0,
         type: "fixed",
@@ -101,12 +102,14 @@ const AddInvoice = () => {
           amount: editingInvoice.accounting.discount.amount,
           type: editingInvoice.accounting.discount.type,
         },
+        paymentMethods: editingInvoice.paymentMethods,
         paidAmountUsd: editingInvoice.accounting.paidAmountUsd,
         customerId: editingInvoice.customer._id,
         vehicleId: editingInvoice.vehicle?._id || "",
         isPaid: editingInvoice.accounting.isPaid,
         hasVehicle: editingInvoice.vehicle?._id ? true : false,
         customerNote: editingInvoice.customerNote,
+        type: editingInvoice.type,
       });
 
       // Clear cart before adding items
@@ -144,8 +147,9 @@ const AddInvoice = () => {
       return accumulator + (currentItem.amount || 0);
     }, 0);
     methods.setValue("subTotalUsd", subTotalUsd);
+    console.log("SETTING TOTAL USD TO : ", totalAmount(!isB2C));
     methods.setValue("totalUsd", totalAmount(!isB2C));
-  }, [cart, methods]);
+  }, [cart, methods, isB2C]);
 
   useEffect(() => {
     if (discountStore) {

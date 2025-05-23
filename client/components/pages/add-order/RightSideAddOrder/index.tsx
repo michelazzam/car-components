@@ -152,6 +152,10 @@ function RightSideAddOrder({
     ).toFixed(2);
 
     setVatAmount(Number(vat));
+
+    if (isFullPaid) {
+      setValue("paidAmountUsd", totalAmount(!isB2C));
+    }
   }, [discountStore.amount, discountStore.type, cartSum()]);
 
   const resetForm = () => {
@@ -183,7 +187,8 @@ function RightSideAddOrder({
     if (usdRate) {
       setPreviewingInvoice({
         _id: "",
-        type: "",
+        type: getValues("type"),
+        paymentMethods: getValues("paymentMethods"),
         accounting: {
           isPaid: false,
           usdRate: usdRate.usdRate,

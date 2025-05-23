@@ -81,6 +81,11 @@ const EditUserPermissionsModal = ({
           update: false,
           read: false,
         },
+        VehicleMakes: {
+          create: false,
+          update: false,
+          read: false,
+        },
       },
     });
 
@@ -133,6 +138,11 @@ const EditUserPermissionsModal = ({
           update: editingUser?.permissions?.Accounting?.update,
           read: editingUser?.permissions?.Accounting?.read,
         },
+        VehicleMakes: {
+          create: editingUser?.permissions?.VehicleMakes?.create,
+          update: editingUser?.permissions?.VehicleMakes?.update,
+          read: editingUser?.permissions?.VehicleMakes?.read,
+        },
       });
     }
   }, [editingUser]);
@@ -149,6 +159,7 @@ const EditUserPermissionsModal = ({
         Organization: data.Organization,
         Expenses: data.Expenses,
         Accounting: data.Accounting,
+        VehicleMakes: data.VehicleMakes,
       },
     });
   };
@@ -368,6 +379,11 @@ const permissions: PermissionEntry[] = [
   {
     label: "Accounting",
     value: "Accounting",
+    permissions: ["create", "update", "read"],
+  },
+  {
+    label: "Vehicle Makes",
+    value: "VehicleMakes",
     permissions: ["create", "update", "read"],
   },
 ];

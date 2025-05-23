@@ -19,6 +19,7 @@ async function bootstrap() {
       'http://tauri.localhost',
       'tauri://localhost',
       'http://localhost:3000',
+      'http://localhost:3001',
       '*',
     ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'PUT'],

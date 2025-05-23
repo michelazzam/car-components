@@ -136,4 +136,10 @@ export const API = {
   getSingleSupplier: (id: string) => `/suppliers/${id}`, //GET
   editSupplier: (id: string) => `/suppliers/${id}`, //PUT
   deleteSupplier: (id: string) => `/suppliers/${id}`, //DELETE
+
+  //Payment method:
+  listPaymentMethod: "/payment-methods", //GET
+  addPaymentMethod: "/payment-methods", //POST
+  editPaymentMethod: (id: string) => `/payment-methods/${id}`, //PUT
+  deletePaymentMethod: (id: string) => `/payment-methods/${id}`, //DELETE
 };

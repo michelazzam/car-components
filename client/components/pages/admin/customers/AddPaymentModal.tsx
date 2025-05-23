@@ -138,7 +138,7 @@ function AddPaymentModal({
               }}
               className="ti ti-btn ti-btn-secondary absolute top-1/2 right-2 -translate-y-1/2"
             >
-              <Tooltip content="Apply Full Paid" position="top">
+              <Tooltip content="Apply Full Paid" position="left">
                 <FaCalculator />
               </Tooltip>
             </button>

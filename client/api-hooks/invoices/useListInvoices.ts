@@ -3,6 +3,7 @@ import { useReadData } from "../../api-service/useReadData";
 import { useDebounce } from "@/hooks/useDebounce";
 import useListInvoicesQueryStrings from "@/shared/helper-hooks/useListInvoicesQueryStrings";
 import { Pagination } from "@/components/admin/Pagination";
+import { InvoicePaymentMethodSchemaType } from "@/lib/apiValidations";
 
 export interface Discount {
   amount: number;
@@ -56,7 +57,8 @@ export interface Accounting {
 export interface Invoice {
   _id: string;
   number: string;
-  type: string;
+  paymentMethods: InvoicePaymentMethodSchemaType[];
+  type: "s1" | "s2";
   customer: Customer;
   vehicle?: Vehicle;
   accounting: Accounting;

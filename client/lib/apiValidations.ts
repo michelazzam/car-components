@@ -96,6 +96,13 @@ const EditUserPermissions = z.object({
       read: z.boolean().optional(),
     })
     .optional(),
+  VehicleMakes: z
+    .object({
+      create: z.boolean().optional(),
+      update: z.boolean().optional(),
+      read: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 const ProfileSchema = z.object({
@@ -129,26 +136,54 @@ const ProductSchema = z.object({
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
-//-------------PURCHASE
-const AddPurchaseItemSchema = z.object({
-  itemId: z.string().min(1, { message: "Please select a product" }),
-  description: z.string(),
-  name: z.string().optional(),
-  price: z.number(),
-  quantity: z.number(),
-  quantityFree: z.number(),
-  discount: z.number(),
-  lotNumber: z.string(),
-  expDate: z.string(),
-  totalPrice: z.number(),
-  discountType: z.enum(["fixed", "percentage"]),
-  supplier: z
-    .object({
-      value: z.string(),
-      label: z.string(),
-    })
-    .optional(),
+const InvoicePaymentMethodSchema = z.object({
+  id: z.string().optional(),
+  method: z.string().min(1, "Name is required"),
+  note: z.string().optional(),
 });
+export type InvoicePaymentMethodSchemaType = z.infer<
+  typeof InvoicePaymentMethodSchema
+>;
+
+const PaymentMethodSchema = z.object({
+  method: z.string().min(1, "Name is required"),
+});
+export type PaymentMethodSchemaType = z.infer<typeof PaymentMethodSchema>;
+
+//-------------PURCHASE
+const AddPurchaseItemSchema = z
+  .object({
+    itemId: z.string().min(1, { message: "Please select a product" }),
+    description: z.string(),
+    name: z.string().optional(),
+    price: z.number(),
+    quantity: z.number(),
+    quantityFree: z.number(),
+    discount: z.number(),
+    lotNumber: z.string(),
+    expDate: z.string(),
+    totalPrice: z.number(),
+    discountType: z.enum(["fixed", "percentage"]),
+    supplier: z
+      .object({
+        value: z.string(),
+        label: z.string(),
+      })
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Ensure either quantity or quantityFree is > 0
+      console.log("DATA.quantity", data.quantity);
+      console.log("DATA.quantityFree", data.quantityFree);
+
+      return data.quantity > 0 || data.quantityFree > 0;
+    },
+    {
+      message: "Required",
+      path: ["quantity"], // You can choose which path to attach error to; or use both separately below
+    }
+  );
 export type AddPurchaseItemSchemaType = z.infer<typeof AddPurchaseItemSchema>;
 
 const AddPurchaseSchema = z.object({
@@ -297,6 +332,7 @@ const AddInvoiceSchema = z
       amount: z.number().min(0, "Discount amount cannot be negative"),
       type: z.string().min(1, "Discount type is required"),
     }),
+    paymentMethods: z.array(InvoicePaymentMethodSchema),
     paidAmountUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
     customerId: z.string().min(1, "Customer ID is required"),
     customer: z
@@ -365,6 +401,7 @@ export const apiValidations = {
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,
+  PaymentMethodSchema,
   AddEditService: ServiceSchema,
   MakeSchema: MakeSchema,
   AddEditPrinter: PrinterSchema,

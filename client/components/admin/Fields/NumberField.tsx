@@ -12,6 +12,7 @@ interface NumberFieldProps {
   value: string | number; // Value managed externally
   onChange: (value: string | number | undefined) => void; // onChange handler managed externally
   errorMessage?: string;
+  onBlur?: (value: number) => void;
 }
 import { tailwindColsClasses } from "@/lib/config/tailwind-cols-classes";
 import { cn } from "@/utils/cn";
@@ -31,6 +32,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
   setIsChecked,
   value,
   onChange,
+  onBlur,
   errorMessage,
 }) => {
   const handleCurrencyChange = (value?: string | undefined) => {
@@ -41,6 +43,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
     const numericValue =
       value && parseFloat(value.toString().replace(/[^\d.-]/g, ""));
     onChange(numericValue || 0); // Normalize the value on blur and call external onChange
+    onBlur?.(numericValue || 0);
   };
 
   return (
@@ -73,6 +76,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
                 )}
                 onValueChange={handleCurrencyChange}
                 decimalsLimit={decimalsLimit}
+                allowDecimals
               />
             </div>
             <div className="absolute -bottom-5">

@@ -19,6 +19,7 @@ interface TextFieldProps {
   onClickActionButton?: () => void;
   ActionButtonIcon?: IconType;
   dontCapitalize?: boolean;
+  marginBottom?: string;
   type?: InputHTMLAttributes<HTMLInputElement>["type"];
 }
 
@@ -32,6 +33,7 @@ const TextFieldControlled: React.FC<TextFieldProps> = ({
   isChecked = false,
   setIsChecked,
   placeholder = "Enter text",
+  marginBottom = "mb-5",
   //action button
   actionButtonTitle,
   onClickActionButton,
@@ -47,7 +49,7 @@ const TextFieldControlled: React.FC<TextFieldProps> = ({
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
-        <div className="mb-5">
+        <div className={marginBottom}>
           <label className="block text-sm font-medium text-gray-700">
             {withCheckbox && setIsChecked && (
               <input

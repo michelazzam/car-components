@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import axios from 'axios';
 import { AppToken, IAppToken } from './app-token.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -48,23 +47,40 @@ export class AppTokenService {
     return { isValid, token: tokenObj.token };
   }
 
-  private async validateTokenWithServer(token: string) {
+  private async validateTokenWithServer(token: string): Promise<any> {
     try {
-      const response = await axios.post(
-        `${this.configService.get('AMS_SERVER_URL')}/projects/validate-token?token=${token}`,
-      );
+      const url = `${this.configService.get('AMS_SERVER_URL')}/projects/validate-token?token=${encodeURIComponent(token)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      console.log(response.data);
-      return response.data;
-    } catch (error) {
-      throw new BadRequestException(error.response.data.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new BadRequestException(errorData.message);
+      }
+
+      return await response.json();
+    } catch (error: any) {
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(error.message || 'Token validation failed');
     }
   }
 
   private async hasInternetConnection(): Promise<boolean> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
     try {
-      await axios.get('https://www.google.com', { timeout: 3000 });
-      return true;
+      const response = await fetch('https://www.google.com', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+      return response.ok;
     } catch {
       return false;
     }

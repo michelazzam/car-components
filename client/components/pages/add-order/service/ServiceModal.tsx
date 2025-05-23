@@ -1,24 +1,25 @@
 import Modal from "@/shared/Modal";
 import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
 import { usePosStore } from "@/shared/store/usePosStore";
-import { CiCirclePlus } from "react-icons/ci";
 import { FaRegEdit } from "react-icons/fa";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaPlus, FaRegTrashCan } from "react-icons/fa6";
 import SelectFieldControlled from "@/components/admin/FormControlledFields/SelectFieldControlled";
 import {
   Service,
   useListServices,
 } from "@/api-hooks/services/use-list-services";
 import { useAddService } from "@/api-hooks/services/use-add-service";
+import { AddInvoiceSchema } from "@/lib/apiValidations";
+import toast from "react-hot-toast";
 interface ServiceSchema {
   name: {
     label: string;
     value: string;
-  };
+  } | null;
   quantity: number;
   price: number;
 }
@@ -30,6 +31,18 @@ const ServiceModal = ({
   triggerModalId: string;
   modalTitle: string;
 }) => {
+  const formContext = useFormContext<AddInvoiceSchema>();
+  const { getValues } = formContext;
+  const servicesIdsNotAllowed = getValues()
+    ?.items?.map((item) => {
+      if (item.serviceRef !== undefined) {
+        return item.serviceRef;
+      } else {
+        return;
+      }
+    })
+    .filter((item) => item !== undefined);
+
   //------------------------State-----------------------------------
   const [services, setServices] = useState<ServiceSchema[]>([]);
   const [editingService, setEditingService] = useState<
@@ -61,30 +74,28 @@ const ServiceModal = ({
   //---------------------------service validation------------------
   const serviceValidation = z.object({
     name: z.object({
-      label: z.string(),
-      value: z.string(),
+      label: z.string().min(1, "Name label is required"),
+      value: z.string().min(1, "Name value is required"),
     }),
-    quantity: z.number().min(1, "Quantity must be at least 1"),
-
-    price: z.number().min(1, "Price must be a positive number"),
+    quantity: z.number().min(1, "At least 1"),
+    price: z.number().min(1, "> 0"),
   });
 
   //---------------------------REFS------------------------------
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
   //-------------------------Form-----------------------------------
-  const { control, handleSubmit, reset, setValue } = useForm<ServiceSchema>({
-    resolver: zodResolver(serviceValidation),
-    defaultValues: {
-      name: {
-        label: "",
-        value: "",
+  const { control, handleSubmit, reset, setValue, watch } =
+    useForm<ServiceSchema>({
+      resolver: zodResolver(serviceValidation),
+      defaultValues: {
+        name: { label: "", value: "" },
+        quantity: 0,
+        price: 0,
       },
-      quantity: 0,
-      price: 0,
-    },
-  });
-
+    });
+  const watchNameValue = watch("name");
+  console.log(watchNameValue?.value);
   //------------------------Functions----------------------------------
 
   const handleDelete = (data: ServiceSchema) => {
@@ -104,6 +115,30 @@ const ServiceModal = ({
   };
 
   const onSubmit = (data: ServiceSchema) => {
+    const isDuplicate =
+      !editingService &&
+      services?.some((item) => {
+        if (item?.name?.value === data?.name?.value) {
+          toast.error("You can't add the same service twice");
+          return true;
+        }
+
+        return false;
+      });
+    if (isDuplicate) {
+      return;
+    }
+
+    if (
+      data?.name?.value &&
+      servicesIdsNotAllowed?.includes(data?.name?.value)
+    ) {
+      toast.error(
+        "You can't add the same service " + data.name.label + " twice"
+      );
+      return;
+    }
+
     if (editingService) {
       const newServices = services.map((item) =>
         item === editingService ? data : item
@@ -121,18 +156,26 @@ const ServiceModal = ({
       });
     } else {
       setServices((prevServices) => [...prevServices, data]);
-      reset(); // Reset form fields after adding service
+      reset({
+        name: {
+          label: "",
+          value: "",
+        },
+        quantity: 0,
+        price: 0,
+      }); // Reset form fields after adding service
     }
   };
 
   //-----------------ADDING SERVICES TO STORE----------------
   const submitServices = () => {
-    for (let i = 0; i < services.length; i++) {
+    for (let i = 0; i < services?.length; i++) {
       addToCart("service", {
-        name: services[i].name.label,
+        name: services[i].name?.label,
+        cost: 0,
         quantity: services[i].quantity,
         price: services[i].price,
-        _id: services[i].name.value,
+        _id: services[i].name?.value,
       });
     }
 
@@ -172,7 +215,7 @@ const ServiceModal = ({
           onSubmit={handleSubmit(onSubmit, onInvalid)}
         >
           <Modal.Body>
-            {services.length > 0 && (
+            {services?.length > 0 && (
               <div className="grid grid-cols-12 gap-x-2 items-center justify-between mb-2">
                 <span className="col-span-3">Service Name</span>
                 <span className="col-span-3">Quantity</span>
@@ -180,46 +223,51 @@ const ServiceModal = ({
                 <span className="col-span-3">Actions</span>
               </div>
             )}
-            {services.length > 0 &&
-              services.map((service, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-12 gap-x-2 items-center justify-between mb-2"
-                >
-                  <span className="col-span-3">{service.name.label}</span>
-                  <span className="col-span-3">{service.quantity}</span>
-                  <span className="col-span-3">${service.price}</span>
-                  <div className="col-span-3 gap-2">
-                    <button
-                      id="edit-btn"
-                      type="button"
-                      className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white me-2"
-                      onClick={() => handleEdit(service)}
-                    >
-                      <FaRegEdit />
-                    </button>
-                    <button
-                      id="delete-btn"
-                      className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
-                      onClick={() => handleDelete(service)}
-                    >
-                      <FaRegTrashCan />
-                    </button>
+            {services?.length > 0 &&
+              services.map((service, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="grid grid-cols-12 gap-x-2 items-center justify-between mb-2"
+                  >
+                    <span className="col-span-3">{service?.name?.label}</span>
+                    <span className="col-span-3">{service.quantity}</span>
+                    <span className="col-span-3">${service.price}</span>
+                    <div className="col-span-3 gap-2">
+                      <button
+                        id="edit-btn"
+                        type="button"
+                        className="btn btn-sm btn-primary edit-btn text-secondary border border-secondary rounded-md p-1 hover:bg-secondary hover:text-white me-2"
+                        onClick={() => handleEdit(service)}
+                      >
+                        <FaRegEdit />
+                      </button>
+                      <button
+                        id="delete-btn"
+                        className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
+                        onClick={() => handleDelete(service)}
+                      >
+                        <FaRegTrashCan />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            <div className="grid grid-cols-12 gap-x-2 items-center justify-between">
+                );
+              })}
+            <div className="grid grid-cols-11 gap-x-2 items-center justify-between">
               <SelectFieldControlled
                 control={control}
                 name="name"
                 label="Name"
+                isClearable
                 options={servicesOptions || []}
                 placeholder={"Choose Service"}
-                colSpan={4}
+                colSpan={3}
                 creatable={true}
                 handleCreate={handleCreateOption}
                 onObjectChange={(obj) => {
-                  setValue("price", obj.price);
+                  if (obj) {
+                    setValue("price", obj.price);
+                  }
                 }}
                 // onInputChange={(value) => setSearchQuery(value)}
                 treatAsObject
@@ -228,9 +276,9 @@ const ServiceModal = ({
                 control={control}
                 name="quantity"
                 label="Quantity"
-                colSpan={4}
+                colSpan={3}
               />
-              <div className="col-span-4 relative">
+              <div className="col-span-3 relative">
                 <NumberFieldControlled
                   control={control}
                   name="price"
@@ -242,15 +290,13 @@ const ServiceModal = ({
                   }}
                 />
               </div>
-              <div className="col-span-12 flex items-center justify-center">
-                <button
-                  id="submitButton"
-                  type="submit"
-                  className=" text-primary"
-                >
-                  <CiCirclePlus className="w-10 h-10" />
-                </button>
-              </div>
+              <button
+                id="submitButton"
+                type="submit"
+                className=" ti ti-btn ti-btn-primary text-primary col-span-2 border border-primary rounded-md flex items-center justify-center h-10 mt-2"
+              >
+                <FaPlus />
+              </button>
             </div>
           </Modal.Body>
 
@@ -264,9 +310,12 @@ const ServiceModal = ({
               Close
             </button>
             <button
-              disabled={services.length > 0 ? false : true}
-              className="ti-btn ti-btn-primary-full"
-              //   type="submit"
+              disabled={
+                (watchNameValue?.value && watchNameValue?.value?.length > 0) ||
+                (services?.length > 0 ? false : true)
+              }
+              className="ti-btn ti-btn-primary-full disabled:opacity-50 disbled:!cursor-not-allowed"
+              type="button"
               onClick={() => {
                 submitServices();
               }}
