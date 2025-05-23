@@ -148,6 +148,17 @@ export default function useMenuItems() {
       children: [],
     },
     {
+      icon: BillingIcon,
+      path: "/admin/payment-methods",
+      type: "link",
+      active: pathname.startsWith("/admin/payment-methods"),
+      selected: pathname.startsWith("/admin/payment-methods"),
+      title: "Payment Methods",
+      children: [],
+      visible: !(user?.role === "user"),
+    },
+
+    {
       icon: SettingsIcon,
       path: "/admin/settings",
       type: "link",
