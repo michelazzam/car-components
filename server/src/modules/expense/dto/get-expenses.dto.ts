@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
+import { Trim } from 'src/decorators/trim.decorator';
 
 export class GetExpensesDto {
   @ApiProperty({ required: true, type: Number })
@@ -36,6 +37,7 @@ export class GetExpensesDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @Trim()
   search?: string;
 
   @ApiProperty({ required: false })
