@@ -73,7 +73,6 @@ function AddEditPaymentMethodModal({
     } else {
       reset({
         method: "",
-        note: "",
       });
     }
   }, [paymentMethod]);
