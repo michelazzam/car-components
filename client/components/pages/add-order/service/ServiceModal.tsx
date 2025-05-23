@@ -115,14 +115,16 @@ const ServiceModal = ({
   };
 
   const onSubmit = (data: ServiceSchema) => {
-    const isDuplicate = services?.some((item) => {
-      if (item?.name?.value === data?.name?.value) {
-        toast.error("You can't add the same service twice");
-        return true;
-      }
+    const isDuplicate =
+      !editingService &&
+      services?.some((item) => {
+        if (item?.name?.value === data?.name?.value) {
+          toast.error("You can't add the same service twice");
+          return true;
+        }
 
-      return false;
-    });
+        return false;
+      });
     if (isDuplicate) {
       return;
     }
@@ -144,10 +146,24 @@ const ServiceModal = ({
 
       setServices(newServices);
       setEditingService(undefined);
-      reset();
+      reset({
+        name: {
+          label: "",
+          value: "",
+        },
+        quantity: 0,
+        price: 0,
+      });
     } else {
       setServices((prevServices) => [...prevServices, data]);
-      reset(); // Reset form fields after adding service
+      reset({
+        name: {
+          label: "",
+          value: "",
+        },
+        quantity: 0,
+        price: 0,
+      }); // Reset form fields after adding service
     }
   };
 
@@ -156,6 +172,7 @@ const ServiceModal = ({
     for (let i = 0; i < services?.length; i++) {
       addToCart("service", {
         name: services[i].name?.label,
+        cost: 0,
         quantity: services[i].quantity,
         price: services[i].price,
         _id: services[i].name?.value,
