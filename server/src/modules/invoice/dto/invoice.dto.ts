@@ -83,6 +83,21 @@ class InvoiceItem {
   totalPrice: number;
 }
 
+class PaymentMethod {
+  @ApiProperty({
+    required: true,
+  })
+  @IsString()
+  method: string;
+
+  @ApiProperty({
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  note: string;
+}
+
 export class InvoiceDto {
   @ApiProperty({
     required: false,
@@ -106,9 +121,15 @@ export class InvoiceDto {
   @IsEnum(invoiceTypes)
   type: InvoiceType;
 
-  @ApiProperty({ isArray: true, type: String })
+  @ApiProperty({
+    required: true,
+    type: PaymentMethod,
+    isArray: true,
+  })
   @IsArray()
-  paymentMethods: string[];
+  @ValidateNested()
+  @Type(() => PaymentMethod)
+  paymentMethods: PaymentMethod[];
 
   @ApiProperty({
     required: true,
