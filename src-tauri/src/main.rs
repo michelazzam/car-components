@@ -28,6 +28,8 @@ fn main() {
                     "BACKUP_DATABASE_URL",
                     "mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
                 )
+                .env("TELEGRAM_API_TOKEN", "8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA")
+                .env("CHAT_ID", "-1002683151718")
                 .args(["--port", "8000"])
                 .spawn()
                 .expect("failed to spawn sidecar");
@@ -37,3 +39,4 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error running tauri application");
 }
+
