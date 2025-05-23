@@ -85,7 +85,7 @@ const AddItemDiscountModal = ({
             label={`Custom Price (Current Cost: ${item?.cost}$)`}
             colSpan={1}
             onChange={(e) => {
-              setItemCustomPrice(e);
+              setItemCustomPrice(e as number);
             }}
             errorMessage={errorMessage}
           />
