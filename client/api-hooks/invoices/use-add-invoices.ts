@@ -4,6 +4,10 @@ import { AddInvoiceSchema } from "@/lib/apiValidations";
 
 export interface InvoiceSchema {
   driverName: string;
+  paymentMethods: {
+    method: string;
+    note: string;
+  }[];
   discount: {
     amount: number;
     type: string;

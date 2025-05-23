@@ -188,6 +188,7 @@ function RightSideAddOrder({
       setPreviewingInvoice({
         _id: "",
         type: getValues("type"),
+        paymentMethods: getValues("paymentMethods"),
         accounting: {
           isPaid: false,
           usdRate: usdRate.usdRate,

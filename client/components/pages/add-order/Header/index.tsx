@@ -12,7 +12,8 @@ import ServiceModal from "../service/ServiceModal";
 import { usePosStore } from "@/shared/store/usePosStore";
 import SelectFieldControlled from "@/components/admin/FormControlledFields/SelectFieldControlled";
 import { BiSolidMessageAltEdit } from "react-icons/bi";
-import { MdCancel } from "react-icons/md";
+import { MdCancel, MdPayment } from "react-icons/md";
+import InvoicePaymentMethodModal from "./InvoicePaymentMethodModal";
 
 function Header({
   search,
@@ -101,7 +102,7 @@ function Header({
           </button>
         </div>
       )}
-      <div className="grid grid-cols-5 gap-5 items-center justify-between pe-2 w-full">
+      <div className="grid grid-cols-6 gap-5 items-center justify-between pe-2 w-full">
         <div className="col-span-2 flex items-center justify-between w-full">
           <SelectFieldControlled
             control={control}
@@ -158,12 +159,20 @@ function Header({
           </button>
         </div>
 
-        <button
-          className="rounded-md text-white p-[0.65rem] bg-primary"
-          data-hs-overlay="#add-services-modal"
-        >
-          Add Service
-        </button>
+        <div className="col-span-2 flex gap-x-2 justify-end">
+          <button
+            className="ti ti-btn-primary ti-btn "
+            data-hs-overlay="#add-invoice-payment-method-modal"
+          >
+            <MdPayment />
+          </button>
+          <button
+            className="rounded-md text-white p-[0.65rem] bg-primary"
+            data-hs-overlay="#add-services-modal"
+          >
+            Add Service
+          </button>
+        </div>
       </div>
       <TextField
         placeholder="Search Products"
@@ -186,6 +195,10 @@ function Header({
       <ServiceModal
         triggerModalId="add-services-modal"
         modalTitle="Add Services"
+      />
+      <InvoicePaymentMethodModal
+        triggerModalId="add-invoice-payment-method-modal"
+        modalTitle="Add Payment Method"
       />
     </div>
   );

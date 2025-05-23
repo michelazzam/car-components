@@ -136,9 +136,17 @@ const ProductSchema = z.object({
 });
 export type ProductSchema = z.infer<typeof ProductSchema>;
 
-const PaymentMethodSchema = z.object({
+const InvoicePaymentMethodSchema = z.object({
+  id: z.string().optional(),
   method: z.string().min(1, "Name is required"),
   note: z.string().optional(),
+});
+export type InvoicePaymentMethodSchemaType = z.infer<
+  typeof InvoicePaymentMethodSchema
+>;
+
+const PaymentMethodSchema = z.object({
+  method: z.string().min(1, "Name is required"),
 });
 export type PaymentMethodSchemaType = z.infer<typeof PaymentMethodSchema>;
 
@@ -324,6 +332,7 @@ const AddInvoiceSchema = z
       amount: z.number().min(0, "Discount amount cannot be negative"),
       type: z.string().min(1, "Discount type is required"),
     }),
+    paymentMethods: z.array(InvoicePaymentMethodSchema),
     paidAmountUsd: z.number().min(0, "Amount paid in USD cannot be negative"),
     customerId: z.string().min(1, "Customer ID is required"),
     customer: z
