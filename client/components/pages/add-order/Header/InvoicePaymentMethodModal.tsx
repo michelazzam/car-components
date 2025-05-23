@@ -1,11 +1,9 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useListPaymentMethods } from "@/api-hooks/payment-methods/use-list-payment-method";
-import CheckboxField from "@/components/admin/FormControlledFields/CheckboxField";
 import TextFieldControlled from "@/components/admin/FormControlledFields/TextFieldControlled";
 import Modal from "@/shared/Modal";
 import React, { useEffect } from "react";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
-import Checkbox from "@/components/admin/Fields/Checkbox";
 import { FaTrash } from "react-icons/fa6";
 
 function InvoicePaymentMethodModal({
