@@ -22,6 +22,7 @@ import { CaisseModule } from './caisse/caisse.module';
 import { BackupModule } from './backup/backup.module';
 import { VehicleMakesModule } from './vehicle-makes/vehicle-makes.module';
 import { AppTokenModule } from './app-token/app-token.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AppTokenModule } from './app-token/app-token.module';
     BackupModule,
     VehicleMakesModule,
     AppTokenModule,
+    PaymentMethodsModule,
   ],
   controllers: [],
   providers: [
