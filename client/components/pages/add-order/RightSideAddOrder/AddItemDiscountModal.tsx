@@ -23,7 +23,7 @@ const AddItemDiscountModal = ({
   setSelected: Dispatch<SetStateAction<Item | undefined>>;
 }) => {
   //----Store-----
-  const { addItemDiscount } = usePosStore();
+  const { addItemDiscount, changeItemPrice } = usePosStore();
   //---------------------------REFS------------------------------
   const cancelFormRef = useRef<HTMLButtonElement>(null);
   // Local discount state
@@ -31,6 +31,9 @@ const AddItemDiscountModal = ({
     amount: 0,
     type: "fixed",
   });
+
+  const [itemCustomPrice, setItemCustomPrice] = useState<number>(0);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
     console.log("effect:", item);
@@ -44,10 +47,20 @@ const AddItemDiscountModal = ({
 
   //-------Function to save---
   const onSave = () => {
+    if (itemCustomPrice < item.cost) {
+      console.log("CUSTOM PRICE:", itemCustomPrice);
+      console.log("COST:", item.cost);
+      setErrorMessage("Custom price cannot be less than the cost");
+      return;
+    }
+    setErrorMessage(undefined);
+
     if (item.productId) {
+      changeItemPrice(item.productId, itemCustomPrice);
       addItemDiscount(item.productId, discount);
     }
     setDiscount({ amount: 0, type: "fixed" });
+    cancelFormRef.current?.click();
   };
   return (
     <div>
@@ -55,16 +68,28 @@ const AddItemDiscountModal = ({
         id={triggerModalId}
         size="md"
         onOpen={() => {
-          console.log("open");
+          setItemCustomPrice(item?.price || 0);
         }}
         onClose={() => {
           setSelected(undefined);
           setDiscount({ amount: 0, type: "fixed" });
+          setItemCustomPrice(0);
         }}
       >
         <Modal.Header title={modalTitle} id={triggerModalId} />
         {/* <form onSubmit={handleSubmit(onSubmit)}> */}
         <Modal.Body>
+          <NumberField
+            name="customPrice"
+            value={itemCustomPrice}
+            label={`Custom Price (Current Cost: ${item?.cost}$)`}
+            colSpan={1}
+            onChange={(e) => {
+              setItemCustomPrice(e);
+            }}
+            errorMessage={errorMessage}
+          />
+
           <NumberField
             label="Amount"
             colSpan={1}
@@ -105,11 +130,9 @@ const AddItemDiscountModal = ({
             Close
           </button>
           <button
-            ref={cancelFormRef}
             type="button"
             disabled={false}
             className="ti-btn ti-btn-primary-full"
-            data-hs-overlay={`#${triggerModalId}`}
             onClick={() => onSave()}
           >
             Save

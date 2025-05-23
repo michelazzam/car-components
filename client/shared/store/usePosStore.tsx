@@ -25,6 +25,7 @@ export interface Item {
   price?: number;
   amount?: number;
   brand?: string;
+  cost: number;
   productId?: string;
   _id?: string;
   product?: {
@@ -61,6 +62,7 @@ interface PosState {
   totalAmount: (isVatActive: boolean) => number;
   setQuantity: (name: string, price: number, quantity: number) => void;
   addItemDiscount: (prodcutId: string, discount: Discount) => void;
+  changeItemPrice: (prodcutId: string, price: number) => void;
 }
 
 export const usePosStore = create<PosState>()((set, get) => ({
@@ -95,6 +97,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
   addToCart: (type: "product" | "service", item: Item) => {
     const newItem: Item = {
       type,
+      cost: item.cost,
       name: item.name,
       price: item.price,
       quantity: type === "product" ? 1 : item.quantity,
@@ -116,6 +119,7 @@ export const usePosStore = create<PosState>()((set, get) => ({
         name: element.name,
         price: element.price,
         quantity: element.quantity,
+        cost: element?.cost || 0,
         amount: element.discount
           ? element.price * element.quantity -
             (element.discount.type === "percentage"
@@ -203,6 +207,23 @@ export const usePosStore = create<PosState>()((set, get) => ({
                 item.price!,
                 item.quantity!,
                 discount
+              ),
+            }
+          : item
+      ),
+    }));
+  },
+  changeItemPrice: (productId: string, price: number) => {
+    set((state) => ({
+      cart: state.cart.map((item) =>
+        item.productId === productId
+          ? {
+              ...item,
+              price: price,
+              amount: calculateDiscountedAmount(
+                price,
+                item.quantity!,
+                item.discount
               ),
             }
           : item

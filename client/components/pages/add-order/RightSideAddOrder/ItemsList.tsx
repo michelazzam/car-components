@@ -92,7 +92,7 @@ function ItemsList() {
       {/* {selectedItem && ( */}
       <AddItemDiscountModal
         triggerModalId="add-item-discount"
-        modalTitle="Add Discount"
+        modalTitle="Pricing Details"
         item={selectedItem || cart[0]}
         setSelected={setSelectedItem}
       />

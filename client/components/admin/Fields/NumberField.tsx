@@ -73,6 +73,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
                 )}
                 onValueChange={handleCurrencyChange}
                 decimalsLimit={decimalsLimit}
+                allowDecimals
               />
             </div>
             <div className="absolute -bottom-5">
