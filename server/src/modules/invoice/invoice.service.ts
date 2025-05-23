@@ -314,6 +314,7 @@ export class InvoiceService {
       customer: updatedDto.customerId,
       vehicle: updatedDto.vehicleId,
       number: invoiceNumber,
+      paymentMethods: updatedDto.paymentMethods,
       type: dto.type,
       customerNote: updatedDto.customerNote,
       accounting: {
@@ -350,6 +351,7 @@ export class InvoiceService {
       vehicle: updatedDto.vehicleId,
       type: dto.type,
       customerNote: updatedDto.customerNote,
+      paymentMethods: updatedDto.paymentMethods,
       accounting: {
         isPaid,
 

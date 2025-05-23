@@ -106,6 +106,10 @@ export class InvoiceDto {
   @IsEnum(invoiceTypes)
   type: InvoiceType;
 
+  @ApiProperty({ isArray: true, type: String })
+  @IsArray()
+  paymentMethods: string[];
+
   @ApiProperty({
     required: true,
     type: Discount,

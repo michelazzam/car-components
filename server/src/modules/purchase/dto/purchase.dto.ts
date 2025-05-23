@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
@@ -34,6 +35,7 @@ class PurchaseItem {
     required: true,
   })
   @IsNumber()
+  @Min(1)
   quantity: number;
 
   @ApiProperty({
