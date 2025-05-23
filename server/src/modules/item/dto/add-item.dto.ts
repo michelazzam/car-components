@@ -36,6 +36,18 @@ export class AddItemDto {
     required: true,
   })
   @IsNumber()
+  lowPrice: number;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  mediumPrice: number;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
   price: number;
 
   @ApiProperty({

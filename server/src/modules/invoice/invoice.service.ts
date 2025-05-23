@@ -658,17 +658,16 @@ export class InvoiceService {
         throw new BadRequestException('Some items are not valid');
 
       // override the dto items array to add product fields for later reference
-      itemsWithDetails = itemsOnly.map((item) => {
-        const product = dbItems.find((product) => {
-          return product._id.toString() === item.itemRef;
+      itemsWithDetails = itemsOnly.map((itemInDto) => {
+        const itemDB = dbItems.find((product) => {
+          return product._id.toString() === itemInDto.itemRef;
         });
-        if (!product) throw new BadRequestException('Item not found');
+        if (!itemDB) throw new BadRequestException('Item not found');
 
         return {
-          ...item,
-          name: product.name,
-          cost: product.cost,
-          price: product.price,
+          ...itemInDto,
+          name: itemDB.name,
+          cost: itemDB.cost,
         };
       });
     }
@@ -684,16 +683,15 @@ export class InvoiceService {
         throw new BadRequestException('Some services are not valid');
 
       // override the dto items array to add service fields for later reference
-      servicesWithDetails = servicesOnly.map((item) => {
-        const service = dbServices.find(
-          (service) => service._id.toString() === item.serviceRef,
+      servicesWithDetails = servicesOnly.map((serviceInDto) => {
+        const serviceDB = dbServices.find(
+          (service) => service._id.toString() === serviceInDto.serviceRef,
         );
-        if (!service) throw new BadRequestException('Service not found');
+        if (!serviceDB) throw new BadRequestException('Service not found');
 
         return {
-          ...item,
-          name: service.name,
-          price: item.price,
+          ...serviceInDto,
+          name: serviceDB.name,
         };
       });
     }

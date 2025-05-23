@@ -15,8 +15,14 @@ export class Item {
   @Prop({ default: 0, required: true })
   cost: number;
 
+  @Prop({ default: 0 })
+  lowPrice: number;
+
+  @Prop({ default: 0 })
+  mediumPrice: number;
+
   @Prop({ default: 0, required: true })
-  price: number;
+  price: number; //acting as maxPrice
 
   @Prop({ default: 0, required: true })
   quantity: number;
