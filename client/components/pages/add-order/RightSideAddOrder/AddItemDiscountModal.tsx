@@ -79,6 +79,7 @@ const AddItemDiscountModal = ({
         <Modal.Header title={modalTitle} id={triggerModalId} />
         {/* <form onSubmit={handleSubmit(onSubmit)}> */}
         <Modal.Body>
+          <h4 className="font-bold text-lg text-gray-600">Pricing</h4>
           <NumberField
             name="customPrice"
             value={itemCustomPrice}
@@ -90,30 +91,33 @@ const AddItemDiscountModal = ({
             errorMessage={errorMessage}
           />
 
-          <NumberField
-            label="Amount"
-            colSpan={1}
-            name="amount"
-            value={discount.amount}
-            onChange={(e) => {
-              setDiscount((prev) => ({
-                ...prev,
-                amount: Number(e),
-              }));
-            }}
-          />
-          <SelectField
-            label="Type"
-            options={discountTypeOptions}
-            value={discountTypeOptions.find((v) => v.value === discount.type)}
-            colSpan={1}
-            onChangeValue={(e) => {
-              setDiscount((prev) => ({
-                ...prev,
-                type: (e?.value as "percentage" | "fixed") || "fixed",
-              }));
-            }}
-          />
+          <h4 className="font-bold text-lg text-gray-600">Discount</h4>
+          <div className="grid grid-cols-2 gap-x-2">
+            <NumberField
+              label="Discount Amount"
+              colSpan={1}
+              name="amount"
+              value={discount.amount}
+              onChange={(e) => {
+                setDiscount((prev) => ({
+                  ...prev,
+                  amount: Number(e),
+                }));
+              }}
+            />
+            <SelectField
+              label="Type"
+              options={discountTypeOptions}
+              value={discountTypeOptions.find((v) => v.value === discount.type)}
+              colSpan={1}
+              onChangeValue={(e) => {
+                setDiscount((prev) => ({
+                  ...prev,
+                  type: (e?.value as "percentage" | "fixed") || "fixed",
+                }));
+              }}
+            />
+          </div>
         </Modal.Body>
 
         <Modal.Footer>
