@@ -36,6 +36,9 @@ export class Purchase {
   @Prop({ required: true })
   amountPaid: number;
 
+  @Prop({ required: false, default: false })
+  isPaid: boolean;
+
   // saving it for later reference (when we want to delete purchase so we know that we should delete the expense)
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Expense' })
   expense: mongoose.Schema.Types.ObjectId;

@@ -130,6 +130,8 @@ export class PurchaseService {
 
     const accounting = await this.accountingService.getAccounting();
 
+    const isPaid = dto.totalAmount <= dto.amountPaid;
+
     // save the purchase
     const newPurchase = await this.purchaseModel.create({
       supplier: dto.supplierId,
@@ -144,6 +146,7 @@ export class PurchaseService {
       amountPaid: dto.amountPaid,
       usdRate: accounting.usdRate,
       items: dto.items,
+      isPaid,
     });
 
     await this.doPurchaseEffects(dto, newPurchase._id?.toString());
@@ -168,6 +171,8 @@ export class PurchaseService {
       currentItemCost: product.cost,
     }));
 
+    const isPaid = dto.totalAmount <= dto.amountPaid;
+
     // update the purchase
     await this.purchaseModel.findByIdAndUpdate(purchaseId, {
       supplier: dto.supplierId,
@@ -181,6 +186,7 @@ export class PurchaseService {
       totalAmount: dto.totalAmount,
       amountPaid: dto.amountPaid,
       items: dto.items,
+      isPaid,
     });
 
     await this.doPurchaseEffects(dto, purchaseId);

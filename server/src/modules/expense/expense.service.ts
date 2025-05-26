@@ -183,6 +183,8 @@ export class ExpenseService {
       await supplier.save();
     }
 
+    //TODO: get purchases and loop over them and pay them until amount is 0
+
     // update daily report
     await this.reportService.syncDailyReport({
       date: dto.date,
@@ -215,8 +217,10 @@ export class ExpenseService {
         await supplier.save();
       }
 
-      //ignore deleted suppliers
+      //-> ignore deleted suppliers
     }
+
+    //TODO: undo paying purchases until amount is equal to expense amount
 
     // update daily report
     await this.reportService.syncDailyReport({
