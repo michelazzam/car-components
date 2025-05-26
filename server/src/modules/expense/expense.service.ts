@@ -108,11 +108,23 @@ export class ExpenseService {
       expenseType: dto.expenseTypeId,
       supplier: dto.supplierId,
       amount: dto.amount,
+      purchases: dto.purchasesIds,
       date: dto.date,
       note: dto.note,
     });
 
     await this.doExpenseEffects(dto);
+  }
+
+  async createWithoutEffects(dto: ExpenseDto) {
+    return this.expenseModel.create({
+      expenseType: dto.expenseTypeId,
+      supplier: dto.supplierId,
+      amount: dto.amount,
+      purchases: dto.purchasesIds,
+      date: dto.date,
+      note: dto.note,
+    });
   }
 
   async edit(id: string, dto: ExpenseDto) {
@@ -124,6 +136,7 @@ export class ExpenseService {
         expenseType: dto.expenseTypeId,
         supplier: dto.supplierId,
         amount: dto.amount,
+        purchases: dto.purchasesIds,
         date: dto.date,
         note: dto.note,
       },
@@ -138,6 +151,13 @@ export class ExpenseService {
   async delete(id: string) {
     await this.revertExpenseEffects(id);
 
+    const expense = await this.expenseModel.findOneAndDelete({ _id: id });
+
+    if (!expense) throw new NotFoundException('Expense not found');
+    return expense;
+  }
+
+  async deleteWithoutEffects(id: string) {
     const expense = await this.expenseModel.findOneAndDelete({ _id: id });
 
     if (!expense) throw new NotFoundException('Expense not found');

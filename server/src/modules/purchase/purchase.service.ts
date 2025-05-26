@@ -9,6 +9,7 @@ import { AccountingService } from '../accounting/accounting.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
+import { ExpenseService } from '../expense/expense.service';
 
 @Injectable()
 export class PurchaseService {
@@ -18,6 +19,7 @@ export class PurchaseService {
     private readonly itemService: ItemService,
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
+    private readonly expenseService: ExpenseService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -129,7 +131,7 @@ export class PurchaseService {
     const accounting = await this.accountingService.getAccounting();
 
     // save the purchase
-    await this.purchaseModel.create({
+    const newPurchase = await this.purchaseModel.create({
       supplier: dto.supplierId,
       invoiceNumber: dto.invoiceNumber,
       invoiceDate: dto.invoiceDate,
@@ -144,7 +146,7 @@ export class PurchaseService {
       items: dto.items,
     });
 
-    await this.doPurchaseEffects(dto);
+    await this.doPurchaseEffects(dto, newPurchase._id?.toString());
   }
 
   async edit(purchaseId: string, dto: PurchaseDto) {
@@ -181,7 +183,7 @@ export class PurchaseService {
       items: dto.items,
     });
 
-    await this.doPurchaseEffects(dto);
+    await this.doPurchaseEffects(dto, purchaseId);
   }
 
   async delete(purchaseId: string) {
@@ -190,7 +192,7 @@ export class PurchaseService {
     await this.purchaseModel.findByIdAndDelete(purchaseId);
   }
 
-  private async doPurchaseEffects(dto: PurchaseDto) {
+  private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
     // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemService.getOneById(item.itemId);
@@ -238,9 +240,34 @@ export class PurchaseService {
       }
     }
 
-    // decrease caisse
+    // save the amount paid as expense
+    if (dto.amountPaid > 0) {
+      const newExpense = await this.expenseService.createWithoutEffects({
+        supplierId: dto.supplierId,
+        amount: dto.amountPaid,
+        date: getFormattedDate(new Date()),
+        purchasesIds: [purchaseId],
+
+        expenseTypeId: null,
+        note: null,
+      });
+
+      // link the expense to the purchase
+      await this.purchaseModel.updateOne(
+        { _id: purchaseId },
+        {
+          $set: {
+            expense: newExpense._id,
+          },
+        },
+      );
+    }
+
     await this.accountingService.incAccountingNumberFields({
+      // decrease caisse
       caisse: -dto.amountPaid,
+      // increase total expense
+      totalExpenses: dto.amountPaid,
     });
   }
 
@@ -254,7 +281,7 @@ export class PurchaseService {
     for (const item of purchase.items) {
       const product = await this.itemService.getOneById(item.item?.toString());
       if (!product) {
-        continue; //ignore deleted products
+        continue; //-> ignore deleted products
       }
 
       // Revert quantity
@@ -285,7 +312,8 @@ export class PurchaseService {
           totalSuppliersLoan: -supplier.loan,
         });
       }
-      //ignore deleted suppliers
+
+      //-> ignore deleted suppliers
     } else {
       // revert decreasing supplier loan in case when paid he paid more than needed
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -303,12 +331,19 @@ export class PurchaseService {
           totalSuppliersLoan: supplier.loan,
         });
       }
-      //ignore deleted suppliers
+      //-> ignore deleted suppliers
     }
 
-    // increase caisse
+    // delete expense
+    await this.expenseService.deleteWithoutEffects(
+      purchase.expense?.toString(),
+    );
+
     await this.accountingService.incAccountingNumberFields({
+      // increase caisse
       caisse: purchase.amountPaid,
+      // decrease total expense
+      totalExpenses: -purchase.amountPaid,
     });
   }
 }

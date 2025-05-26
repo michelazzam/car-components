@@ -122,7 +122,8 @@ export class PurchaseDto {
     required: false,
   })
   @IsNumber()
-  subTotal: number;
+  @IsOptional()
+  subTotal: number = 0;
 
   @ApiProperty({
     required: true,

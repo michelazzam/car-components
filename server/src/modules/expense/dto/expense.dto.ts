@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsMongoId,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
 export class ExpenseDto {
@@ -8,14 +14,24 @@ export class ExpenseDto {
   })
   @IsMongoId()
   @IsOptional()
-  expenseTypeId: string;
+  expenseTypeId: string | null;
 
   @ApiProperty({
     required: false,
   })
   @IsMongoId()
   @IsOptional()
-  supplierId: string;
+  supplierId: string | null;
+
+  @ApiProperty({
+    required: false,
+    isArray: true,
+    type: String,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  purchasesIds: string[];
 
   @ApiProperty({
     example: '2024-08-01',
@@ -36,5 +52,5 @@ export class ExpenseDto {
   })
   @IsString()
   @IsOptional()
-  note: string;
+  note: string | null;
 }
