@@ -9,17 +9,18 @@ import { AccountingService } from '../accounting/accounting.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
-import { ExpenseService } from '../expense/expense.service';
+import { Expense, IExpense } from '../expense/expense.schema';
 
 @Injectable()
 export class PurchaseService {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
+    @InjectModel(Expense.name)
+    private expenseModel: Model<IExpense>,
     private readonly itemService: ItemService,
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
-    private readonly expenseService: ExpenseService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -111,6 +112,10 @@ export class PurchaseService {
     };
   }
 
+  async getManyByIds(ids: string[]) {
+    return this.purchaseModel.find({ _id: { $in: ids } });
+  }
+
   async create(dto: PurchaseDto) {
     // get products from db and save the name with each one
     const products = await this.itemService.getManyByIds(
@@ -198,6 +203,28 @@ export class PurchaseService {
     await this.purchaseModel.findByIdAndDelete(purchaseId);
   }
 
+  async updatePurchasePayments({
+    purchaseId,
+    amount,
+    isPaid,
+  }: {
+    purchaseId: string;
+    amount: number;
+    isPaid: boolean;
+  }) {
+    await this.purchaseModel.updateOne(
+      { _id: purchaseId },
+      {
+        $set: {
+          isPaid,
+        },
+        $inc: {
+          amountPaid: amount,
+        },
+      },
+    );
+  }
+
   private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
     // update product quantity + new product cost
     for (const item of dto.items) {
@@ -248,14 +275,11 @@ export class PurchaseService {
 
     // save the amount paid as expense
     if (dto.amountPaid > 0) {
-      const newExpense = await this.expenseService.createWithoutEffects({
+      const newExpense = await this.expenseModel.create({
         supplierId: dto.supplierId,
         amount: dto.amountPaid,
         date: getFormattedDate(new Date()),
         purchasesIds: [purchaseId],
-
-        expenseTypeId: null,
-        note: null,
       });
 
       // link the expense to the purchase
@@ -341,9 +365,7 @@ export class PurchaseService {
     }
 
     // delete expense
-    await this.expenseService.deleteWithoutEffects(
-      purchase.expense?.toString(),
-    );
+    await this.expenseModel.deleteOne({ _id: purchase.expense?.toString() });
 
     await this.accountingService.incAccountingNumberFields({
       // increase caisse

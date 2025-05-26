@@ -12,6 +12,7 @@ import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { AccountingService } from '../accounting/accounting.service';
 import { ReportService } from '../report/report.service';
 import { SupplierService } from '../supplier/supplier.service';
+import { PurchaseService } from '../purchase/purchase.service';
 
 @Injectable()
 export class ExpenseService {
@@ -21,6 +22,7 @@ export class ExpenseService {
     private readonly supplierervice: SupplierService,
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
+    private readonly purchaseService: PurchaseService,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
@@ -173,7 +175,7 @@ export class ExpenseService {
   }
 
   private async doExpenseEffects(dto: ExpenseDto) {
-    // subtract supplier loan
+    // senario where expense is paying for purchases
     if (dto.supplierId) {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
       if (!supplier) throw new NotFoundException('Supplier not found');
@@ -181,9 +183,31 @@ export class ExpenseService {
       const minLoan = Math.max(supplier.loan - dto.amount, 0);
       supplier.loan = minLoan;
       await supplier.save();
-    }
 
-    //TODO: get purchases and loop over them and pay them until amount is 0
+      // get purchases and loop over them and pay them until amount is 0
+      if (dto.purchasesIds.length > 0) {
+        const purchases = await this.purchaseService.getManyByIds(
+          dto.purchasesIds,
+        );
+
+        const remainingAmountPaid = dto.amount;
+
+        for (const purchase of purchases) {
+          if (remainingAmountPaid <= 0) break;
+
+          const purchaseRemainingAmount =
+            purchase.totalAmount - purchase.amountPaid;
+
+          const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
+
+          await this.purchaseService.updatePurchasePayments({
+            purchaseId: purchase._id?.toString(),
+            amount: purchaseRemainingAmount,
+            isPaid: isPurchasePaid,
+          });
+        }
+      }
+    }
 
     // update daily report
     await this.reportService.syncDailyReport({
@@ -220,7 +244,44 @@ export class ExpenseService {
       //-> ignore deleted suppliers
     }
 
-    //TODO: undo paying purchases until amount is equal to expense amount
+    // undo paying purchases until amount is equal to expense amount
+    if (expense.purchases.length > 0) {
+      const purchases = await this.purchaseService.getManyByIds(
+        expense.purchases?.map((id) => id.toString()),
+      );
+
+      let totalDeducted = 0;
+      const targetDeduction = expense.amount; // total you want to deduct
+
+      for (const purchase of purchases) {
+        if (totalDeducted >= targetDeduction) break;
+
+        const alreadyPaidAmount = purchase.amountPaid;
+
+        // Calculate how much more we need to deduct
+        const remainingToDeduct = targetDeduction - totalDeducted;
+
+        // Deduct only as much as possible without going below zero
+        const deductionAmount = Math.min(alreadyPaidAmount, remainingToDeduct);
+
+        const isPurchaseFullyUnpaid = deductionAmount > 0;
+
+        await this.purchaseService.updatePurchasePayments({
+          purchaseId: purchase._id?.toString(),
+          amount: -deductionAmount, // negative for deduction
+          isPaid: !isPurchaseFullyUnpaid, // update paid status
+        });
+
+        totalDeducted += deductionAmount;
+      }
+
+      if (totalDeducted < targetDeduction) {
+        // Handle if you cannot deduct full expense.amount
+        throw new Error(
+          `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
+        );
+      }
+    }
 
     // update daily report
     await this.reportService.syncDailyReport({
