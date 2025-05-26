@@ -77,6 +77,7 @@ const ServiceModal = ({
       label: z.string().min(1, "Name label is required"),
       value: z.string().min(1, "Name value is required"),
     }),
+
     quantity: z.number().min(1, "At least 1"),
     price: z.number().min(1, "> 0"),
   });
@@ -243,6 +244,7 @@ const ServiceModal = ({
                         <FaRegEdit />
                       </button>
                       <button
+                        type="button"
                         id="delete-btn"
                         className="btn btn-sm btn-danger delete-btn text-danger border border-danger rounded-md p-1 hover:bg-danger hover:text-white"
                         onClick={() => handleDelete(service)}
@@ -267,6 +269,8 @@ const ServiceModal = ({
                 onObjectChange={(obj) => {
                   if (obj) {
                     setValue("price", obj.price);
+                  } else {
+                    setValue("name", { label: "", value: "" });
                   }
                 }}
                 // onInputChange={(value) => setSearchQuery(value)}
