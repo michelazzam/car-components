@@ -17,7 +17,7 @@ function InvoicePaymentMethodModal({
   if (!formContext) return <div>Loading...</div>;
 
   const { control, watch } = formContext;
-  const { append, remove } = useFieldArray({
+  const { append, remove, fields } = useFieldArray({
     control,
     name: "paymentMethods", // Field name in the form data
   });
@@ -89,13 +89,13 @@ function InvoicePaymentMethodModal({
         </div>
 
         <div className="grid grid-cols-2 gap-x-4">
-          {currentPaymentMethods?.map((paymentMethod, index) => {
+          {fields?.map((field, index) => {
             return (
-              <div key={paymentMethod.id} className="flex  gap-2">
+              <div key={field.id} className="flex  gap-2">
                 <TextFieldControlled
                   marginBottom="mb-0"
                   name={`paymentMethods[${index}].note`}
-                  label={paymentMethod.method + " Note"}
+                  label={`${watch(`paymentMethods.${index}.method`)} Note`}
                   control={control}
                 />
                 <button
