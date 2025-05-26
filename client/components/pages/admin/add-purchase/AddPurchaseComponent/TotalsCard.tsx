@@ -55,7 +55,7 @@ function TotalsCard() {
       0 + totals.totalAmount - (amount + (amountLbp || 0) / usdRate)
     )?.toFixed(2)
   );
-
+  const totalPurchaseAmount = tvaAmountInDollars + totals.totalAmount;
   return (
     <div className=" p-4 h-100" style={{ borderRadius: "8px" }}>
       <div className="flex items-center gap-x-4  mb-1">
@@ -142,15 +142,26 @@ function TotalsCard() {
           "Please select a supplier"
         )}
       </div>
-      <div className="">
-        <div className="">
-          <span>Total Purchase Amount </span>
+      <div className="mt-2">
+        <div className="text-gray-600 flex justify-between ">
+          <span>Subtotal </span>
           <span className="">${formatNumber(totals.totalAmount, 2)}</span>
         </div>
-        <div className="">
+        <div className="flex justify-between">
+          <span>Total (with TVA) </span>
+          <span className="">${formatNumber(totalPurchaseAmount, 2)}</span>
+        </div>
+        <div className="flex justify-between">
           <span>Paid </span>
           <span className="text-success fs-20">
             ${formatNumber(totals.totalAmountPaid, 2)}
+          </span>
+        </div>
+
+        <div className="flex justify-between">
+          <span>Remaining (for this purchase) </span>
+          <span className="text-danger fs-20">
+            ${formatNumber(totalPurchaseAmount - totals.totalAmountPaid, 2)}
           </span>
         </div>
       </div>
