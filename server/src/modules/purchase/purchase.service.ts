@@ -376,10 +376,21 @@ export class PurchaseService {
       //-> ignore deleted suppliers
     }
 
-    // delete expense
-    await this.expenseModel.deleteOne({
-      _id: purchase.expenses?.[0]?.toString(),
-    });
+    const expenseId = purchase.expenses?.[0]?.toString();
+    if (expenseId) {
+      // delete expense
+      await this.expenseModel.deleteOne({
+        _id: expenseId,
+      });
+
+      // remove expense from purchase
+      await this.purchaseModel.updateOne(
+        { _id: purchaseId },
+        {
+          $pull: { expenses: expenseId },
+        },
+      );
+    }
 
     await this.accountingService.incAccountingNumberFields({
       // increase caisse
