@@ -102,7 +102,7 @@ const AddInvoice = () => {
           amount: editingInvoice.accounting.discount.amount,
           type: editingInvoice.accounting.discount.type,
         },
-        paymentMethods: editingInvoice.paymentMethods,
+        paymentMethods: editingInvoice.paymentMethods || [],
         paidAmountUsd: editingInvoice.accounting.paidAmountUsd,
         customerId: editingInvoice.customer._id,
         vehicleId: editingInvoice.vehicle?._id || "",
