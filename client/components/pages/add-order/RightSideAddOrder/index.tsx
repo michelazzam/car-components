@@ -19,6 +19,7 @@ import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
+import SaveInvoiceModal from "./SaveInvoiceModal";
 // import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 
 function RightSideAddOrder({
@@ -290,14 +291,7 @@ function RightSideAddOrder({
             applyDiscount(discountStore.amount, type);
           }} // Pass type correctly
         />
-        <NumberFieldControlled
-          control={control}
-          name="paidAmountUsd"
-          label="Amount Paid in USD"
-          colSpan={2}
-          prefix="$"
-          readOnly={isFullPaid}
-        />
+
         {/*  */}
         <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
           <div className="flex items-center justify-between mt-1">
@@ -328,19 +322,6 @@ function RightSideAddOrder({
       <div>
         <div className="flex items-center mb-4 justify-between">
           <div className="flex items-center gap-2">
-            <Checkbox
-              label="Full Paid"
-              onValueChange={() => {
-                if (isFullPaid) {
-                  setValue("paidAmountUsd", 0);
-                  setIsFullPaid(false);
-                } else {
-                  setValue("paidAmountUsd", +totalAmount(!isB2C));
-                  setIsFullPaid(true);
-                }
-              }}
-              isChecked={isFullPaid}
-            />
             <Checkbox
               label="No Vehicle"
               isChecked={!hasVehicle}
@@ -381,7 +362,8 @@ function RightSideAddOrder({
             </button>
 
             <button
-              type="submit"
+              type="button"
+              data-hs-overlay="#save-invoice-modal"
               onClick={() => setIsPrint(true)}
               className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
             >
@@ -389,12 +371,11 @@ function RightSideAddOrder({
               <FaPrint className="w-3 h-3" />
             </button>
             <button
-              type="submit"
+              type="button"
+              data-hs-overlay="#save-invoice-modal"
               className="p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary"
             >
-              {mutation.isPending || isEditInvoicePending
-                ? "Saving..."
-                : "Save"}
+              save
             </button>
           </div>
         </div>
@@ -418,6 +399,14 @@ function RightSideAddOrder({
           prev
         />
       )}
+
+      <SaveInvoiceModal
+        triggerModalId="save-invoice-modal"
+        title="Save Invoice"
+        isFullPaid={isFullPaid}
+        setIsFullPaid={setIsFullPaid}
+        isPendingSubmittion={mutation.isPending || isEditInvoicePending}
+      />
     </form>
   );
 }
