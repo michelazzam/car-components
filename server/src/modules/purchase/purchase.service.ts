@@ -95,7 +95,8 @@ export class PurchaseService {
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
         .limit(pageSize)
-        .populate('supplier'),
+        .populate('supplier')
+        .populate('expenses'),
       this.purchaseModel.countDocuments(filter),
     ]);
 
@@ -207,22 +208,32 @@ export class PurchaseService {
     purchaseId,
     amount,
     isPaid,
+    expenseLinking,
   }: {
     purchaseId: string;
     amount: number;
     isPaid: boolean;
+    expenseLinking: {
+      expenseId: string;
+      action: 'add' | 'remove';
+    };
   }) {
-    await this.purchaseModel.updateOne(
-      { _id: purchaseId },
-      {
-        $set: {
-          isPaid,
-        },
-        $inc: {
-          amountPaid: amount,
-        },
+    const updatePayload: any = {
+      $set: {
+        isPaid,
       },
-    );
+      $inc: {
+        amountPaid: amount,
+      },
+    };
+
+    if (expenseLinking.action === 'add') {
+      updatePayload.$addToSet = { expenses: expenseLinking.expenseId };
+    } else if (expenseLinking.action === 'remove') {
+      updatePayload.$pull = { expenses: expenseLinking.expenseId };
+    }
+
+    await this.purchaseModel.updateOne({ _id: purchaseId }, updatePayload);
   }
 
   private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
@@ -286,8 +297,8 @@ export class PurchaseService {
       await this.purchaseModel.updateOne(
         { _id: purchaseId },
         {
-          $set: {
-            expense: newExpense._id,
+          $push: {
+            expenses: newExpense._id,
           },
         },
       );
@@ -361,11 +372,14 @@ export class PurchaseService {
           totalSuppliersLoan: supplier.loan,
         });
       }
+
       //-> ignore deleted suppliers
     }
 
     // delete expense
-    await this.expenseModel.deleteOne({ _id: purchase.expense?.toString() });
+    await this.expenseModel.deleteOne({
+      _id: purchase.expenses?.[0]?.toString(),
+    });
 
     await this.accountingService.incAccountingNumberFields({
       // increase caisse

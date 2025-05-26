@@ -31,7 +31,7 @@ export class ExpenseDto {
   @IsArray()
   @IsMongoId({ each: true })
   @IsOptional()
-  purchasesIds: string[];
+  purchasesIds: string[] = [];
 
   @ApiProperty({
     example: '2024-08-01',

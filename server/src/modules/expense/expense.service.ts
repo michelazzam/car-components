@@ -106,7 +106,7 @@ export class ExpenseService {
   }
 
   async create(dto: ExpenseDto) {
-    await this.expenseModel.create({
+    const newExpense = await this.expenseModel.create({
       expenseType: dto.expenseTypeId,
       supplier: dto.supplierId,
       amount: dto.amount,
@@ -115,18 +115,7 @@ export class ExpenseService {
       note: dto.note,
     });
 
-    await this.doExpenseEffects(dto);
-  }
-
-  async createWithoutEffects(dto: ExpenseDto) {
-    return this.expenseModel.create({
-      expenseType: dto.expenseTypeId,
-      supplier: dto.supplierId,
-      amount: dto.amount,
-      purchases: dto.purchasesIds,
-      date: dto.date,
-      note: dto.note,
-    });
+    await this.doExpenseEffects(dto, newExpense._id?.toString());
   }
 
   async edit(id: string, dto: ExpenseDto) {
@@ -145,7 +134,7 @@ export class ExpenseService {
     );
     if (!expense) throw new NotFoundException('Expense not found');
 
-    await this.doExpenseEffects(dto);
+    await this.doExpenseEffects(dto, id);
 
     return expense;
   }
@@ -153,13 +142,6 @@ export class ExpenseService {
   async delete(id: string) {
     await this.revertExpenseEffects(id);
 
-    const expense = await this.expenseModel.findOneAndDelete({ _id: id });
-
-    if (!expense) throw new NotFoundException('Expense not found');
-    return expense;
-  }
-
-  async deleteWithoutEffects(id: string) {
     const expense = await this.expenseModel.findOneAndDelete({ _id: id });
 
     if (!expense) throw new NotFoundException('Expense not found');
@@ -174,7 +156,7 @@ export class ExpenseService {
     return this.expenseModel.findOne({ supplier: supplierId });
   }
 
-  private async doExpenseEffects(dto: ExpenseDto) {
+  private async doExpenseEffects(dto: ExpenseDto, expenseId: string) {
     // senario where expense is paying for purchases
     if (dto.supplierId) {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
@@ -204,6 +186,10 @@ export class ExpenseService {
             purchaseId: purchase._id?.toString(),
             amount: purchaseRemainingAmount,
             isPaid: isPurchasePaid,
+            expenseLinking: {
+              expenseId,
+              action: 'add',
+            },
           });
         }
       }
@@ -242,44 +228,51 @@ export class ExpenseService {
       }
 
       //-> ignore deleted suppliers
-    }
 
-    // undo paying purchases until amount is equal to expense amount
-    if (expense.purchases.length > 0) {
-      const purchases = await this.purchaseService.getManyByIds(
-        expense.purchases?.map((id) => id.toString()),
-      );
-
-      let totalDeducted = 0;
-      const targetDeduction = expense.amount; // total you want to deduct
-
-      for (const purchase of purchases) {
-        if (totalDeducted >= targetDeduction) break;
-
-        const alreadyPaidAmount = purchase.amountPaid;
-
-        // Calculate how much more we need to deduct
-        const remainingToDeduct = targetDeduction - totalDeducted;
-
-        // Deduct only as much as possible without going below zero
-        const deductionAmount = Math.min(alreadyPaidAmount, remainingToDeduct);
-
-        const isPurchaseFullyUnpaid = deductionAmount > 0;
-
-        await this.purchaseService.updatePurchasePayments({
-          purchaseId: purchase._id?.toString(),
-          amount: -deductionAmount, // negative for deduction
-          isPaid: !isPurchaseFullyUnpaid, // update paid status
-        });
-
-        totalDeducted += deductionAmount;
-      }
-
-      if (totalDeducted < targetDeduction) {
-        // Handle if you cannot deduct full expense.amount
-        throw new Error(
-          `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
+      // undo paying purchases until amount is equal to expense amount
+      if (expense.purchases?.length > 0) {
+        const purchases = await this.purchaseService.getManyByIds(
+          expense.purchases?.map((id) => id.toString()),
         );
+
+        let totalDeducted = 0;
+        const targetDeduction = expense.amount; // total you want to deduct
+
+        for (const purchase of purchases) {
+          if (totalDeducted >= targetDeduction) break;
+
+          const alreadyPaidAmount = purchase.amountPaid;
+
+          // Calculate how much more we need to deduct
+          const remainingToDeduct = targetDeduction - totalDeducted;
+
+          // Deduct only as much as possible without going below zero
+          const deductionAmount = Math.min(
+            alreadyPaidAmount,
+            remainingToDeduct,
+          );
+
+          const isPurchaseFullyUnpaid = deductionAmount > 0;
+
+          await this.purchaseService.updatePurchasePayments({
+            purchaseId: purchase._id?.toString(),
+            amount: -deductionAmount, // negative for deduction
+            isPaid: !isPurchaseFullyUnpaid, // update paid status
+            expenseLinking: {
+              expenseId,
+              action: 'remove',
+            },
+          });
+
+          totalDeducted += deductionAmount;
+        }
+
+        if (totalDeducted < targetDeduction) {
+          // Handle if you cannot deduct full expense.amount
+          throw new Error(
+            `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
+          );
+        }
       }
     }
 
