@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import ItemsList from "./ItemsList";
-import Checkbox from "@/components/admin/Fields/Checkbox";
+
 import { clearPosStore, usePosStore } from "@/shared/store/usePosStore";
 import { SubmitHandler, useFormContext } from "react-hook-form";
 import { useAddInvoice } from "@/api-hooks/invoices/use-add-invoices";
@@ -55,11 +55,8 @@ function RightSideAddOrder({
   const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
-  const { handleSubmit, control, watch, setValue, reset, getValues } =
-    formContext;
+  const { handleSubmit, control, setValue, reset, getValues } = formContext;
   const isB2C = getValues("type") === "s2";
-
-  const { hasVehicle } = watch();
 
   //-----------------------API Calls------------------------------------
 
@@ -244,169 +241,160 @@ function RightSideAddOrder({
     }
   };
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit, onInvalid)}
-      className="bg-white min-h-full -mr-[1.5rem]  pt-3 px-3 lex flex-col justify-between "
-    >
-      <span ref={printRef} data-hs-overlay="#print-invoice"></span>
-      <div className="grid grid-cols-2 gap-x-2 items-center justify-between ">
-        <button
-          type="button"
-          className="col-span-2 p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary mb-2"
-          data-hs-overlay="#general-invoice-info-modal"
-        >
-          General Info
-        </button>
-        <SelectFieldControlled
-          control={control}
-          label="Customer Type"
-          name="type"
-          colSpan={2}
-          creatable={false}
-          options={customerTypeOption}
-        />
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="">
+      <div className="bg-white min-h-full -mr-[1.5rem] flex pt-3 px-3 lex flex-col justify-between h-[calc(100vh-60px)] ">
+        <span ref={printRef} data-hs-overlay="#print-invoice"></span>
+        <div className="flex flex-col gap-x-2 items-center  flex-grow">
+          <button
+            type="button"
+            className="w-full p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary mb-2"
+            data-hs-overlay="#general-invoice-info-modal"
+          >
+            General Info
+          </button>
+          <SelectFieldControlled
+            control={control}
+            label="Customer Type"
+            name="type"
+            creatable={false}
+            options={customerTypeOption}
+          />
 
-        {/* items list */}
-        <ItemsList />
-        {/* items list */}
-        <NumberFieldControlled
-          control={control}
-          name="discount.amount"
-          label="Discount"
-          colSpan={1}
-          onChangeValue={(val) =>
-            applyDiscount(Number(val) || 0, discountStore.type)
-          } // Pass amount and type correctly
-        />
+          {/* items list */}
+          <ItemsList />
+          {/* items list */}
+          <div className="w-full grid grid-cols-2 gap-x-2">
+            <NumberFieldControlled
+              control={control}
+              name="discount.amount"
+              label="Discount"
+              colSpan={1}
+              onChangeValue={(val) =>
+                applyDiscount(Number(val) || 0, discountStore.type)
+              } // Pass amount and type correctly
+            />
 
-        <SelectFieldControlled
-          control={control}
-          label="Type"
-          name="discount.type"
-          colSpan={1}
-          creatable={false}
-          options={discountTypeOptions}
-          onChangeValue={(val) => {
-            const type = val === "fixed" ? "fixed" : "percentage";
-            applyDiscount(discountStore.amount, type);
-          }} // Pass type correctly
-        />
-
-        {/*  */}
-        <div className="h-[15vh] mb-4 col-span-2 p-2 rounded-md bg-gray-300">
-          <div className="flex items-center justify-between mt-1">
-            <span>Sub Total</span>
-            <span>${cartSum()}</span>
-          </div>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-danger">{`Discount`}</span>
-            <span className="text-danger">{`${
-              discountStore.type === "fixed" ? "$" : "%"
-            }${discountStore.amount || 0}`}</span>
-          </div>
-          {!isB2C && (
-            <>
-              <div className="flex items-center justify-between mt-1">
-                <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
-                <span>${vatAmount}</span>
-              </div>
-            </>
-          )}
-          <div className="flex items-center justify-between mt-1">
-            <span>Total</span>
-            <span>${totalAmount(!isB2C)}</span>
-          </div>
-        </div>
-        {/*  */}
-      </div>
-      <div>
-        <div className="flex items-center mb-4 justify-between">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              label="No Vehicle"
-              isChecked={!hasVehicle}
-              onValueChange={() => setValue("hasVehicle", !hasVehicle)}
+            <SelectFieldControlled
+              control={control}
+              label="Type"
+              name="discount.type"
+              colSpan={1}
+              creatable={false}
+              options={discountTypeOptions}
+              onChangeValue={(val) => {
+                const type = val === "fixed" ? "fixed" : "percentage";
+                applyDiscount(discountStore.amount, type);
+              }} // Pass type correctly
             />
           </div>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          {!editingInvoice ? (
-            <button
-              onDoubleClick={() => {
-                reset();
-                clearPosStore();
-              }}
-              type="button"
-              className="p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
-            >
-              Reset
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
-              onClick={() => handleCancelEditing()}
-            >
-              Cancel
-            </button>
-          )}
-          <div className="flex items-center gap-2">
-            {/* View Invoice  */}
-            <button
-              type="button"
-              onClick={() => setPrevInv()}
-              data-hs-overlay="#preview-invoice"
-              className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
-            >
-              <FaEye className="h-full aspect-square" />
-            </button>
 
-            <button
-              type="button"
-              data-hs-overlay="#save-invoice-modal"
-              onClick={() => setIsPrint(true)}
-              className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
-            >
-              print
-              <FaPrint className="w-3 h-3" />
-            </button>
-            <button
-              type="button"
-              data-hs-overlay="#save-invoice-modal"
-              className="p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary"
-            >
-              save
-            </button>
+          {/*  */}
+          <div className="h-[15vh] mb-4 w-full p-2 rounded-md bg-gray-300">
+            <div className="flex items-center justify-between mt-1">
+              <span>Sub Total</span>
+              <span>${cartSum()}</span>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span className="text-danger">{`Discount`}</span>
+              <span className="text-danger">{`${
+                discountStore.type === "fixed" ? "$" : "%"
+              }${discountStore.amount || 0}`}</span>
+            </div>
+            {!isB2C && (
+              <>
+                <div className="flex items-center justify-between mt-1">
+                  <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
+                  <span>${vatAmount}</span>
+                </div>
+              </>
+            )}
+            <div className="flex items-center justify-between mt-1">
+              <span>Total</span>
+              <span>${totalAmount(!isB2C)}</span>
+            </div>
+          </div>
+          {/*  */}
+        </div>
+        <div>
+          <div className="flex items-center justify-between mt-2">
+            {!editingInvoice ? (
+              <button
+                onDoubleClick={() => {
+                  reset();
+                  clearPosStore();
+                }}
+                type="button"
+                className="p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
+              >
+                Reset
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
+                onClick={() => handleCancelEditing()}
+              >
+                Cancel
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              {/* View Invoice  */}
+              <button
+                type="button"
+                onClick={() => setPrevInv()}
+                data-hs-overlay="#preview-invoice"
+                className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
+              >
+                <FaEye className="h-full aspect-square" />
+              </button>
+
+              <button
+                type="button"
+                data-hs-overlay="#save-invoice-modal"
+                onClick={() => setIsPrint(true)}
+                className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
+              >
+                print
+                <FaPrint className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                data-hs-overlay="#save-invoice-modal"
+                className="p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary"
+              >
+                save
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <GeneralInfoModal
-        modalTitle="General Info"
-        triggerModalId="general-invoice-info-modal"
-      />
-      <PrintInvoiceModal
-        triggerModalId="print-invoice"
-        title="New Inovice"
-        printingInvoices={invoice ? [invoice] : undefined}
-      />
-
-      {previewingInvoice && (
-        <PrintInvoiceModal
-          triggerModalId="preview-invoice"
-          title="Preview Inovice"
-          previewingInvoice={previewingInvoice}
-          prev
+        <GeneralInfoModal
+          modalTitle="General Info"
+          triggerModalId="general-invoice-info-modal"
         />
-      )}
+        <PrintInvoiceModal
+          triggerModalId="print-invoice"
+          title="New Inovice"
+          printingInvoices={invoice ? [invoice] : undefined}
+        />
 
-      <SaveInvoiceModal
-        triggerModalId="save-invoice-modal"
-        title="Save Invoice"
-        isFullPaid={isFullPaid}
-        setIsFullPaid={setIsFullPaid}
-        isPendingSubmittion={mutation.isPending || isEditInvoicePending}
-      />
+        {previewingInvoice && (
+          <PrintInvoiceModal
+            triggerModalId="preview-invoice"
+            title="Preview Inovice"
+            previewingInvoice={previewingInvoice}
+            prev
+          />
+        )}
+
+        <SaveInvoiceModal
+          triggerModalId="save-invoice-modal"
+          title="Save Invoice"
+          isFullPaid={isFullPaid}
+          setIsFullPaid={setIsFullPaid}
+          isPendingSubmittion={mutation.isPending || isEditInvoicePending}
+        />
+      </div>
     </form>
   );
 }

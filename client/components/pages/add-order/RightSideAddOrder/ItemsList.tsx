@@ -32,7 +32,7 @@ function ItemsList() {
   };
 
   return (
-    <div className="col-span-2">
+    <div className="w-full flex-grow flex flex-col">
       <div className="flex items-center justify-between ">
         <div>
           <p>Products & Services Added</p>
@@ -46,11 +46,11 @@ function ItemsList() {
           </span>
         )}
       </div>
-      <div className="col-span-2 h-[27vh] overflow-y-auto">
+      <div className="col-span-2 h-[27vh] overflow-y-auto flex-grow">
         {cart.map((item) => (
           <div
             key={item.name}
-            className="flex items-center justify-between p-4"
+            className="flex items-center justify-between px-0 py-2"
           >
             {item.type === "product" ? (
               <p
