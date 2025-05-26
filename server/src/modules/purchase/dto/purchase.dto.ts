@@ -119,6 +119,12 @@ export class PurchaseDto {
   vatLBP: number;
 
   @ApiProperty({
+    required: false,
+  })
+  @IsNumber()
+  subTotal: number;
+
+  @ApiProperty({
     required: true,
   })
   @IsNumber()
