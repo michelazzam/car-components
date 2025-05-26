@@ -351,7 +351,7 @@ function RightSideAddOrder({
         <div className="flex items-center justify-between mt-2">
           {!editingInvoice ? (
             <button
-              onClick={() => {
+              onDoubleClick={() => {
                 reset();
                 clearPosStore();
               }}
