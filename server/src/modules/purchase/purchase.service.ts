@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
 import mongoose, { FilterQuery, Model } from 'mongoose';
@@ -12,7 +12,7 @@ import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
 
 @Injectable()
-export class PurchaseService {
+export class PurchaseService implements OnModuleInit {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
@@ -22,6 +22,33 @@ export class PurchaseService {
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
   ) {}
+
+  onModuleInit() {
+    this.markPaidPurchasesAsPaid();
+  }
+
+  // for old purchases, do a migration
+  private async markPaidPurchasesAsPaid() {
+    const purchases = await this.purchaseModel.find({
+      isPaid: false,
+    });
+
+    let purchasesCount = 0;
+    for (const purchase of purchases) {
+      const isPaid = purchase.totalAmount <= purchase.amountPaid;
+
+      await this.purchaseModel.updateOne(
+        { _id: purchase._id },
+        {
+          isPaid,
+        },
+      );
+
+      purchasesCount++;
+    }
+
+    console.log(`Marked ${purchasesCount} old purchases as paid`);
+  }
 
   async getAll(dto: GetPurchaseDto) {
     const {
