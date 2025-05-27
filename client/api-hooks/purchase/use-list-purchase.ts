@@ -11,6 +11,7 @@ const useListPurchase = ({
   startDate,
   endDate,
   supplierId,
+  enabled = true,
 }: {
   pageSize?: number;
   pageIndex?: number;
@@ -19,6 +20,7 @@ const useListPurchase = ({
   startDate?: string;
   endDate?: string;
   supplierId?: string;
+  enabled?: boolean;
 }) => {
   return useReadData<PurchaseResponse>({
     queryKey: [
@@ -27,6 +29,7 @@ const useListPurchase = ({
     ],
     endpoint: API.listPurchase,
     keepPreviousData: true,
+    enabled,
     params: {
       pageSize,
       pageIndex,

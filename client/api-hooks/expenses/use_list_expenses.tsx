@@ -13,6 +13,7 @@ export interface Expense {
   supplier?: Supplier;
   createdAt: string;
   updatedAt: string;
+  purchases: string[];
   __v: number;
 }
 

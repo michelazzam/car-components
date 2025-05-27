@@ -8,6 +8,7 @@ function Checkbox({
   onValueChange,
   isChecked,
   setIsChecked,
+  className,
 }: {
   id?: string;
   readOnly?: boolean;
@@ -16,10 +17,11 @@ function Checkbox({
   onValueChange?: (value: boolean) => void;
   isChecked: boolean;
   setIsChecked?: (value: boolean) => void;
+  className?: string;
 }) {
   return (
     <>
-      <div className="" id={id}>
+      <div className={className} id={id}>
         <label className=" text-sm font-medium text-gray-700 flex items-center cursor-pointer">
           <input
             readOnly={readOnly}
