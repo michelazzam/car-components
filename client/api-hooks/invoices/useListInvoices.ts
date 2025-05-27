@@ -65,8 +65,17 @@ export interface Invoice {
   customerNote?: string;
   items: GetItem[];
   createdAt: string;
+  swaps?: Swap[];
   __v?: number;
 }
+
+export interface Swap {
+  itemName: string;
+  quantity: number;
+  price: number;
+  note?: string;
+}
+
 interface InvoiceResponse {
   invoices: Invoice[];
   flattenedInvoices: FlattenedInvoice[];

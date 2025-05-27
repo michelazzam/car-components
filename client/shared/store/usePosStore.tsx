@@ -1,4 +1,4 @@
-import { GetItem, Invoice } from "@/api-hooks/invoices/useListInvoices";
+import { GetItem, Invoice, Swap } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
 
 function calculateDiscountedAmount(
@@ -46,6 +46,8 @@ interface PosState {
   cart: Item[];
   vatAmount: number;
   setVatAmount: (vatAmount: number) => void;
+  swaps: Swap[];
+  setSwaps: (swaps: Swap[]) => void;
   discountStore: Discount;
   applyDiscount: (amount: number, type: "percentage" | "fixed") => Discount;
   payLater: boolean;
@@ -72,8 +74,9 @@ export const usePosStore = create<PosState>()((set, get) => ({
   discountStore: { amount: 0, type: "fixed" },
   payLater: false,
   editingInvoice: undefined,
-
+  swaps: [],
   // Setters
+  setSwaps: (swaps: Swap[]) => set({ swaps }),
   setVatAmount: (vatAmount: number) => set({ vatAmount }),
   setPayLater: (payLater: boolean) => set({ payLater }),
   setEditingInvoice: (invoice?: Invoice) => {
@@ -147,7 +150,8 @@ export const usePosStore = create<PosState>()((set, get) => ({
   },
 
   totalAmount: (isVatActive: boolean) => {
-    const { cart, vatAmount, discountStore } = get();
+    console.log("CALCULATING TOTAL....");
+    const { cart, vatAmount, discountStore, swaps } = get();
 
     let totalItemsAmount = Number(
       cart.reduce((total: number, item: Item) => total + Number(item.amount), 0)
@@ -156,18 +160,22 @@ export const usePosStore = create<PosState>()((set, get) => ({
     // Ensure vatAmount and discountStore.amount are valid numbers
     const validVatAmount = isVatActive ? Number(vatAmount) || 0 : 0;
     const discountAmount = Number(discountStore.amount) || 0;
-
+    const swapsDiscount = swaps.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+    console.log("SWAPS DISCOUNT IS : ", swapsDiscount);
     if (discountStore.type === "percentage") {
       const discountValue = totalItemsAmount * (discountAmount * 0.01);
       let totalItemsAmountWithDiscount = Number(
-        totalItemsAmount - discountValue
+        totalItemsAmount - discountValue - swapsDiscount
       );
       return parseFloat(
         (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)
       );
     } else {
       let totalItemsAmountWithDiscount = Number(
-        totalItemsAmount - discountAmount
+        totalItemsAmount - discountAmount - swapsDiscount
       );
       return parseFloat(
         (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)

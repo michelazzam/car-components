@@ -376,6 +376,17 @@ const AddInvoiceSchema = z
     totalUsd: z.number(),
     customerNote: z.string().optional(),
     type: z.enum(["s1", "s2"]),
+
+    swaps: z
+      .array(
+        z.object({
+          itemName: z.string(),
+          quantity: z.number(),
+          price: z.number(),
+          note: z.string().optional(),
+        })
+      )
+      .nullable(),
   })
   .refine(
     (data) => {
