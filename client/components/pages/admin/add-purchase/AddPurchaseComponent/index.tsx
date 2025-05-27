@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import TotalsCard from "./TotalsCard";
 import AddItemForm from "./AddItemForm";
@@ -24,6 +24,8 @@ const CustomAddPurchaseComponent = () => {
     totals,
     addPayment: addExpense,
     setEditingPurchase,
+    tva,
+    addPayment,
   } = usePurchase();
   //----------------------------------API CALLS-------------------------------------
 
@@ -47,6 +49,13 @@ const CustomAddPurchaseComponent = () => {
   const addPurchaseFormRef = useRef<HTMLFormElement | null>(null);
 
   //----------------------------------FORM SETUP------------------------------------
+  useEffect(() => {
+    if (editingPurchase) {
+      addPayment({
+        amount: editingPurchase.amountPaid,
+      });
+    }
+  }, [editingPurchase]);
 
   const methods = useForm<AddPurchaseSchemaType>({
     resolver: zodResolver(apiValidations.AddPurchaseSchema),
@@ -74,6 +83,10 @@ const CustomAddPurchaseComponent = () => {
   };
 
   const onSubmitAddEdit = (data: AddPurchaseSchemaType) => {
+    const tvaAmountInDollars = Number(
+      ((totals.totalAmount * tva) / 100)?.toFixed(2)
+    );
+
     const newData = {
       ...data,
       items: productsStore.map((product) => ({
@@ -83,7 +96,8 @@ const CustomAddPurchaseComponent = () => {
 
       amountPaid: totals.totalAmountPaid,
       notes: expense.note,
-      totalAmount: totals.totalAmount,
+      totalAmount: totals.totalAmount + tvaAmountInDollars,
+      subTotal: totals.totalAmount,
     };
 
     if (editingPurchase) {
@@ -110,7 +124,7 @@ const CustomAddPurchaseComponent = () => {
             ref={addPurchaseFormRef}
             onSubmit={handleSubmit(onSubmitAddEdit, onError)}
           >
-            <div className="grid grid-cols-12 mb-4 gap-x-4">
+            <div className="grid grid-cols-6 lg:grid-cols-12 mb-4 gap-x-4">
               <div className="col-span-6 bg-gray-100 rounded-lg">
                 <InvoiceDetailsForm />
               </div>

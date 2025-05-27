@@ -83,6 +83,7 @@ function ItemCard({ product }: { product: Product }) {
           <h3 className="font-semibold text-[.875rem] block text-truncate">
             {product?.name}
           </h3>
+          <p className="text-gray-500">cost: ${product?.cost} </p>
           <div className="text-success text-lg font-bold">
             $ {product?.price}
           </div>
