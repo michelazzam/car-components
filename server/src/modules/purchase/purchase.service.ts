@@ -201,6 +201,14 @@ export class PurchaseService {
   async delete(purchaseId: string) {
     await this.revertPurchaseEffects(purchaseId);
 
+    // remove purchase link from expenses
+    await this.expenseModel.updateMany(
+      { purchases: purchaseId },
+      {
+        $pull: { purchases: purchaseId },
+      },
+    );
+
     await this.purchaseModel.findByIdAndDelete(purchaseId);
   }
 
@@ -290,7 +298,7 @@ export class PurchaseService {
         supplierId: dto.supplierId,
         amount: dto.amountPaid,
         date: getFormattedDate(new Date()),
-        purchasesIds: [purchaseId],
+        purchases: [purchaseId],
       });
 
       // link the expense to the purchase
