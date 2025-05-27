@@ -36,6 +36,13 @@ export class Purchase {
   @Prop({ required: true })
   amountPaid: number;
 
+  @Prop({ required: false, default: false })
+  isPaid: boolean;
+
+  // the first one is the one created when purchase is created
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Expense' })
+  expenses: mongoose.Schema.Types.ObjectId[];
+
   @Prop({ required: true })
   items: {
     item: mongoose.Schema.Types.ObjectId;

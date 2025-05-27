@@ -6,11 +6,13 @@ import { Purchase, PurchaseSchema } from './purchase.schema';
 import { AccountingModule } from '../accounting/accounting.module';
 import { SupplierModule } from '../supplier/supplier.module';
 import { ItemModule } from '../item/item.module';
+import { Expense, ExpenseSchema } from '../expense/expense.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Purchase.name, schema: PurchaseSchema },
+      { name: Expense.name, schema: ExpenseSchema },
     ]),
     AccountingModule,
     SupplierModule,
@@ -18,5 +20,6 @@ import { ItemModule } from '../item/item.module';
   ],
   controllers: [PurchaseController],
   providers: [PurchaseService],
+  exports: [PurchaseService],
 })
 export class PurchaseModule {}

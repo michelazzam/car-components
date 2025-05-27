@@ -98,6 +98,33 @@ class PaymentMethod {
   note: string;
 }
 
+class Swap {
+  @ApiProperty({
+    required: true,
+  })
+  @IsString()
+  itemName: string;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  quantity: number;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  price: number;
+
+  @ApiProperty({
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  note: string;
+}
+
 export class InvoiceDto {
   @ApiProperty({
     required: false,
@@ -179,6 +206,16 @@ export class InvoiceDto {
   @ValidateNested()
   @Type(() => InvoiceItem)
   items: InvoiceItem[];
+
+  @ApiProperty({
+    required: true,
+    type: Swap,
+    isArray: true,
+  })
+  @IsArray()
+  @ValidateNested()
+  @Type(() => Swap)
+  swaps: Swap[];
 }
 
 // New interface with added fields

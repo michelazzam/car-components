@@ -17,6 +17,9 @@ export class Expense {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' })
   supplier: mongoose.Types.ObjectId;
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Purchase' })
+  purchases: mongoose.Types.ObjectId[];
 }
 
 export type IExpense = HydratedDocument<Expense>;

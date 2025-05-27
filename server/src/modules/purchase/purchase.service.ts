@@ -9,12 +9,15 @@ import { AccountingService } from '../accounting/accounting.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
+import { Expense, IExpense } from '../expense/expense.schema';
 
 @Injectable()
 export class PurchaseService {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
+    @InjectModel(Expense.name)
+    private expenseModel: Model<IExpense>,
     private readonly itemService: ItemService,
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
@@ -92,7 +95,8 @@ export class PurchaseService {
         .sort({ createdAt: -1 })
         .skip(pageIndex * pageSize)
         .limit(pageSize)
-        .populate('supplier'),
+        .populate('supplier')
+        .populate('expenses'),
       this.purchaseModel.countDocuments(filter),
     ]);
 
@@ -107,6 +111,10 @@ export class PurchaseService {
         totalPages,
       },
     };
+  }
+
+  async getManyByIds(ids: string[]) {
+    return this.purchaseModel.find({ _id: { $in: ids } });
   }
 
   async create(dto: PurchaseDto) {
@@ -128,8 +136,10 @@ export class PurchaseService {
 
     const accounting = await this.accountingService.getAccounting();
 
+    const isPaid = dto.totalAmount <= dto.amountPaid;
+
     // save the purchase
-    await this.purchaseModel.create({
+    const newPurchase = await this.purchaseModel.create({
       supplier: dto.supplierId,
       invoiceNumber: dto.invoiceNumber,
       invoiceDate: dto.invoiceDate,
@@ -142,9 +152,10 @@ export class PurchaseService {
       amountPaid: dto.amountPaid,
       usdRate: accounting.usdRate,
       items: dto.items,
+      isPaid,
     });
 
-    await this.doPurchaseEffects(dto);
+    await this.doPurchaseEffects(dto, newPurchase._id?.toString());
   }
 
   async edit(purchaseId: string, dto: PurchaseDto) {
@@ -166,6 +177,8 @@ export class PurchaseService {
       currentItemCost: product.cost,
     }));
 
+    const isPaid = dto.totalAmount <= dto.amountPaid;
+
     // update the purchase
     await this.purchaseModel.findByIdAndUpdate(purchaseId, {
       supplier: dto.supplierId,
@@ -179,18 +192,59 @@ export class PurchaseService {
       totalAmount: dto.totalAmount,
       amountPaid: dto.amountPaid,
       items: dto.items,
+      isPaid,
     });
 
-    await this.doPurchaseEffects(dto);
+    await this.doPurchaseEffects(dto, purchaseId);
   }
 
   async delete(purchaseId: string) {
     await this.revertPurchaseEffects(purchaseId);
 
+    // remove purchase link from expenses
+    await this.expenseModel.updateMany(
+      { purchases: purchaseId },
+      {
+        $pull: { purchases: purchaseId },
+      },
+    );
+
     await this.purchaseModel.findByIdAndDelete(purchaseId);
   }
 
-  private async doPurchaseEffects(dto: PurchaseDto) {
+  async updatePurchasePayments({
+    purchaseId,
+    amount,
+    isPaid,
+    expenseLinking,
+  }: {
+    purchaseId: string;
+    amount: number;
+    isPaid: boolean;
+    expenseLinking: {
+      expenseId: string;
+      action: 'add' | 'remove';
+    };
+  }) {
+    const updatePayload: any = {
+      $set: {
+        isPaid,
+      },
+      $inc: {
+        amountPaid: amount,
+      },
+    };
+
+    if (expenseLinking.action === 'add') {
+      updatePayload.$addToSet = { expenses: expenseLinking.expenseId };
+    } else if (expenseLinking.action === 'remove') {
+      updatePayload.$pull = { expenses: expenseLinking.expenseId };
+    }
+
+    await this.purchaseModel.updateOne({ _id: purchaseId }, updatePayload);
+  }
+
+  private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
     // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemService.getOneById(item.itemId);
@@ -238,9 +292,31 @@ export class PurchaseService {
       }
     }
 
-    // decrease caisse
+    // save the amount paid as expense
+    if (dto.amountPaid > 0) {
+      const newExpense = await this.expenseModel.create({
+        supplierId: dto.supplierId,
+        amount: dto.amountPaid,
+        date: getFormattedDate(new Date()),
+        purchases: [purchaseId],
+      });
+
+      // link the expense to the purchase
+      await this.purchaseModel.updateOne(
+        { _id: purchaseId },
+        {
+          $push: {
+            expenses: newExpense._id,
+          },
+        },
+      );
+    }
+
     await this.accountingService.incAccountingNumberFields({
+      // decrease caisse
       caisse: -dto.amountPaid,
+      // increase total expense
+      totalExpenses: dto.amountPaid,
     });
   }
 
@@ -254,7 +330,7 @@ export class PurchaseService {
     for (const item of purchase.items) {
       const product = await this.itemService.getOneById(item.item?.toString());
       if (!product) {
-        continue; //ignore deleted products
+        continue; //-> ignore deleted products
       }
 
       // Revert quantity
@@ -285,7 +361,8 @@ export class PurchaseService {
           totalSuppliersLoan: -supplier.loan,
         });
       }
-      //ignore deleted suppliers
+
+      //-> ignore deleted suppliers
     } else {
       // revert decreasing supplier loan in case when paid he paid more than needed
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -303,12 +380,31 @@ export class PurchaseService {
           totalSuppliersLoan: supplier.loan,
         });
       }
-      //ignore deleted suppliers
+
+      //-> ignore deleted suppliers
     }
 
-    // increase caisse
+    const expenseId = purchase.expenses?.[0]?.toString();
+    if (expenseId) {
+      // delete expense
+      await this.expenseModel.deleteOne({
+        _id: expenseId,
+      });
+
+      // remove expense from purchase
+      await this.purchaseModel.updateOne(
+        { _id: purchaseId },
+        {
+          $pull: { expenses: expenseId },
+        },
+      );
+    }
+
     await this.accountingService.incAccountingNumberFields({
+      // increase caisse
       caisse: purchase.amountPaid,
+      // decrease total expense
+      totalExpenses: -purchase.amountPaid,
     });
   }
 }

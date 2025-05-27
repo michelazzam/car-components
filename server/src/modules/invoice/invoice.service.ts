@@ -317,6 +317,7 @@ export class InvoiceService {
       paymentMethods: updatedDto.paymentMethods,
       type: dto.type,
       customerNote: updatedDto.customerNote,
+      swaps: updatedDto.swaps,
       accounting: {
         isPaid,
         usdRate: accounting.usdRate,
@@ -352,6 +353,7 @@ export class InvoiceService {
       type: dto.type,
       customerNote: updatedDto.customerNote,
       paymentMethods: updatedDto.paymentMethods,
+      swaps: updatedDto.swaps,
       accounting: {
         isPaid,
 

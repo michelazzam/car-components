@@ -27,6 +27,13 @@ export class Invoice {
     note?: string;
   }[];
 
+  @Prop()
+  swaps: {
+    itemName: string;
+    quantity: number;
+    price: number;
+  }[];
+
   @Prop({ required: true, type: Object })
   accounting: {
     isPaid: boolean;
