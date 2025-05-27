@@ -5,7 +5,7 @@ import {
   ReactTablePaginated,
   useReactTablePagination,
 } from "@/shared/ReactTablePaginated";
-import { FaRegEdit } from "react-icons/fa";
+import { FaCheckCircle, FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
 import { FaEye, FaRegTrashCan } from "react-icons/fa6";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -23,6 +23,8 @@ import SelectField, {
   SelectOption,
 } from "@/components/admin/Fields/SlectField";
 import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
+import ExpenseModal from "@/components/pages/admin/expenses/ExpenseModal";
+import { cn } from "@/utils/cn";
 
 const PurchasePage = () => {
   const { pageIndex, pageSize, pagination, setPagination } =
@@ -82,7 +84,7 @@ const PurchasePage = () => {
     }),
 
     columnHelper.accessor("phoneNumber", {
-      header: "Phone Number",
+      header: "Phone",
       cell: ({ getValue }) => {
         const phone = getValue();
 
@@ -91,8 +93,49 @@ const PurchasePage = () => {
     }),
 
     columnHelper.accessor("vatPercent", {
-      header: "VAT Percent",
+      header: "VAT",
       cell: ({ getValue }) => <div>{getValue()}%</div>,
+    }),
+
+    columnHelper.accessor("totalAmount", {
+      header: "Remaining",
+      cell: ({ cell }) => {
+        const totalAmount = cell.getValue();
+        const amountPaid = cell.row.original.amountPaid;
+        const remainingAmount = totalAmount - amountPaid;
+        return (
+          <div>
+            <div
+              className={cn(
+                "text-lg font-bold",
+                remainingAmount >= 0 ? "text-success" : "text-danger"
+              )}
+            >
+              $ {remainingAmount}
+            </div>
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("isPaid", {
+      header: "Payment",
+      cell: ({ getValue, row }) => (
+        <div className="flex items-center justify-center">
+          {getValue() ? (
+            <FaCheckCircle className="text-success" />
+          ) : (
+            <button
+              onClick={() => {
+                setSelectedPurchase(row.original);
+              }}
+              data-hs-overlay="#add-expense-modal"
+              className="ti ti-btn ti-btn-primary ti-btn-wave rounded-md"
+            >
+              Pay Now
+            </button>
+          )}
+        </div>
+      ),
     }),
 
     columnHelper.display({
@@ -205,6 +248,12 @@ const PurchasePage = () => {
         queryKeysToInvalidate={[["purchases"]]}
       />
       <ViewPurchaseModal purchase={selectedPurchase} />
+      <ExpenseModal
+        triggerModalId="add-expense-modal"
+        modalTitle="Add Expense"
+        purchase={selectedPurchase}
+        setPurchase={setSelectedPurchase}
+      />
     </div>
   );
 };

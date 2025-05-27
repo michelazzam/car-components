@@ -19,7 +19,10 @@ import Checkbox from "@/components/admin/Fields/Checkbox";
 import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 import { useDebounce } from "@/hooks/useDebounce";
 import MultiSelectFieldControlled from "@/components/admin/FormControlledFields/MultiSelectFieldControlled";
-import { useListPurchase } from "@/api-hooks/purchase/use-list-purchase";
+import {
+  Purchase,
+  useListPurchase,
+} from "@/api-hooks/purchase/use-list-purchase";
 
 function ExpenseModal({
   expense,
@@ -27,12 +30,16 @@ function ExpenseModal({
   modalTitle,
   setSelectedExpense,
   onSuccess,
+  purchase,
+  setPurchase,
 }: {
   expense?: Expense;
   triggerModalId: string;
   modalTitle: string;
   setSelectedExpense?: (expense: Expense | undefined) => void;
   onSuccess?: ({ amount, note }: { amount: number; note: string }) => void;
+  purchase?: Purchase;
+  setPurchase?: React.Dispatch<React.SetStateAction<Purchase | undefined>>;
 }) {
   //---------------------------REFS------------------------------
   const expenseFormRef = useRef<HTMLFormElement>(null);
@@ -54,6 +61,25 @@ function ExpenseModal({
         purchasesIds: [],
       },
     });
+
+  useEffect(() => {
+    if (purchase) {
+      setValue("supplierId", purchase.supplier?._id);
+      setValue("amount", purchase.totalAmount - purchase.amountPaid);
+      console.log("TOTAL AMOUNT IS : ", purchase.totalAmount);
+      console.log("AMOUNT PAID IS : ", purchase.amountPaid);
+      console.log(
+        "DIFFERENCE IS : ",
+        purchase.totalAmount - purchase.amountPaid
+      );
+      setValue("purchasesIds", [
+        {
+          label: purchase.invoiceNumber,
+          value: purchase._id,
+        },
+      ]);
+    }
+  }, [purchase]);
 
   const amount = watch("amount");
   const note = watch("note");
@@ -186,6 +212,7 @@ function ExpenseModal({
       size="md"
       onClose={() => {
         setSelectedExpense?.(undefined);
+        setPurchase?.(undefined);
         reset();
       }}
     >
@@ -217,6 +244,7 @@ function ExpenseModal({
           />
           <SelectFieldControlled
             control={control}
+            disabled={!!purchase}
             name="supplierId"
             label="Supplier"
             options={suppliersOptions || []}

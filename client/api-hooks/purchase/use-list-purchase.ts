@@ -60,6 +60,7 @@ export type Purchase = {
   totalAmount: number;
   subTotal?: number;
   amountPaid: number;
+  isPaid: boolean;
   items: [
     {
       itemId: string;
