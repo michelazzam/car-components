@@ -28,6 +28,9 @@ export class Purchase {
   vatLBP: number;
 
   @Prop({ required: true })
+  subTotal: number;
+
+  @Prop({ required: true })
   totalAmount: number;
 
   @Prop({ required: true })

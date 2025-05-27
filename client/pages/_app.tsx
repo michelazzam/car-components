@@ -22,7 +22,7 @@ function MyApp({ Component, pageProps }: any) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools />
+      <ReactQueryDevtools buttonPosition="bottom-left" />
       <Toaster />
       {/* <AuthProvider> */}
       <Layout>

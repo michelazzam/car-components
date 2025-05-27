@@ -10,7 +10,6 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import DeleteRecord from "@/components/admin/DeleteRecord";
-import Link from "next/link";
 import AddEditPaymentMethodModal from "@/components/pages/admin/payment-methods/AddEditPaymentMethodModal";
 import {
   PaymentMethod,
@@ -34,17 +33,7 @@ const PaymentMethods = () => {
       id: "actions",
       header: "",
       cell: ({ row }) => (
-        <div
-          className="flex align-middle gap-2"
-          style={{ display: "flex", justifyContent: "space-around" }}
-        >
-          <Link
-            href={`/admin/inventory/${row.original._id}`}
-            className="btn btn-sm btn-primary delete-btn text-primary border border-primary rounded-md p-1 hover:bg-primary hover:text-white"
-          >
-            Show Details
-          </Link>
-
+        <div className="flex align-middle gap-2 justify-end">
           <button
             id="edit-btn"
             onClick={() => setSelectedPaymentMethod(row.original)}

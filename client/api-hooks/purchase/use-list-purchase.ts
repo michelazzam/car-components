@@ -55,6 +55,7 @@ export type Purchase = {
   vatPercent: number;
   vatLBP: number;
   totalAmount: number;
+  subTotal?: number;
   amountPaid: number;
   items: [
     {

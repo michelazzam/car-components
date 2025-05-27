@@ -3,7 +3,6 @@ import { useListVehicles } from "@/api-hooks/vehicles/use_list_vehicles";
 import TextField from "@/components/admin/Fields/TextField";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { FaCarRear } from "react-icons/fa6";
 import { IoMdPersonAdd } from "react-icons/io";
 import CustomerModal from "../../admin/customers/CustomerModal";
 import VehicleModal from "../../admin/vehicles/VehicleModal";
@@ -14,6 +13,8 @@ import SelectFieldControlled from "@/components/admin/FormControlledFields/Selec
 import { BiSolidMessageAltEdit } from "react-icons/bi";
 import { MdCancel, MdPayment } from "react-icons/md";
 import InvoicePaymentMethodModal from "./InvoicePaymentMethodModal";
+import Checkbox from "@/components/admin/Fields/Checkbox";
+import { HiOutlinePlusSm } from "react-icons/hi";
 
 function Header({
   search,
@@ -31,7 +32,7 @@ function Header({
   if (!formContext) return <div>Loading...</div>;
 
   const { control, watch, setValue, reset: resetForm } = formContext;
-  const { customerId: customerId } = watch();
+  const { customerId: customerId, hasVehicle } = watch();
 
   const debouncedSearch = useDebounce(customerSearch);
   const vehiclesDebouncedSearch = useDebounce(vehicleSearch);
@@ -102,14 +103,22 @@ function Header({
           </button>
         </div>
       )}
-      <div className="grid grid-cols-6 gap-5 items-center justify-between pe-2 w-full">
+      <div className="grid grid-cols-8 gap-5 items-center justify-between pe-2 w-full">
         <div className="col-span-2 flex items-center justify-between w-full">
           <SelectFieldControlled
+            AddButton={
+              <button
+                className="ti ti-btn-secondary ti-btn h-full aspect-square"
+                data-hs-overlay="#add-customer-modal"
+              >
+                <IoMdPersonAdd />
+              </button>
+            }
             control={control}
             label="Customer"
             name="customerId"
             options={customerOptions || []}
-            placeholder={"choose customer"}
+            placeholder={"choose"}
             creatable={false}
             onInputChange={(e) => {
               setCustomerSearch(e);
@@ -120,18 +129,18 @@ function Header({
               setValue("customer", e);
             }}
           />
-          <button
-            className="flex items-center justify-end"
-            data-hs-overlay="#add-customer-modal"
-          >
-            <div className="border rounded-sm bg-primary p-1">
-              <IoMdPersonAdd className="w-6 h-6 text-white" />
-            </div>
-          </button>
         </div>
 
-        <div className="col-span-2 flex items-center justify-between w-full">
+        <div className="col-span-3 flex items-center justify-between w-full">
           <SelectFieldControlled
+            AddButton={
+              <button
+                className="ti ti-btn-secondary ti-btn h-full aspect-square"
+                data-hs-overlay="#add-vehicle-modal"
+              >
+                <HiOutlinePlusSm />
+              </button>
+            }
             control={control}
             label="Vehicle"
             name="vehicleId"
@@ -141,7 +150,7 @@ function Header({
             }`}
             colSpan={4}
             creatable={false}
-            disabled={customerId ? false : true}
+            disabled={!hasVehicle || (customerId ? false : true)}
             onInputChange={(e) => {
               setVehicleSearch(e);
             }}
@@ -149,14 +158,13 @@ function Header({
               setValue("vehicle", e);
             }}
           />
-          <button
-            className="col-span-2 flex items-center justify-end"
-            data-hs-overlay="#add-vehicle-modal"
-          >
-            <div className=" border rounded-sm bg-primary p-1">
-              <FaCarRear className="w-6 h-6 text-white" />
-            </div>
-          </button>
+        </div>
+        <div className="col-span-1">
+          <Checkbox
+            label="No Vehicle"
+            isChecked={!hasVehicle}
+            onValueChange={() => setValue("hasVehicle", !hasVehicle)}
+          />
         </div>
 
         <div className="col-span-2 flex gap-x-2 justify-end">

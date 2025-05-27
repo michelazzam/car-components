@@ -128,7 +128,7 @@ export type AddUserSchema = z.infer<typeof UserSchema>;
 const ProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
   supplierId: z.string().min(1, "Name is required"),
-  price: z.number().min(1, "Price is required"),
+  price: z.number(),
   cost: z.number(),
   note: z.string().optional(),
   quantity: z.number(),

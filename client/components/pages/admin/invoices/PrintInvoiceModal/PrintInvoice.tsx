@@ -10,16 +10,11 @@ import {
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import numWords from "num-words";
-// import {
-//   CustomerPrev,
-//   InvoicePreviewItem,
-//   PreviewInvoice,
-//   VehiclePrev,
-// } from ".";
 import {
   OrganizationInfoType,
   useGetOrganization,
 } from "@/api-hooks/restaurant/use-get-organization-info";
+import { InvoicePaymentMethodSchemaType } from "@/lib/apiValidations";
 
 const formatCurrencyInWords = (amount: number) => {
   if (typeof amount !== "number" || isNaN(amount)) return "0.00";
@@ -60,10 +55,10 @@ function PrintInvoice({
     totalPriceUsd,
     invoiceUsdRate,
     type,
+    paymentMethods,
   } = useMemo(() => {
     const invoiceData = prev ? previewingInvoice : printingInvoice;
     if (!invoiceData) return {};
-
     return {
       customer: invoiceData.customer,
       vehicle: invoiceData.vehicle,
@@ -77,6 +72,7 @@ function PrintInvoice({
       totalPriceUsd: invoiceData.accounting.totalUsd,
       invoiceUsdRate: invoiceData.accounting.usdRate,
       type: invoiceData.type,
+      paymentMethods: invoiceData.paymentMethods,
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
 
@@ -107,6 +103,7 @@ function PrintInvoice({
             isB2b={type === "s1"}
             createdAt={createdAt}
             invoiceUsdRate={invoiceUsdRate || usdRate.usdRate}
+            paymentMethods={paymentMethods}
           />
           {items && <InvoiceTable items={items} />}
           <InvoiceSubtotal
@@ -181,6 +178,7 @@ const PrintInvoiceDetails = ({
   createdAt,
   invoiceUsdRate,
   isB2b,
+  paymentMethods,
 }: {
   customer?: any;
   vehicle?: any;
@@ -188,13 +186,14 @@ const PrintInvoiceDetails = ({
   createdAt?: string;
   invoiceUsdRate: number;
   isB2b: boolean;
+  paymentMethods?: InvoicePaymentMethodSchemaType[];
 }) => {
   console.log("IS B2b", isB2b);
   console.log("SHOULD HAVE VAT", isB2b ? true : false);
   return (
     <div className="grid grid-cols-12 px-4 py-2">
       {/* Customer and Vehicle Details */}
-      <div className="col-span-4">
+      <div className="col-span-8">
         <p>
           <span className="font-light text-gray-600">Customer:</span>
           <br />
@@ -233,8 +232,17 @@ const PrintInvoiceDetails = ({
             </>
           )}
         </p>
+        <span className="font-bold">Payment Methods:</span>
+        {paymentMethods?.map((paymentMethod, index) => {
+          return (
+            <div key={index} className="flex gap-2">
+              <span>{paymentMethod.method}</span>
+              <span className="text-gray-500">{paymentMethod.note}</span>
+            </div>
+          );
+        })}
       </div>
-      <div className="col-span-8 flex justify-end">
+      <div className="col-span-4 flex justify-end">
         <p>
           {invoiceNumber ? (
             <span className="font-bold">Invoice # TB{invoiceNumber}</span>
