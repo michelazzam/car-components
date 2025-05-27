@@ -269,7 +269,7 @@ const ExpenseSchema = z
     date: z.string().min(1, "Date is required"),
     supplierId: z.string().optional(),
     note: z.string().optional(),
-    purchasesIds: z.array(z.string()).optional(),
+    purchasesIds: z.array(z.object({ label: z.string(), value: z.string() })),
     // if there is supplier then we dont need expense type , else make it required
   })
   .refine(

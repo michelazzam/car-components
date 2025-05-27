@@ -127,6 +127,7 @@ function ExpenseModal({
   ) => {
     const refinedData = {
       ...data,
+      purchasesIds: data.purchasesIds.map((item) => item.value),
       expenseTypeId:
         data.expenseTypeId && data.expenseTypeId.length > 0
           ? data.expenseTypeId
@@ -156,7 +157,13 @@ function ExpenseModal({
         date: expense?.date || "",
         note: expense?.note || "",
         supplierId: expense?.supplier?._id || "",
-        purchasesIds: expense?.purchases || [],
+        purchasesIds:
+          expense?.purchases?.map((purchase) => {
+            return {
+              label: purchase.invoiceNumber,
+              value: purchase._id,
+            };
+          }) || [],
       });
     } else {
       // Reset the form to default values if there's no expense (e.g., for creating a new expense)
@@ -228,6 +235,7 @@ function ExpenseModal({
             disabled={!supplierId}
             control={control}
             name="purchasesIds"
+            treatAsObject
             label="Purchases"
             options={purchasesOptions || []}
             placeholder={"Choose Purchases"}

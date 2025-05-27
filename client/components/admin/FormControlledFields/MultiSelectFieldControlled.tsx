@@ -24,6 +24,7 @@ interface MultiSelectFieldControlledProps {
   control: Control<any>;
   disabled?: boolean;
   placeholder: string;
+  treatAsObject?: boolean;
   onSearchChange?: (value: string) => void;
 }
 
@@ -34,10 +35,10 @@ export default function MultiSelectFieldControlled({
   name,
   label,
   control,
-
   disabled = false,
   placeholder,
   onSearchChange,
+  treatAsObject = false,
 }: MultiSelectFieldControlledProps) {
   const { field } = useController({ name, control });
 
@@ -112,10 +113,20 @@ export default function MultiSelectFieldControlled({
   // Toggle an option
   function handleCheckboxChange(option: SelectOption) {
     let newValues;
-    if (selectedValues.includes(option.value)) {
-      newValues = selectedValues.filter((v) => v !== option.value);
+    if (treatAsObject) {
+      if (selectedValues.map((v) => v.value).includes(option.value)) {
+        console.log("REMOVE VALUE IS : ", option);
+        newValues = selectedValues.filter((v) => v.value !== option.value);
+      } else {
+        newValues = [...selectedValues, option];
+      }
+      console.log("NEW VALUES ARE : ", newValues);
     } else {
-      newValues = [...selectedValues, option.value];
+      if (selectedValues.includes(option.value)) {
+        newValues = selectedValues.filter((v) => v !== option.value);
+      } else {
+        newValues = [...selectedValues, option.value];
+      }
     }
     field.onChange(newValues);
   }
@@ -127,7 +138,7 @@ export default function MultiSelectFieldControlled({
 
   // For display
   const isSelectedSome = selectedValues.length > 0;
-
+  console.log("SELECTED VALUES ARE: ", selectedValues);
   return (
     <div className={cn("relative w-full mb-5", tailwindColsClasses[colSpan])}>
       {label && (
@@ -150,9 +161,11 @@ export default function MultiSelectFieldControlled({
       >
         <p className="truncate">
           {isSelectedSome
-            ? selectedValues
-                .map((v) => options.find((o) => o.value === v)?.label)
-                .join(", ")
+            ? treatAsObject
+              ? selectedValues.map((v) => v.label).join(", ")
+              : selectedValues
+                  .map((v) => options.find((o) => o.value === v)?.label)
+                  .join(", ")
             : placeholder}
         </p>
         <span onClick={handleClear} className="cursor-pointer">
@@ -182,7 +195,9 @@ export default function MultiSelectFieldControlled({
 
             {/* Checkbox list */}
             {sortedOptions.map((option) => {
-              const isChecked = selectedValues.includes(option.value);
+              const isChecked = treatAsObject
+                ? selectedValues.map((v) => v.value).includes(option.value)
+                : selectedValues.includes(option.value);
               return (
                 <div key={option.value}>
                   <Checkbox
