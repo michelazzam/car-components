@@ -19,12 +19,19 @@ import Search from "@/components/admin/Search";
 import SelectField, {
   SelectOption,
 } from "@/components/admin/Fields/SlectField";
-import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
+import {
+  Supplier,
+  useListSupplier,
+} from "@/api-hooks/supplier/use-list-supplier";
 import ExpenseModal from "@/components/pages/admin/expenses/ExpenseModal";
 import { cn } from "@/utils/cn";
 import DeleteRecord from "@/components/admin/DeleteRecord";
 
-const PurchaseTable = () => {
+const PurchaseTable = ({
+  selectedSupplier,
+}: {
+  selectedSupplier?: Supplier;
+}) => {
   const { pageIndex, pageSize, pagination, setPagination } =
     useReactTablePagination();
 
@@ -51,7 +58,8 @@ const PurchaseTable = () => {
     pageSize: pageSize,
     pageIndex: pageIndex,
     search: debouncedSearch,
-    supplierId: selectedSupplierOption?.value as string,
+    supplierId:
+      selectedSupplier?._id || (selectedSupplierOption?.value as string),
   });
   const purchases = purchasesResponse?.purchases;
 
@@ -185,29 +193,31 @@ const PurchaseTable = () => {
               value={searchValue}
               onChangeSearch={(v) => setSearchValue(v)}
             />
-            <SelectField
-              width="w-[20rem]"
-              marginBottom="mb-0 -mt-1"
-              isClearable
-              options={
-                suppliersData?.suppliers.map((supplier: any) => ({
-                  label: supplier.name,
-                  value: supplier._id,
-                })) || []
-              }
-              placeholder={"Filter by supplier"}
-              onChangeValue={(opt) => {
-                if (opt) {
-                  setSelectedSupplierOption(opt);
-                } else {
-                  setSelectedSupplierOption(undefined);
+            {!selectedSupplier && (
+              <SelectField
+                width="w-[20rem]"
+                marginBottom="mb-0 -mt-1"
+                isClearable
+                options={
+                  suppliersData?.suppliers.map((supplier: any) => ({
+                    label: supplier.name,
+                    value: supplier._id,
+                  })) || []
                 }
-              }}
-              value={selectedSupplierOption}
-              onInputChange={(e) => {
-                setSupplierSearch(e);
-              }}
-            />
+                placeholder={"Filter by supplier"}
+                onChangeValue={(opt) => {
+                  if (opt) {
+                    setSelectedSupplierOption(opt);
+                  } else {
+                    setSelectedSupplierOption(undefined);
+                  }
+                }}
+                value={selectedSupplierOption}
+                onInputChange={(e) => {
+                  setSupplierSearch(e);
+                }}
+              />
+            )}
           </div>
         </div>
         <div className="box-body">

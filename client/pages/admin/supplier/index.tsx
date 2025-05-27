@@ -8,17 +8,18 @@ import {
 } from "@/shared/ReactTablePaginated";
 import { FaRegEdit } from "react-icons/fa";
 import { createColumnHelper } from "@tanstack/react-table";
-import { FaEye, FaRegTrashCan } from "react-icons/fa6";
-import AddEditSupplierModal from "../../components/pages/admin/supplier/AddEditSupplierModal";
+import { FaEye, FaPerson, FaRegTrashCan } from "react-icons/fa6";
 import {
   Supplier,
   useListSupplier,
 } from "@/api-hooks/supplier/use-list-supplier";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { useDebounce } from "@/hooks/useDebounce";
-import DeleteRecord from "../../components/admin/DeleteRecord";
 import { API } from "@/constants/apiEndpoints";
-import ViewSupplierModal from "../../components/pages/admin/supplier/ViewSupplierModal";
+import AddEditSupplierModal from "@/components/pages/admin/supplier/AddEditSupplierModal";
+import ViewSupplierModal from "@/components/pages/admin/supplier/ViewSupplierModal";
+import DeleteRecord from "@/components/admin/DeleteRecord";
+import Link from "next/link";
 
 const SupplierPage = () => {
   const { pagination, setPagination } = useReactTablePagination();
@@ -92,6 +93,13 @@ const SupplierPage = () => {
           className="flex align-middle gap-2"
           style={{ display: "flex", justifyContent: "space-around" }}
         >
+          <Link
+            id="view-btn"
+            className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
+            href={`/admin/supplier/${row.original._id}`}
+          >
+            <FaPerson />
+          </Link>{" "}
           <button
             id="view-btn"
             className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
