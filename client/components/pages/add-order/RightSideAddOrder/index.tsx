@@ -54,6 +54,11 @@ function RightSideAddOrder({
     editingInvoice,
     cart,
   } = usePosStore();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   //---------------------Router----------------------------------------
   const router = useRouter();
@@ -302,38 +307,40 @@ function RightSideAddOrder({
           </div>
 
           {/*  */}
-          <div className="h-[15vh] mb-4 w-full p-2 rounded-md bg-gray-300">
-            <div className="flex items-center justify-between mt-1">
-              <span>Sub Total</span>
-              <span>${cartSum()}</span>
+          {isClient && (
+            <div className="h-[15vh] mb-4 w-full p-2 rounded-md bg-gray-300">
+              <div className="flex items-center justify-between mt-1">
+                <span>Sub Total</span>
+                <span>${cartSum()}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-danger">{`Discount`}</span>
+                <span className="text-danger">{`${
+                  discountStore.type === "fixed" ? "$" : "%"
+                }${discountStore.amount || 0}`}</span>
+              </div>
+              {swaps.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-danger">Swaps Discount</span>
+                    <span className="text-danger">${swapsTotal}</span>
+                  </div>
+                </>
+              )}
+              {!isB2C && (
+                <>
+                  <div className="flex items-center justify-between mt-1">
+                    <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
+                    <span>${vatAmount}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex items-center justify-between mt-1">
+                <span>Total</span>
+                <span>${totalAmount(!isB2C)}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-danger">{`Discount`}</span>
-              <span className="text-danger">{`${
-                discountStore.type === "fixed" ? "$" : "%"
-              }${discountStore.amount || 0}`}</span>
-            </div>
-            {swaps.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-danger">Swaps Discount</span>
-                  <span className="text-danger">${swapsTotal}</span>
-                </div>
-              </>
-            )}
-            {!isB2C && (
-              <>
-                <div className="flex items-center justify-between mt-1">
-                  <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
-                  <span>${vatAmount}</span>
-                </div>
-              </>
-            )}
-            <div className="flex items-center justify-between mt-1">
-              <span>Total</span>
-              <span>${totalAmount(!isB2C)}</span>
-            </div>
-          </div>
+          )}
           {/*  */}
         </div>
         <div>
