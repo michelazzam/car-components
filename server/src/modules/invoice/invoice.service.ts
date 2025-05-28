@@ -335,7 +335,12 @@ export class InvoiceService {
     });
 
     await this.doInvoiceEffects(updatedDto);
-    return createdInvoice;
+    const createdInvoicePopulated = await this.invoiceModel
+      .findById(createdInvoice._id)
+      .populate('customer')
+      .populate('vehicle');
+
+    return createdInvoicePopulated;
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {
