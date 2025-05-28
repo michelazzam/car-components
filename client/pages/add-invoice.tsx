@@ -5,7 +5,7 @@ import ItemsList from "../components/pages/add-order/ItemsList";
 import Header from "../components/pages/add-order/Header";
 import { useListProducts } from "@/api-hooks/products/use-list-products";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddInvoiceSchema, apiValidations } from "@/lib/apiValidations";
@@ -79,6 +79,7 @@ const AddInvoice = () => {
       },
       paidAmountUsd: 0,
       customerId: "",
+      swaps: [],
       customer: {},
       vehicle: {},
       isPaid: false,
@@ -92,6 +93,9 @@ const AddInvoice = () => {
       taxesUsd: 0,
     },
   });
+  const { control } = methods;
+  const swapsFieldArrayMethods = useFieldArray({ control, name: "swaps" });
+
   const isB2C = methods.watch("type") === "s2";
   //-----------------Effects-----------------------------
   useEffect(() => {
@@ -102,6 +106,7 @@ const AddInvoice = () => {
           amount: editingInvoice.accounting.discount.amount,
           type: editingInvoice.accounting.discount.type,
         },
+        swaps: editingInvoice.swaps || [],
         paymentMethods: editingInvoice.paymentMethods || [],
         paidAmountUsd: editingInvoice.accounting.paidAmountUsd,
         customerId: editingInvoice.customer._id,
@@ -167,11 +172,18 @@ const AddInvoice = () => {
       <div className="grid grid-cols-12 h-calculate-60px  ">
         <FormProvider {...methods}>
           <div className="col-span-9 pt-2">
-            <Header search={search} setSearch={setSearch} />
+            <Header
+              search={search}
+              setSearch={setSearch}
+              swapsFieldArrayMethods={swapsFieldArrayMethods}
+            />
             <ItemsList products={products?.items} />
           </div>
           <div className="col-span-3">
-            <RightSideAddOrder refetchProducts={refetchProducts} />
+            <RightSideAddOrder
+              swapsFieldArrayMethods={swapsFieldArrayMethods}
+              refetchProducts={refetchProducts}
+            />
           </div>
         </FormProvider>
       </div>

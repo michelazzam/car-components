@@ -88,7 +88,8 @@ export class ExpenseService {
         .skip(pageIndex * pageSize)
         .limit(pageSize)
         .populate('supplier')
-        .populate('expenseType'),
+        .populate('expenseType')
+        .populate('purchases', { _id: 1, invoiceNumber: 1 }),
       this.expenseModel.countDocuments(filter),
     ]);
 

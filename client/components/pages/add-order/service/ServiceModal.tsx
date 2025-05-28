@@ -96,7 +96,6 @@ const ServiceModal = ({
       },
     });
   const watchNameValue = watch("name");
-  console.log(watchNameValue?.value);
   //------------------------Functions----------------------------------
 
   const handleDelete = (data: ServiceSchema) => {

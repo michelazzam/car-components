@@ -18,6 +18,11 @@ import NumberFieldControlled from "@/components/admin/FormControlledFields/Numbe
 import Checkbox from "@/components/admin/Fields/Checkbox";
 import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 import { useDebounce } from "@/hooks/useDebounce";
+import MultiSelectFieldControlled from "@/components/admin/FormControlledFields/MultiSelectFieldControlled";
+import {
+  Purchase,
+  useListPurchase,
+} from "@/api-hooks/purchase/use-list-purchase";
 
 function ExpenseModal({
   expense,
@@ -25,12 +30,16 @@ function ExpenseModal({
   modalTitle,
   setSelectedExpense,
   onSuccess,
+  purchase,
+  setPurchase,
 }: {
   expense?: Expense;
   triggerModalId: string;
   modalTitle: string;
   setSelectedExpense?: (expense: Expense | undefined) => void;
   onSuccess?: ({ amount, note }: { amount: number; note: string }) => void;
+  purchase?: Purchase;
+  setPurchase?: React.Dispatch<React.SetStateAction<Purchase | undefined>>;
 }) {
   //---------------------------REFS------------------------------
   const expenseFormRef = useRef<HTMLFormElement>(null);
@@ -38,15 +47,6 @@ function ExpenseModal({
 
   //---------------------------STATE--------------------------
   const [keepAdding, setKeepAdding] = useState(false);
-  //-----------------------------------Options----------------
-
-  const { data: expenseType } = useListExpensesType();
-  const expenseTypeOptions = expenseType?.map((exp) => {
-    return {
-      label: exp?.name,
-      value: exp?._id,
-    };
-  });
 
   //---------------------------FORM---------------------------------
   const { handleSubmit, control, reset, setValue, watch } =
@@ -58,11 +58,53 @@ function ExpenseModal({
         amount: 0,
         date: "",
         note: "",
+        purchasesIds: [],
       },
     });
 
+  useEffect(() => {
+    if (purchase) {
+      setValue("supplierId", purchase.supplier?._id);
+      setValue("amount", purchase.totalAmount - purchase.amountPaid);
+      console.log("TOTAL AMOUNT IS : ", purchase.totalAmount);
+      console.log("AMOUNT PAID IS : ", purchase.amountPaid);
+      console.log(
+        "DIFFERENCE IS : ",
+        purchase.totalAmount - purchase.amountPaid
+      );
+      setValue("purchasesIds", [
+        {
+          label: purchase.invoiceNumber,
+          value: purchase._id,
+        },
+      ]);
+    }
+  }, [purchase]);
+
   const amount = watch("amount");
   const note = watch("note");
+  const supplierId = watch("supplierId") || "";
+  //-----------------------------------Options----------------
+  const [purchaseSearch, setPurchaseSearch] = useState("");
+  const { data: purchases } = useListPurchase({
+    pageIndex: 0,
+    pageSize: 50,
+    search: purchaseSearch,
+    supplierId: supplierId,
+    enabled: !!supplierId,
+  });
+  const purchasesOptions = purchases?.purchases?.map((purchase) => ({
+    label: purchase.invoiceNumber,
+    value: purchase._id,
+  }));
+
+  const { data: expenseType } = useListExpensesType();
+  const expenseTypeOptions = expenseType?.map((exp) => {
+    return {
+      label: exp?.name,
+      value: exp?._id,
+    };
+  });
 
   //---------------------------API----------------------------------
   const [search, setSearch] = useState("");
@@ -111,6 +153,7 @@ function ExpenseModal({
   ) => {
     const refinedData = {
       ...data,
+      purchasesIds: data.purchasesIds.map((item) => item.value),
       expenseTypeId:
         data.expenseTypeId && data.expenseTypeId.length > 0
           ? data.expenseTypeId
@@ -140,6 +183,13 @@ function ExpenseModal({
         date: expense?.date || "",
         note: expense?.note || "",
         supplierId: expense?.supplier?._id || "",
+        purchasesIds:
+          expense?.purchases?.map((purchase) => {
+            return {
+              label: purchase.invoiceNumber,
+              value: purchase._id,
+            };
+          }) || [],
       });
     } else {
       // Reset the form to default values if there's no expense (e.g., for creating a new expense)
@@ -149,6 +199,7 @@ function ExpenseModal({
         date: "",
         note: "",
         supplierId: "",
+        purchasesIds: [],
       });
     }
   }, [expense]);
@@ -161,6 +212,7 @@ function ExpenseModal({
       size="md"
       onClose={() => {
         setSelectedExpense?.(undefined);
+        setPurchase?.(undefined);
         reset();
       }}
     >
@@ -181,8 +233,18 @@ function ExpenseModal({
             creatable={true}
             handleCreate={handleCreateOption}
           />
+
+          <NumberFieldControlled
+            control={control}
+            name="amount"
+            label="Total Amount"
+            placeholder="0.00"
+            prefix="$"
+            colSpan={6}
+          />
           <SelectFieldControlled
             control={control}
+            disabled={!!purchase}
             name="supplierId"
             label="Supplier"
             options={suppliersOptions || []}
@@ -194,14 +256,20 @@ function ExpenseModal({
               setSearch(value);
             }}
           />
-          <NumberFieldControlled
+          <MultiSelectFieldControlled
+            onSearchChange={(value) => {
+              setPurchaseSearch(value);
+            }}
+            disabled={!supplierId}
             control={control}
-            name="amount"
-            label="Total Amount"
-            placeholder="0.00"
-            prefix="$"
+            name="purchasesIds"
+            treatAsObject
+            label="Purchases"
+            options={purchasesOptions || []}
+            placeholder={"Choose Purchases"}
             colSpan={6}
           />
+
           <DateFieldControlled
             control={control}
             name="date"

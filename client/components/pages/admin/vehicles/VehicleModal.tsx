@@ -64,7 +64,6 @@ function VehicleModal({
       },
     });
   const selectedMake = watch("make");
-  console.log("SELECTED MAKE IS ", selectedMake);
 
   //---------------------------API----------------------------------
 

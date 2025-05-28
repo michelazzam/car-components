@@ -269,6 +269,7 @@ const ExpenseSchema = z
     date: z.string().min(1, "Date is required"),
     supplierId: z.string().optional(),
     note: z.string().optional(),
+    purchasesIds: z.array(z.object({ label: z.string(), value: z.string() })),
     // if there is supplier then we dont need expense type , else make it required
   })
   .refine(
@@ -376,6 +377,17 @@ const AddInvoiceSchema = z
     totalUsd: z.number(),
     customerNote: z.string().optional(),
     type: z.enum(["s1", "s2"]),
+
+    swaps: z
+      .array(
+        z.object({
+          itemName: z.string(),
+          quantity: z.number(),
+          price: z.number(),
+          note: z.string().optional(),
+        })
+      )
+      .nullable(),
   })
   .refine(
     (data) => {

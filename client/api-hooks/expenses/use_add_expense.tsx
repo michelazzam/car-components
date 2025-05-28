@@ -7,6 +7,7 @@ export interface AddEditExpenseBodyParam {
   date: string;
   note?: string;
   supplierId?: string;
+  purchasesIds?: string[];
 }
 
 const useAddExpense = ({
@@ -15,7 +16,7 @@ const useAddExpense = ({
   callBackOnSuccess?: () => void;
 }) => {
   return usePostData<AddEditExpenseBodyParam>({
-    queryKeysToInvalidate: [["expenses"], ["caisse"]],
+    queryKeysToInvalidate: [["expenses"], ["caisse"], ["purchases"]],
     endpoint: API.addExpense,
     callBackOnSuccess: callBackOnSuccess,
   });

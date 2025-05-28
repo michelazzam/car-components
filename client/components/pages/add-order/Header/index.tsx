@@ -2,7 +2,7 @@ import { useListCustomers } from "@/api-hooks/customer/use-list-customer";
 import { useListVehicles } from "@/api-hooks/vehicles/use_list_vehicles";
 import TextField from "@/components/admin/Fields/TextField";
 import React, { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { UseFieldArrayReturn, useFormContext } from "react-hook-form";
 import { IoMdPersonAdd } from "react-icons/io";
 import CustomerModal from "../../admin/customers/CustomerModal";
 import VehicleModal from "../../admin/vehicles/VehicleModal";
@@ -15,13 +15,18 @@ import { MdCancel, MdPayment } from "react-icons/md";
 import InvoicePaymentMethodModal from "./InvoicePaymentMethodModal";
 import Checkbox from "@/components/admin/Fields/Checkbox";
 import { HiOutlinePlusSm } from "react-icons/hi";
+import { AiOutlineSwap } from "react-icons/ai";
+import InvoiceItemsSwapsModal from "./InvoiceItemsSwapsModal";
+import { AddInvoiceSchema } from "@/lib/apiValidations";
 
 function Header({
   search,
   setSearch,
+  swapsFieldArrayMethods,
 }: {
   search: string;
   setSearch: (search: string) => void;
+  swapsFieldArrayMethods: UseFieldArrayReturn<AddInvoiceSchema, "swaps">;
 }) {
   const { editingInvoice, setEditingInvoice, clearPosStore } = usePosStore();
 
@@ -146,7 +151,7 @@ function Header({
             name="vehicleId"
             options={vehicleOptions || []}
             placeholder={`${
-              customerId ? "choose vehicle" : "please choose customer first"
+              customerId ? "choose vehicle" : "choose customer first"
             }`}
             colSpan={4}
             creatable={false}
@@ -168,6 +173,13 @@ function Header({
         </div>
 
         <div className="col-span-2 flex gap-x-2 justify-end">
+          <button
+            className="ti ti-btn-primary ti-btn "
+            data-hs-overlay="#add-invoice-items-swaps-modal"
+          >
+            <AiOutlineSwap />
+          </button>
+
           <button
             className="ti ti-btn-primary ti-btn "
             data-hs-overlay="#add-invoice-payment-method-modal"
@@ -207,6 +219,11 @@ function Header({
       <InvoicePaymentMethodModal
         triggerModalId="add-invoice-payment-method-modal"
         modalTitle="Add Payment Method"
+      />
+      <InvoiceItemsSwapsModal
+        swapsFieldArrayMethods={swapsFieldArrayMethods}
+        triggerModalId="add-invoice-items-swaps-modal"
+        modalTitle="Swap Items"
       />
     </div>
   );

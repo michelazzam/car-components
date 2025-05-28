@@ -1,5 +1,5 @@
 import { cn } from "@/utils/cn";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { Controller, useController, Control } from "react-hook-form";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
@@ -46,11 +46,11 @@ const SelectFieldControlled: React.FC<SelectFieldProps> = ({
   treatAsObject = false,
 }) => {
   if (!control) return null;
+  const instanceId = useId();
 
   const [allOptions, setAllOptions] = useState<SelectOption[]>([]);
   const { fieldState, field } = useController({ name, control });
   const errorMessage = fieldState.error?.message;
-  console.log("FIELD VALUE IS : ", field.value);
   // Update local cache whenever options change
   useEffect(() => {
     const updatedOptions = new Set([...allOptions, ...options]);
@@ -58,6 +58,8 @@ const SelectFieldControlled: React.FC<SelectFieldProps> = ({
   }, [options]);
 
   const commonProps = {
+    instanceId,
+    inputId: instanceId,
     onInputChange,
     isDisabled: disabled,
     options,

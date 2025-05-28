@@ -34,11 +34,25 @@ export function useQueryStrings() {
       shallow: true,
     });
   };
+  const resetAllQueriesExcept = (keysToKeep: string[]) => {
+    // Filter the current query to keep only keys in keysToKeep
+    const filteredQueries = Object.fromEntries(
+      Object.entries(router.query).filter(([key]) => keysToKeep.includes(key))
+    );
+
+    // Replace with the filtered queries only
+    router.replace(
+      { pathname: router.pathname, query: filteredQueries },
+      undefined,
+      { scroll: false, shallow: true }
+    );
+  };
 
   return {
     router,
     currentQueries: router.query,
     appendQueries,
+    resetAllQueriesExcept,
     resetAllQueries,
   };
 }

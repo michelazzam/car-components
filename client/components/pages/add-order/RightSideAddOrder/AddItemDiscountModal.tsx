@@ -36,7 +36,6 @@ const AddItemDiscountModal = ({
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
-    console.log("effect:", item);
     if (item?.discount) {
       setDiscount({
         amount: item?.discount?.amount,

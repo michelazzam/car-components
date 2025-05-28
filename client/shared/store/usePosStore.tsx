@@ -1,5 +1,6 @@
-import { GetItem, Invoice } from "@/api-hooks/invoices/useListInvoices";
+import { GetItem, Invoice, Swap } from "@/api-hooks/invoices/useListInvoices";
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 function calculateDiscountedAmount(
   price: number,
@@ -46,6 +47,8 @@ interface PosState {
   cart: Item[];
   vatAmount: number;
   setVatAmount: (vatAmount: number) => void;
+  swaps: Swap[];
+  setSwaps: (swaps: Swap[]) => void;
   discountStore: Discount;
   applyDiscount: (amount: number, type: "percentage" | "fixed") => Discount;
   payLater: boolean;
@@ -55,6 +58,8 @@ interface PosState {
   clearCart: () => void;
   clearPosStore: () => void;
   editingInvoice?: Invoice;
+  draftInvoices?: Invoice[];
+  setDraftInvoices: (draftInvoices: Invoice[]) => void;
   setEditingInvoice: (invoice?: Invoice) => void;
   addToCart: (type: "product" | "service", item: Item) => void;
   addGroupItem: (type: "product" | "service", items: GetItem[]) => void;
@@ -65,192 +70,219 @@ interface PosState {
   changeItemPrice: (prodcutId: string, price: number) => void;
 }
 
-export const usePosStore = create<PosState>()((set, get) => ({
-  //-----\
-  cart: [],
-  vatAmount: 0,
-  discountStore: { amount: 0, type: "fixed" },
-  payLater: false,
-  editingInvoice: undefined,
-
-  // Setters
-  setVatAmount: (vatAmount: number) => set({ vatAmount }),
-  setPayLater: (payLater: boolean) => set({ payLater }),
-  setEditingInvoice: (invoice?: Invoice) => {
-    set({ editingInvoice: invoice as Invoice });
-  },
-
-  // Apply discount logic
-  applyDiscount: (amount: number, type: "fixed" | "percentage"): Discount => {
-    const discount = { amount, type };
-    set((state) => ({
-      ...state,
-      discountStore: discount,
-    }));
-    return discount;
-  },
-  //Cart Management
-  cartSum: () => {
-    return get().cart.reduce((acc, item) => acc + Number(item.amount), 0);
-  },
-
-  addToCart: (type: "product" | "service", item: Item) => {
-    const newItem: Item = {
-      type,
-      cost: item.cost,
-      name: item.name,
-      price: item.price,
-      quantity: type === "product" ? 1 : item.quantity,
-      amount:
-        Number(item.price) * (type === "product" ? 1 : Number(item.quantity)),
-      productId: item._id || "",
-      stock: item.quantity || 0,
-    };
-
-    set((state) => ({
-      cart: [...state.cart, newItem],
-    }));
-  },
-
-  addGroupItem: (type: "product" | "service", items: GetItem[]) => {
-    if (items) {
-      const itemsToAdd = items.map((element) => ({
-        type,
-        name: element.name,
-        price: element.price,
-        quantity: element.quantity,
-        cost: element?.cost || 0,
-        amount: element.discount
-          ? element.price * element.quantity -
-            (element.discount.type === "percentage"
-              ? element.price *
-                element.quantity *
-                (element.discount.amount * 0.01)
-              : element.discount.amount)
-          : element.price * element.quantity,
-        discount: element.discount,
-        productId: type === "product" ? element.itemRef : element.serviceRef,
-      }));
-      set((state) => ({
-        cart: [...state.cart, ...itemsToAdd],
-      }));
-    }
-  },
-
-  removeItem: (item: Item) => {
-    set((state) => ({
-      cart: state.cart.filter(
-        (element) =>
-          !(element.name === item.name && element.price === item.price)
-      ),
-    }));
-  },
-
-  totalAmount: (isVatActive: boolean) => {
-    const { cart, vatAmount, discountStore } = get();
-
-    let totalItemsAmount = Number(
-      cart.reduce((total: number, item: Item) => total + Number(item.amount), 0)
-    );
-
-    // Ensure vatAmount and discountStore.amount are valid numbers
-    const validVatAmount = isVatActive ? Number(vatAmount) || 0 : 0;
-    const discountAmount = Number(discountStore.amount) || 0;
-
-    if (discountStore.type === "percentage") {
-      const discountValue = totalItemsAmount * (discountAmount * 0.01);
-      let totalItemsAmountWithDiscount = Number(
-        totalItemsAmount - discountValue
-      );
-      return parseFloat(
-        (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)
-      );
-    } else {
-      let totalItemsAmountWithDiscount = Number(
-        totalItemsAmount - discountAmount
-      );
-      return parseFloat(
-        (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)
-      );
-    }
-  },
-
-  setQuantity: (name: string, price: number, quantity: number) => {
-    set((state) => {
-      return {
-        ...state,
-        cart: state.cart.map((item: Item) =>
-          item.name === name && item.price === price
-            ? {
-                ...item,
-                quantity,
-                amount: calculateDiscountedAmount(
-                  item.price,
-                  quantity,
-                  item.discount
-                ),
-              }
-            : item
-        ),
-      };
-    });
-  },
-
-  addItemDiscount: (productId: string, discount: Discount) => {
-    set((state) => ({
-      cart: state.cart.map((item) =>
-        item.productId === productId
-          ? {
-              ...item,
-              discount,
-              amount: calculateDiscountedAmount(
-                item.price!,
-                item.quantity!,
-                discount
-              ),
-            }
-          : item
-      ),
-    }));
-  },
-  changeItemPrice: (productId: string, price: number) => {
-    set((state) => ({
-      cart: state.cart.map((item) =>
-        item.productId === productId
-          ? {
-              ...item,
-              price: price,
-              amount: calculateDiscountedAmount(
-                price,
-                item.quantity!,
-                item.discount
-              ),
-            }
-          : item
-      ),
-    }));
-  },
-
-  clearCart: () =>
-    set({
+export const usePosStore = create<PosState>()(
+  persist(
+    (set, get) => ({
+      //-----\
       cart: [],
-    }),
-
-  clearPosStore: () =>
-    set({
-      cart: [],
-      editingInvoice: undefined,
       vatAmount: 0,
-      payLater: false,
       discountStore: { amount: 0, type: "fixed" },
+      payLater: false,
+      editingInvoice: undefined,
+      swaps: [],
+      draftInvoices: [],
+      // Setters
+      setSwaps: (swaps: Swap[]) => set({ swaps }),
+      setVatAmount: (vatAmount: number) => set({ vatAmount }),
+      setPayLater: (payLater: boolean) => set({ payLater }),
+      setEditingInvoice: (invoice?: Invoice) => {
+        set({ editingInvoice: invoice as Invoice });
+      },
+      setDraftInvoices: (draftInvoices: Invoice[]) => {
+        set({ draftInvoices });
+      },
+
+      // Apply discount logic
+      applyDiscount: (
+        amount: number,
+        type: "fixed" | "percentage"
+      ): Discount => {
+        const discount = { amount, type };
+        set((state) => ({
+          ...state,
+          discountStore: discount,
+        }));
+        return discount;
+      },
+      //Cart Management
+      cartSum: () => {
+        return get().cart.reduce((acc, item) => acc + Number(item.amount), 0);
+      },
+
+      addToCart: (type: "product" | "service", item: Item) => {
+        const newItem: Item = {
+          type,
+          cost: item.cost,
+          name: item.name,
+          price: item.price,
+          quantity: type === "product" ? 1 : item.quantity,
+          amount:
+            Number(item.price) *
+            (type === "product" ? 1 : Number(item.quantity)),
+          productId: item._id || "",
+          stock: item.quantity || 0,
+        };
+
+        set((state) => ({
+          cart: [...state.cart, newItem],
+        }));
+      },
+
+      addGroupItem: (type: "product" | "service", items: GetItem[]) => {
+        if (items) {
+          const itemsToAdd = items.map((element) => ({
+            type,
+            name: element.name,
+            price: element.price,
+            quantity: element.quantity,
+            cost: element?.cost || 0,
+            amount: element.discount
+              ? element.price * element.quantity -
+                (element.discount.type === "percentage"
+                  ? element.price *
+                    element.quantity *
+                    (element.discount.amount * 0.01)
+                  : element.discount.amount)
+              : element.price * element.quantity,
+            discount: element.discount,
+            productId:
+              type === "product" ? element.itemRef : element.serviceRef,
+          }));
+          set((state) => ({
+            cart: [...state.cart, ...itemsToAdd],
+          }));
+        }
+      },
+
+      removeItem: (item: Item) => {
+        set((state) => ({
+          cart: state.cart.filter(
+            (element) =>
+              !(element.name === item.name && element.price === item.price)
+          ),
+        }));
+      },
+
+      totalAmount: (isVatActive: boolean) => {
+        console.log("CALCULATING TOTAL....");
+        const { cart, vatAmount, discountStore, swaps } = get();
+
+        let totalItemsAmount = Number(
+          cart.reduce(
+            (total: number, item: Item) => total + Number(item.amount),
+            0
+          )
+        );
+
+        // Ensure vatAmount and discountStore.amount are valid numbers
+        const validVatAmount = isVatActive ? Number(vatAmount) || 0 : 0;
+        const discountAmount = Number(discountStore.amount) || 0;
+        const swapsDiscount = swaps.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        );
+        console.log("SWAPS DISCOUNT IS : ", swapsDiscount);
+        if (discountStore.type === "percentage") {
+          const discountValue = totalItemsAmount * (discountAmount * 0.01);
+          let totalItemsAmountWithDiscount = Number(
+            totalItemsAmount - discountValue - swapsDiscount
+          );
+          return parseFloat(
+            (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)
+          );
+        } else {
+          let totalItemsAmountWithDiscount = Number(
+            totalItemsAmount - discountAmount - swapsDiscount
+          );
+          return parseFloat(
+            (totalItemsAmountWithDiscount + validVatAmount).toFixed(2)
+          );
+        }
+      },
+
+      setQuantity: (name: string, price: number, quantity: number) => {
+        set((state) => {
+          return {
+            ...state,
+            cart: state.cart.map((item: Item) =>
+              item.name === name && item.price === price
+                ? {
+                    ...item,
+                    quantity,
+                    amount: calculateDiscountedAmount(
+                      item.price,
+                      quantity,
+                      item.discount
+                    ),
+                  }
+                : item
+            ),
+          };
+        });
+      },
+
+      addItemDiscount: (productId: string, discount: Discount) => {
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.productId === productId
+              ? {
+                  ...item,
+                  discount,
+                  amount: calculateDiscountedAmount(
+                    item.price!,
+                    item.quantity!,
+                    discount
+                  ),
+                }
+              : item
+          ),
+        }));
+      },
+      changeItemPrice: (productId: string, price: number) => {
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.productId === productId
+              ? {
+                  ...item,
+                  price: price,
+                  amount: calculateDiscountedAmount(
+                    price,
+                    item.quantity!,
+                    item.discount
+                  ),
+                }
+              : item
+          ),
+        }));
+      },
+
+      clearCart: () =>
+        set({
+          cart: [],
+        }),
+
+      clearPosStore: () =>
+        set({
+          cart: [],
+          editingInvoice: undefined,
+          vatAmount: 0,
+          payLater: false,
+          discountStore: { amount: 0, type: "fixed" },
+        }),
     }),
-}));
+    {
+      name: "Invoice Storage", // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+    }
+  )
+);
 
 export const clearPosStore = () => {
   usePosStore.setState({
     cart: [],
     editingInvoice: undefined,
     vatAmount: 0,
+    draftInvoices: [],
     payLater: false,
     discountStore: { amount: 0, type: "fixed" },
   });

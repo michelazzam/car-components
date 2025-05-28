@@ -2,7 +2,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { useListPaymentMethods } from "@/api-hooks/payment-methods/use-list-payment-method";
 import TextFieldControlled from "@/components/admin/FormControlledFields/TextFieldControlled";
 import Modal from "@/shared/Modal";
-import React, { useEffect } from "react";
+import React from "react";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { FaTrash } from "react-icons/fa6";
 
@@ -23,10 +23,6 @@ function InvoicePaymentMethodModal({
   });
 
   const currentPaymentMethods = watch("paymentMethods");
-
-  useEffect(() => {
-    console.log("currentPaymentMethods", currentPaymentMethods);
-  }, [currentPaymentMethods]);
 
   const { data: paymentMethods } = useListPaymentMethods({});
 

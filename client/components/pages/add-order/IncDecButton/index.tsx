@@ -13,11 +13,11 @@ function IncDecButton({
   inc: () => void;
   size?: "sm" | "lg";
   value: number;
-  onChange:(val:number) => void;
+  onChange: (val: number) => void;
 }) {
   return (
     <div>
-      <td className="">
+      <div className="">
         <div
           className={cn(
             " rounded-[10px]  bg-primary/20 flex justify-between ",
@@ -31,14 +31,14 @@ function IncDecButton({
             readOnly={false}
             value={value}
             onValueChange={(v) => {
-              onChange(v?Number(v):0);
+              onChange(v ? Number(v) : 0);
             }}
             className="max-w-8 py-0 px-0 border-0 bg-transparent text-center text-base"
           />
 
           <Button onClick={inc} type="inc" size={size} />
         </div>
-      </td>
+      </div>
     </div>
   );
 }

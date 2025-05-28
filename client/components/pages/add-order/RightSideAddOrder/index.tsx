@@ -3,7 +3,11 @@ import React, { useEffect, useRef, useState } from "react";
 import ItemsList from "./ItemsList";
 
 import { clearPosStore, usePosStore } from "@/shared/store/usePosStore";
-import { SubmitHandler, useFormContext } from "react-hook-form";
+import {
+  SubmitHandler,
+  UseFieldArrayReturn,
+  useFormContext,
+} from "react-hook-form";
 import { useAddInvoice } from "@/api-hooks/invoices/use-add-invoices";
 import GeneralInfoModal from "./GeneralInfoModal";
 import { useGetOrganization } from "@/api-hooks/restaurant/use-get-organization-info";
@@ -24,8 +28,10 @@ import SaveInvoiceModal from "./SaveInvoiceModal";
 
 function RightSideAddOrder({
   refetchProducts,
+  swapsFieldArrayMethods,
 }: {
   refetchProducts: () => void;
+  swapsFieldArrayMethods: UseFieldArrayReturn<AddInvoiceSchema, "swaps">;
 }) {
   //--------------------State-------------------------------------
   const [invoice, setInvoice] = useState();
@@ -34,6 +40,7 @@ function RightSideAddOrder({
   const [previewingInvoice, setPreviewingInvoice] = useState<Invoice>();
 
   //--------------------Refs-------------------------------------
+  const saveInvoiceRef = useRef<HTMLButtonElement>(null);
   const printRef = useRef<HTMLFormElement>(null);
   //--------------------Storage-----------------------------------
   const {
@@ -47,6 +54,11 @@ function RightSideAddOrder({
     editingInvoice,
     cart,
   } = usePosStore();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   //---------------------Router----------------------------------------
   const router = useRouter();
@@ -55,6 +67,11 @@ function RightSideAddOrder({
   const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
+  const swaps = formContext.watch("swaps") || [];
+  const swapsTotal = swaps.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
   const { handleSubmit, control, setValue, reset, getValues } = formContext;
   const isB2C = getValues("type") === "s2";
 
@@ -82,7 +99,7 @@ function RightSideAddOrder({
 
   const mutation = useAddInvoice({
     callBackOnSuccess: (resp: any) => {
-      console.log("RESP IS : ", resp);
+      saveInvoiceRef.current?.click();
       successFunction();
       setInvoice(resp);
       if (isPrint) {
@@ -96,6 +113,7 @@ function RightSideAddOrder({
     useEditInvoice({
       id: editingInvoice?._id || "",
       callBackOnSuccess: (resp: any) => {
+        saveInvoiceRef.current?.click();
         successFunction();
         setInvoice(resp);
         if (isPrint) {
@@ -261,7 +279,7 @@ function RightSideAddOrder({
           />
 
           {/* items list */}
-          <ItemsList />
+          <ItemsList swapsFieldArrayMethods={swapsFieldArrayMethods} />
           {/* items list */}
           <div className="w-full grid grid-cols-2 gap-x-2">
             <NumberFieldControlled
@@ -289,30 +307,40 @@ function RightSideAddOrder({
           </div>
 
           {/*  */}
-          <div className="h-[15vh] mb-4 w-full p-2 rounded-md bg-gray-300">
-            <div className="flex items-center justify-between mt-1">
-              <span>Sub Total</span>
-              <span>${cartSum()}</span>
+          {isClient && (
+            <div className="h-[15vh] mb-4 w-full p-2 rounded-md bg-gray-300">
+              <div className="flex items-center justify-between mt-1">
+                <span>Sub Total</span>
+                <span>${cartSum()}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-danger">{`Discount`}</span>
+                <span className="text-danger">{`${
+                  discountStore.type === "fixed" ? "$" : "%"
+                }${discountStore.amount || 0}`}</span>
+              </div>
+              {swaps.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-danger">Swaps Discount</span>
+                    <span className="text-danger">${swapsTotal}</span>
+                  </div>
+                </>
+              )}
+              {!isB2C && (
+                <>
+                  <div className="flex items-center justify-between mt-1">
+                    <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
+                    <span>${vatAmount}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex items-center justify-between mt-1">
+                <span>Total</span>
+                <span>${totalAmount(!isB2C)}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-danger">{`Discount`}</span>
-              <span className="text-danger">{`${
-                discountStore.type === "fixed" ? "$" : "%"
-              }${discountStore.amount || 0}`}</span>
-            </div>
-            {!isB2C && (
-              <>
-                <div className="flex items-center justify-between mt-1">
-                  <span>{`TVA(${organization?.tvaPercentage}%)`}</span>
-                  <span>${vatAmount}</span>
-                </div>
-              </>
-            )}
-            <div className="flex items-center justify-between mt-1">
-              <span>Total</span>
-              <span>${totalAmount(!isB2C)}</span>
-            </div>
-          </div>
+          )}
           {/*  */}
         </div>
         <div>
@@ -358,6 +386,7 @@ function RightSideAddOrder({
                 <FaPrint className="w-3 h-3" />
               </button>
               <button
+                ref={saveInvoiceRef}
                 type="button"
                 data-hs-overlay="#save-invoice-modal"
                 className="p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary"

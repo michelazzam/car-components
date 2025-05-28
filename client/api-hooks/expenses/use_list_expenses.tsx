@@ -3,6 +3,7 @@ import { API } from "@/constants/apiEndpoints";
 import { ExpenseType } from "../expensesType/use-list-expensesType";
 import { Pagination } from "@/components/admin/Pagination";
 import { Supplier } from "../supplier/use-list-supplier";
+import { Purchase } from "../purchase/use-list-purchase";
 
 export interface Expense {
   _id: string;
@@ -13,6 +14,7 @@ export interface Expense {
   supplier?: Supplier;
   createdAt: string;
   updatedAt: string;
+  purchases: Purchase[];
   __v: number;
 }
 
