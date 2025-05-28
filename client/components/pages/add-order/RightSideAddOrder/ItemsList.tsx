@@ -80,7 +80,7 @@ function ItemsList({
       <div className="col-span-2 h-[27vh] overflow-y-auto flex-grow">
         {cart.map((item) => (
           <div
-            key={item.name}
+            key={item._id}
             className="flex items-center justify-between px-0 py-2"
           >
             {item.type === "product" ? (
@@ -123,7 +123,7 @@ function ItemsList({
           const item = swaps[index] || field;
           return (
             <div
-              key={item.itemName + index}
+              key={item.itemName + field.id}
               className="flex items-center justify-between px-0 py-2"
             >
               <p className="w-1/4 hover:cursor-pointer hover:text-primary hover:font-bold">
