@@ -13,6 +13,7 @@ import { MdOutlineBackup } from "react-icons/md";
 import { useGetCaisse } from "@/api-hooks/caisse/use-get-caisse";
 import OpenCloseCaisseModal from "@/components/pages/navbar/OpenCloseCaisseModal";
 import { cn } from "@/utils/cn";
+import { formatNumber } from "@/lib/helpers/formatNumber";
 
 const Header = ({ local_varaiable, ThemeChanger }: any) => {
   const { user } = UseAuth();
@@ -304,7 +305,7 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
                         ? "Close "
                         : "Open "
                       : ""}
-                    {"Caisse "}: {caisseStatus?.caisse}$
+                    {"Caisse "}: {formatNumber(caisseStatus?.caisse || 0, 2)}$
                   </div>
                 </button>
               )}
