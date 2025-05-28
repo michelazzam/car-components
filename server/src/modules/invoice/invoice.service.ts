@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   IInvoice,
   IInvoiceCounter,
@@ -20,7 +20,6 @@ import {
 import { IService } from '../service/service.schema';
 import { IItem } from '../item/item.schema';
 import { GetInvoicesDto } from './dto/get-invoices.dto';
-import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { ReqUserData } from '../user/interfaces/req-user-data.interface';
 import { AccountingService } from '../accounting/accounting.service';
 import { PayCustomerInvoicesDto } from './dto/pay-customer-invoices.dto';
@@ -44,134 +43,182 @@ export class InvoiceService {
     private readonly reportService: ReportService,
   ) {}
 
-  // 2 private functions making code cleaner
-  private buildGetInvoicesFilter(dto: GetInvoicesDto, user: ReqUserData) {
-    const { search, customerId, type, startDate, endDate, itemId, isPaid } =
-      dto;
+  private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
+    const {
+      search,
+      customerId,
+      vehicleId,
+      type,
+      startDate,
+      endDate,
+      itemId,
+      isPaid,
+      pageIndex,
+      pageSize,
+    } = dto;
 
-    const filter: FilterQuery<IInvoice> = { $and: [{ $or: [] }] };
+    const pipeline: any[] = [];
+
+    // Match by ObjectId before customer is replaced by lookup
+    if (customerId) {
+      pipeline.push({
+        $match: {
+          customer: new Types.ObjectId(customerId),
+        },
+      });
+    }
+
+    // Lookup to join customer data for search
+    pipeline.push({
+      $lookup: {
+        from: 'customers', // make sure this is the correct collection name
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer',
+      },
+    });
+    pipeline.push({
+      $unwind: { path: '$customer', preserveNullAndEmptyArrays: true },
+    });
+
+    // Match by ObjectId before vehicle is replaced by lookup
+    if (vehicleId) {
+      pipeline.push({
+        $match: {
+          vehicle: new Types.ObjectId(vehicleId),
+        },
+      });
+    }
+
+    // Lookup to join vehicle data (if needed)
+    pipeline.push({
+      $lookup: {
+        from: 'vehicles', // adjust collection name if different
+        localField: 'vehicle',
+        foreignField: '_id',
+        as: 'vehicle',
+      },
+    });
+    pipeline.push({
+      $unwind: { path: '$vehicle', preserveNullAndEmptyArrays: true },
+    });
+
+    // Match stage
+    const matchConditions: any[] = [];
 
     if (search) {
-      // @ts-ignore
-      filter.$and[0].$or.push({ number: { $regex: search, $options: 'i' } });
-      // @ts-ignore
-      filter.$and[0].$or.push({
-        driverName: { $regex: search, $options: 'i' },
-      });
-      // @ts-ignore
-      filter.$and[0].$or.push({
-        generalNote: { $regex: search, $options: 'i' },
-      });
-      // @ts-ignore
-      filter.$and[0].$or.push({
-        customerNote: { $regex: search, $options: 'i' },
+      const regex = { $regex: search, $options: 'i' };
+      matchConditions.push({
+        $or: [
+          { number: regex },
+          { driverName: regex },
+          { generalNote: regex },
+          { customerNote: regex },
+          { 'customer.name': regex }, // search by customer name
+        ],
       });
     }
 
     if (isPaid === 'true') {
-      // @ts-ignore
-      filter.$and[0].$or.push({ 'accounting.isPaid': true });
+      matchConditions.push({ 'accounting.isPaid': true });
     } else if (isPaid === 'false') {
-      // @ts-ignore
-      filter.$and[0].$or.push({ 'accounting.isPaid': false });
+      matchConditions.push({ 'accounting.isPaid': false });
     }
 
-    // for "specialAccess" user, only s1 invoices
     if (user.role === 'specialAccess') {
-      // @ts-ignore
-      filter.$and[0].$or.push({ type: 's1' });
+      matchConditions.push({ type: 's1' });
     } else if (type) {
-      // @ts-ignore
-      filter.$and[0].$or.push({ type });
-    }
-
-    if (customerId) {
-      // @ts-ignore
-      filter.$and[0].$or.push({ customer: customerId });
+      matchConditions.push({ type });
     }
 
     if (itemId) {
-      // @ts-ignore
-      filter.$and.push({
-        'items.itemRef': itemId,
-      });
+      matchConditions.push({ 'items.itemRef': itemId });
     }
 
-    // Add date range filter
     if (startDate || endDate) {
       const dateFilter: any = {};
       if (startDate) {
-        dateFilter.$gte = startDate;
+        dateFilter.$gte = new Date(startDate);
       }
       if (endDate) {
-        const nextDay = new Date(endDate as string);
+        const nextDay = new Date(endDate);
         nextDay.setDate(nextDay.getDate() + 1);
-        dateFilter.$lt = getFormattedDate(nextDay);
+        dateFilter.$lt = nextDay;
       }
-      // @ts-ignore
-      filter.$and.push({ createdAt: dateFilter });
+      console.log(dateFilter);
+      matchConditions.push({ createdAt: dateFilter });
     }
 
-    // If no filters were added to $or, remove it
-    if (filter?.$and?.[0]?.$or?.length === 0) {
-      filter.$and = filter.$and.slice(1);
+    if (matchConditions.length > 0) {
+      pipeline.push({ $match: { $and: matchConditions } });
     }
 
-    // If no filters were added at all, use an empty filter to query all orders
-    if (filter?.$and?.length === 0) {
-      // @ts-ignore
-      delete filter.$and;
-    }
+    // Sort
+    pipeline.push({ $sort: { createdAt: -1 } });
 
-    return filter;
-  }
+    // Pagination
+    pipeline.push({ $skip: pageIndex * pageSize });
+    pipeline.push({ $limit: pageSize });
 
-  private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
-    const filter = this.buildGetInvoicesFilter(dto, user);
-
-    const { pageIndex, pageSize } = dto;
-
-    const [invoices, totalCount, totalsResult] = await Promise.all([
-      this.invoiceModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(pageIndex * pageSize)
-        .limit(pageSize)
-        .populate('customer')
-        .populate('vehicle')
-        .lean(),
-      this.invoiceModel.countDocuments(filter),
-      this.invoiceModel.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: null,
-            totalInvoiceAmount: { $sum: '$accounting.totalUsd' },
-            totalAmountPaid: { $sum: '$accounting.paidAmountUsd' },
-            totalOutstandingAmount: {
-              $sum: {
-                $subtract: [
-                  '$accounting.totalUsd',
-                  '$accounting.paidAmountUsd',
-                ],
-              },
-            },
-          },
+    // Final project to clean up nested customer/vehicle if needed
+    pipeline.push({
+      $project: {
+        number: 1,
+        driverName: 1,
+        generalNote: 1,
+        customerNote: 1,
+        type: 1,
+        items: 1,
+        accounting: 1,
+        createdAt: 1,
+        customer: {
+          _id: 1,
+          name: 1,
+          phone: 1,
         },
-      ]),
+        vehicle: {
+          _id: 1,
+          plate: 1,
+        },
+      },
+    });
+
+    const [invoices, totalCount] = await Promise.all([
+      this.invoiceModel.aggregate(pipeline),
+      this.invoiceModel.countDocuments(),
+
+      // Note: not used by frontend so comment it for now:
+      // this.invoiceModel.aggregate([
+      //   { $match: filter },
+      //   {
+      //     $group: {
+      //       _id: null,
+      //       totalInvoiceAmount: { $sum: '$accounting.totalUsd' },
+      //       totalAmountPaid: { $sum: '$accounting.paidAmountUsd' },
+      //       totalOutstandingAmount: {
+      //         $sum: {
+      //           $subtract: [
+      //             '$accounting.totalUsd',
+      //             '$accounting.paidAmountUsd',
+      //           ],
+      //         },
+      //       },
+      //     },
+      //   },
+      // ]),
     ]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
-    const totals = totalsResult[0] || {
-      totalCost: 0,
-      totalPrice: 0,
-      totalProfitOrLoss: 0,
-    };
+    // const totals = totalsResult[0] || {
+    //   totalCost: 0,
+    //   totalPrice: 0,
+    //   totalProfitOrLoss: 0,
+    // };
 
     return {
       invoices,
-      totals,
+      // totals,
       pagination: {
         pageIndex,
         pageSize,
@@ -182,10 +229,7 @@ export class InvoiceService {
   }
 
   async getAll(dto: GetInvoicesDto, user: ReqUserData) {
-    const { invoices, pagination, totals } = await this.getInvoicesData(
-      dto,
-      user,
-    );
+    const { invoices, pagination } = await this.getInvoicesData(dto, user);
 
     // Flatten the invoices so each item becomes a separate object with its respective data
     const flattenedInvoices = invoices.reduce((acc: any, invoice) => {
@@ -202,7 +246,6 @@ export class InvoiceService {
     return {
       invoices,
       flattenedInvoices,
-      totals,
       pagination,
     };
   }

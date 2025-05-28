@@ -8,7 +8,6 @@ import {
   Matches,
 } from 'class-validator';
 import { invoiceTypes } from '../invoice.schema';
-import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 import { Trim } from 'src/decorators/trim.decorator';
 
 export class GetInvoicesDto {
@@ -24,22 +23,18 @@ export class GetInvoicesDto {
 
   @ApiProperty({
     type: String,
-    example: '2024-08-01',
     required: false,
   })
   @IsOptional()
   @IsString()
-  @IsValidDateFormat()
   startDate: string;
 
   @ApiProperty({
     type: String,
-    example: '2024-08-01',
     required: false,
   })
   @IsOptional()
   @IsString()
-  @IsValidDateFormat()
   endDate: string;
 
   @ApiProperty({ required: false })
@@ -50,6 +45,10 @@ export class GetInvoicesDto {
   @ApiProperty({ required: false })
   @IsOptional()
   customerId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  vehicleId?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
