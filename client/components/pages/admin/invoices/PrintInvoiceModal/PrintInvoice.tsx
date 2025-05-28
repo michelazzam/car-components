@@ -406,7 +406,7 @@ const InvoiceSubtotal = ({
 
           <div className="flex justify-between text-green-600">
             <span className="font-semibold">Total:</span>
-            <span>${taxesUsd ? formatNumber(totalPriceUsd, 2) : 0}</span>
+            <span>${formatNumber(totalPriceUsd, 2)}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Paid (USD):</span>
