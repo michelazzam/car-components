@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ItemsList from "./ItemsList";
 
-import { clearPosStore, usePosStore } from "@/shared/store/usePosStore";
+import { usePosStore } from "@/shared/store/usePosStore";
 import {
   SubmitHandler,
   UseFieldArrayReturn,
@@ -24,6 +24,8 @@ import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 import SaveInvoiceModal from "./SaveInvoiceModal";
+import ChooseDraftInvoiceModal from "./ChooseDraftInvoiceModal";
+import { addInvoiceDefaultValues } from "@/pages/add-invoice";
 // import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 
 function RightSideAddOrder({
@@ -34,6 +36,7 @@ function RightSideAddOrder({
   swapsFieldArrayMethods: UseFieldArrayReturn<AddInvoiceSchema, "swaps">;
 }) {
   //--------------------State-------------------------------------
+  const { deleteCurrentDraftInvoice, clearPosStore } = usePosStore();
   const [invoice, setInvoice] = useState();
   const [isPrint, setIsPrint] = useState(false);
   const [isFullPaid, setIsFullPaid] = useState(false);
@@ -82,11 +85,15 @@ function RightSideAddOrder({
   // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
     refetchProducts();
+    deleteCurrentDraftInvoice();
+    console.log("CLEARING THE POS STORE...");
     clearPosStore();
+    console.log("POS STORE SHOULD HAVE BEEN CLEARED");
     setIsFullPaid(false);
+    reset(addInvoiceDefaultValues);
     if (editingInvoice) {
       setEditingInvoice(undefined);
-      resetForm();
+
       if (!isPrint) {
         setTimeout(() => {
           router.back();
@@ -99,9 +106,11 @@ function RightSideAddOrder({
 
   const mutation = useAddInvoice({
     callBackOnSuccess: (resp: any) => {
+      console.log("SUCCESS ADD INVOICE");
       saveInvoiceRef.current?.click();
       successFunction();
       setInvoice(resp);
+
       if (isPrint) {
         printRef.current?.click();
       }
@@ -174,26 +183,10 @@ function RightSideAddOrder({
     }
   }, [discountStore.amount, discountStore.type, cartSum()]);
 
-  const resetForm = () => {
-    reset({
-      driverName: "",
-      discount: {
-        amount: 0,
-        type: "fixed",
-      },
-      paidAmountUsd: 0,
-      customerId: "",
-      isPaid: false,
-      hasVehicle: true,
-      vehicleId: "",
-      customerNote: "",
-      items: [],
-    });
-  };
   const handleCancelEditing = () => {
     setEditingInvoice();
     clearPosStore();
-    resetForm();
+    reset(addInvoiceDefaultValues);
     router.back();
   };
 
@@ -263,13 +256,23 @@ function RightSideAddOrder({
       <div className="bg-white min-h-full -mr-[1.5rem] flex pt-3 px-3 lex flex-col justify-between h-[calc(100vh-60px)] ">
         <span ref={printRef} data-hs-overlay="#print-invoice"></span>
         <div className="flex flex-col gap-x-2 items-center  flex-grow">
-          <button
-            type="button"
-            className="w-full p-2 rounded-md bg-primary border border-primary text-white hover:bg-white hover:text-primary mb-2"
-            data-hs-overlay="#general-invoice-info-modal"
-          >
-            General Info
-          </button>
+          <div className="grid grid-cols-2 gap-x-2 mb-2 w-full">
+            <button
+              type="button"
+              className="ti ti-btn ti-btn-primary-full w-full relative"
+              data-hs-overlay="#choose-draft-invoice-modal"
+            >
+              Saved Invoices
+            </button>
+
+            <button
+              type="button"
+              className="ti ti-btn ti-btn-primary"
+              data-hs-overlay="#general-invoice-info-modal"
+            >
+              General Info
+            </button>
+          </div>
           <SelectFieldControlled
             control={control}
             label="Customer Type"
@@ -287,9 +290,9 @@ function RightSideAddOrder({
               name="discount.amount"
               label="Discount"
               colSpan={1}
-              onChangeValue={(val) =>
-                applyDiscount(Number(val) || 0, discountStore.type)
-              } // Pass amount and type correctly
+              onChangeValue={(val) => {
+                applyDiscount(Number(val) || 0, discountStore.type);
+              }} // Pass amount and type correctly
             />
 
             <SelectFieldControlled
@@ -348,7 +351,8 @@ function RightSideAddOrder({
             {!editingInvoice ? (
               <button
                 onDoubleClick={() => {
-                  reset();
+                  reset(addInvoiceDefaultValues);
+                  deleteCurrentDraftInvoice();
                   clearPosStore();
                 }}
                 type="button"
@@ -400,6 +404,10 @@ function RightSideAddOrder({
         <GeneralInfoModal
           modalTitle="General Info"
           triggerModalId="general-invoice-info-modal"
+        />
+        <ChooseDraftInvoiceModal
+          triggerModalId="choose-draft-invoice-modal"
+          modalTitle="Draft Invoices"
         />
         <PrintInvoiceModal
           triggerModalId="print-invoice"
