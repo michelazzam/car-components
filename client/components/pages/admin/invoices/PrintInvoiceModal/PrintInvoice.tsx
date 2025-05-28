@@ -19,9 +19,14 @@ import { InvoicePaymentMethodSchemaType } from "@/lib/apiValidations";
 
 const formatCurrencyInWords = (amount: number) => {
   if (typeof amount !== "number" || isNaN(amount)) return "0.00";
-  const dollars = Math.floor(amount);
-  const cents = Math.round((amount - dollars) * 100);
-  return `${numWords(dollars)} dollar${dollars !== 1 ? "s" : ""} ${
+  const isNegative = amount < 0;
+  const absoluteAmount = Math.abs(amount);
+
+  const dollars = Math.floor(absoluteAmount);
+  const cents = Math.round((absoluteAmount - dollars) * 100);
+  return `${isNegative ? "minus " : ""}${numWords(dollars)} dollar${
+    dollars !== 1 ? "s" : ""
+  } ${
     cents > 0 ? `and ${numWords(cents)} cent${cents !== 1 ? "s" : ""}` : ""
   } only`;
 };
