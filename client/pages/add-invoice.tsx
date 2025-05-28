@@ -1,5 +1,5 @@
 import Seo from "@/shared/layout-components/seo/seo";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import RightSideAddOrder from "../components/pages/add-order/RightSideAddOrder";
 import ItemsList from "../components/pages/add-order/ItemsList";
 import Header from "../components/pages/add-order/Header";
@@ -9,6 +9,30 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddInvoiceSchema, apiValidations } from "@/lib/apiValidations";
+import { v4 as uuidv4 } from "uuid";
+
+export const addInvoiceDefaultValues: AddInvoiceSchema = {
+  driverName: "",
+  paymentMethods: [],
+  discount: {
+    amount: 0,
+    type: "fixed",
+  },
+  paidAmountUsd: 0,
+  customerId: "",
+  swaps: [],
+  customer: {},
+  vehicle: {},
+  isPaid: false,
+  hasVehicle: true,
+  vehicleId: "",
+  items: [],
+  customerNote: "",
+  subTotalUsd: 0,
+  totalUsd: 0,
+  type: "s1",
+  taxesUsd: 0,
+};
 
 const AddInvoice = () => {
   //-----------------State----------------
@@ -26,6 +50,8 @@ const AddInvoice = () => {
     cart,
     clearCart,
     totalAmount,
+    upsertDraftInvoice,
+    draftInvoices,
   } = usePosStore();
 
   //--------------------API----------------------
@@ -48,6 +74,7 @@ const AddInvoice = () => {
 
   const processCart = (cart: Item[]): ProcessedItem[] => {
     const items = cart.map((item) => ({
+      name: item.name,
       itemRef: item.type === "product" ? item.productId : undefined,
       serviceRef: item.type === "service" ? item.productId : undefined,
       quantity: item.quantity || 1,
@@ -71,30 +98,126 @@ const AddInvoice = () => {
   const methods = useForm<AddInvoiceSchema>({
     resolver: zodResolver(apiValidations.AddInvoiceSchema),
     defaultValues: {
-      driverName: "",
-      paymentMethods: [],
-      discount: {
-        amount: 0,
-        type: "fixed",
-      },
-      paidAmountUsd: 0,
-      customerId: "",
-      swaps: [],
-      customer: {},
-      vehicle: {},
-      isPaid: false,
-      hasVehicle: true,
-      vehicleId: "",
+      ...addInvoiceDefaultValues,
       items: items,
-      customerNote: "",
-      subTotalUsd: 0,
-      totalUsd: 0,
-      type: "s1",
-      taxesUsd: 0,
     },
   });
-  const { control } = methods;
+
+  const { control, watch, reset } = methods;
+
+  const watchAll = watch();
+  const watchCustomerId = watch("customerId");
+  const customer = watch("customer");
+  const draftIdRef = useRef<string>(uuidv4());
+  const lastSavedRef = useRef<string>("");
   const swapsFieldArrayMethods = useFieldArray({ control, name: "swaps" });
+
+  // keep the *previous* customerId here:
+  const prevCustomerIdRef = useRef<string>("");
+
+  // 1) Load or init draft when customer changes
+  useEffect(() => {
+    const cid = watchCustomerId;
+    if (!cid) {
+      prevCustomerIdRef.current = cid;
+      return;
+    }
+
+    const existing = draftInvoices.find((d) => d.customerId === cid);
+    if (existing) {
+      draftIdRef.current = existing.draft_invoice_id;
+      reset(existing as AddInvoiceSchema);
+    } else {
+      draftIdRef.current = uuidv4();
+
+      if (prevCustomerIdRef.current) {
+        clearCart();
+        reset({
+          ...addInvoiceDefaultValues,
+          customerId: cid,
+          customer: customer,
+          items: [],
+          paymentMethods: [],
+        });
+      }
+    }
+    prevCustomerIdRef.current = cid;
+  }, [watchCustomerId, draftInvoices, reset]);
+
+  // Debounce whole form object
+  const debouncedForm = useDebounce(watchAll, 1000);
+
+  const prevCustomerId2Ref = useRef<string>("");
+
+  // 2) Autosave only if values changed, preserve isCurrent
+  useEffect(() => {
+    const vals = debouncedForm;
+    const cid = vals.customerId;
+
+    if (!vals.customerId) {
+      return;
+    }
+    const payload = JSON.stringify(vals);
+    if (payload === lastSavedRef.current) return;
+    lastSavedRef.current = payload;
+
+    // preserve existing isCurrent flag if switching or saving
+    const existing = draftInvoices.find(
+      (d) => d.draft_invoice_id === draftIdRef.current
+    );
+
+    const hasPreviousPreviwInvoice =
+      !!prevCustomerId2Ref.current &&
+      draftInvoices.find((d) => d.draft_invoice_id === draftIdRef.current);
+    const isNew = !hasPreviousPreviwInvoice;
+    const values = isNew ? addInvoiceDefaultValues : vals;
+    console.log("SAVING THE DRAFT INVOICE WITH VALUES : ", values);
+
+    upsertDraftInvoice({
+      ...vals,
+      paymentMethods: values.paymentMethods,
+      swaps: values.swaps,
+      draft_invoice_id: draftIdRef.current,
+      isCurrent: existing?.isCurrent ?? false,
+    });
+
+    prevCustomerId2Ref.current = cid;
+  }, [debouncedForm, upsertDraftInvoice, draftInvoices]);
+
+  // 3) Change discount, discount type , items in store when draft changes
+
+  useEffect(() => {
+    const draft = draftInvoices.find(
+      (d) => d.draft_invoice_id === draftIdRef.current
+    );
+    if (!draft) return;
+    //store
+    console.log("DRAFT ITEMS ARE : ", draft.items);
+    clearCart();
+    //add items to cart
+    const productItems: any[] = [];
+    const serviceItems: any[] = [];
+
+    draft?.items?.forEach((item) => {
+      if (item.itemRef) {
+        productItems.push(item);
+      } else {
+        serviceItems.push(item);
+      }
+    });
+
+    if (productItems.length > 0) {
+      addGroupItem("product", productItems);
+    }
+    if (serviceItems.length > 0) {
+      addGroupItem("service", serviceItems);
+    }
+
+    applyDiscount(
+      draft.discount.amount,
+      draft.discount.type as "fixed" | "percentage"
+    );
+  }, [draftIdRef.current]);
 
   const isB2C = methods.watch("type") === "s2";
   //-----------------Effects-----------------------------
@@ -152,7 +275,6 @@ const AddInvoice = () => {
       return accumulator + (currentItem.amount || 0);
     }, 0);
     methods.setValue("subTotalUsd", subTotalUsd);
-    console.log("SETTING TOTAL USD TO : ", totalAmount(!isB2C));
     methods.setValue("totalUsd", totalAmount(!isB2C));
   }, [cart, methods, isB2C]);
 

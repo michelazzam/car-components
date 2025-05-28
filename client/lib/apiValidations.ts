@@ -351,7 +351,7 @@ const AddInvoiceSchema = z
       })
       .optional(),
 
-    isPaid: z.boolean(),
+    isPaid: z.boolean().default(false),
     hasVehicle: z.boolean(),
     vehicleId: z.string().optional(),
     taxesUsd: z.number(),
@@ -387,7 +387,8 @@ const AddInvoiceSchema = z
           note: z.string().optional(),
         })
       )
-      .nullable(),
+      .nullable()
+      .optional(),
   })
   .refine(
     (data) => {

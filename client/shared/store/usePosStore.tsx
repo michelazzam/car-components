@@ -1,4 +1,5 @@
 import { GetItem, Invoice, Swap } from "@/api-hooks/invoices/useListInvoices";
+import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -18,6 +19,11 @@ function calculateDiscountedAmount(
     return total;
   }
 }
+
+export type DraftInvoice = AddInvoiceSchema & {
+  draft_invoice_id: string;
+  isCurrent: boolean;
+};
 
 export interface Item {
   type?: "product" | "service";
@@ -58,8 +64,11 @@ interface PosState {
   clearCart: () => void;
   clearPosStore: () => void;
   editingInvoice?: Invoice;
-  draftInvoices?: Invoice[];
-  setDraftInvoices: (draftInvoices: Invoice[]) => void;
+  draftInvoices: DraftInvoice[];
+  deleteDraftInvoice: (id: string) => void;
+  deleteCurrentDraftInvoice: () => void;
+  getCurrentDraftInvoice: () => DraftInvoice | undefined;
+  upsertDraftInvoice: (draft: DraftInvoice) => void;
   setEditingInvoice: (invoice?: Invoice) => void;
   addToCart: (type: "product" | "service", item: Item) => void;
   addGroupItem: (type: "product" | "service", items: GetItem[]) => void;
@@ -88,10 +97,51 @@ export const usePosStore = create<PosState>()(
       setEditingInvoice: (invoice?: Invoice) => {
         set({ editingInvoice: invoice as Invoice });
       },
-      setDraftInvoices: (draftInvoices: Invoice[]) => {
-        set({ draftInvoices });
+
+      deleteDraftInvoice: (id: string) => {
+        set((state) => {
+          const others = state.draftInvoices.filter(
+            (d) => d.draft_invoice_id !== id
+          );
+          return { draftInvoices: others };
+        });
+      },
+      deleteCurrentDraftInvoice: () => {
+        set((state) => {
+          const others = state.draftInvoices.filter(
+            (d) => d.isCurrent === false
+          );
+          return { draftInvoices: others };
+        });
       },
 
+      getCurrentDraftInvoice: () => {
+        return get().draftInvoices.find((d) => d.isCurrent);
+      },
+
+      upsertDraftInvoice: (draft: DraftInvoice) => {
+        set((state) => {
+          const existing = state.draftInvoices.find(
+            (d) => d.draft_invoice_id === draft.draft_invoice_id
+          );
+          // mark others false
+          const others = state.draftInvoices.map((d) => ({
+            ...d,
+            isCurrent: false,
+          }));
+          let updated: DraftInvoice[];
+          if (existing) {
+            updated = others.map((d) =>
+              d.draft_invoice_id === draft.draft_invoice_id
+                ? { ...draft, isCurrent: true }
+                : d
+            );
+          } else {
+            updated = [...others, { ...draft, isCurrent: true }];
+          }
+          return { draftInvoices: updated };
+        });
+      },
       // Apply discount logic
       applyDiscount: (
         amount: number,
@@ -164,7 +214,6 @@ export const usePosStore = create<PosState>()(
       },
 
       totalAmount: (isVatActive: boolean) => {
-        console.log("CALCULATING TOTAL....");
         const { cart, vatAmount, discountStore, swaps } = get();
 
         let totalItemsAmount = Number(
@@ -181,7 +230,6 @@ export const usePosStore = create<PosState>()(
           (acc, item) => acc + item.price * item.quantity,
           0
         );
-        console.log("SWAPS DISCOUNT IS : ", swapsDiscount);
         if (discountStore.type === "percentage") {
           const discountValue = totalItemsAmount * (discountAmount * 0.01);
           let totalItemsAmountWithDiscount = Number(
@@ -264,6 +312,7 @@ export const usePosStore = create<PosState>()(
       clearPosStore: () =>
         set({
           cart: [],
+          swaps: [],
           editingInvoice: undefined,
           vatAmount: 0,
           payLater: false,
@@ -278,11 +327,12 @@ export const usePosStore = create<PosState>()(
 );
 
 export const clearPosStore = () => {
+  console.log("CLEARING POS STORE...");
   usePosStore.setState({
     cart: [],
+    swaps: [],
     editingInvoice: undefined,
     vatAmount: 0,
-    draftInvoices: [],
     payLater: false,
     discountStore: { amount: 0, type: "fixed" },
   });
