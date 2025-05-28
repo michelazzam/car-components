@@ -23,7 +23,13 @@ function SaveInvoiceModal({
   const isB2C = getValues("type") === "s2";
 
   return (
-    <Modal id={triggerModalId}>
+    <Modal
+      onOpen={() => {
+        setValue("paidAmountUsd", 0);
+        setIsFullPaid(false);
+      }}
+      id={triggerModalId}
+    >
       <Modal.Header title={title} id={triggerModalId} />
       <Modal.Body>
         <NumberFieldControlled
