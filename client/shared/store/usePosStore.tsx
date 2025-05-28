@@ -67,6 +67,7 @@ interface PosState {
   draftInvoices: DraftInvoice[];
   deleteDraftInvoice: (id: string) => void;
   deleteCurrentDraftInvoice: () => void;
+  getCurrentDraftInvoice: () => DraftInvoice | undefined;
   upsertDraftInvoice: (draft: DraftInvoice) => void;
   setEditingInvoice: (invoice?: Invoice) => void;
   addToCart: (type: "product" | "service", item: Item) => void;
@@ -113,6 +114,11 @@ export const usePosStore = create<PosState>()(
           return { draftInvoices: others };
         });
       },
+
+      getCurrentDraftInvoice: () => {
+        return get().draftInvoices.find((d) => d.isCurrent);
+      },
+
       upsertDraftInvoice: (draft: DraftInvoice) => {
         set((state) => {
           const existing = state.draftInvoices.find(

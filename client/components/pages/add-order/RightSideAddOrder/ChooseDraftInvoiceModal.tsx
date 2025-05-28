@@ -31,6 +31,7 @@ const ChooseDraftInvoiceModal = ({
     if (!selectedId) return;
     const draft = draftInvoices.find((d) => d.draft_invoice_id === selectedId)!;
     // mark it current in store
+    console.log("THE DRAFT WAS FOUND : ", draft);
     upsertDraftInvoice(draft);
     // load its values into the form
     reset(draft);

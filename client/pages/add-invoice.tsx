@@ -110,6 +110,7 @@ const AddInvoice = () => {
   const customer = watch("customer");
   const draftIdRef = useRef<string>(uuidv4());
   const lastSavedRef = useRef<string>("");
+  const swapsFieldArrayMethods = useFieldArray({ control, name: "swaps" });
 
   // keep the *previous* customerId here:
   const prevCustomerIdRef = useRef<string>("");
@@ -118,13 +119,8 @@ const AddInvoice = () => {
   useEffect(() => {
     const cid = watchCustomerId;
     if (!cid) {
-      console.log("NO CID");
       prevCustomerIdRef.current = cid;
-      console.log("prevCustomerIdRef.current = ", prevCustomerIdRef.current);
       return;
-    } else {
-      console.log("CID EXISTS");
-      console.log("PREV CUSTOMER REF. CURRENT = ", prevCustomerIdRef.current);
     }
 
     const existing = draftInvoices.find((d) => d.customerId === cid);
@@ -135,13 +131,13 @@ const AddInvoice = () => {
       draftIdRef.current = uuidv4();
 
       if (prevCustomerIdRef.current) {
-        console.log("RESETING .... ..... .... ");
         clearCart();
         reset({
           ...addInvoiceDefaultValues,
           customerId: cid,
           customer: customer,
           items: [],
+          paymentMethods: [],
         });
       }
     }
@@ -151,10 +147,16 @@ const AddInvoice = () => {
   // Debounce whole form object
   const debouncedForm = useDebounce(watchAll, 1000);
 
+  const prevCustomerId2Ref = useRef<string>("");
+
   // 2) Autosave only if values changed, preserve isCurrent
   useEffect(() => {
     const vals = debouncedForm;
-    if (!vals.customerId) return;
+    const cid = vals.customerId;
+
+    if (!vals.customerId) {
+      return;
+    }
     const payload = JSON.stringify(vals);
     if (payload === lastSavedRef.current) return;
     lastSavedRef.current = payload;
@@ -163,11 +165,23 @@ const AddInvoice = () => {
     const existing = draftInvoices.find(
       (d) => d.draft_invoice_id === draftIdRef.current
     );
+
+    const hasPreviousPreviwInvoice =
+      !!prevCustomerId2Ref.current &&
+      draftInvoices.find((d) => d.draft_invoice_id === draftIdRef.current);
+    const isNew = !hasPreviousPreviwInvoice;
+    const values = isNew ? addInvoiceDefaultValues : vals;
+    console.log("SAVING THE DRAFT INVOICE WITH VALUES : ", values);
+
     upsertDraftInvoice({
       ...vals,
+      paymentMethods: values.paymentMethods,
+      swaps: values.swaps,
       draft_invoice_id: draftIdRef.current,
       isCurrent: existing?.isCurrent ?? false,
     });
+
+    prevCustomerId2Ref.current = cid;
   }, [debouncedForm, upsertDraftInvoice, draftInvoices]);
 
   // 3) Change discount, discount type , items in store when draft changes
@@ -204,8 +218,6 @@ const AddInvoice = () => {
       draft.discount.type as "fixed" | "percentage"
     );
   }, [draftIdRef.current]);
-
-  const swapsFieldArrayMethods = useFieldArray({ control, name: "swaps" });
 
   const isB2C = methods.watch("type") === "s2";
   //-----------------Effects-----------------------------

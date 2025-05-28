@@ -16,7 +16,7 @@ function InvoicePaymentMethodModal({
   const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
-  const { control, watch } = formContext;
+  const { control, watch, register } = formContext;
   const { append, remove, fields } = useFieldArray({
     control,
     name: "paymentMethods", // Field name in the form data
@@ -50,6 +50,7 @@ function InvoicePaymentMethodModal({
 
   return (
     <Modal
+      onOpen={() => {}}
       id={triggerModalId}
       size="md"
       onClose={() => {
@@ -84,14 +85,25 @@ function InvoicePaymentMethodModal({
             })}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4">
+        <div key={watch("customerId")} className="grid grid-cols-2 gap-x-4">
           {fields?.map((field, index) => {
+            const methodLabel = watch(`paymentMethods.${index}.method`) || "";
+
             return (
               <div key={field.id} className="flex  gap-2">
+                <input
+                  type="hidden"
+                  {...register(`paymentMethods.${index}.id` as const)}
+                />
+                <input
+                  type="hidden"
+                  {...register(`paymentMethods.${index}.method` as const)}
+                />
+
                 <TextFieldControlled
                   marginBottom="mb-0"
-                  name={`paymentMethods[${index}].note`}
-                  label={`${watch(`paymentMethods.${index}.method`)} Note`}
+                  name={`paymentMethods.${index}.note`}
+                  label={`${methodLabel} Note`}
                   control={control}
                 />
                 <button
