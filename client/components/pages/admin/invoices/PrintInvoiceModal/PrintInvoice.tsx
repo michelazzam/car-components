@@ -6,6 +6,7 @@ import {
   Discount,
   GetItem,
   Invoice,
+  Swap,
 } from "@/api-hooks/invoices/useListInvoices";
 import { formatNumber } from "@/lib/helpers/formatNumber";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
@@ -55,6 +56,7 @@ function PrintInvoice({
     totalPriceUsd,
     invoiceUsdRate,
     type,
+    swaps,
     paymentMethods,
   } = useMemo(() => {
     const invoiceData = prev ? previewingInvoice : printingInvoice;
@@ -72,6 +74,7 @@ function PrintInvoice({
       totalPriceUsd: invoiceData.accounting.totalUsd,
       invoiceUsdRate: invoiceData.accounting.usdRate,
       type: invoiceData.type,
+      swaps: invoiceData.swaps,
       paymentMethods: invoiceData.paymentMethods,
     };
   }, [prev, previewingInvoice, printingInvoice, usdRate]);
@@ -107,6 +110,7 @@ function PrintInvoice({
           />
           {items && <InvoiceTable items={items} />}
           <InvoiceSubtotal
+            swaps={swaps}
             discount={discount}
             noTax={noTax}
             subTotalUsd={subTotalUsd || 0}
@@ -188,8 +192,7 @@ const PrintInvoiceDetails = ({
   isB2b: boolean;
   paymentMethods?: InvoicePaymentMethodSchemaType[];
 }) => {
-  console.log("IS B2b", isB2b);
-  console.log("SHOULD HAVE VAT", isB2b ? true : false);
+  const hasPaymentMethods = paymentMethods && paymentMethods?.length > 0;
   return (
     <div className="grid grid-cols-12 px-4 py-2">
       {/* Customer and Vehicle Details */}
@@ -232,7 +235,9 @@ const PrintInvoiceDetails = ({
             </>
           )}
         </p>
-        <span className="font-bold">Payment Methods:</span>
+        {hasPaymentMethods && (
+          <span className="font-bold">Payment Methods:</span>
+        )}
         {paymentMethods?.map((paymentMethod, index) => {
           return (
             <div key={index} className="flex gap-2">
@@ -345,6 +350,7 @@ const ProductTableRow = ({
 
 const InvoiceSubtotal = ({
   discount,
+  swaps,
   amountPaidUsd,
   customerNote,
   taxesUsd,
@@ -357,6 +363,7 @@ const InvoiceSubtotal = ({
     amount: number;
     type: "fixed" | "percentage";
   };
+  swaps?: Swap[];
   amountPaidUsd?: number;
   taxesLbp?: number;
   customerNote?: string;
@@ -366,6 +373,9 @@ const InvoiceSubtotal = ({
   totalPriceUsd: number;
   noTax: boolean;
 }) => {
+  const isSwapAvailable = swaps && swaps?.length > 0;
+  const totalSwapsDiscount =
+    swaps?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
   return (
     <div className="flex justify-end mt-2">
       <div className="grid grid-cols-2 gap-4 w-full max-w-4xl mx-2">
@@ -387,6 +397,13 @@ const InvoiceSubtotal = ({
             <span className="font-semibold">Sub Total:</span>
             <span>${formatNumber(subTotalUsd, 2)}</span>
           </div>
+          {isSwapAvailable && totalSwapsDiscount > 0 && (
+            <div className="flex justify-between text-red-500">
+              <span className="font-semibold">Swapped By:</span>
+              <span>-${formatNumber(totalSwapsDiscount, 2)}</span>
+            </div>
+          )}
+
           {discount && discount.amount > 0 && (
             <div className="flex justify-between text-red-500">
               <span className="font-semibold">Discount:</span>
