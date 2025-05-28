@@ -111,22 +111,41 @@ const AddInvoice = () => {
   const draftIdRef = useRef<string>(uuidv4());
   const lastSavedRef = useRef<string>("");
 
+  // keep the *previous* customerId here:
+  const prevCustomerIdRef = useRef<string>("");
+
   // 1) Load or init draft when customer changes
   useEffect(() => {
     const cid = watchCustomerId;
-    if (!cid) return;
+    if (!cid) {
+      console.log("NO CID");
+      prevCustomerIdRef.current = cid;
+      console.log("prevCustomerIdRef.current = ", prevCustomerIdRef.current);
+      return;
+    } else {
+      console.log("CID EXISTS");
+      console.log("PREV CUSTOMER REF. CURRENT = ", prevCustomerIdRef.current);
+    }
+
     const existing = draftInvoices.find((d) => d.customerId === cid);
     if (existing) {
       draftIdRef.current = existing.draft_invoice_id;
       reset(existing as AddInvoiceSchema);
     } else {
       draftIdRef.current = uuidv4();
-      reset({
-        ...addInvoiceDefaultValues,
-        customerId: cid,
-        customer: customer,
-      });
+
+      if (prevCustomerIdRef.current) {
+        console.log("RESETING .... ..... .... ");
+        clearCart();
+        reset({
+          ...addInvoiceDefaultValues,
+          customerId: cid,
+          customer: customer,
+          items: [],
+        });
+      }
     }
+    prevCustomerIdRef.current = cid;
   }, [watchCustomerId, draftInvoices, reset]);
 
   // Debounce whole form object

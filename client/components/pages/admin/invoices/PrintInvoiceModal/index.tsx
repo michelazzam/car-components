@@ -77,16 +77,7 @@ function PrintInvoiceModal({
   };
 
   return (
-    <Modal
-      id={triggerModalId}
-      size="md"
-      onClose={() => {}}
-      onOpen={() => {
-        console.log("INVOICE TYPE IS :", printingInvoices?.[0]?.type);
-        console.log("IS CUSTOMER", printingInvoices?.[0]?.type === "s2");
-        console.log("PREVIEWING INVOICE TYPE IS :", previewingInvoice?.type);
-      }}
-    >
+    <Modal id={triggerModalId} size="md" onClose={() => {}}>
       <Modal.Header title={title} id={triggerModalId} />
 
       <Modal.Body>
