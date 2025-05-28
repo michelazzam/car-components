@@ -142,4 +142,9 @@ export const API = {
   addPaymentMethod: "/payment-methods", //POST
   editPaymentMethod: (id: string) => `/payment-methods/${id}`, //PUT
   deletePaymentMethod: (id: string) => `/payment-methods/${id}`, //DELETE
+
+  // ams:
+  getBilling: "/app-token/billing",
+  checkLicense: "/app-token/validate",
+  validateLicense: "/app-token/validate",
 };

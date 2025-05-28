@@ -409,7 +409,12 @@ const DBBackupPath = z.object({
 });
 export type DBBackupPath = z.infer<typeof DBBackupPath>;
 
+const validateTokenSchema = z.object({
+  token: z.string().min(1, "Required"),
+});
+
 export const apiValidations = {
+  validateToken: validateTokenSchema,
   Login: loginSchema,
   AddUser: UserSchema,
   AddEditProduct: ProductSchema,

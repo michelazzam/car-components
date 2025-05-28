@@ -5,6 +5,7 @@ import { startSwagger } from './config/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as nodeCrypto from 'crypto';
 import { GlobalExceptionFilter } from './middleware/global-exception-filter.middleware';
+
 if (typeof (globalThis as any).crypto === 'undefined') {
   (globalThis as any).crypto = {
     randomUUID: (): string => nodeCrypto.randomUUID(),
