@@ -33,7 +33,7 @@ function Header({
   const [customerSearch, setCustomerSearch] = useState("");
   const [vehicleSearch, setVehicleSearch] = useState("");
   //------------------Form storage--------------------------
-  const formContext = useFormContext();
+  const formContext = useFormContext<AddInvoiceSchema>();
   if (!formContext) return <div>Loading...</div>;
 
   const { control, watch, setValue, reset: resetForm } = formContext;
@@ -86,7 +86,9 @@ function Header({
       model: editingInvoice.vehicle.model,
     });
   }
-
+  // console.log("THE VEHICLE_ID IS CURRENTLY : ", watch("vehicleId"));
+  // console.log("THE VEHICLE IS CURRENTLY : ", watch("vehicle"));
+  // console.log("VEHICLE OPTIONS ARE : ", vehicleOptions);
   return (
     <div>
       {editingInvoice && (
@@ -127,11 +129,11 @@ function Header({
             creatable={false}
             onInputChange={(e) => {
               setCustomerSearch(e);
-              setValue("vehicleId", "");
-              setValue("vehicle", {});
             }}
             onObjectChange={(e) => {
               setValue("customer", e);
+              setValue("vehicleId", "");
+              setValue("vehicle", {});
             }}
           />
         </div>
