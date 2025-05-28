@@ -5,7 +5,7 @@ import Landinglayout from "@/shared/layout-components/layout/landing-layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
-// import AuthProvider from "@/shared/Providers/AithProvider";
+import LicenseValidatorWrapper from "@/shared/LicenseValidatorWrapper";
 
 const queryClient = new QueryClient();
 
@@ -24,11 +24,11 @@ function MyApp({ Component, pageProps }: any) {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <Toaster />
-      {/* <AuthProvider> */}
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-      {/* </AuthProvider> */}
+      <LicenseValidatorWrapper>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </LicenseValidatorWrapper>
     </QueryClientProvider>
   );
 }
