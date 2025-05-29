@@ -215,9 +215,13 @@ const AddInvoice = () => {
     const draft = draftInvoices.find(
       (d) => d.draft_invoice_id === draftIdRef.current
     );
-    if (!draft) return;
+
+    if (!draft) {
+      applyDiscount(0, "fixed");
+      return;
+    }
     //store
-    console.log("DRAFT ITEMS ARE : ", draft.items);
+
     clearCart();
     //add items to cart
     const productItems: any[] = [];
