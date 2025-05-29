@@ -85,12 +85,13 @@ function RightSideAddOrder({
   // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
     refetchProducts();
-    deleteCurrentDraftInvoice();
-    console.log("CLEARING THE POS STORE...");
-    clearPosStore();
-    console.log("POS STORE SHOULD HAVE BEEN CLEARED");
-    setIsFullPaid(false);
+    if (!editingInvoice) {
+      deleteCurrentDraftInvoice();
+    }
     reset(addInvoiceDefaultValues);
+    clearPosStore();
+    setIsFullPaid(false);
+
     if (editingInvoice) {
       setEditingInvoice(undefined);
 

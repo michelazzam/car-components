@@ -18,6 +18,7 @@ import { HiOutlinePlusSm } from "react-icons/hi";
 import { AiOutlineSwap } from "react-icons/ai";
 import InvoiceItemsSwapsModal from "./InvoiceItemsSwapsModal";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
+import { addInvoiceDefaultValues } from "@/pages/add-invoice";
 
 function Header({
   search,
@@ -102,7 +103,7 @@ function Header({
             onClick={() => {
               setEditingInvoice();
               clearPosStore();
-              resetForm();
+              resetForm(addInvoiceDefaultValues);
             }}
           >
             Cancel Editing

@@ -118,6 +118,10 @@ const AddInvoice = () => {
   // 1) Load or init draft when customer changes
   useEffect(() => {
     const cid = watchCustomerId;
+    if (editingInvoice) {
+      return;
+    }
+
     if (!cid) {
       prevCustomerIdRef.current = cid;
       return;
@@ -151,12 +155,17 @@ const AddInvoice = () => {
 
   // 2) Autosave only if values changed, preserve isCurrent
   useEffect(() => {
+    if (editingInvoice) {
+      return;
+    }
+
     const vals = debouncedForm;
     const cid = vals.customerId;
 
-    if (!vals.customerId) {
+    if (!vals.customerId || vals.customerId === "" || !vals.customer) {
       return;
     }
+    console.log("VALS.CUSTOMER ID : ", vals.customerId);
     const payload = JSON.stringify(vals);
     if (payload === lastSavedRef.current) return;
     lastSavedRef.current = payload;
@@ -166,17 +175,28 @@ const AddInvoice = () => {
       (d) => d.draft_invoice_id === draftIdRef.current
     );
 
-    const hasPreviousPreviwInvoice =
-      !!prevCustomerId2Ref.current &&
-      draftInvoices.find((d) => d.draft_invoice_id === draftIdRef.current);
+    const hasPreviousPreviwInvoice = draftInvoices.find(
+      (d) => d.draft_invoice_id === draftIdRef.current
+    );
+
     const isNew = !hasPreviousPreviwInvoice;
     const values = isNew ? addInvoiceDefaultValues : vals;
-    console.log("SAVING THE DRAFT INVOICE WITH VALUES : ", values);
 
+    // console.log("1---SAVING THE INVOICE WITH VALS : \n", vals);
+    // console.log("2---SAVING THE INVOICE WITH VALUES : \n", values);
+    // console.log("HAS PREVIOUS PREVIW INVOICE? : ", !!hasPreviousPreviwInvoice);
+    // console.log("HAS PREVIOUS CUSTOMER ID? : ", !!prevCustomerId2Ref.current);
+    // 1- if didnt has prev invoice && didnt has cust id --> take vals
+    // 2- if didnt has prev invoice but  has cust id --> take values
+    // 3- if he has a prev invoice and has a cust id --> take vals
+    const shouldTakeValues =
+      !hasPreviousPreviwInvoice && !!prevCustomerId2Ref.current;
     upsertDraftInvoice({
       ...vals,
-      paymentMethods: values.paymentMethods,
-      swaps: values.swaps,
+      paymentMethods: shouldTakeValues
+        ? values.paymentMethods
+        : vals.paymentMethods,
+      swaps: shouldTakeValues ? values.swaps : vals.swaps,
       draft_invoice_id: draftIdRef.current,
       isCurrent: existing?.isCurrent ?? false,
     });
@@ -187,6 +207,10 @@ const AddInvoice = () => {
   // 3) Change discount, discount type , items in store when draft changes
 
   useEffect(() => {
+    if (editingInvoice) {
+      return;
+    }
+
     const draft = draftInvoices.find(
       (d) => d.draft_invoice_id === draftIdRef.current
     );
