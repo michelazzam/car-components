@@ -19,6 +19,7 @@ import { AiOutlineSwap } from "react-icons/ai";
 import InvoiceItemsSwapsModal from "./InvoiceItemsSwapsModal";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { addInvoiceDefaultValues } from "@/pages/add-invoice";
+import { FaPlus } from "react-icons/fa6";
 
 function Header({
   search,
@@ -190,10 +191,11 @@ function Header({
             <MdPayment />
           </button>
           <button
-            className="rounded-md text-white p-[0.65rem] bg-primary"
+            className="ti ti-btn ti-btn-primary flex items-center justify-center"
             data-hs-overlay="#add-services-modal"
           >
-            Add Service
+            <FaPlus />
+            Services
           </button>
         </div>
       </div>

@@ -65,6 +65,8 @@ interface PosState {
   clearPosStore: () => void;
   editingInvoice?: Invoice;
   draftInvoices: DraftInvoice[];
+  hasReadDraftInvoices: boolean;
+  setHasReadDraftInvoices: (hasReadDraftInvoices: boolean) => void;
   deleteDraftInvoice: (id: string) => void;
   deleteCurrentDraftInvoice: () => void;
   getCurrentDraftInvoice: () => DraftInvoice | undefined;
@@ -85,6 +87,7 @@ export const usePosStore = create<PosState>()(
       //-----\
       cart: [],
       vatAmount: 0,
+      hasReadDraftInvoices: true,
       discountStore: { amount: 0, type: "fixed" },
       payLater: false,
       editingInvoice: undefined,
@@ -97,7 +100,8 @@ export const usePosStore = create<PosState>()(
       setEditingInvoice: (invoice?: Invoice) => {
         set({ editingInvoice: invoice as Invoice });
       },
-
+      setHasReadDraftInvoices: (hasReadDraftInvoices: boolean) =>
+        set({ hasReadDraftInvoices }),
       deleteDraftInvoice: (id: string) => {
         set((state) => {
           const others = state.draftInvoices.filter(
@@ -130,6 +134,7 @@ export const usePosStore = create<PosState>()(
             isCurrent: false,
           }));
           let updated: DraftInvoice[];
+          let hasReadDraftInvoices = state.hasReadDraftInvoices;
           if (existing) {
             updated = others.map((d) =>
               d.draft_invoice_id === draft.draft_invoice_id
@@ -137,9 +142,12 @@ export const usePosStore = create<PosState>()(
                 : d
             );
           } else {
+            //make the status of has read = false
+            hasReadDraftInvoices = false;
+            console.log("SETTING HAS READ TO FALSE");
             updated = [...others, { ...draft, isCurrent: true }];
           }
-          return { draftInvoices: updated };
+          return { draftInvoices: updated, hasReadDraftInvoices };
         });
       },
       // Apply discount logic

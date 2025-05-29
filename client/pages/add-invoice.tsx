@@ -116,9 +116,12 @@ const AddInvoice = () => {
   const prevCustomerIdRef = useRef<string>("");
 
   // 1) Load or init draft when customer changes
+  //this effect will only run when customer changes
+
   useEffect(() => {
     const cid = watchCustomerId;
     if (editingInvoice) {
+      //just return if editing invoice
       return;
     }
 
@@ -156,6 +159,7 @@ const AddInvoice = () => {
   // 2) Autosave only if values changed, preserve isCurrent
   useEffect(() => {
     if (editingInvoice) {
+      //just return if editing invoice
       return;
     }
 
@@ -182,13 +186,10 @@ const AddInvoice = () => {
     const isNew = !hasPreviousPreviwInvoice;
     const values = isNew ? addInvoiceDefaultValues : vals;
 
-    // console.log("1---SAVING THE INVOICE WITH VALS : \n", vals);
-    // console.log("2---SAVING THE INVOICE WITH VALUES : \n", values);
-    // console.log("HAS PREVIOUS PREVIW INVOICE? : ", !!hasPreviousPreviwInvoice);
-    // console.log("HAS PREVIOUS CUSTOMER ID? : ", !!prevCustomerId2Ref.current);
     // 1- if didnt has prev invoice && didnt has cust id --> take vals
     // 2- if didnt has prev invoice but  has cust id --> take values
     // 3- if he has a prev invoice and has a cust id --> take vals
+
     const shouldTakeValues =
       !hasPreviousPreviwInvoice && !!prevCustomerId2Ref.current;
     upsertDraftInvoice({

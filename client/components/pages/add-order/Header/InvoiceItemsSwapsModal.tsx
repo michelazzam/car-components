@@ -42,7 +42,7 @@ function InvoiceItemsSwapsModal({
                   </h4>
                   <button
                     type="button"
-                    className="text-red-600 hover:text-red-800"
+                    className="ti ti-btn ti-btn-icon ti-btn-danger"
                     onClick={() => remove(index)}
                     aria-label={`Remove swap item ${index + 1}`}
                   >

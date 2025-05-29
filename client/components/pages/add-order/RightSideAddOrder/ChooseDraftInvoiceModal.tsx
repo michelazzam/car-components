@@ -16,6 +16,7 @@ const ChooseDraftInvoiceModal = ({
     deleteDraftInvoice,
     upsertDraftInvoice,
     clearPosStore,
+    setHasReadDraftInvoices,
   } = usePosStore();
   const { reset } = useFormContext<AddInvoiceSchema>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -67,7 +68,13 @@ const ChooseDraftInvoiceModal = ({
   };
 
   return (
-    <Modal id={triggerModalId} size="lg">
+    <Modal
+      onOpen={() => {
+        setHasReadDraftInvoices(true);
+      }}
+      id={triggerModalId}
+      size="lg"
+    >
       <Modal.Header title={modalTitle} id={triggerModalId} />
 
       <Modal.Body>
