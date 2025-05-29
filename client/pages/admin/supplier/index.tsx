@@ -20,12 +20,32 @@ import AddEditSupplierModal from "@/components/pages/admin/supplier/AddEditSuppl
 import ViewSupplierModal from "@/components/pages/admin/supplier/ViewSupplierModal";
 import DeleteRecord from "@/components/admin/DeleteRecord";
 import Link from "next/link";
+import { SelectOption } from "@/components/admin/Fields/SlectField";
 
 const SupplierPage = () => {
   const { pagination, setPagination } = useReactTablePagination();
 
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
+
+  const [selectedOption, setSelectedOption] = useState<SelectOption | null>({
+    label: "All",
+    value: "all",
+  });
+  const onlyHasLoanOptions: SelectOption[] = [
+    {
+      label: "All",
+      value: "all",
+    },
+    {
+      label: "Has loan",
+      value: "true",
+    },
+    {
+      label: "No loan",
+      value: "false",
+    },
+  ];
 
   const {
     data: suppliersResponse,
@@ -36,6 +56,12 @@ const SupplierPage = () => {
     pageSize: pagination.pageSize,
     pageIndex: pagination.pageIndex,
     search: debouncedSearch,
+    onlyHasLoan:
+      selectedOption?.value === "true"
+        ? true
+        : selectedOption?.value === "false"
+        ? false
+        : undefined,
   });
   const suppliers = suppliersResponse?.suppliers;
 
@@ -149,6 +175,13 @@ const SupplierPage = () => {
         id="supplier-table"
         searchValue={searchValue}
         onSearchValueChange={onSearchValueChange}
+        select={{
+          options: onlyHasLoanOptions,
+          value: selectedOption,
+          onChange: (value) => {
+            setSelectedOption(value);
+          },
+        }}
       >
         <ReactTablePaginated
           errorMessage={error?.message}
