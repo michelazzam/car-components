@@ -28,7 +28,7 @@ export class SupplierService {
   }
 
   async getAll(dto: GetSuppliersDto) {
-    const { pageIndex, search, pageSize } = dto;
+    const { pageIndex, search, pageSize, onlyHasLoan } = dto;
 
     const filter: FilterQuery<ISupplier> = {};
 
@@ -39,6 +39,12 @@ export class SupplierService {
         { phoneNumber: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
       ];
+    }
+
+    if (onlyHasLoan === 'true') {
+      filter.loan = { $gt: 0 };
+    } else if (onlyHasLoan === 'false') {
+      filter.loan = { $eq: 0 };
     }
 
     const [suppliers, totalCount] = await Promise.all([

@@ -32,7 +32,7 @@ export class CustomerService {
 
   //-----------------------------GET ALL CUSTOMERS-----------------------------
   async getAll(dto: GetCustomersDto) {
-    const { pageIndex, search, pageSize } = dto;
+    const { pageIndex, search, pageSize, onlyHasLoan } = dto;
 
     const filter: FilterQuery<ICustomer> = {};
 
@@ -43,6 +43,12 @@ export class CustomerService {
         { phoneNumber: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
       ];
+    }
+
+    if (onlyHasLoan === 'true') {
+      filter.loan = { $gt: 0 };
+    } else if (onlyHasLoan === 'false') {
+      filter.loan = { $eq: 0 };
     }
 
     const [customers, totalCount] = await Promise.all([
