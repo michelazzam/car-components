@@ -29,13 +29,7 @@ function InvoiceItemsSwapsModal({
   }, [swaps]);
 
   return (
-    <Modal
-      id={triggerModalId}
-      size="md"
-      onClose={() => {
-        console.log("close");
-      }}
-    >
+    <Modal id={triggerModalId} size="md" onClose={() => {}}>
       <Modal.Header title={modalTitle} id={triggerModalId} />
       <Modal.Body>
         <div>

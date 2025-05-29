@@ -49,14 +49,7 @@ function InvoicePaymentMethodModal({
   };
 
   return (
-    <Modal
-      onOpen={() => {}}
-      id={triggerModalId}
-      size="md"
-      onClose={() => {
-        console.log("close");
-      }}
-    >
+    <Modal onOpen={() => {}} id={triggerModalId} size="md" onClose={() => {}}>
       <Modal.Header title={modalTitle} id={triggerModalId} />
       <Modal.Body>
         <div className=" flex flex-wrap gap-x-4">

@@ -10,11 +10,11 @@ function PrintStatementModal({
   triggerModalId,
   title,
   printingInvoices = undefined,
-  // startDate,
-  // endDate,
-  // currency,
-  // customerDetails,
-}: {
+}: // startDate,
+// endDate,
+// currency,
+// customerDetails,
+{
   triggerModalId: string;
   title: string;
   printingInvoices?: Invoice[];
@@ -79,16 +79,7 @@ function PrintStatementModal({
   };
 
   return (
-    <Modal
-      id={"print-statement-modal"}
-      size="md"
-      onClose={() => {
-        console.log("close");
-      }}
-      onOpen={() => {
-        console.log("open");
-      }}
-    >
+    <Modal id={"print-statement-modal"} size="md">
       <Modal.Header title={title} id={triggerModalId} />
 
       <Modal.Body>

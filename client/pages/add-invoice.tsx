@@ -165,7 +165,7 @@ const AddInvoice = () => {
     if (!vals.customerId || vals.customerId === "" || !vals.customer) {
       return;
     }
-    console.log("VALS.CUSTOMER ID : ", vals.customerId);
+
     const payload = JSON.stringify(vals);
     if (payload === lastSavedRef.current) return;
     lastSavedRef.current = payload;
