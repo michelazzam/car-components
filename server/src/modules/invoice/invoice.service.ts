@@ -164,6 +164,8 @@ export class InvoiceService {
     pipeline.push({
       $project: {
         number: 1,
+        swaps: 1,
+        paymentMethods: 1,
         driverName: 1,
         generalNote: 1,
         customerNote: 1,
@@ -418,6 +420,13 @@ export class InvoiceService {
     });
 
     await this.doInvoiceEffects(updatedDto);
+
+    const editedInvoice = await this.invoiceModel
+      .findById(invoiceId)
+      .populate('customer')
+      .populate('vehicle');
+
+    return editedInvoice;
   }
 
   async delete(invoiceId: string) {
