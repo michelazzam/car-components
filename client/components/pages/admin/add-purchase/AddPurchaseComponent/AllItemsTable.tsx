@@ -1,13 +1,16 @@
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import React from "react";
 import { ReactTablePaginated } from "@/shared/ReactTablePaginated";
 import { createColumnHelper } from "@tanstack/react-table";
 import { AddPurchaseItemSchemaType } from "@/lib/apiValidations";
 import { FaTrash } from "react-icons/fa6";
 function AllItemsTable() {
-  const { products, deleteProduct } = usePurchase();
+  const {
+    formValues: { items },
+    removeItem,
+  } = usePurchaseFormStore();
   const columnHelper = createColumnHelper<AddPurchaseItemSchemaType>();
-  console.log("PRODUCTS : ", products);
+  console.log("ITEMS ARE : ", items);
   const columns = [
     columnHelper.accessor("name", {
       header: "Name",
@@ -54,7 +57,7 @@ function AllItemsTable() {
           <button
             className=" btn-delete-row text-danger"
             onClick={() => {
-              deleteProduct(row.original.itemId);
+              removeItem(row.original.itemId);
             }}
           >
             <FaTrash />
@@ -68,7 +71,7 @@ function AllItemsTable() {
       <div className="box-body">
         <ReactTablePaginated
           columns={columns}
-          data={products}
+          data={items || []}
           totalRows={0}
           loading={false}
           errorMessage={undefined}

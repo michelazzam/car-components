@@ -2,11 +2,11 @@ import Pageheader from "@/shared/layout-components/page-header/pageheader";
 import Seo from "@/shared/layout-components/seo/seo";
 import React from "react";
 import Link from "next/link";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import PurchaseTable from "@/components/pages/admin/purchase/PurchaseTable";
 
 const PurchasePage = () => {
-  const { setEditingPurchase, clearPurchase } = usePurchase();
+  const { setEditingPurchase, reset: clearPurchase } = usePurchaseFormStore();
 
   //---------------Create Columns--------------------
 

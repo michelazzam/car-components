@@ -1,258 +1,205 @@
+// src/shared/store/usePurchaseFormStore.ts
 import { Purchase } from "@/api-hooks/purchase/use-list-purchase";
-import { AddPurchaseItemSchemaType as ProductT } from "@/lib/apiValidations";
-import create, { StoreApi } from "zustand";
+import { apiValidations } from "@/lib/apiValidations";
+import { ZodError } from "zod";
+import create from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 //
-// Types
+// 1) Your unified formValues type
 //
-
-// Generic option type for select inputs
-export interface Option<T = string> {
-  value: T;
-  label: string;
+export interface PurchaseItem {
+  itemId: string;
+  name: string;
+  description: string;
+  quantity: number;
+  totalPrice: number;
+  price: number;
+  quantityFree: number;
+  discount: number;
+  discountType: "percentage" | "fixed";
+  lotNumber: string;
+  expDate: string;
 }
 
-interface Supplier {
+// name: "",
+
+export interface SupplierOption {
   value: string;
   label: string;
 }
 
-export interface InvoiceDetails {
-  invoiceNumber: string | null;
-  invoiceDate: string | null;
-  supplier: Option<string> | null;
-  customer: Option<string> | null;
-  salesOrder: Option<string> | null;
-  phoneNumber: string | null;
-}
+export interface FormValues {
+  invoiceNumber: string;
+  invoiceDate: string; // ISO date
+  supplier: SupplierOption | null;
+  customerConsultant: string;
+  phoneNumber: string;
 
-export interface Payment {
-  amount: number;
-  amountLbp?: number;
-  note?: string;
-}
+  items: PurchaseItem[];
 
-export interface Totals {
-  totalAmount: number;
-  totalAmountPaid: number;
-  totalAmountPaidLbp: number;
-  totalAmountDue: number;
-}
+  paymentAmount: number;
 
-export interface PurchaseState {
-  invoiceDetails: InvoiceDetails;
-  payment: Payment;
-  addingProduct: ProductT | null;
-  products: ProductT[];
-  tva: number;
-  lebaneseTva: number;
+  tvaPercent: number;
+  vatLBP: number;
+
+  subTotal: number;
+  totalWithTax: number;
+  totalPaid: number;
+  totalDue: number;
+
   usdRate: number;
+}
+
+//
+// 2) The store interface
+//
+interface PurchaseFormState {
+  formValues: FormValues;
   editingPurchase: Purchase | null;
-  totals: Totals;
-
-  // Actions
-  setUsdRate: (newUsdRate: number) => void;
-  addProduct: (product: ProductT) => void;
-  setAddingProduct: (product: ProductT) => void;
-
-  setTVA: (newTVA: number) => void;
-  setLebaneseTva: (newTVA: number) => void;
-  setSupplier: (supplier: Option<string>) => void;
-  deleteProduct: (_id: string) => void;
-  addPayment: (
-    payment: Payment,
-    onError?: () => void,
-    onSuccess?: () => void
+  errors: any;
+  // single setter
+  setFieldValue: <K extends keyof FormValues>(
+    field: K,
+    value: FormValues[K]
   ) => void;
   setEditingPurchase: (purchase: Purchase | undefined) => void;
-  clearPurchase: () => void;
+  // item‐helpers
+  addItem: (item: PurchaseItem) => void;
+  removeItem: (itemId: string) => void;
+
+  // recompute everything
+  recalcTotals: () => void;
+
+  //validate form
+  isFormValid: (addErros?: boolean) => { data: FormValues; errors: ZodError[] };
+  // reset
+  reset: () => void;
 }
 
 //
-// Utility functions
+// 3) Initial form values
 //
+const initialFormValues: FormValues = {
+  invoiceNumber: "",
+  invoiceDate: new Date().toISOString().slice(0, 10),
+  supplier: null,
+  customerConsultant: "",
+  phoneNumber: "",
 
-function calculateTotals(products: ProductT[], payment: Payment): Totals {
-  const totalAmount = products.reduce((acc, item) => acc + item.totalPrice, 0);
-  const totalAmountPaid = payment.amount;
-  const totalAmountPaidLbp = payment.amountLbp || 0;
-  const totalAmountDue = totalAmount - totalAmountPaid;
+  items: [],
 
-  return {
-    totalAmount,
-    totalAmountPaid,
-    totalAmountPaidLbp,
-    totalAmountDue,
-  };
-}
+  paymentAmount: 0,
 
-function handleSetSupplier(
-  set: StoreApi<PurchaseState>["setState"],
-  supplier: Supplier
-): void {
-  set((state) => ({
-    invoiceDetails: {
-      ...state.invoiceDetails,
-      supplier: {
-        value: supplier.value,
-        label: supplier.label,
-      },
-    },
-  }));
-}
+  tvaPercent: 11,
+  vatLBP: 0,
 
-//
-// Zustand store
-//
+  subTotal: 0,
+  totalWithTax: 0,
+  totalPaid: 0,
+  totalDue: 0,
 
-export const usePurchase = create<PurchaseState>((set, get) => ({
-  // Initial state
-  invoiceDetails: {
-    invoiceNumber: null,
-    invoiceDate: null,
-    supplier: null,
-    customer: null,
-    salesOrder: null,
-    phoneNumber: null,
-  },
-  payment: {
-    amount: 0,
-    amountLbp: 0,
-    note: "",
-  },
-  addingProduct: null,
-  products: [],
-  tva: 11,
-  lebaneseTva: 0,
   usdRate: 0,
-  editingPurchase: null,
-  totals: {
-    totalAmount: 0,
-    totalAmountPaid: 0,
-    totalAmountPaidLbp: 0,
-    totalAmountDue: 0,
-  },
-
-  // Action implementations
-  setUsdRate: (newUsdRate) => set({ usdRate: newUsdRate }),
-
-  addProduct: (product) => {
-    const products = [...get().products, product];
-    set({
-      products,
-      totals: calculateTotals(products, get().payment),
-    });
-  },
-
-  setAddingProduct: (product) => {
-    set({ addingProduct: product });
-    if (product.supplier) {
-      handleSetSupplier(set, product.supplier);
-    }
-  },
-
-  setTVA: (newTVA) => set({ tva: newTVA }),
-
-  setLebaneseTva: (newTVA) => set({ lebaneseTva: newTVA }),
-
-  setSupplier: (supplier) => {
-    set({
-      invoiceDetails: {
-        ...get().invoiceDetails,
-        supplier,
-      },
-    });
-  },
-
-  deleteProduct: (_id) => {
-    const products = get().products.filter((product) => product.itemId !== _id);
-    set({
-      products,
-      totals: calculateTotals(products, get().payment),
-    });
-  },
-
-  addPayment: (payment, onSuccess) => {
-    set({
-      payment: payment,
-      totals: calculateTotals(get().products, payment),
-    });
-    onSuccess?.();
-  },
-
-  setEditingPurchase: (purchase) => {
-    if (!purchase) {
-      set({
-        editingPurchase: undefined,
-      });
-      return;
-    }
-
-    get().clearPurchase();
-    if (!purchase) return;
-
-    set({ editingPurchase: purchase });
-
-    if (purchase.supplier) {
-      handleSetSupplier(set, {
-        value: purchase.supplier._id || "",
-        label: purchase.supplier.name,
-      });
-    }
-
-    if (purchase.items) {
-      const formatted = purchase.items.map((item) => ({
-        ...item,
-        product: {
-          value: item.itemId,
-          label: item.description,
-        },
-      }));
-      //@ts-ignore
-      set({ products: formatted });
-    }
-
-    // if (purchase.expense) {
-    //   set({ payment: purchase.expense });
-    // }
-
-    set({
-      totals: calculateTotals(get().products, get().payment),
-      tva: purchase.vatPercent ?? get().tva,
-      lebaneseTva: purchase.vatLBP ?? get().lebaneseTva,
-    });
-  },
-
-  clearPurchase: () => {
-    set({
-      invoiceDetails: {
-        invoiceNumber: null,
-        invoiceDate: null,
-        supplier: null,
-        customer: null,
-        salesOrder: null,
-        phoneNumber: null,
-      },
-      addingProduct: null,
-      products: [],
-      tva: 11,
-      lebaneseTva: 0,
-      payment: {
-        amount: 0,
-        amountLbp: 0,
-        note: "",
-      },
-      editingPurchase: null,
-      totals: {
-        totalAmount: 0,
-        totalAmountPaid: 0,
-        totalAmountPaidLbp: 0,
-        totalAmountDue: 0,
-      },
-    });
-  },
-}));
-
-export const clearPurchase = (): void => {
-  usePurchase.getState().clearPurchase();
 };
+
+//
+// 4) Create the store
+//
+export const usePurchaseFormStore = create<PurchaseFormState>()(
+  persist(
+    (set, get) => ({
+      formValues: initialFormValues,
+      editingPurchase: null,
+      errors: {},
+
+      isFormValid: (addErrors = true) => {
+        console.log("CHECKING IF FORM IS VALID");
+        const { formValues } = get();
+        const schema = apiValidations.AddPurchaseSchema;
+        const validation = schema.safeParse(formValues);
+
+        if (!validation.success) {
+          console.log("VALIDATION ERROR", validation.error);
+          if (addErrors) {
+            set({ errors: validation.error.flatten().fieldErrors });
+          }
+          return {
+            data: formValues,
+            errors: [validation.error],
+          };
+        }
+        // form is valid
+        console.log("FORM IS VALID");
+        set({ errors: {} });
+        return {
+          data: formValues,
+          errors: [],
+        };
+      },
+
+      setEditingPurchase: (purchase) => {
+        set({ editingPurchase: purchase });
+      },
+      setFieldValue: (field, value) => {
+        set((state) => ({
+          formValues: {
+            ...state.formValues,
+            [field]: value,
+          },
+        }));
+        // immediately recalc any derived totals
+        get().recalcTotals();
+        get().isFormValid(false);
+      },
+
+      addItem: (item) => {
+        set((state) => ({
+          formValues: {
+            ...state.formValues,
+            items: [...state.formValues.items, item],
+          },
+        }));
+        get().recalcTotals();
+      },
+
+      removeItem: (itemId) => {
+        set((state) => ({
+          formValues: {
+            ...state.formValues,
+            items: state.formValues.items.filter((i) => i.itemId !== itemId),
+          },
+        }));
+        get().recalcTotals();
+      },
+
+      recalcTotals: () => {
+        const fv = get().formValues;
+        const subTotal = fv.items.reduce((sum, i) => sum + i.totalPrice, 0);
+        const taxFromPercent = parseFloat(
+          ((subTotal * fv.tvaPercent) / 100).toFixed(2)
+        );
+        const totalWithTax = subTotal + taxFromPercent;
+        const totalPaid = fv.paymentAmount;
+        const totalDue = totalWithTax - totalPaid;
+
+        set((state) => ({
+          formValues: {
+            ...state.formValues,
+            subTotal,
+            totalWithTax,
+            totalPaid,
+            totalDue,
+          },
+        }));
+      },
+
+      reset: () => {
+        set({ formValues: initialFormValues, editingPurchase: null });
+      },
+    }),
+    {
+      name: "Car Components Purchase Storage", // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+    }
+  )
+);

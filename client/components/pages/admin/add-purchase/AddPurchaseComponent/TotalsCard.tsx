@@ -1,14 +1,11 @@
 import { useGetOrganization } from "@/api-hooks/restaurant/use-get-organization-info";
 import { useGetSupplierById } from "@/api-hooks/supplier/use-get-single-supplier-by-id";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
-import { AddPurchaseSchemaType } from "@/lib/apiValidations";
 import { formatNumber } from "@/lib/helpers/formatNumber";
-import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import React, { useEffect } from "react";
-
-import { useFormContext } from "react-hook-form";
 import { CiCalculator1 } from "react-icons/ci";
+import NumberField from "@/components/admin/Fields/NumberField";
 
 function TotalsCard() {
   //----------------------------------API CALLS--------------------------------------
@@ -16,57 +13,52 @@ function TotalsCard() {
   const vat = organization?.tvaPercentage || 0;
 
   //----------------------------------FORM--------------------------------------
-  const { control, setValue } = useFormContext<AddPurchaseSchemaType>();
 
   //----------------------------------STORE--------------------------------------
   const {
-    totals,
-    tva,
-    setTVA,
-    setLebaneseTva,
-    invoiceDetails: { supplier: supplierOption },
-    payment: { amount, amountLbp },
-    usdRate,
-    addPayment,
-    setUsdRate,
-  } = usePurchase();
+    formValues: {
+      totalPaid,
+      usdRate,
+      subTotal,
+      vatLBP,
+      paymentAmount,
+      tvaPercent,
+      supplier: selectedSupplier,
+    },
+
+    setFieldValue,
+  } = usePurchaseFormStore();
 
   const { data: supplier } = useGetSupplierById({
-    supplierId: supplierOption?.value || "",
+    supplierId: selectedSupplier?.value || "",
   });
   const { data: usdRateData } = useGetUsdRate();
 
   //----------------------------------EFFECTS--------------------------------------
   useEffect(() => {
-    if (usdRateData) setUsdRate(usdRateData?.usdRate);
+    if (usdRateData) setFieldValue("usdRate", usdRateData?.usdRate);
   }, [usdRateData]);
 
   useEffect(() => {
-    if (vat) setValue("vatPercent", Number(vat));
+    if (vat) setFieldValue("tvaPercent", Number(vat));
   }, [organization]);
 
   //----------------------------------CONSTANTS--------------------------------------
-  const tvaAmountInDollars = Number(
-    ((totals.totalAmount * tva) / 100)?.toFixed(2)
-  );
+  const tvaAmountInDollars = (subTotal * Number(tvaPercent)) / 100;
   const supplierAmountDue = Number(
-    (
-      supplier?.loan ||
-      0 + totals.totalAmount - (amount + (amountLbp || 0) / usdRate)
-    )?.toFixed(2)
+    (supplier?.loan || 0 + subTotal - totalPaid)?.toFixed(2)
   );
-  const totalPurchaseAmount = tvaAmountInDollars + totals.totalAmount;
+  const totalPurchaseAmount = tvaAmountInDollars + subTotal;
   return (
     <div className=" p-4 h-100" style={{ borderRadius: "8px" }}>
       <div className="flex items-center gap-x-4  mb-1">
         <div className="col-span-2 ">TVA</div>
         <div className="col-span-7">
-          <NumberFieldControlled
-            marginBotton="mb-0"
-            control={control}
-            name="vatPercent"
-            onChangeValue={(value) => {
-              setTVA(value as unknown as number);
+          <NumberField
+            marginBottom="mb-0"
+            value={tvaPercent}
+            onChange={(value) => {
+              setFieldValue("tvaPercent", value as unknown as number);
             }}
             colSpan={12}
             prefix="%"
@@ -81,12 +73,11 @@ function TotalsCard() {
       <div className="flex items-center gap-x-4">
         <div className="col-span-2">{"(LL)"}</div>
         <div className="col-span-7">
-          <NumberFieldControlled
-            marginBotton="mb-0"
-            control={control}
-            name="vatLBP"
-            onChangeValue={(value) => {
-              setLebaneseTva(value as unknown as number);
+          <NumberField
+            marginBottom="mb-0"
+            value={vatLBP}
+            onChange={(value) => {
+              setFieldValue("vatLBP", value as unknown as number);
             }}
             colSpan={12}
             prefix="LBP "
@@ -97,11 +88,11 @@ function TotalsCard() {
           type="button"
           onClick={() => {
             const lebaneseTva = computeLebaneseTva(
-              totals.totalAmount,
-              tva,
+              subTotal,
+              tvaPercent,
               usdRate
             );
-            setValue("vatLBP", lebaneseTva);
+            setFieldValue("vatLBP", lebaneseTva);
           }}
           className="ti-btn ti-btn-outline-primary col-span-1"
         >
@@ -110,17 +101,14 @@ function TotalsCard() {
       </div>
 
       <div className="col-span-12 grid grid-cols-2">
-        <NumberFieldControlled
-          marginBotton="mb-0"
-          control={control}
-          name="amountPaid"
+        <NumberField
+          marginBottom="mb-0"
+          value={paymentAmount}
+          onChange={(value) => {
+            setFieldValue("paymentAmount", Number(value) || 0);
+          }}
           label="Amount Paid"
           colSpan={12}
-          onChangeValue={(value) => {
-            addPayment({
-              amount: Number(value),
-            });
-          }}
           prefix="$"
         />
       </div>
@@ -145,7 +133,7 @@ function TotalsCard() {
       <div className="mt-2">
         <div className="text-gray-600 flex justify-between ">
           <span>Subtotal </span>
-          <span className="">${formatNumber(totals.totalAmount, 2)}</span>
+          <span className="">${formatNumber(subTotal, 2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Total (with TVA) </span>
@@ -154,14 +142,14 @@ function TotalsCard() {
         <div className="flex justify-between">
           <span>Paid </span>
           <span className="text-success fs-20">
-            ${formatNumber(totals.totalAmountPaid, 2)}
+            ${formatNumber(totalPaid, 2)}
           </span>
         </div>
 
         <div className="flex justify-between">
           <span>Remaining (for this purchase) </span>
           <span className="text-danger fs-20">
-            ${formatNumber(totalPurchaseAmount - totals.totalAmountPaid, 2)}
+            ${formatNumber(totalPurchaseAmount - totalPaid, 2)}
           </span>
         </div>
       </div>

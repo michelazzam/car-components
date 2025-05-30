@@ -11,6 +11,7 @@ export interface SelectOption {
 
 interface SelectFieldProps {
   options: SelectOption[];
+  errorMessage?: string;
   placeholder?: string;
   label?: string;
   onInputChange?: (value: string) => void;
@@ -28,6 +29,7 @@ interface SelectFieldProps {
 
 const SelectField: React.FC<SelectFieldProps> = ({
   options,
+  errorMessage,
   placeholder,
   label = "",
   onInputChange = () => {},
@@ -72,7 +74,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 
   return (
     <div className={cn(tailwindColsClasses[colSpan], width)}>
-      <div className={cn(marginBottom)}>
+      <div className={cn(marginBottom, "relative")}>
         {label && (
           <label className="block text-sm font-medium text-gray-700">
             {label}
@@ -87,6 +89,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
             )}
           </div>
           {AddButton && <div className="ml-2">{AddButton}</div>}
+        </div>
+        <div className="absolute -bottom-5">
+          {errorMessage && (
+            <p className=" text-red text-sm mt-1">{errorMessage}</p>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useDebounce } from "../../../../../hooks/useDebounce";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import TextFieldControlled from "@/components/admin/FormControlledFields/TextFieldControlled";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
 import DateFieldControlled from "@/components/admin/FormControlledFields/DateFieldControlled";
@@ -29,19 +29,16 @@ function AddItemForm() {
 
   //----------------------------------STORE--------------------------------------
   const {
-    addProduct,
-    addingProduct,
-    products: productsInStore,
-  } = usePurchase();
+    addItem,
+    formValues: { items },
+  } = usePurchaseFormStore();
 
   //----------------------------------API CALLS-------------------------------------
   const { data } = useListProducts({
     search: debouncedSearchQuery,
   });
   const products = data?.items?.filter((p) => {
-    const isInStore = productsInStore.find(
-      (productInStore) => productInStore.itemId === p._id
-    );
+    const isInStore = items.find((item) => item.itemId === p._id);
     return !isInStore;
   });
   const productsOptions =
@@ -95,17 +92,24 @@ function AddItemForm() {
     setValue("totalPrice", Number(total.toFixed(2)));
   }, [price, quantity, discount, discountType, setValue]);
 
-  useEffect(() => {
-    if (addingProduct && Object.keys(addingProduct).length !== 0) {
-      // setValue("product", addingProduct?.product);
-      setValue("description", addingProduct?.description);
-      setValue("price", addingProduct?.price);
-    }
-  }, [addingProduct]);
+  // useEffect(() => {
+  //   if (addingProduct && Object.keys(addingProduct).length !== 0) {
+  //     setValue("description", addingProduct?.description);
+  //     setValue("price", addingProduct?.price);
+  //   }
+  // }, [addingProduct]);
 
   //----------------------------------HANDLERS--------------------------------------
   const onSubmit = (data: AddPurchaseItemSchemaType) => {
-    addProduct({ ...data, itemId: data.itemId });
+    console.log("ADDING ITEM WITH TOTAL PRICE: ", data.totalPrice);
+    addItem({
+      ...data,
+      itemId: data.itemId,
+      name: data.name || "",
+      discount: data.discount,
+      discountType: data.discountType,
+      totalPrice: data.totalPrice,
+    });
     reset();
   };
 
