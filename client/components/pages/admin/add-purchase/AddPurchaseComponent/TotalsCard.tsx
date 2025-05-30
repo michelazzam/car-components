@@ -18,7 +18,6 @@ function TotalsCard() {
   const {
     formValues: {
       totalPaid,
-      usdRate,
       subTotal,
       vatLBP,
       paymentAmount,
@@ -90,7 +89,7 @@ function TotalsCard() {
             const lebaneseTva = computeLebaneseTva(
               subTotal,
               tvaPercent,
-              usdRate
+              usdRateData?.usdRate || 0
             );
             setFieldValue("vatLBP", lebaneseTva);
           }}

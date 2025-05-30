@@ -6,6 +6,7 @@ import {
   DraftPurchase,
   usePurchaseFormStore,
 } from "@/shared/store/usePurchaseStore";
+import { cn } from "@/utils/cn";
 
 const ChooseDraftPurchases = ({
   triggerModalId,
@@ -54,50 +55,56 @@ const ChooseDraftPurchases = ({
             </p>
           )}
 
-          {draftPurchases.map((d) => (
-            <div
-              key={d.draft_purchase_id}
-              className="flex items-center justify-between p-2 border rounded"
-            >
-              <label className="flex-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="choose-draft"
-                  value={d.draft_purchase_id}
-                  checked={d.draft_purchase_id === selectedId}
-                  onChange={() => setSelectedId(d.draft_purchase_id)}
-                  className="mr-2"
-                />
-                {/* show customerId or a timestamp */}
-                {d.supplier && d.supplier.label && (
-                  <span className="font-medium">
-                    {d?.supplier?.label + " - "}
-                  </span>
+          {draftPurchases.map((d) => {
+            const isCurrent = d.draft_purchase_id === currentDraftId;
+            return (
+              <div
+                key={d.draft_purchase_id}
+                className={cn(
+                  "flex items-center justify-between p-2 border rounded mb-1",
+                  isCurrent && "bg-gray-200"
                 )}
-                {d.invoiceNumber && (
-                  <span className="text-xs text-gray-500">
-                    #{d.invoiceNumber} -
-                  </span>
-                )}
-                {d.draft_purchase_id && (
-                  <span className="text-xs text-gray-500">
-                    {d.draft_purchase_id}
-                  </span>
-                )}
-                {d.draft_purchase_id === currentDraftId && (
-                  <span className="ml-2 text-green-600 text-xs">current</span>
-                )}
-              </label>
-              <button
-                onClick={() => setSelectedDraft(d)}
-                type="button"
-                data-hs-overlay="#delete-record-modal"
-                className="text-red-600 hover:underline text-sm"
               >
-                Delete
-              </button>
-            </div>
-          ))}
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="choose-draft"
+                    value={d.draft_purchase_id}
+                    checked={d.draft_purchase_id === selectedId}
+                    onChange={() => setSelectedId(d.draft_purchase_id)}
+                    className="mr-2"
+                  />
+                  {/* show customerId or a timestamp */}
+                  {d.supplier && d.supplier.label && (
+                    <span className="font-medium">
+                      {d?.supplier?.label + " - "}
+                    </span>
+                  )}
+                  {d.invoiceNumber && (
+                    <span className="text-xs text-gray-500">
+                      #{d.invoiceNumber} -
+                    </span>
+                  )}
+                  {d.draft_purchase_id && (
+                    <span className="text-xs text-gray-500">
+                      {d.draft_purchase_id}
+                    </span>
+                  )}
+                  {d.draft_purchase_id === currentDraftId && (
+                    <span className="ml-2 text-green-600 text-xs">current</span>
+                  )}
+                </label>
+                <button
+                  onClick={() => setSelectedDraft(d)}
+                  type="button"
+                  data-hs-overlay="#delete-record-modal"
+                  className="text-red-600 hover:underline text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            );
+          })}
         </Modal.Body>
 
         <Modal.Footer>
