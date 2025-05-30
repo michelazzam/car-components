@@ -126,17 +126,26 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
         set({ currentDraftId: id });
       },
       upserDraftPurchase: (draft) => {
-        // if the draft already exists, update it
-        // else if the draft doesn't exist, add it
+        const currentDraftId = get().currentDraftId;
+        draft.isCurrent = false;
+        console.log("CURRENT DRAFT ID: ", currentDraftId);
+
         const existing = get().draftPurchases.find(
-          (d) => d.draft_purchase_id === draft.draft_purchase_id
+          (d) => d.draft_purchase_id === currentDraftId
         );
-        if (existing) {
+
+        console.log("IS EXISITNG? : ", existing);
+
+        if (existing && currentDraftId) {
+          console.log("THIS IS AN UPDATE");
           // update
           const others = get().draftPurchases.filter(
-            (d) => d.draft_purchase_id !== draft.draft_purchase_id
+            (d) => d.draft_purchase_id !== currentDraftId
           );
           const existingDraft = draft as DraftPurchase;
+          existingDraft.isCurrent = true;
+          existingDraft.draft_purchase_id = currentDraftId;
+
           set({ draftPurchases: [...others, existingDraft] });
         } else {
           // add
@@ -144,7 +153,7 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           const isCurrent = true;
 
           set({ currentDraftId: id });
-
+          console.log("SETTING CURRENT DRAFT ID: ", id);
           const draftWithId: DraftPurchase = {
             ...draft,
             draft_purchase_id: id,

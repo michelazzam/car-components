@@ -27,6 +27,7 @@ const CustomAddPurchaseComponent = () => {
     currentDraftId,
     upserDraftPurchase,
     setCurrentDraftId,
+    deleteDraftPurchase,
   } = usePurchaseFormStore();
   const { items } = formValues;
   const { data: usdRateData } = useGetUsdRate();
@@ -64,6 +65,9 @@ const CustomAddPurchaseComponent = () => {
   const handleSuccess = () => {
     reset();
     setEditingPurchase(undefined);
+    if (currentDraftId) {
+      deleteDraftPurchase(currentDraftId);
+    }
     router.push("/admin/purchase");
   };
 
@@ -90,18 +94,10 @@ const CustomAddPurchaseComponent = () => {
     console.log(" FORM VALUES CHANGED , AND WILL UPDATE CURRENT DRAFT");
     if (currentDraftId) {
       console.log(" THERE IS A CURRENT DRAFT ID: ", currentDraftId);
-      upserDraftPurchase({
-        ...formValues,
-        draft_purchase_id: currentDraftId,
-        isCurrent: true,
-      });
+      upserDraftPurchase(formValues);
     } else {
       console.log("THERE IS NO CURRENT DRAFT ID");
-      upserDraftPurchase({
-        ...formValues,
-        draft_purchase_id: undefined,
-        isCurrent: false,
-      });
+      upserDraftPurchase(formValues);
     }
   }, [formValues]);
 
