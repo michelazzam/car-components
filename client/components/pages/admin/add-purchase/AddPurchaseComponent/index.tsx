@@ -47,11 +47,11 @@ const CustomAddPurchaseComponent = () => {
 
   //----------------------------------FORM SETUP------------------------------------
   useEffect(() => {
-    if (editingPurchase) {
+    if (editingPurchase && usdRateData) {
       // here, we should populate all values in the store with the editing purchase values
       populatePurchase(editingPurchase, usdRateData?.usdRate);
     }
-  }, [editingPurchase]);
+  }, [editingPurchase, usdRateData]);
 
   //----------------------------------CONSTANTS------------------------------------
   //----------------------------------HANDLERS & Functions----------------------------
