@@ -10,7 +10,6 @@ function AllItemsTable() {
     removeItem,
   } = usePurchaseFormStore();
   const columnHelper = createColumnHelper<AddPurchaseItemSchemaType>();
-  console.log("ITEMS ARE : ", items);
   const columns = [
     columnHelper.accessor("name", {
       header: "Name",

@@ -5,7 +5,6 @@ import React from "react";
 function AddEditPurchasePage() {
   return (
     <div className="space-y-3 mt-5">
-      <BackBtn />
       <CustomAddPurchaseComponent />
     </div>
   );

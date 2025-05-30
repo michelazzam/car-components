@@ -28,26 +28,24 @@ export interface SupplierOption {
   value: string;
   label: string;
 }
-
+export interface DraftPurchase extends FormValues {
+  draft_purchase_id: string;
+  isCurrent: boolean;
+}
 export interface FormValues {
   invoiceNumber: string;
   invoiceDate: string; // ISO date
   supplier: SupplierOption | null;
   customerConsultant: string;
   phoneNumber: string;
-
   items: PurchaseItem[];
-
   paymentAmount: number;
-
   tvaPercent: number;
   vatLBP: number;
-
   subTotal: number;
   totalWithTax: number;
   totalPaid: number;
   totalDue: number;
-
   usdRate: number;
 }
 
@@ -57,6 +55,15 @@ export interface FormValues {
 interface PurchaseFormState {
   formValues: FormValues;
   editingPurchase: Purchase | null;
+  draftPurchases: DraftPurchase[];
+  currentDraftId: string | null;
+
+  setCurrentDraftId: (id: string | null) => void;
+  upserDraftPurchase: (
+    draft: FormValues & { draft_purchase_id?: string; isCurrent?: boolean }
+  ) => void;
+  populateDraftPurchase: (draftId: string) => void;
+  deleteDraftPurchase: (id: string) => void;
   errors: any;
   // single setter
   setFieldValue: <K extends keyof FormValues>(
@@ -112,15 +119,50 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
       formValues: initialFormValues,
       editingPurchase: null,
       errors: {},
+      draftPurchases: [],
+      currentDraftId: null,
+
+      setCurrentDraftId: (id) => {
+        set({ currentDraftId: id });
+      },
+      upserDraftPurchase: (draft) => {
+        // if the draft already exists, update it
+        // else if the draft doesn't exist, add it
+        const existing = get().draftPurchases.find(
+          (d) => d.draft_purchase_id === draft.draft_purchase_id
+        );
+        if (existing) {
+          // update
+          const others = get().draftPurchases.filter(
+            (d) => d.draft_purchase_id !== draft.draft_purchase_id
+          );
+          const existingDraft = draft as DraftPurchase;
+          set({ draftPurchases: [...others, existingDraft] });
+        } else {
+          // add
+          const id = new Date().toISOString();
+          const isCurrent = true;
+
+          set({ currentDraftId: id });
+
+          const draftWithId: DraftPurchase = {
+            ...draft,
+            draft_purchase_id: id,
+            isCurrent,
+          };
+
+          set((state) => ({
+            draftPurchases: [...state.draftPurchases, draftWithId],
+          }));
+        }
+      },
 
       isFormValid: (addErrors = true) => {
-        console.log("CHECKING IF FORM IS VALID");
         const { formValues } = get();
         const schema = apiValidations.AddPurchaseSchema;
         const validation = schema.safeParse(formValues);
 
         if (!validation.success) {
-          console.log("VALIDATION ERROR", validation.error);
           if (addErrors) {
             set({ errors: validation.error.flatten().fieldErrors });
           }
@@ -136,6 +178,28 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           data: formValues,
           errors: [],
         };
+      },
+      populateDraftPurchase: (draftId) => {
+        const draft = get().draftPurchases.find(
+          (d) => d.draft_purchase_id === draftId
+        );
+
+        if (draft) {
+          set({ formValues: draft });
+          set({ currentDraftId: draftId });
+        }
+      },
+      deleteDraftPurchase: (id) => {
+        set((state) => {
+          const others = state.draftPurchases.filter(
+            (d) => d.draft_purchase_id !== id
+          );
+          const isCurrent = state.currentDraftId === id;
+          if (isCurrent) {
+            set({ currentDraftId: null });
+          }
+          return { draftPurchases: others };
+        });
       },
       populatePurchase: (purchase, usdRate) => {
         // Map API Purchase → FormValues
@@ -238,7 +302,10 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
       },
 
       reset: () => {
-        set({ formValues: initialFormValues, editingPurchase: null });
+        set({
+          formValues: initialFormValues,
+          editingPurchase: null,
+        });
       },
     }),
     {

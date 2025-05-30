@@ -11,6 +11,8 @@ import AllItemsTable from "./AllItemsTable";
 import AddEditSupplierModal from "../../supplier/AddEditSupplierModal";
 import toast from "react-hot-toast";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
+import BackBtn from "@/components/common/BackBtn";
+import ViewDraftPurchasesModal from "./modals/ViewDraftPurchasesModal";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STORE--------------------------------------
@@ -22,6 +24,9 @@ const CustomAddPurchaseComponent = () => {
     reset,
     isFormValid,
     populatePurchase,
+    currentDraftId,
+    upserDraftPurchase,
+    setCurrentDraftId,
   } = usePurchaseFormStore();
   const { items } = formValues;
   const { data: usdRateData } = useGetUsdRate();
@@ -61,6 +66,44 @@ const CustomAddPurchaseComponent = () => {
     setEditingPurchase(undefined);
     router.push("/admin/purchase");
   };
+
+  const handleAddNewDraft = () => {
+    setCurrentDraftId(null);
+    reset();
+    toast.success("Draft purchase saved successfully");
+  };
+
+  function useDidUpdateEffect(fn: () => void, deps: any[]) {
+    const didMount = useRef(false);
+
+    useEffect(() => {
+      if (didMount.current) {
+        fn();
+      } else {
+        didMount.current = true;
+      }
+    }, deps);
+  }
+
+  useDidUpdateEffect(() => {
+    if (editingPurchase) return;
+    console.log(" FORM VALUES CHANGED , AND WILL UPDATE CURRENT DRAFT");
+    if (currentDraftId) {
+      console.log(" THERE IS A CURRENT DRAFT ID: ", currentDraftId);
+      upserDraftPurchase({
+        ...formValues,
+        draft_purchase_id: currentDraftId,
+        isCurrent: true,
+      });
+    } else {
+      console.log("THERE IS NO CURRENT DRAFT ID");
+      upserDraftPurchase({
+        ...formValues,
+        draft_purchase_id: undefined,
+        isCurrent: false,
+      });
+    }
+  }, [formValues]);
 
   const handleSubmit = () => {
     // validate form
@@ -105,8 +148,33 @@ const CustomAddPurchaseComponent = () => {
   };
 
   return (
-    <>
+    <div>
       {/*Add Purchase */}
+      <div className="flex justify-between mb-2">
+        <BackBtn />
+
+        {!editingPurchase && (
+          <div className="flex gap-x-2 items-center">
+            <button
+              type="button"
+              className="ti-btn ti-btn-primary ti-btn-wave"
+              data-hs-overlay={`#view-draft-purchases-modal`}
+            >
+              View Draft Purchases
+            </button>
+            <button
+              type="button"
+              className="ti-btn ti-btn-primary-full ti-btn-wave"
+              onClick={() => {
+                handleAddNewDraft();
+              }}
+            >
+              Save as Draft & Add New
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="mb-[1.5rem]">
         <div className="grid grid-cols-6 lg:grid-cols-12 mb-4 gap-x-4">
           <div className="col-span-6 bg-gray-100 rounded-lg">
@@ -161,7 +229,11 @@ const CustomAddPurchaseComponent = () => {
         <AddEditSupplierModal triggerModalId="add-supplier-modal" />
       </div>
       {/* Add Purchase */}
-    </>
+      <ViewDraftPurchasesModal
+        triggerModalId="view-draft-purchases-modal"
+        modalTitle="View Draft Purchases"
+      />
+    </div>
   );
 };
 
