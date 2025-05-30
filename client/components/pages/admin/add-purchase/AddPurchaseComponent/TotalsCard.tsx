@@ -36,6 +36,7 @@ function TotalsCard() {
 
   //----------------------------------EFFECTS--------------------------------------
   useEffect(() => {
+    console.log("USD RATE DATA IS : ", usdRateData);
     if (usdRateData) setFieldValue("usdRate", usdRateData?.usdRate);
   }, [usdRateData]);
 

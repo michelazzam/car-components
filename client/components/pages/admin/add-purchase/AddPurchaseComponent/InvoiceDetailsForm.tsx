@@ -21,7 +21,6 @@ function InvoiceDetailsForm() {
     label: supplier.name,
     ...supplier,
   }));
-  console.log("ERRORS ARE : ", errors);
   return (
     <div
       className=" p-2  grid grid-cols-12 gap-x-2 "

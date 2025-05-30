@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import AllItemsTable from "./AllItemsTable";
 import AddEditSupplierModal from "../../supplier/AddEditSupplierModal";
 import toast from "react-hot-toast";
+import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STORE--------------------------------------
@@ -20,8 +21,10 @@ const CustomAddPurchaseComponent = () => {
     setEditingPurchase,
     reset,
     isFormValid,
+    populatePurchase,
   } = usePurchaseFormStore();
   const { items } = formValues;
+  const { data: usdRateData } = useGetUsdRate();
   //----------------------------------API CALLS-------------------------------------
 
   //---PURCHASE MUTATION---
@@ -45,7 +48,8 @@ const CustomAddPurchaseComponent = () => {
   //----------------------------------FORM SETUP------------------------------------
   useEffect(() => {
     if (editingPurchase) {
-      setFieldValue("paymentAmount", editingPurchase.amountPaid);
+      // here, we should populate all values in the store with the editing purchase values
+      populatePurchase(editingPurchase, usdRateData?.usdRate);
     }
   }, [editingPurchase]);
 
@@ -60,14 +64,13 @@ const CustomAddPurchaseComponent = () => {
 
   const handleSubmit = () => {
     // validate form
-    const { data: validatedData, errors } = isFormValid();
+    const { errors } = isFormValid();
     if (errors.length > 0) {
       toast.error("Please fix the following errors", {
         position: "top-center",
       });
       return;
     }
-    console.log("VALIDATED DATA", validatedData);
     const data = {
       ...formValues,
       items: formValues.items.map((item) => ({

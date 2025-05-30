@@ -64,6 +64,7 @@ interface PurchaseFormState {
     value: FormValues[K]
   ) => void;
   setEditingPurchase: (purchase: Purchase | undefined) => void;
+  populatePurchase: (purchase: Purchase, usdRate: number) => void;
   // item‐helpers
   addItem: (item: PurchaseItem) => void;
   removeItem: (itemId: string) => void;
@@ -135,6 +136,49 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           data: formValues,
           errors: [],
         };
+      },
+      populatePurchase: (purchase, usdRate) => {
+        // Map API Purchase → FormValues
+        const mappedItems: PurchaseItem[] = purchase.items.map((i) => ({
+          itemId: i.itemId,
+          name: i.name,
+          description: i.description,
+          quantity: i.quantity,
+          price: i.price,
+          totalPrice: i.totalPrice,
+          quantityFree: i.quantityFree,
+          discount: i.discount,
+          discountType: "fixed",
+          lotNumber: i.lotNumber,
+          expDate: i.expDate.slice(0, 10), // assume ISO string
+        }));
+
+        set({
+          formValues: {
+            usdRate: usdRate,
+            invoiceNumber: purchase.invoiceNumber ?? "",
+            invoiceDate: purchase.invoiceDate.slice(0, 10),
+            supplier: purchase.supplier
+              ? { value: purchase.supplier._id, label: purchase.supplier.name }
+              : null,
+            customerConsultant: purchase.customerConsultant,
+            phoneNumber: purchase.phoneNumber,
+            items: mappedItems,
+            paymentAmount: purchase.amountPaid,
+            tvaPercent: purchase.vatPercent,
+            vatLBP: purchase.vatLBP,
+
+            // If your backend already sent these, you can skip recomputing—
+            // otherwise recalcTotals() below will overwrite.
+            subTotal: purchase.subTotal ?? 0,
+            totalWithTax: purchase.totalAmount,
+            totalPaid: purchase.amountPaid,
+            totalDue: purchase.totalAmount - purchase.amountPaid,
+          },
+        });
+
+        // now compute any derived fields you prefer to recalc
+        get().recalcTotals();
       },
 
       setEditingPurchase: (purchase) => {
