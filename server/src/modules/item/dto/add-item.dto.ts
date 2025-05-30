@@ -21,6 +21,12 @@ export class AddItemDto {
   @IsString()
   note: string;
 
+  @ApiProperty({
+    required: false,
+  })
+  @IsString()
+  locationInStore: string;
+
   @ApiProperty({ required: false })
   @IsMongoId()
   @IsOptional()
