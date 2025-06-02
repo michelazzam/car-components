@@ -12,6 +12,9 @@ export class Item {
   @Prop({ required: false })
   note: string;
 
+  @Prop({ required: false })
+  locationInStore: string;
+
   @Prop({ default: 0, required: true })
   cost: number;
 

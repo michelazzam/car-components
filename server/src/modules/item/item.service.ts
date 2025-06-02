@@ -101,6 +101,7 @@ export class ItemService {
     await this.itemModel.create({
       supplier: dto.supplierId,
       note: dto.note,
+      locationInStore: dto.locationInStore,
       cost: formatMoneyField(dto.cost),
       price: formatMoneyField(dto.price),
       quantity: dto.quantity,
@@ -114,6 +115,7 @@ export class ItemService {
       supplier: dto.supplierId,
       cost: formatMoneyField(dto.cost),
       note: dto.note,
+      locationInStore: dto.locationInStore,
       price: formatMoneyField(dto.price),
       quantity: dto.quantity,
       name: dto.name,
