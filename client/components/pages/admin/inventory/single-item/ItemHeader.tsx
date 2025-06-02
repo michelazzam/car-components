@@ -30,6 +30,11 @@ function ItemHeader({ item }: { item: Product }) {
           <p className="">{item.status}</p>
         </div>
         <p className="text-gray-600 mt-4">Note: {item.note}</p>
+        {item.locationInStore && (
+          <p className="text-gray-600 mt-4">
+            Location in Store: {item.locationInStore}
+          </p>
+        )}
       </div>
     </div>
   );
