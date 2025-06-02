@@ -19,6 +19,7 @@ export interface GetItem {
   cost: number;
   subTotal: number;
   totalPrice: number;
+  note?: string;
   discount?: Discount;
 }
 
