@@ -14,7 +14,7 @@ import {
 } from "@/shared/ReactTablePaginated";
 import { Product } from "@/api-hooks/products/use-list-products";
 import useListPurchasesQueryStrings from "@/shared/helper-hooks/useListPurchasesQueryStrings";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import {
   Purchase,
   useListPurchase,
@@ -47,7 +47,7 @@ function ListPurchase({
   const [selectedPurchase, setSelectedPurchase] = useState<
     Purchase | undefined
   >();
-  const { setEditingPurchase } = usePurchase();
+  const { setEditingPurchase } = usePurchaseFormStore();
 
   //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Purchase>();

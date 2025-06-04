@@ -1,72 +1,91 @@
 import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
-import { AddPurchaseSchemaType } from "@/lib/apiValidations";
-import DateFieldControlled from "@/components/admin/FormControlledFields/DateFieldControlled";
-import PhoneCodePickerControlled from "@/components/admin/FormControlledFields/PhoneCodePickerControlled";
-import SelectFieldControlled from "@/components/admin/FormControlledFields/SelectFieldControlled";
-import TextFieldControlled from "@/components/admin/FormControlledFields/TextFieldControlled";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
-import React from "react";
-import { useFormContext } from "react-hook-form";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
+import React, { useState } from "react";
 import Link from "next/link";
 import { FaPlus } from "react-icons/fa6";
+import SelectField from "@/components/admin/Fields/SlectField";
+import TextField from "@/components/admin/Fields/TextField";
+import DateField from "@/components/admin/Fields/DateField";
+import PhoneCodePicker from "@/components/admin/Fields/PhoneCodePicker";
 
 function InvoiceDetailsForm() {
-  const { control } = useFormContext<AddPurchaseSchemaType>();
-  const { setSupplier } = usePurchase();
-  const { data: suppliersResponse } = useListSupplier({});
-  const suppliers = suppliersResponse?.suppliers || [];
+  const [supplierSearch, setSupplierSearc] = useState("");
 
+  const { setFieldValue, formValues, errors } = usePurchaseFormStore();
+  const { data: suppliersResponse } = useListSupplier({
+    search: supplierSearch,
+  });
+  const suppliers = suppliersResponse?.suppliers || [];
   const suppliersOptions = suppliers?.map((supplier) => ({
     value: supplier._id,
     label: supplier.name,
     ...supplier,
   }));
-
   return (
     <div
       className=" p-2  grid grid-cols-12 gap-x-2 "
       style={{ borderRadius: "8px" }}
     >
-      <SelectFieldControlled
+      <SelectField
+        errorMessage={errors.supplier?.[0]}
+        onInputChange={(value) => {
+          setSupplierSearc(value);
+        }}
+        value={formValues.supplier}
         placeholder={"Select"}
         colSpan={6}
-        control={control}
-        name="supplierId"
         label="Supplier"
-        onObjectChange={(value) => {
-          setSupplier(value);
+        onChangeValue={(value) => {
+          setFieldValue("supplier", value as any);
         }}
         AddButton={<AddButton />}
         options={suppliersOptions || []}
       />
 
-      <TextFieldControlled
+      <TextField
         colSpan={6}
-        control={control}
-        name="invoiceNumber"
+        errorMessage={errors.invoiceNumber?.[0]}
+        onChange={(value) => {
+          if (value) {
+            setFieldValue("invoiceNumber", value);
+          }
+        }}
+        value={formValues.invoiceNumber}
         label="Invoice Number"
       />
 
-      <DateFieldControlled
-        control={control}
-        name="invoiceDate"
+      <DateField
+        value={new Date(formValues.invoiceDate)}
+        onChange={(value) => {
+          if (value && typeof value === "string") {
+            setFieldValue("invoiceDate", value);
+          }
+        }}
         label="Invoice Date"
         placeholder={"Select Date"}
         formatType="dd-MM-yyyy"
         colSpan={6}
       />
 
-      <TextFieldControlled
+      <TextField
         colSpan={6}
-        control={control}
-        name="customerConsultant"
+        value={formValues.customerConsultant}
+        onChange={(value) => {
+          if (value) {
+            setFieldValue("customerConsultant", value);
+          }
+        }}
         label="Customer Consultant"
       />
 
-      <PhoneCodePickerControlled
+      <PhoneCodePicker
         colSpan={12}
-        control={control}
-        name="phoneNumber"
+        value={formValues.phoneNumber}
+        onChange={(value) => {
+          if (value) {
+            setFieldValue("phoneNumber", value);
+          }
+        }}
         label="Phone Number"
       />
     </div>

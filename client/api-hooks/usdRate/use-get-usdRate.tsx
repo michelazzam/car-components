@@ -10,6 +10,7 @@ const useGetUsdRate = () => {
     queryKey: ["usdRate"],
     endpoint: API.getUsdRate,
     staleTime: Infinity,
+    refetchOnWindowFocus: true,
   });
 
   return { data, error, isLoading };

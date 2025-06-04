@@ -138,7 +138,6 @@ export default function MultiSelectFieldControlled({
 
   // For display
   const isSelectedSome = selectedValues.length > 0;
-  console.log("SELECTED VALUES ARE: ", selectedValues);
   return (
     <div className={cn("relative w-full mb-5", tailwindColsClasses[colSpan])}>
       {label && (

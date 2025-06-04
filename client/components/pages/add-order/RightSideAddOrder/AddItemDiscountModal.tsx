@@ -80,7 +80,6 @@ const AddItemDiscountModal = ({
         <Modal.Body>
           <h4 className="font-bold text-lg text-gray-600">Pricing</h4>
           <NumberField
-            name="customPrice"
             value={itemCustomPrice}
             label={`Custom Price (Current Cost: ${item?.cost}$)`}
             colSpan={1}
@@ -95,7 +94,6 @@ const AddItemDiscountModal = ({
             <NumberField
               label="Discount Amount"
               colSpan={1}
-              name="amount"
               value={discount.amount}
               onChange={(e) => {
                 setDiscount((prev) => ({

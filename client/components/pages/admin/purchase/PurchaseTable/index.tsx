@@ -13,7 +13,7 @@ import {
   useListPurchase,
 } from "@/api-hooks/purchase/use-list-purchase";
 import Link from "next/link";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import ViewPurchaseModal from "@/components/pages/admin/purchase/ViewPurchaseModal";
 import Search from "@/components/admin/Search";
 import SelectField, {
@@ -66,7 +66,7 @@ const PurchaseTable = ({
   const [selectedPurchase, setSelectedPurchase] = useState<
     Purchase | undefined
   >();
-  const { setEditingPurchase } = usePurchase();
+  const { setEditingPurchase } = usePurchaseFormStore();
 
   //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Purchase>();

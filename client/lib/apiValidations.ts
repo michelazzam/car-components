@@ -187,15 +187,16 @@ const AddPurchaseItemSchema = z
 export type AddPurchaseItemSchemaType = z.infer<typeof AddPurchaseItemSchema>;
 
 const AddPurchaseSchema = z.object({
-  supplierId: z.string().min(1, { message: "required" }),
+  // supplierId: z.string().min(1, { message: "required" }),
+  supplier: z.object({ label: z.string() }, { message: "required" }).required(),
   invoiceDate: z.string().min(1, { message: "required" }),
   invoiceNumber: z.string().min(1, { message: "required" }),
   customerConsultant: z.string().optional(),
   phoneNumber: z.string().optional(),
-  vatPercent: z.number().min(0),
+  tvaPercent: z.number().min(0),
   vatLBP: z.number().min(0),
   totalAmount: z.number().optional(),
-  amountPaid: z.number().min(0),
+  paymentAmount: z.number().min(0),
   items: z.array(AddPurchaseItemSchema).optional(),
 });
 export type AddPurchaseSchemaType = z.infer<typeof AddPurchaseSchema>;

@@ -1,10 +1,10 @@
 interface NumberFieldProps {
   prefix?: string;
   suffix?: string;
+  marginBottom?: string;
   decimalsLimit?: number;
   readOnly?: boolean;
-  name: string;
-  label: string;
+  label?: string;
   colSpan?: number;
   withCheckbox?: boolean;
   isChecked?: boolean;
@@ -21,10 +21,10 @@ import CurrencyInput from "react-currency-input-field";
 
 const NumberField: React.FC<NumberFieldProps> = ({
   prefix = "",
+  marginBottom = "mb-5",
   suffix = "",
   decimalsLimit = 2,
   readOnly = false,
-  name,
   label,
   colSpan = 6,
   withCheckbox = false,
@@ -49,7 +49,7 @@ const NumberField: React.FC<NumberFieldProps> = ({
   return (
     <>
       <div className={tailwindColsClasses[colSpan]}>
-        <div className="mb-5">
+        <div className={marginBottom}>
           <label className="block text-sm font-medium text-gray-700">
             {withCheckbox && setIsChecked && (
               <input

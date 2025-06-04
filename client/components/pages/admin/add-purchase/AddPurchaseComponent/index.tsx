@@ -1,32 +1,36 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useRef } from "react";
-import { FormProvider, useForm } from "react-hook-form";
 import TotalsCard from "./TotalsCard";
 import AddItemForm from "./AddItemForm";
 import InvoiceDetailsForm from "./InvoiceDetailsForm";
-import { AddPurchaseSchemaType, apiValidations } from "@/lib/apiValidations";
 import { useEditPurchase } from "@/api-hooks/purchase/use-edit-purchase";
 import { useAddPurchase } from "@/api-hooks/purchase/use-add-purchase";
-import { usePurchase } from "@/shared/store/usePurchaseStore";
+import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import ExpenseModal from "../../expenses/ExpenseModal";
 import { useRouter } from "next/router";
 import AllItemsTable from "./AllItemsTable";
 import AddEditSupplierModal from "../../supplier/AddEditSupplierModal";
+import toast from "react-hot-toast";
+import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
+import BackBtn from "@/components/common/BackBtn";
+import ViewDraftPurchasesModal from "./modals/ViewDraftPurchasesModal";
 
 const CustomAddPurchaseComponent = () => {
   //----------------------------------STORE--------------------------------------
   const {
-    products: productsStore,
-    clearPurchase,
-    invoiceDetails: { supplier },
-    payment: expense,
+    formValues,
     editingPurchase,
-    totals,
-    addPayment: addExpense,
+    setFieldValue,
     setEditingPurchase,
-    tva,
-    addPayment,
-  } = usePurchase();
+    reset,
+    isFormValid,
+    populatePurchase,
+    currentDraftId,
+    upserDraftPurchase,
+    setCurrentDraftId,
+    deleteDraftPurchase,
+  } = usePurchaseFormStore();
+  const { items } = formValues;
+  const { data: usdRateData } = useGetUsdRate();
   //----------------------------------API CALLS-------------------------------------
 
   //---PURCHASE MUTATION---
@@ -46,94 +50,136 @@ const CustomAddPurchaseComponent = () => {
   //----------------------------------REFS------------------------------------------
 
   const addPurchaseCancelRef = useRef(null);
-  const addPurchaseFormRef = useRef<HTMLFormElement | null>(null);
 
   //----------------------------------FORM SETUP------------------------------------
   useEffect(() => {
-    if (editingPurchase) {
-      addPayment({
-        amount: editingPurchase.amountPaid,
-      });
+    if (editingPurchase && usdRateData) {
+      // here, we should populate all values in the store with the editing purchase values
+      populatePurchase(editingPurchase, usdRateData?.usdRate);
     }
-  }, [editingPurchase]);
-
-  const methods = useForm<AddPurchaseSchemaType>({
-    resolver: zodResolver(apiValidations.AddPurchaseSchema),
-    defaultValues: {
-      amountPaid: editingPurchase?.amountPaid || 0,
-      vatLBP: editingPurchase?.vatLBP || 0,
-      vatPercent: editingPurchase?.vatPercent || 0,
-      supplierId: supplier?.value,
-      invoiceNumber: editingPurchase?.invoiceNumber || "",
-      invoiceDate: editingPurchase?.invoiceDate || "",
-      customerConsultant: editingPurchase?.customerConsultant || "",
-      phoneNumber: editingPurchase?.phoneNumber || "",
-    },
-  });
-  const { handleSubmit, reset } = methods;
+  }, [editingPurchase, usdRateData]);
 
   //----------------------------------CONSTANTS------------------------------------
   //----------------------------------HANDLERS & Functions----------------------------
   const router = useRouter();
   const handleSuccess = () => {
     reset();
-    clearPurchase();
     setEditingPurchase(undefined);
+    if (currentDraftId) {
+      deleteDraftPurchase(currentDraftId);
+    }
     router.push("/admin/purchase");
   };
 
-  const onSubmitAddEdit = (data: AddPurchaseSchemaType) => {
-    const tvaAmountInDollars = Number(
-      ((totals.totalAmount * tva) / 100)?.toFixed(2)
-    );
+  const handleAddNewDraft = () => {
+    setCurrentDraftId(null);
+    reset();
+    toast.success("Draft purchase saved successfully");
+  };
 
-    const newData = {
-      ...data,
-      items: productsStore.map((product) => ({
-        ...product,
-        productId: product.itemId,
+  function useDidUpdateEffect(fn: () => void, deps: any[]) {
+    const didMount = useRef(false);
+
+    useEffect(() => {
+      if (didMount.current) {
+        fn();
+      } else {
+        didMount.current = true;
+      }
+    }, deps);
+  }
+
+  useDidUpdateEffect(() => {
+    if (editingPurchase) return;
+    console.log(" FORM VALUES CHANGED , AND WILL UPDATE CURRENT DRAFT");
+    if (currentDraftId) {
+      console.log(" THERE IS A CURRENT DRAFT ID: ", currentDraftId);
+      upserDraftPurchase(formValues);
+    } else {
+      console.log("THERE IS NO CURRENT DRAFT ID");
+      upserDraftPurchase(formValues);
+    }
+  }, [formValues]);
+
+  const handleSubmit = () => {
+    // validate form
+    const { errors } = isFormValid();
+    if (errors.length > 0) {
+      toast.error("Please fix the following errors", {
+        position: "top-center",
+      });
+      return;
+    }
+    const data = {
+      ...formValues,
+      items: formValues.items.map((item) => ({
+        ...item,
+        productId: item.itemId,
       })),
+      paymentAmount: undefined,
+      totalPaid: undefined,
+      totalWithTax: undefined,
+      tvaPercent: undefined,
+      supplier: undefined,
+      usdRate: undefined,
 
-      amountPaid: totals.totalAmountPaid,
-      notes: expense.note,
-      totalAmount: totals.totalAmount + tvaAmountInDollars,
-      subTotal: totals.totalAmount,
+      amountPaid: formValues.totalPaid,
+      totalAmount: formValues.totalWithTax,
+      subTotal: formValues.subTotal,
+      vatPercent: formValues.tvaPercent,
+      vatLBP: formValues.vatLBP,
+      supplierId: formValues.supplier?.value || "",
+      customerConsultant: formValues.customerConsultant,
     };
 
     if (editingPurchase) {
       editPurchase({
-        ...newData,
+        ...data,
       });
     } else {
       addPurchase({
-        ...newData,
+        ...data,
       });
     }
   };
 
-  const onError = (errors = {}) => {
-    console.log("error", errors);
-  };
-
   return (
-    <>
+    <div>
       {/*Add Purchase */}
+      <div className="flex justify-between mb-2">
+        <BackBtn />
+
+        {!editingPurchase && (
+          <div className="flex gap-x-2 items-center">
+            <button
+              type="button"
+              className="ti-btn ti-btn-primary ti-btn-wave"
+              data-hs-overlay={`#view-draft-purchases-modal`}
+            >
+              View Draft Purchases
+            </button>
+            <button
+              type="button"
+              className="ti-btn ti-btn-primary-full ti-btn-wave"
+              onClick={() => {
+                handleAddNewDraft();
+              }}
+            >
+              Save as Draft & Add New
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="mb-[1.5rem]">
-        <FormProvider {...methods}>
-          <form
-            ref={addPurchaseFormRef}
-            onSubmit={handleSubmit(onSubmitAddEdit, onError)}
-          >
-            <div className="grid grid-cols-6 lg:grid-cols-12 mb-4 gap-x-4">
-              <div className="col-span-6 bg-gray-100 rounded-lg">
-                <InvoiceDetailsForm />
-              </div>
-              <div className="col-span-6 bg-gray-100 rounded-lg">
-                <TotalsCard />
-              </div>
-            </div>
-          </form>
-        </FormProvider>
+        <div className="grid grid-cols-6 lg:grid-cols-12 mb-4 gap-x-4">
+          <div className="col-span-6 bg-gray-100 rounded-lg">
+            <InvoiceDetailsForm />
+          </div>
+          <div className="col-span-6 bg-gray-100 rounded-lg">
+            <TotalsCard />
+          </div>
+        </div>
 
         <div>
           <div className="bg-gray-100 rounded-lg p-2">
@@ -149,8 +195,8 @@ const CustomAddPurchaseComponent = () => {
             ref={addPurchaseCancelRef}
             onClick={() => {
               setEditingPurchase(undefined);
-              clearPurchase();
               reset();
+
               router.push("/admin/purchase");
             }}
           >
@@ -158,14 +204,11 @@ const CustomAddPurchaseComponent = () => {
           </button>
           <button
             disabled={
-              productsStore.length === 0 ||
+              items.length === 0 ||
               isPendingAddPurchase ||
               isPendingEditPurchase
             }
-            onClick={() =>
-              addPurchaseFormRef?.current &&
-              addPurchaseFormRef?.current.requestSubmit()
-            }
+            onClick={() => handleSubmit()}
             type="submit"
             className="ti-btn ti-btn-primary-full disabled:bg-gray-500"
           >
@@ -175,18 +218,18 @@ const CustomAddPurchaseComponent = () => {
         <ExpenseModal
           triggerModalId="add-expense-from-purchase-modal"
           modalTitle="Add Expense"
-          onSuccess={({ amount, note }) => {
-            addExpense({
-              amount: amount,
-              amountLbp: 0,
-              note: note,
-            });
+          onSuccess={({ amount }) => {
+            setFieldValue("paymentAmount", amount);
           }}
         />
         <AddEditSupplierModal triggerModalId="add-supplier-modal" />
       </div>
       {/* Add Purchase */}
-    </>
+      <ViewDraftPurchasesModal
+        triggerModalId="view-draft-purchases-modal"
+        modalTitle="View Draft Purchases"
+      />
+    </div>
   );
 };
 
