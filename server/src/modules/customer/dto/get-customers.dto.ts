@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Trim } from 'src/decorators/trim.decorator';
 
 export class GetCustomersDto {
@@ -18,4 +18,10 @@ export class GetCustomersDto {
   @IsOptional()
   @Trim()
   search?: string;
+
+  @ApiProperty({ required: false, enum: ['true', 'false'] })
+  @IsOptional()
+  @IsString()
+  @IsEnum({ true: 'true', false: 'false' })
+  onlyHasLoan: 'true' | 'false';
 }

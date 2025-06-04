@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import axios from 'axios';
 import { AppToken, IAppToken } from './app-token.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { EnvConfigService } from 'src/config/env.validation';
 import { ValidateAppTokenDto } from './dto/create-app-token.dto';
+import { fetchApi } from 'src/utils/fetchApi';
 
 @Injectable()
 export class AppTokenService {
@@ -69,7 +69,7 @@ export class AppTokenService {
       const tokenObj = await this.appTokenModel.findOne();
       if (!tokenObj) throw new BadRequestException('Token not found');
 
-      const response = await axios.get(
+      const response = await fetchApi(
         `${this.configService.get('AMS_SERVER_URL')}/get-client-invoices`,
         {
           headers: {
@@ -78,31 +78,46 @@ export class AppTokenService {
         },
       );
 
+      if (response.error) {
+        // If fetchApi returns an error in the response, throw it as a BadRequestException
+        throw new BadRequestException(response.error);
+      }
+
       return response.data;
     } catch (error) {
-      console.log(error.response);
-      throw new BadRequestException(error.response.data.message);
+      throw new BadRequestException(error.message);
     }
   }
 
   private async validateTokenWithServer(token: string) {
     try {
-      const response = await axios.post(
+      const response = await fetchApi(
         `${this.configService.get('AMS_SERVER_URL')}/projects/validate-token?token=${token}`,
+        {
+          method: 'POST',
+        },
       );
+
+      if (response.error) {
+        // If fetchApi returns an error in the response, throw it as a BadRequestException
+        throw new BadRequestException(response.error);
+      }
 
       return response.data;
     } catch (error) {
-      throw new BadRequestException(error.response.data.message);
+      throw new BadRequestException(error.message);
     }
   }
 
   private async hasInternetConnection(): Promise<boolean> {
-    try {
-      await axios.get('https://www.google.com', { timeout: 3000 });
-      return true;
-    } catch {
+    const response = await fetchApi('https://www.google.com', {
+      method: 'GET',
+    });
+
+    if (response.error) {
       return false;
     }
+
+    return true;
   }
 }
