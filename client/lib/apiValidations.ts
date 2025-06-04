@@ -131,6 +131,7 @@ const ProductSchema = z.object({
   price: z.number(),
   cost: z.number(),
   note: z.string().optional(),
+  locationInStore: z.string().optional(),
   quantity: z.number(),
   status: z.enum(itemStatuses),
 });

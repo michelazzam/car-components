@@ -5,6 +5,7 @@ export interface AddEditProductBodyParam {
   name: string;
   supplierId: string;
   note?: string;
+  locationInStore?: string;
   cost: number;
   price: number;
   quantity: number;

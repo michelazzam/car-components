@@ -6,6 +6,7 @@ export interface Product {
   _id: string;
   name: string;
   note?: string;
+  locationInStore?: string;
   supplier: {
     _id: string;
     name: string;

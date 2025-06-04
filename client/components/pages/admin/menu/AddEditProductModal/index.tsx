@@ -89,6 +89,7 @@ function AddEditProductModal({
       cost: product?.cost || 0,
       quantity: product?.quantity || 0,
       status: product?.status || itemStatuses[0],
+      locationInStore: product?.locationInStore || "",
     },
   });
 
@@ -120,6 +121,7 @@ function AddEditProductModal({
         cost: product?.cost,
         quantity: product?.quantity,
         status: product.status,
+        locationInStore: product?.locationInStore,
       });
     } else {
       reset({
@@ -223,6 +225,14 @@ function AddEditProductModal({
             name="note"
             label="Note"
             placeholder="note"
+            colSpan={12}
+          />
+          <TextFieldControlled
+            dontCapitalize
+            control={control}
+            name="locationInStore"
+            label="Location in Store"
+            placeholder="location in store"
             colSpan={12}
           />
         </form>

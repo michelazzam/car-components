@@ -16,6 +16,7 @@ import {
   useGetOrganization,
 } from "@/api-hooks/restaurant/use-get-organization-info";
 import { InvoicePaymentMethodSchemaType } from "@/lib/apiValidations";
+import { cn } from "@/utils/cn";
 
 const formatCurrencyInWords = (amount: number) => {
   if (typeof amount !== "number" || isNaN(amount)) return "0.00";
@@ -307,6 +308,7 @@ const InvoiceTable = ({ items }: { items: GetItem[] }) => {
                     price: item?.price || 0,
                     quantity: item.quantity || 1,
                     discount: item.discount,
+                    note: item?.note || "",
                   }}
                   key={index}
                 />
@@ -325,31 +327,66 @@ const ProductTableRow = ({
     name: string;
     quantity: number;
     price: number;
+    note?: string;
     discount?: Discount;
   };
 }) => {
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-black">
-        {product.name}
-      </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-        {formatNumber(product.quantity)}
-      </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-        ${formatNumber(product.price || 0)}
-      </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
-        ${formatNumber((product.price || 0) * product.quantity)}
-      </td>
-      <td className="px-6 py-2 whitespace-nowrap text-sm text-danger">
-        {product.discount
-          ? product.discount.type === "percentage"
-            ? `%${product.discount.amount}`
-            : `$${product.discount.amount}`
-          : "$0"}
-      </td>
-    </tr>
+    <>
+      <tr>
+        <td
+          className={cn(
+            "px-6  whitespace-nowrap text-sm font-medium text-black align-top",
+            product.note ? "pt-2 pb-1" : "py-2"
+          )}
+        >
+          {product.name}
+        </td>
+        <td
+          className={cn(
+            "px-6  whitespace-nowrap text-sm text-gray-900 align-top",
+            product.note ? "pt-2 pb-1" : "py-2"
+          )}
+        >
+          {formatNumber(product.quantity)}
+        </td>
+        <td
+          className={cn(
+            "px-6  whitespace-nowrap text-sm text-gray-900 align-top",
+            product.note ? "pt-2 pb-1" : "py-2"
+          )}
+        >
+          ${formatNumber(product.price || 0)}
+        </td>
+        <td
+          className={cn(
+            "px-6  whitespace-nowrap text-sm text-gray-900 align-top",
+            product.note ? "pt-2 pb-1" : "py-2"
+          )}
+        >
+          ${formatNumber((product.price || 0) * product.quantity)}
+        </td>
+        <td
+          className={cn(
+            "px-6  whitespace-nowrap text-sm text-danger align-top",
+            product.note ? "pt-2 pb-1" : "py-2"
+          )}
+        >
+          {product.discount
+            ? product.discount.type === "percentage"
+              ? `%${product.discount.amount}`
+              : `$${product.discount.amount}`
+            : "$0"}
+        </td>
+      </tr>
+      {product.note && (
+        <tr className="!border-none !pt-0">
+          <td colSpan={5} className="px-6 pb-1 text-sm text-gray-600">
+            {product.note}
+          </td>
+        </tr>
+      )}
+    </>
   );
 };
 
@@ -439,5 +476,4 @@ const InvoiceSubtotal = ({
     </div>
   );
 };
-
 export default PrintInvoice;

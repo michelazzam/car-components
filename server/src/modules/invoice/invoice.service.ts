@@ -729,6 +729,7 @@ export class InvoiceService {
           ...itemInDto,
           name: itemDB.name,
           cost: itemDB.cost,
+          note: itemDB.note,
         };
       });
     }
