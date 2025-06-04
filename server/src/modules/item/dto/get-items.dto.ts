@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Trim } from 'src/decorators/trim.decorator';
 
 export enum PaginationType {
@@ -33,4 +33,9 @@ export class GetItemsDto {
     ).join(', ')}`,
   })
   paginationType?: PaginationType;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  nextCursor?: string;
 }

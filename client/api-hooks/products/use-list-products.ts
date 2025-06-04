@@ -45,7 +45,6 @@ export interface ProductResponse {
 
 const useListProductsInfinite = (params: {
   search?: string;
-  paginationType?: "cursor";
   pageSize?: number;
 }) => {
   const {
@@ -63,7 +62,10 @@ const useListProductsInfinite = (params: {
     endpoint: API.listProducts,
     keepPreviousData: true,
     initialPageParam: 0,
-    params,
+    params: {
+      ...params,
+      paginationType: "cursor",
+    },
   });
 
   const products = data?.pages.flatMap((page) => page.items) || [];

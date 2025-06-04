@@ -6,7 +6,6 @@ import { AddItemDto } from './dto/add-item.dto';
 import { EditItemDto } from './dto/edit-item.dto';
 import { GetItemsDto } from './dto/get-items.dto';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class ItemService {
@@ -16,7 +15,13 @@ export class ItemService {
   ) {}
 
   async getAll(dto: GetItemsDto) {
-    const { pageIndex, search, pageSize, paginationType = 'paged' } = dto;
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      paginationType = 'paged',
+      nextCursor: cursor = null,
+    } = dto;
 
     const filter: FilterQuery<IItem> = {};
 
@@ -95,15 +100,14 @@ export class ItemService {
       };
     } else {
       // Cursor-based pagination
-      const cursor = pageIndex ? new ObjectId(pageIndex) : null;
+      const cursorFilter = cursor ? { _id: { $lt: cursor } } : {};
 
       if (cursor) {
         filter._id = { $lt: cursor };
       }
-
       const [cursorItems, totalsResult] = await Promise.all([
         this.itemModel
-          .find(filter)
+          .find({ ...filter, ...cursorFilter })
           .sort({ createdAt: -1 })
           .limit(pageSize + 1)
           .populate('supplier', 'name')
@@ -128,9 +132,10 @@ export class ItemService {
         ]),
       ]);
 
-      const hasMore = cursorItems.length > pageSize;
-      items = hasMore ? cursorItems.slice(0, pageSize) : cursorItems;
-      nextCursor = hasMore ? items[items.length - 1]._id.toString() : null;
+      if (cursorItems.length > pageSize) {
+        nextCursor = cursorItems[pageSize - 1]._id;
+        cursorItems.pop(); // Remove the extra item used for calculating the nextCursor
+      }
 
       const totals = totalsResult[0] || {
         totalCost: 0,
@@ -138,7 +143,7 @@ export class ItemService {
         totalProfitOrLoss: 0,
       };
 
-      const itemsWithCalculations = items.map((item) => {
+      const itemsWithCalculations = cursorItems.map((item) => {
         const totalCost = item.cost * item.quantity;
         const totalPrice = item.price * item.quantity;
         const profitOrLoss = totalPrice - totalCost;
@@ -154,7 +159,7 @@ export class ItemService {
       return {
         items: itemsWithCalculations,
         totals,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     }
   }
