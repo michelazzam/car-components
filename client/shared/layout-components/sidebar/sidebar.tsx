@@ -127,8 +127,8 @@ const Sidebar = () => {
               <Image
                 width={30}
                 height={30}
-                alt="ams-logo"
-                src="/assets/images/ams.ico"
+                alt="car-components-logo"
+                src="/assets/images/brand-logos/logo.jpg"
               />
             </Link>
           </div>
