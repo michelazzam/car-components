@@ -89,6 +89,17 @@ const Firebaselogin = () => {
                   </button>
                 </form>
               </div>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={"https://advanced-meta.com/"}
+                className="flex items-center justify-center flex-wrap"
+              >
+                Designed & Developed by{" "}
+                <span className="text-[#0076FA] mx-1">
+                  <b> Advanced Meta Solutions</b>
+                </span>
+              </a>
             </div>
           </div>
         </div>

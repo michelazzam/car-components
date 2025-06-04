@@ -26,6 +26,7 @@ import {
 import ExpenseModal from "@/components/pages/admin/expenses/ExpenseModal";
 import { cn } from "@/utils/cn";
 import DeleteRecord from "@/components/admin/DeleteRecord";
+import TableWrapper from "@/shared/Table/TableWrapper";
 
 const PurchaseTable = ({
   selectedSupplier,
@@ -181,6 +182,11 @@ const PurchaseTable = ({
           </button>
         </div>
       ),
+      meta: {
+        sticky: "right",
+        stickyClassName:
+          "sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
+      },
     }),
   ];
 
@@ -221,16 +227,21 @@ const PurchaseTable = ({
           </div>
         </div>
         <div className="box-body">
-          <ReactTablePaginated
-            errorMessage={error?.message}
-            data={purchases || []}
-            columns={tanstackColumns}
-            loading={isLoading}
-            paginating={isFetching}
-            pagination={pagination}
-            setPagination={setPagination}
-            totalRows={purchasesResponse?.pagination.totalCount || 0}
-          />
+          <TableWrapper id="inventory-table" withSearch={false}>
+            {" "}
+            <div className="overflow-x-auto">
+              <ReactTablePaginated
+                errorMessage={error?.message}
+                data={purchases || []}
+                columns={tanstackColumns}
+                loading={isLoading}
+                paginating={isFetching}
+                pagination={pagination}
+                setPagination={setPagination}
+                totalRows={purchasesResponse?.pagination.totalCount || 0}
+              />
+            </div>
+          </TableWrapper>
         </div>
       </div>
 

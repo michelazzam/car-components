@@ -8,8 +8,15 @@ import Backtotop from "../backtotop/backtotop";
 import Switcher from "../switcher/switcher";
 import { Provider } from "react-redux";
 import store from "@/shared/redux/store";
+import Footer from "../footer/footer";
 
-const ContentLayout = ({ children }: any) => {
+const ContentLayout = ({
+  children,
+  withoutFooter = false,
+}: {
+  children: React.ReactNode;
+  withoutFooter?: boolean;
+}) => {
   const [lateLoad, setlateLoad] = useState(false);
   const Add = () => {
     document.querySelector("body")?.classList.remove("error-1");
@@ -47,7 +54,7 @@ const ContentLayout = ({ children }: any) => {
                 {children}
               </div>
             </div>
-            {/* <Footer /> */}
+            {!withoutFooter && <Footer />}
           </div>
           <Backtotop />
         </div>

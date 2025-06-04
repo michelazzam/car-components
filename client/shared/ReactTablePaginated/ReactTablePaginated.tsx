@@ -50,18 +50,20 @@ export default function ReactTablePaginated<DataType>({
   return (
     <>
       <TableStyle overflowX={overflowX}>
-        <table className="min-w-full">
-          <TableHead table={table} />
-          {loading ? (
-            <>
-              {Array.from({ length: estimatedPageSize }).map(() => (
-                <SkeletonLoader columnsLength={columns.length} />
-              ))}
-            </>
-          ) : (
-            <TableBody table={table} />
-          )}
-        </table>
+        <div className="relative">
+          <table className="min-w-full">
+            <TableHead table={table} />
+            {loading ? (
+              <>
+                {Array.from({ length: estimatedPageSize }).map(() => (
+                  <SkeletonLoader columnsLength={columns.length} />
+                ))}
+              </>
+            ) : (
+              <TableBody table={table} />
+            )}
+          </table>
+        </div>
         {!loading && !paginating && data?.length === 0 && (
           <div className="flex items-center py-5 justify-center">
             <div className="text-center">
@@ -69,7 +71,6 @@ export default function ReactTablePaginated<DataType>({
             </div>
           </div>
         )}
-        {}
         <Pagination
           table={table}
           totalRows={totalRows}

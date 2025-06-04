@@ -10,7 +10,7 @@ const useEditInvoice = ({
   callBackOnSuccess?: (data: any) => void;
 }) => {
   return useUpdateData<AddInvoiceSchema>({
-    queryKeysToInvalidate: [["invoices"], ["caisse"]],
+    queryKeysToInvalidate: [["invoices"], ["caisse"], ["products"]],
     endpoint: API.editInvoice(id),
     callBackOnSuccess: callBackOnSuccess,
   });

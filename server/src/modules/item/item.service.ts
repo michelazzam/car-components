@@ -15,7 +15,13 @@ export class ItemService {
   ) {}
 
   async getAll(dto: GetItemsDto) {
-    const { pageIndex, search, pageSize } = dto;
+    const {
+      pageIndex,
+      search,
+      pageSize,
+      paginationType = 'paged',
+      nextCursor: cursor = null,
+    } = dto;
 
     const filter: FilterQuery<IItem> = {};
 
@@ -27,66 +33,135 @@ export class ItemService {
       ];
     }
 
-    const [items, totalCount, totalsResult] = await Promise.all([
-      this.itemModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(pageIndex * pageSize)
-        .limit(pageSize)
-        .populate('supplier', 'name')
-        .lean(),
-      this.itemModel.countDocuments(filter),
-      this.itemModel.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: null,
-            totalCost: { $sum: { $multiply: ['$cost', '$quantity'] } },
-            totalPrice: { $sum: { $multiply: ['$price', '$quantity'] } },
-            totalProfitOrLoss: {
-              $sum: {
-                $subtract: [
-                  { $multiply: ['$price', '$quantity'] },
-                  { $multiply: ['$cost', '$quantity'] },
-                ],
+    let items;
+    let nextCursor;
+
+    if (paginationType === 'paged') {
+      const [pagedItems, totalCount, totalsResult] = await Promise.all([
+        this.itemModel
+          .find(filter)
+          .sort({ createdAt: -1 })
+          .skip(pageIndex * pageSize)
+          .limit(pageSize)
+          .populate('supplier', 'name')
+          .lean(),
+        this.itemModel.countDocuments(filter),
+        this.itemModel.aggregate([
+          { $match: filter },
+          {
+            $group: {
+              _id: null,
+              totalCost: { $sum: { $multiply: ['$cost', '$quantity'] } },
+              totalPrice: { $sum: { $multiply: ['$price', '$quantity'] } },
+              totalProfitOrLoss: {
+                $sum: {
+                  $subtract: [
+                    { $multiply: ['$price', '$quantity'] },
+                    { $multiply: ['$cost', '$quantity'] },
+                  ],
+                },
               },
             },
           },
-        },
-      ]),
-    ]);
+        ]),
+      ]);
 
-    const totalPages = Math.ceil(totalCount / pageSize);
+      const totalPages = Math.ceil(totalCount / pageSize);
+      items = pagedItems;
 
-    const totals = totalsResult[0] || {
-      totalCost: 0,
-      totalPrice: 0,
-      totalProfitOrLoss: 0,
-    };
+      const totals = totalsResult[0] || {
+        totalCost: 0,
+        totalPrice: 0,
+        totalProfitOrLoss: 0,
+      };
 
-    const itemsWithCalculations = items.map((item) => {
-      const totalCost = item.cost * item.quantity;
-      const totalPrice = item.price * item.quantity;
-      const profitOrLoss = totalPrice - totalCost;
+      const itemsWithCalculations = items.map((item) => {
+        const totalCost = item.cost * item.quantity;
+        const totalPrice = item.price * item.quantity;
+        const profitOrLoss = totalPrice - totalCost;
+
+        return {
+          ...item,
+          totalCost,
+          totalPrice,
+          profitOrLoss,
+        };
+      });
 
       return {
-        ...item,
-        totalCost,
-        totalPrice,
-        profitOrLoss,
+        items: itemsWithCalculations,
+        totals,
+        pagination: {
+          pageIndex,
+          pageSize,
+          totalCount,
+          totalPages,
+        },
       };
-    });
+    } else {
+      // Cursor-based pagination
+      const cursorFilter = cursor ? { _id: { $lt: cursor } } : {};
 
-    return {
-      items: itemsWithCalculations,
-      totals,
-      pagination: {
-        pageIndex,
-        pageSize,
-        totalCount,
-        totalPages,
-      },
-    };
+      if (cursor) {
+        filter._id = { $lt: cursor };
+      }
+      const [cursorItems, totalsResult] = await Promise.all([
+        this.itemModel
+          .find({ ...filter, ...cursorFilter })
+          .sort({ createdAt: -1 })
+          .limit(pageSize + 1)
+          .populate('supplier', 'name')
+          .lean(),
+        this.itemModel.aggregate([
+          { $match: filter },
+          {
+            $group: {
+              _id: null,
+              totalCost: { $sum: { $multiply: ['$cost', '$quantity'] } },
+              totalPrice: { $sum: { $multiply: ['$price', '$quantity'] } },
+              totalProfitOrLoss: {
+                $sum: {
+                  $subtract: [
+                    { $multiply: ['$price', '$quantity'] },
+                    { $multiply: ['$cost', '$quantity'] },
+                  ],
+                },
+              },
+            },
+          },
+        ]),
+      ]);
+
+      if (cursorItems.length > pageSize) {
+        nextCursor = cursorItems[pageSize - 1]._id;
+        cursorItems.pop(); // Remove the extra item used for calculating the nextCursor
+      }
+
+      const totals = totalsResult[0] || {
+        totalCost: 0,
+        totalPrice: 0,
+        totalProfitOrLoss: 0,
+      };
+
+      const itemsWithCalculations = cursorItems.map((item) => {
+        const totalCost = item.cost * item.quantity;
+        const totalPrice = item.price * item.quantity;
+        const profitOrLoss = totalPrice - totalCost;
+
+        return {
+          ...item,
+          totalCost,
+          totalPrice,
+          profitOrLoss,
+        };
+      });
+
+      return {
+        items: itemsWithCalculations,
+        totals,
+        nextCursor: nextCursor || null,
+      };
+    }
   }
 
   getOneById(id: string) {

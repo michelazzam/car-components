@@ -22,6 +22,7 @@ import {
 } from "@/shared/ReactTablePaginated";
 import Checkbox from "@/components/admin/Fields/Checkbox";
 import { Product } from "@/api-hooks/products/use-list-products";
+import TableWrapper from "@/shared/Table/TableWrapper";
 
 const paidStatuses = [
   {
@@ -223,6 +224,11 @@ function ListInvoice({
           </button>
         </div>
       ),
+      meta: {
+        sticky: "right",
+        stickyClassName:
+          "sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
+      },
     }),
   ];
   const { pagination, setPagination } = useReactTablePagination();
@@ -365,21 +371,26 @@ function ListInvoice({
             </div>
 
             <div className="py-2 px-4">
-              <ReactTablePaginated
-                errorMessage={error?.message}
-                data={invoicesData?.invoices || []}
-                columns={tanstackColumns}
-                loading={isLoading}
-                paginating={isFetching}
-                pagination={pagination}
-                setPagination={setPagination}
-                totalRows={invoicesData?.pagination.totalCount || 0}
-                renderInTheBottom={
-                  <span className="text-success font-bold">
-                    Total Amount: {totalAmount?.toFixed(2)} $
-                  </span>
-                }
-              />
+              <TableWrapper id="inventory-table" withSearch={false}>
+                {" "}
+                <div className="overflow-x-auto">
+                  <ReactTablePaginated
+                    errorMessage={error?.message}
+                    data={invoicesData?.invoices || []}
+                    columns={tanstackColumns}
+                    loading={isLoading}
+                    paginating={isFetching}
+                    pagination={pagination}
+                    setPagination={setPagination}
+                    totalRows={invoicesData?.pagination.totalCount || 0}
+                    renderInTheBottom={
+                      <span className="text-success font-bold">
+                        Total Amount: {totalAmount?.toFixed(2)} $
+                      </span>
+                    }
+                  />
+                </div>
+              </TableWrapper>
             </div>
           </div>
         </div>
