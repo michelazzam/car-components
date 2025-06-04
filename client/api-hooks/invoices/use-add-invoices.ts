@@ -38,7 +38,7 @@ const useAddInvoice = ({
   callBackOnSuccess?: (data: any) => void;
 }) => {
   return usePostData<AddInvoiceSchema>({
-    queryKeysToInvalidate: [["invoices"], ["caisse"]],
+    queryKeysToInvalidate: [["invoices"], ["caisse"], ["products"]],
     endpoint: API.addInvoice,
     callBackOnSuccess: callBackOnSuccess,
   });

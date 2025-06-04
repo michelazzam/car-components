@@ -3,7 +3,6 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import RightSideAddOrder from "../components/pages/add-order/RightSideAddOrder";
 import ItemsList from "../components/pages/add-order/ItemsList";
 import Header from "../components/pages/add-order/Header";
-import { useListProducts } from "@/api-hooks/products/use-list-products";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Item, usePosStore } from "@/shared/store/usePosStore";
@@ -55,9 +54,6 @@ const AddInvoice = () => {
   } = usePosStore();
 
   //--------------------API----------------------
-  const { data: products, refetch: refetchProducts } = useListProducts({
-    search: debouncedSearch,
-  });
 
   type ProcessedItem = {
     itemRef?: string;
@@ -322,18 +318,17 @@ const AddInvoice = () => {
       <Seo title="Table list" />
       <div className="grid grid-cols-12 h-calculate-60px  ">
         <FormProvider {...methods}>
-          <div className="col-span-9 pt-2">
+          <div className="col-span-9 pt-2 max-h-full overflow-y-auto overflow-x-clip flex flex-col">
             <Header
               search={search}
               setSearch={setSearch}
               swapsFieldArrayMethods={swapsFieldArrayMethods}
             />
-            <ItemsList products={products?.items} />
+            <ItemsList search={debouncedSearch} />
           </div>
           <div className="col-span-3">
             <RightSideAddOrder
               swapsFieldArrayMethods={swapsFieldArrayMethods}
-              refetchProducts={refetchProducts}
             />
           </div>
         </FormProvider>
@@ -343,5 +338,5 @@ const AddInvoice = () => {
 };
 
 AddInvoice.layout = "Contentlayout";
-
+AddInvoice.withoutFooter = true;
 export default AddInvoice;

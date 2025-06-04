@@ -207,6 +207,17 @@ const Sidebar = () => {
               </ul>
             </nav>
           </SimpleBar>
+          <div className="absolute bottom-0 translate-y-1/2 left-1/2 -translate-x-1/2 w-full">
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://advanced-meta.com/"
+              className="flex items-center justify-center flex-wrap text-center text-gray-50"
+            >
+              Designed & Developed by{" "}
+              <span className="text-[#FFC433]"> Advanced Meta Solutions</span>
+            </a>
+          </div>
         </div>
       </aside>
     </Fragment>

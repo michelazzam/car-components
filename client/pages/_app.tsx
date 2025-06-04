@@ -25,7 +25,7 @@ function MyApp({ Component, pageProps }: any) {
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <Toaster />
       <LicenseValidatorWrapper>
-        <Layout>
+        <Layout withoutFooter={Component.withoutFooter}>
           <Component {...pageProps} />
         </Layout>
       </LicenseValidatorWrapper>

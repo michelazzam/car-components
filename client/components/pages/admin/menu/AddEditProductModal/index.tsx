@@ -128,6 +128,7 @@ function AddEditProductModal({
         name: "",
         note: "",
         supplierId: "",
+        locationInStore: "",
         price: 0,
         cost: 0,
         quantity: 0,

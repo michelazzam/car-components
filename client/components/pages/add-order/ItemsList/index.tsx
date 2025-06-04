@@ -1,10 +1,15 @@
 import React from "react";
 import ItemCard from "./ItemCard";
-import { Product } from "@/api-hooks/products/use-list-products";
+import { useListProductsInfinite } from "@/api-hooks/products/use-list-products";
 
-function ItemsList({ products }: { products?: Product[] }) {
+function ItemsList({ search }: { search?: string }) {
+  const { products } = useListProductsInfinite({
+    search: search,
+    pageSize: 100,
+  });
+
   return (
-    <div className="grid grid-cols-12 gap-x-6 gap-y-2  pr-[1.5rem] ">
+    <div className="grid grid-cols-12 gap-x-6 gap-y-2  pr-[1.5rem]  flex-grow overflow-y-auto overflow-x-clip">
       {products?.map((product) => (
         <div
           key={product._id}

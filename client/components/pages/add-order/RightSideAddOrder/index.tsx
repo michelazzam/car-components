@@ -29,10 +29,8 @@ import { FaSave } from "react-icons/fa";
 import PulsingCircle from "@/components/common/animations/PulsingCircle";
 
 function RightSideAddOrder({
-  refetchProducts,
   swapsFieldArrayMethods,
 }: {
-  refetchProducts: () => void;
   swapsFieldArrayMethods: UseFieldArrayReturn<AddInvoiceSchema, "swaps">;
 }) {
   //--------------------State-------------------------------------
@@ -85,7 +83,6 @@ function RightSideAddOrder({
   const { data: organization } = useGetOrganization();
   // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
-    refetchProducts();
     if (!editingInvoice) {
       deleteCurrentDraftInvoice();
     }
