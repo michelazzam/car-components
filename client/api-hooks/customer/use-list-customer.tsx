@@ -27,16 +27,18 @@ const useListCustomers = ({
   pageSize = 10,
   pageIndex = 0,
   search,
+  onlyHasLoan,
 }: {
   pageSize?: number;
   pageIndex?: number;
   search?: string;
+  onlyHasLoan?: boolean;
 }) => {
   return useReadData<CustomerResponse>({
-    queryKey: ["customers", { pageSize, pageIndex, search }],
+    queryKey: ["customers", { pageSize, pageIndex, search, onlyHasLoan }],
     endpoint: API.listCustomers,
     keepPreviousData: true,
-    params: { pageSize, pageIndex, search },
+    params: { pageSize, pageIndex, search, onlyHasLoan },
   });
 };
 

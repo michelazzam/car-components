@@ -19,14 +19,14 @@ import { useRouter } from "next/router";
 import PrintInvoiceModal from "../../admin/invoices/PrintInvoiceModal";
 import { FaEye, FaPrint } from "react-icons/fa6";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
-// import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { customerTypeOption, discountTypeOptions } from "@/constants/constant";
 import { useGetUsdRate } from "@/api-hooks/usdRate/use-get-usdRate";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 import SaveInvoiceModal from "./SaveInvoiceModal";
 import ChooseDraftInvoiceModal from "./ChooseDraftInvoiceModal";
 import { addInvoiceDefaultValues } from "@/pages/add-invoice";
-// import { Invoice } from "@/api-hooks/invoices/useListInvoices";
+import { FaSave } from "react-icons/fa";
+import PulsingCircle from "@/components/common/animations/PulsingCircle";
 
 function RightSideAddOrder({
   refetchProducts,
@@ -36,9 +36,10 @@ function RightSideAddOrder({
   swapsFieldArrayMethods: UseFieldArrayReturn<AddInvoiceSchema, "swaps">;
 }) {
   //--------------------State-------------------------------------
-  const { deleteCurrentDraftInvoice, clearPosStore } = usePosStore();
-  const [invoice, setInvoice] = useState();
-  const [isPrint, setIsPrint] = useState(false);
+  const { deleteCurrentDraftInvoice, clearPosStore, hasReadDraftInvoices } =
+    usePosStore();
+  const [printingInvoice, setPrintingInvoice] = useState<Invoice | undefined>();
+  const [shouldPrint, setShouldPrint] = useState(false);
   const [isFullPaid, setIsFullPaid] = useState(false);
   const [previewingInvoice, setPreviewingInvoice] = useState<Invoice>();
 
@@ -85,16 +86,17 @@ function RightSideAddOrder({
   // const { data: usdRate } = useGetUsdRate();
   const successFunction = () => {
     refetchProducts();
-    deleteCurrentDraftInvoice();
-    console.log("CLEARING THE POS STORE...");
-    clearPosStore();
-    console.log("POS STORE SHOULD HAVE BEEN CLEARED");
-    setIsFullPaid(false);
+    if (!editingInvoice) {
+      deleteCurrentDraftInvoice();
+    }
     reset(addInvoiceDefaultValues);
+    clearPosStore();
+    setIsFullPaid(false);
+
     if (editingInvoice) {
       setEditingInvoice(undefined);
 
-      if (!isPrint) {
+      if (!shouldPrint) {
         setTimeout(() => {
           router.back();
         }, 1000);
@@ -105,30 +107,30 @@ function RightSideAddOrder({
   };
 
   const mutation = useAddInvoice({
-    callBackOnSuccess: (resp: any) => {
+    callBackOnSuccess: (resp: Invoice) => {
       console.log("SUCCESS ADD INVOICE");
       saveInvoiceRef.current?.click();
       successFunction();
-      setInvoice(resp);
+      setPrintingInvoice(resp);
 
-      if (isPrint) {
+      if (shouldPrint) {
         printRef.current?.click();
       }
-      setIsPrint(false);
+      setShouldPrint(false);
     },
   });
 
   const { mutate: editInvoice, isPending: isEditInvoicePending } =
     useEditInvoice({
       id: editingInvoice?._id || "",
-      callBackOnSuccess: (resp: any) => {
+      callBackOnSuccess: (resp: Invoice) => {
         saveInvoiceRef.current?.click();
         successFunction();
-        setInvoice(resp);
-        if (isPrint) {
+        setPrintingInvoice(resp);
+        if (shouldPrint) {
           printRef.current?.click();
         }
-        setIsPrint(false);
+        setShouldPrint(false);
       },
     });
 
@@ -197,6 +199,7 @@ function RightSideAddOrder({
       setPreviewingInvoice({
         _id: "",
         type: getValues("type"),
+        swaps: getValues("swaps") || [],
         paymentMethods: getValues("paymentMethods"),
         accounting: {
           isPaid: false,
@@ -211,11 +214,6 @@ function RightSideAddOrder({
 
         customerNote: getValues("customerNote"),
         number: editingInvoice?.number || "",
-
-        // discount: {
-        //   amount: discountStore.amount,
-        //   type: discountStore.type,
-        // },
 
         items: cart.map((item) => {
           const subtotal = (item.amount || 0) * (item.quantity || 0);
@@ -259,10 +257,16 @@ function RightSideAddOrder({
           <div className="grid grid-cols-2 gap-x-2 mb-2 w-full">
             <button
               type="button"
-              className="ti ti-btn ti-btn-primary-full w-full relative"
+              className="ti ti-btn ti-btn-primary-full w-full relative flex items-center justify-center gap-x-1"
               data-hs-overlay="#choose-draft-invoice-modal"
             >
+              <FaSave />
               Saved Invoices
+              {!hasReadDraftInvoices && (
+                <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 ">
+                  <PulsingCircle />
+                </div>
+              )}
             </button>
 
             <button
@@ -383,7 +387,7 @@ function RightSideAddOrder({
               <button
                 type="button"
                 data-hs-overlay="#save-invoice-modal"
-                onClick={() => setIsPrint(true)}
+                onClick={() => setShouldPrint(true)}
                 className="flex gap-1 items-center p-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white"
               >
                 print
@@ -412,7 +416,7 @@ function RightSideAddOrder({
         <PrintInvoiceModal
           triggerModalId="print-invoice"
           title="New Inovice"
-          printingInvoices={invoice ? [invoice] : undefined}
+          printingInvoices={printingInvoice ? [printingInvoice] : undefined}
         />
 
         {previewingInvoice && (
@@ -425,6 +429,7 @@ function RightSideAddOrder({
         )}
 
         <SaveInvoiceModal
+          shouldPrint={shouldPrint}
           triggerModalId="save-invoice-modal"
           title="Save Invoice"
           isFullPaid={isFullPaid}

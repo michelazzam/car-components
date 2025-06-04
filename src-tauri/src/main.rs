@@ -23,7 +23,7 @@ fn main() {
                 .env("NODE_ENV", "development")
                 .env("PORT", "8000")
                 .env("DATABASE_URL", "mongodb://127.0.0.1:27017")
-                .env("AMS_SERVER_URL","http://localhost:8001")
+                .env("AMS_SERVER_URL","https://admin.panel.advanced-meta.com")
                 .env(
                     "BACKUP_DATABASE_URL",
                     "mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",

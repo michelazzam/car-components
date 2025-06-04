@@ -21,12 +21,32 @@ import {
 import { createColumnHelper } from "@tanstack/react-table";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import { BsCashCoin } from "react-icons/bs";
+import { SelectOption } from "@/components/admin/Fields/SlectField";
+import { extractBooleanFromString } from "@/lib/helpers/extractBooleanFromString";
 
 const Customers = () => {
   const { pagination, setPagination } = useReactTablePagination();
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
+  const [selectedOption, setSelectedOption] = useState<SelectOption | null>({
+    label: "All",
+    value: "all",
+  });
+  const onlyHasLoanOptions: SelectOption[] = [
+    {
+      label: "All",
+      value: "all",
+    },
+    {
+      label: "Has loan",
+      value: "true",
+    },
+    {
+      label: "No loan",
+      value: "false",
+    },
+  ];
 
   const {
     data: customersResponse,
@@ -37,6 +57,7 @@ const Customers = () => {
     pageSize: pagination.pageSize,
     pageIndex: pagination.pageIndex,
     search: debouncedSearch,
+    onlyHasLoan: extractBooleanFromString(selectedOption?.value as string),
   });
   const [selectedCustomer, setSelectedCustomer] = useState<
     Customer | undefined
@@ -134,6 +155,13 @@ const Customers = () => {
         id="customers-table"
         searchValue={search}
         onSearchValueChange={setSearch}
+        select={{
+          options: onlyHasLoanOptions,
+          value: selectedOption,
+          onChange: (value) => {
+            setSelectedOption(value);
+          },
+        }}
       >
         <ReactTablePaginated
           errorMessage={error?.message}

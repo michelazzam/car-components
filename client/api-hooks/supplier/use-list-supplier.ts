@@ -24,6 +24,7 @@ const useListSupplier = (params: {
   pageIndex?: number;
   pageSize?: number;
   search?: string;
+  onlyHasLoan?: boolean;
 }) => {
   return useReadData<SupplierResponse>({
     queryKey: ["suppliers", JSON.stringify(params)],

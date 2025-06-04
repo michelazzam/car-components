@@ -11,21 +11,26 @@ function SaveInvoiceModal({
   isFullPaid,
   setIsFullPaid,
   isPendingSubmittion,
+  shouldPrint,
 }: {
   triggerModalId: string;
   title: string;
   isFullPaid: boolean;
   setIsFullPaid: React.Dispatch<React.SetStateAction<boolean>>;
   isPendingSubmittion: boolean;
+  shouldPrint: boolean;
 }) {
-  const { totalAmount } = usePosStore();
+  const { totalAmount, editingInvoice } = usePosStore();
   const { control, setValue, getValues } = useFormContext();
   const isB2C = getValues("type") === "s2";
 
   return (
     <Modal
       onOpen={() => {
-        setValue("paidAmountUsd", 0);
+        setValue(
+          "paidAmountUsd",
+          editingInvoice?.accounting?.paidAmountUsd || 0
+        );
         setIsFullPaid(false);
       }}
       id={triggerModalId}
@@ -61,7 +66,11 @@ function SaveInvoiceModal({
           type="submit"
           className="ti ti-btn ti-btn-primary"
         >
-          {isPendingSubmittion ? "Saving Invoice..." : "Save Invoice"}
+          {isPendingSubmittion
+            ? "Saving Invoice..."
+            : shouldPrint
+            ? "Save & Print"
+            : "Save Invoice"}
         </button>
       </Modal.Footer>
     </Modal>

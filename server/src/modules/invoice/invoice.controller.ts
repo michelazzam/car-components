@@ -50,10 +50,13 @@ export class InvoiceController {
 
   @Permissions('Invoices', 'update')
   @Put(':id')
-  async editPurchase(@Param('id') id: string, @Body() dto: InvoiceDto) {
-    await this.invoiceService.edit(id, dto);
+  async editInvoice(@Param('id') id: string, @Body() dto: InvoiceDto) {
+    const editedInvoice = await this.invoiceService.edit(id, dto);
 
-    return { message: 'Invoice updated successfully' };
+    return {
+      data: editedInvoice,
+      message: 'Invoice updated successfully',
+    };
   }
 
   @Roles('admin', 'superAmsAdmin')
