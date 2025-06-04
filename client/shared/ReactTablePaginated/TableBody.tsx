@@ -1,5 +1,4 @@
 import { Table, flexRender } from "@tanstack/react-table";
-import { cn } from "@/utils/cn";
 
 interface ColumnMeta {
   sticky?: "left" | "right";
