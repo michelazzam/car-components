@@ -223,6 +223,11 @@ function ListInvoice({
           </button>
         </div>
       ),
+      meta: {
+        sticky: "right",
+        stickyClassName:
+          "sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
+      },
     }),
   ];
   const { pagination, setPagination } = useReactTablePagination();

@@ -96,6 +96,11 @@ const Inventory = () => {
           </button>
         </div>
       ),
+      meta: {
+        sticky: "right",
+        stickyClassName:
+          "sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]",
+      },
     }),
   ];
 
@@ -114,16 +119,18 @@ const Inventory = () => {
         searchValue={search}
         onSearchValueChange={setSearch}
       >
-        <ReactTablePaginated
-          errorMessage={error?.message}
-          data={data?.items || []}
-          columns={tanstackColumns}
-          loading={isLoading}
-          paginating={isFetching}
-          pagination={pagination}
-          setPagination={setPagination}
-          totalRows={data?.pagination.totalCount || 0}
-        />
+        <div className="overflow-x-auto">
+          <ReactTablePaginated
+            errorMessage={error?.message}
+            data={data?.items || []}
+            columns={tanstackColumns}
+            loading={isLoading}
+            paginating={isFetching}
+            pagination={pagination}
+            setPagination={setPagination}
+            totalRows={data?.pagination.totalCount || 0}
+          />
+        </div>
       </TableWrapper>
 
       {/* Edit Modal */}

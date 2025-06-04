@@ -1,28 +1,37 @@
+import { Table, flexRender } from "@tanstack/react-table";
 import { cn } from "@/utils/cn";
-import { flexRender } from "@tanstack/react-table";
 
-export default function TableBody({ table }: { table: any }) {
+interface ColumnMeta {
+  sticky?: "left" | "right";
+  stickyClassName?: string;
+}
+
+export default function TableBody<DataType>({
+  table,
+}: {
+  table: Table<DataType>;
+}) {
   return (
     <tbody className="bg-white">
-      {table.getRowModel().rows.map((row: any) => (
-        <tr
-          key={row.id}
-          className="border-b hover:bg-gray-100 transition-all duration-200 ease-linear"
-        >
-          {row.getVisibleCells().map((cell: any) => {
-            const cellValue = cell.getValue();
+      {table.getRowModel().rows.map((row) => (
+        <tr key={row.id} className="border-b even:bg-gray-50">
+          {row.getVisibleCells().map((cell) => {
+            const meta = cell.column.columnDef.meta as ColumnMeta | undefined;
+            const sticky = meta?.sticky;
+            const stickyClassName = meta?.stickyClassName;
             return (
               <td
                 key={cell.id}
-                className={cn(
-                  "whitespace-nowrap p-2 text-start text-sm font-medium text-gray-900 "
-                )}
+                className={`whitespace-nowrap p-2 text-start text-sm font-medium text-gray-900 ${
+                  sticky ? stickyClassName : ""
+                }`}
+                style={{
+                  position: sticky ? "sticky" : undefined,
+                  [sticky as string]: sticky ? 0 : undefined,
+                  zIndex: sticky ? 1 : undefined,
+                }}
               >
-                {cellValue !== null ? (
-                  flexRender(cell.column.columnDef.cell, cell.getContext())
-                ) : (
-                  <span className="text-gray-300"> N/A</span>
-                )}
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             );
           })}

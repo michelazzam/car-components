@@ -1,15 +1,34 @@
-import { flexRender } from "@tanstack/react-table";
+import { Table, flexRender } from "@tanstack/react-table";
 
-export default function TableHead({ table }: { table: any }) {
+interface ColumnMeta {
+  sticky?: "left" | "right";
+  stickyClassName?: string;
+}
+
+export default function TableHead<DataType>({
+  table,
+}: {
+  table: Table<DataType>;
+}) {
   return (
-    <thead className="pl-3 hover:bg-gray-100 transition-all duration-200 ease-linear">
-      {table.getHeaderGroups().map((headerGroup: any) => {
-        return (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header: any) => (
+    <thead className="bg-gray-50">
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => {
+            const meta = header.column.columnDef.meta as ColumnMeta | undefined;
+            const sticky = meta?.sticky;
+            const stickyClassName = meta?.stickyClassName;
+            return (
               <th
                 key={header.id}
-                className="capitalize tracking-wider whitespace-nowrap p-2 text-left text-sm text-black border-b"
+                className={`whitespace-nowrap p-2 text-start text-sm font-medium text-gray-900 ${
+                  sticky ? stickyClassName : ""
+                }`}
+                style={{
+                  position: sticky ? "sticky" : undefined,
+                  [sticky as string]: sticky ? 0 : undefined,
+                  zIndex: sticky ? 1 : undefined,
+                }}
               >
                 {header.isPlaceholder
                   ? null
@@ -18,10 +37,10 @@ export default function TableHead({ table }: { table: any }) {
                       header.getContext()
                     )}
               </th>
-            ))}
-          </tr>
-        );
-      })}
+            );
+          })}
+        </tr>
+      ))}
     </thead>
   );
 }
