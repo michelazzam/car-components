@@ -17,6 +17,7 @@ import { CaisseModule } from 'src/modules/caisse/caisse.module';
 import { VehicleMakesModule } from 'src/modules/vehicle-makes/vehicle-makes.module';
 import { AppTokenModule } from 'src/modules/app-token/app-token.module';
 import { PaymentMethodsModule } from 'src/modules/payment-methods/payment-methods.module';
+import { TransactionsModule } from 'src/modules/transactions/transactions.module';
 
 export function startSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(
@@ -48,6 +49,7 @@ export function startSwagger(app: INestApplication) {
         VehicleMakesModule,
         AppTokenModule,
         PaymentMethodsModule,
+        TransactionsModule,
       ],
     },
   );

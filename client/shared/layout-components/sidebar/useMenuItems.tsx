@@ -15,6 +15,11 @@ const PurchaseIcon = <i className="ri-shopping-bag-line side-menu__icon"></i>;
 const DashboardIcon = <i className="ri-file-chart-line side-menu__icon"></i>;
 const BillingIcon = <i className="bx bx-receipt side-menu__icon"></i>;
 const CarIcon = <i className="ri-car-line side-menu__icon"></i>;
+
+const moneyIcon = (
+  <i className="ri-money-dollar-circle-line side-menu__icon"></i>
+);
+
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -175,6 +180,16 @@ export default function useMenuItems() {
       active: pathname.startsWith("/admin/db-backup"),
       selected: pathname.startsWith("/admin/db-backup"),
       title: "DB Backup",
+      children: [],
+      visible: user?.role === "superAmsAdmin",
+    },
+    {
+      icon: moneyIcon,
+      path: "/admin/transactions",
+      type: "link",
+      active: pathname.startsWith("/admin/transactions"),
+      selected: pathname.startsWith("/admin/transactions"),
+      title: "Transactions",
       children: [],
       visible: user?.role === "superAmsAdmin",
     },

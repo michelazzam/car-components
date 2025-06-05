@@ -145,7 +145,6 @@ export class InvoiceService {
         nextDay.setDate(nextDay.getDate() + 1);
         dateFilter.$lt = nextDay;
       }
-      console.log(dateFilter);
       matchConditions.push({ createdAt: dateFilter });
     }
 

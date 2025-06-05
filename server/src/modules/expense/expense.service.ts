@@ -13,6 +13,7 @@ import { AccountingService } from '../accounting/accounting.service';
 import { ReportService } from '../report/report.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { PurchaseService } from '../purchase/purchase.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class ExpenseService {
@@ -23,6 +24,7 @@ export class ExpenseService {
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
     private readonly purchaseService: PurchaseService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
@@ -158,6 +160,8 @@ export class ExpenseService {
   }
 
   private async doExpenseEffects(dto: ExpenseDto, expenseId: string) {
+    const actions: string[] = [];
+
     // senario where expense is paying for purchases
     if (dto.supplierId) {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
@@ -173,7 +177,7 @@ export class ExpenseService {
           dto.purchasesIds,
         );
 
-        const remainingAmountPaid = dto.amount;
+        let remainingAmountPaid = dto.amount;
 
         for (const purchase of purchases) {
           if (remainingAmountPaid <= 0) break;
@@ -183,17 +187,29 @@ export class ExpenseService {
 
           const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
 
+          const amountToPayPurchase = isPurchasePaid
+            ? purchaseRemainingAmount
+            : remainingAmountPaid;
+
           await this.purchaseService.updatePurchasePayments({
             purchaseId: purchase._id?.toString(),
-            amount: purchaseRemainingAmount,
+            amountPaid: amountToPayPurchase,
             isPaid: isPurchasePaid,
             expenseLinking: {
               expenseId,
               action: 'add',
             },
           });
+
+          actions.push(
+            `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}`,
+          );
+
+          remainingAmountPaid -= amountToPayPurchase;
         }
       }
+
+      actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}`);
     }
 
     // update daily report
@@ -209,9 +225,20 @@ export class ExpenseService {
       totalSuppliersLoan: dto.supplierId ? -dto.amount : 0, //decrease total suppliers loan
       caisse: -dto.amount, //decrease caisse
     });
+
+    actions.push(`New Expense created of amount ${dto.amount}`);
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('. '),
+      totalAmount: dto.amount,
+      discountAmount: 0,
+      finalAmount: dto.amount,
+      type: 'outcome',
+    });
   }
 
   private async revertExpenseEffects(expenseId: string) {
+    const actions: string[] = [];
+
     const expense = await this.expenseModel.findById(expenseId).lean();
     if (!expense) {
       throw new BadRequestException('Expense not found');
@@ -226,6 +253,10 @@ export class ExpenseService {
       if (supplier) {
         supplier.loan += expense.amount;
         await supplier.save();
+
+        actions.push(
+          `Increased supplier ${supplier.name} loan: ${expense.amount}`,
+        );
       }
 
       //-> ignore deleted suppliers
@@ -257,7 +288,7 @@ export class ExpenseService {
 
           await this.purchaseService.updatePurchasePayments({
             purchaseId: purchase._id?.toString(),
-            amount: -deductionAmount, // negative for deduction
+            amountPaid: -deductionAmount, // negative for deduction
             isPaid: !isPurchaseFullyUnpaid, // update paid status
             expenseLinking: {
               expenseId,
@@ -274,6 +305,8 @@ export class ExpenseService {
             `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
           );
         }
+
+        actions.push(`Reverted paying to purchases: ${totalDeducted}`);
       }
     }
 
@@ -288,6 +321,15 @@ export class ExpenseService {
       totalExpenses: -expense.amount, // decrease total expenses
       totalSuppliersLoan: expense.supplier ? expense.amount : 0, // re-add total suppliers loan
       caisse: expense.amount, // re-add caisse
+    });
+
+    actions.push(`Expense ${expense._id} reverted of amount ${expense.amount}`);
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('. '),
+      totalAmount: expense.amount,
+      discountAmount: 0,
+      finalAmount: expense.amount,
+      type: 'income',
     });
   }
 }

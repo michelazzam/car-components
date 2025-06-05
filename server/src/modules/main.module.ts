@@ -25,6 +25,7 @@ import { AppTokenModule } from './app-token/app-token.module';
 import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { TelegramService } from 'src/lib/telegram.service';
 import { GlobalExceptionFilter } from 'src/middleware/global-exception-filter.middleware';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { GlobalExceptionFilter } from 'src/middleware/global-exception-filter.mi
     VehicleMakesModule,
     AppTokenModule,
     PaymentMethodsModule,
+    TransactionsModule,
   ],
   controllers: [],
   providers: [

@@ -147,4 +147,6 @@ export const API = {
   getBilling: "/app-token/billing",
   checkLicense: "/app-token/validate",
   validateLicense: "/app-token/validate",
+
+  getTransactions: "/transactions",
 };
