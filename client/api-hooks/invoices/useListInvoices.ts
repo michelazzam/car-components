@@ -146,7 +146,7 @@ const useListInvoices = ({
       : undefined,
     customerId: customerId,
     itemId: itemId,
-    pageSize: localPageSize ?? pageSize,
+    pageSize: localPageSize ? localPageSize || 5 : pageSize,
 
     isPaid: isPaid,
     vehicleId: selectedVehicleId,
