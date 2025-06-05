@@ -176,11 +176,18 @@ export class InvoiceService {
         customer: {
           _id: 1,
           name: 1,
-          phone: 1,
+          phoneNumber: 1,
+          tvaNumber: 1,
+          address: 1,
+          note: 1,
+          loan: 1,
         },
         vehicle: {
           _id: 1,
-          plate: 1,
+          make: 1,
+          model: 1,
+          number: 1,
+          odometer: 1,
         },
       },
     });
