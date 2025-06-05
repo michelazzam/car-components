@@ -7,24 +7,28 @@ import {
   IsString,
 } from 'class-validator';
 import { ItemStatus, itemStatuses } from '../item.schema';
+import { Trim } from 'src/decorators/trim.decorator';
 
 export class AddItemDto {
   @ApiProperty({
     required: true,
   })
   @IsString()
+  @Trim()
   name: string;
 
   @ApiProperty({
     required: false,
   })
   @IsString()
+  @Trim()
   note: string;
 
   @ApiProperty({
     required: false,
   })
   @IsString()
+  @Trim()
   locationInStore: string;
 
   @ApiProperty({ required: false })

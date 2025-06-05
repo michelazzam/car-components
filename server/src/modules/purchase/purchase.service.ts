@@ -174,9 +174,9 @@ export class PurchaseService implements OnModuleInit {
       phoneNumber: dto.phoneNumber,
       vatPercent: dto.vatPercent,
       vatLBP: dto.vatLBP,
-      subTotal: dto.subTotal,
-      totalAmount: dto.totalAmount,
-      amountPaid: dto.amountPaid,
+      subTotal: formatMoneyField(dto.subTotal),
+      totalAmount: formatMoneyField(dto.totalAmount),
+      amountPaid: formatMoneyField(dto.amountPaid),
       usdRate: accounting.usdRate,
       items: dto.items,
       isPaid,
@@ -215,9 +215,9 @@ export class PurchaseService implements OnModuleInit {
       phoneNumber: dto.phoneNumber,
       vatPercent: dto.vatPercent,
       vatLBP: dto.vatLBP,
-      subTotal: dto.subTotal,
-      totalAmount: dto.totalAmount,
-      amountPaid: dto.amountPaid,
+      subTotal: formatMoneyField(dto.subTotal),
+      totalAmount: formatMoneyField(dto.totalAmount),
+      amountPaid: formatMoneyField(dto.amountPaid),
       items: dto.items,
       isPaid,
     });
@@ -241,12 +241,12 @@ export class PurchaseService implements OnModuleInit {
 
   async updatePurchasePayments({
     purchaseId,
-    amount,
+    amountPaid,
     isPaid,
     expenseLinking,
   }: {
     purchaseId: string;
-    amount: number;
+    amountPaid: number;
     isPaid: boolean;
     expenseLinking: {
       expenseId: string;
@@ -258,7 +258,7 @@ export class PurchaseService implements OnModuleInit {
         isPaid,
       },
       $inc: {
-        amountPaid: amount,
+        amountPaid: amountPaid,
       },
     };
 

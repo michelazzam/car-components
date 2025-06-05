@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IItem, Item } from './item.schema';
 import { FilterQuery, Model } from 'mongoose';
@@ -173,6 +177,13 @@ export class ItemService {
   }
 
   async create(dto: AddItemDto) {
+    const existingItem = await this.itemModel.findOne({
+      name: dto.name,
+    });
+    if (existingItem) {
+      throw new BadRequestException('Item with this name already exists');
+    }
+
     await this.itemModel.create({
       supplier: dto.supplierId,
       note: dto.note,
@@ -186,7 +197,20 @@ export class ItemService {
   }
 
   async edit(id: string, dto: EditItemDto) {
-    const item = await this.itemModel.findByIdAndUpdate(id, {
+    const item = await this.itemModel.findById(id);
+    if (!item) throw new NotFoundException(`Item with id ${id} not found`);
+
+    if (item.name !== dto.name) {
+      const existingItem = await this.itemModel.findOne({
+        name: dto.name,
+        _id: { $ne: id },
+      });
+      if (existingItem) {
+        throw new BadRequestException('Item with this name already exists');
+      }
+    }
+
+    await this.itemModel.findByIdAndUpdate(id, {
       supplier: dto.supplierId,
       cost: formatMoneyField(dto.cost),
       note: dto.note,
@@ -196,9 +220,6 @@ export class ItemService {
       name: dto.name,
       status: dto.status,
     });
-
-    if (!item) throw new NotFoundException(`Item with id ${id} not found`);
-    return item;
   }
 
   updateItemQuantity(id: string, quantity: number) {

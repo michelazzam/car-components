@@ -59,6 +59,7 @@ export class Invoice {
     itemRef: mongoose.Schema.Types.ObjectId;
     serviceRef: mongoose.Schema.Types.ObjectId;
     name: string;
+    note: string;
     cost: number;
     price: number;
     quantity: number;

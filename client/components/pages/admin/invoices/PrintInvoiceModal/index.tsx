@@ -70,7 +70,7 @@ function PrintInvoiceModal({
       pdf.save(
         printingInvoices.length > 1
           ? "invoices.pdf"
-          : `${printingInvoices[0].customer.name}-TB${printingInvoices[0]}.pdf`
+          : `${printingInvoices[0].customer.name}-${printingInvoices[0].number}.pdf`
       );
     }
     setLoading(false);

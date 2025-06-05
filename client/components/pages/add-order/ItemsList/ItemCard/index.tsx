@@ -80,7 +80,7 @@ function ItemCard({ product }: { product: Product }) {
       )}
       <Tooltip content={product?.note || product.name}>
         <div className="flex-grow flex flex-col justify-center items-center w-full text-center p-2">
-          <h3 className="font-semibold text-[.875rem] block text-truncate">
+          <h3 className="font-semibold text-[.875rem] block text-truncate max-w-[95%]">
             {product?.name}
           </h3>
           <p className="text-gray-500">cost: ${product?.cost} </p>

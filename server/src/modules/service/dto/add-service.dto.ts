@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Trim } from 'src/decorators/trim.decorator';
 
 export class AddServiceDto {
   @ApiProperty({
@@ -7,6 +8,7 @@ export class AddServiceDto {
     type: String,
   })
   @IsString()
+  @Trim()
   name: string;
 
   @ApiProperty({

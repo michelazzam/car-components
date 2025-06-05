@@ -6,6 +6,7 @@ import { FilterQuery, Model } from 'mongoose';
 import { CaisseHistory, ICaisseHistory } from './caisse.schema';
 import { getFormattedDate } from 'src/utils/getFormattedDate';
 import { InjectModel } from '@nestjs/mongoose';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class CaisseService {
@@ -13,6 +14,7 @@ export class CaisseService {
     private accountingService: AccountingService,
     @InjectModel(CaisseHistory.name)
     private caisseHistoryModel: Model<ICaisseHistory>,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   async openCaisse(dto: CloseOpenCaisseDto) {
@@ -32,6 +34,14 @@ export class CaisseService {
       accounting.caisse,
       'opening',
     );
+
+    await this.transactionsService.saveTransaction({
+      whatHappened: 'Caisse opened',
+      totalAmount: amount,
+      discountAmount: 0,
+      finalAmount: amount,
+      type: 'none',
+    });
   }
 
   async closeCaisse(dto: CloseOpenCaisseDto) {
@@ -51,6 +61,14 @@ export class CaisseService {
       accounting.caisse,
       'closing',
     );
+
+    await this.transactionsService.saveTransaction({
+      whatHappened: 'Caisse closed',
+      totalAmount: amount,
+      discountAmount: 0,
+      finalAmount: amount,
+      type: 'none',
+    });
   }
 
   async getCaisseStatus() {

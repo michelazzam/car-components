@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
+import { Trim } from 'src/decorators/trim.decorator';
 
 export class AddSupplierDto {
   @ApiProperty({
@@ -7,6 +8,7 @@ export class AddSupplierDto {
     type: String,
   })
   @IsString()
+  @Trim()
   name: string;
 
   @ApiProperty({
@@ -15,6 +17,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   capital: string;
 
   @ApiProperty({
@@ -23,6 +26,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   poBox: string;
 
   @ApiProperty({
@@ -31,6 +35,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   address: string;
 
   @ApiProperty({
@@ -39,6 +44,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   phoneNumber: string;
 
   @ApiProperty({
@@ -47,6 +53,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   fax: string;
 
   @ApiProperty({
@@ -55,6 +62,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   ext: string;
 
   @ApiProperty({
@@ -63,6 +71,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   email: string;
 
   @ApiProperty({
@@ -71,6 +80,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   website: string;
 
   @ApiProperty({
@@ -79,6 +89,7 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   vatNumber: string;
 
   @ApiProperty({
@@ -87,5 +98,6 @@ export class AddSupplierDto {
   })
   @IsString()
   @IsOptional()
+  @Trim()
   extraInfo: string;
 }

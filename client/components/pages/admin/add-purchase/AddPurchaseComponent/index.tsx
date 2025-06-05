@@ -68,7 +68,7 @@ const CustomAddPurchaseComponent = () => {
     if (currentDraftId) {
       deleteDraftPurchase(currentDraftId);
     }
-    router.push("/admin/purchase");
+    router.back();
   };
 
   const handleAddNewDraft = () => {
@@ -197,7 +197,7 @@ const CustomAddPurchaseComponent = () => {
               setEditingPurchase(undefined);
               reset();
 
-              router.push("/admin/purchase");
+              router.back();
             }}
           >
             Cancel
