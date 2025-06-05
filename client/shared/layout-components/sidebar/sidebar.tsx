@@ -121,7 +121,7 @@ const Sidebar = () => {
         onMouseOver={() => {}}
         onMouseLeave={() => {}}
       >
-        <div className="main-sidebar-header ">
+        <div className="main-sidebar-header">
           <div className="flex items-center space-x-2">
             <Link href="/add-invoice">
               <Image
@@ -134,7 +134,10 @@ const Sidebar = () => {
           </div>
         </div>
 
-        <div className="main-sidebar " id="sidebar-scroll">
+        <div
+          className="main-sidebar flex flex-col justify-between"
+          id="sidebar-scroll"
+        >
           <SimpleBar>
             <nav className="main-menu-container nav nav-pills flex-column sub-open">
               <ul className="main-menu" onClick={() => Sideclick()}>
@@ -207,7 +210,7 @@ const Sidebar = () => {
               </ul>
             </nav>
           </SimpleBar>
-          <div className="absolute bottom-0 translate-y-1/2 left-1/2 -translate-x-1/2 w-full">
+          <div className="w-full">
             <a
               target="_blank"
               rel="noopener noreferrer"
