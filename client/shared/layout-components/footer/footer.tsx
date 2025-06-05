@@ -16,7 +16,11 @@ const Footer = () => {
             </a>
             . Designed with{" "}
             <span className="bi bi-heart-fill text-danger"></span> by{" "}
-            <a href="#!">
+            <a
+              href="https://advanced-meta.com/"
+              target="_blank"
+              rel="noreferrer"
+            >
               {" "}
               <span className="font-semibold text-primary underline">
                 Advanced Meta Solutions
