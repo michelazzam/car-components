@@ -6,7 +6,7 @@ export type ItemStatus = (typeof itemStatuses)[number];
 
 @Schema({ timestamps: true })
 export class Item {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop({ required: false })

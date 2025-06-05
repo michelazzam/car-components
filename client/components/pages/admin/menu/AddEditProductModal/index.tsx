@@ -63,21 +63,6 @@ function AddEditProductModal({
     };
   }) as SelectOption[];
 
-  //----Getting Data for Options-----
-  // const { data: categories } = useListCategories();
-  // const { data: printers } = useListPrinters();
-
-  //---------------------------Options---------------------------------
-  // const categoriesOptions = categories?.map((category) => ({
-  //   label: category.name,
-  //   value: category._id,
-  // }));
-
-  // const printersOptions = printers?.map((printer) => ({
-  //   label: printer.name,
-  //   value: printer._id,
-  // }));
-
   //---------------------------FORM---------------------------------
   const { handleSubmit, control, reset } = useForm<ProductSchema>({
     resolver: zodResolver(apiValidations.AddEditProduct),
@@ -92,18 +77,6 @@ function AddEditProductModal({
       locationInStore: product?.locationInStore || "",
     },
   });
-
-  // const [ingredients, setIngredients] = useState<
-  //   {
-  //     label: string;
-  //     value: string;
-  //   }[]
-  // >(
-  //   product?.ingredients.map((ingredient) => ({
-  //     label: ingredient,
-  //     value: uuid4(),
-  //   })) || []
-  // );
 
   const onSubmit = (data: ProductSchema) => {
     if (product) editProduct(data);
@@ -161,6 +134,7 @@ function AddEditProductModal({
             label="Name"
             placeholder="name"
             colSpan={6}
+            dontCapitalize
           />
           <SelectFieldControlled
             control={control}
@@ -171,18 +145,9 @@ function AddEditProductModal({
             creatable={false}
             onInputChange={(e) => {
               setSupplierSearch(e);
-              // setValue("supplierId", "");
             }}
-            // onObjectChange={(e) => {
-            //   setValue("supplierId", e);
-            // }}
           />
-          {/* <NumberField
-            control={control}
-            name="stock"
-            label="Stock "
-            colSpan={!product ? 3 : 4}
-          /> */}
+
           <NumberFieldControlled
             control={control}
             readOnly={product ? true : false}
@@ -213,13 +178,6 @@ function AddEditProductModal({
             options={ITEM_STATUSES_OPTIONS || []}
             placeholder={"choose status"}
             creatable={false}
-            // onInputChange={(e) => {
-            //   setSupplierSearch(e);
-            //   // setValue("supplierId", "");
-            // }}
-            // onObjectChange={(e) => {
-            //   setValue("supplierId", e);
-            // }}
           />
           <TextFieldControlled
             control={control}
