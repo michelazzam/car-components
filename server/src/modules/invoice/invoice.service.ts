@@ -189,7 +189,7 @@ export class InvoiceService {
       this.invoiceModel.aggregate(pipeline),
       this.invoiceModel.countDocuments(),
 
-      // Note: not used by frontend so comment it for now:
+      // !Note: not used by frontend so comment it for now:
       // this.invoiceModel.aggregate([
       //   { $match: filter },
       //   {
@@ -389,10 +389,13 @@ export class InvoiceService {
   }
 
   async edit(invoiceId: string, dto: InvoiceDto) {
-    await this.revertInvoiceEffects(invoiceId);
+    const currentInvoice = await this.revertInvoiceEffects(invoiceId);
 
     // items existance validation
-    const updatedDto = await this.validateItemsExistanceAndUpdateDto(dto);
+    const updatedDto = await this.validateItemsExistanceAndUpdateDto(
+      dto,
+      currentInvoice,
+    );
 
     const isPaid = updatedDto.totalUsd <= updatedDto.paidAmountUsd;
 
@@ -694,10 +697,13 @@ export class InvoiceService {
       date: invoice.createdAt,
       totalIncome: -invoice.accounting.paidAmountUsd,
     });
+
+    return invoice;
   }
 
   private async validateItemsExistanceAndUpdateDto(
     dto: InvoiceDto,
+    invoiceToEdit?: Invoice,
   ): Promise<InvoiceDtoWithItemsDetails> {
     // Separate items and services from the provided DTO
     const itemsOnly = dto.items.filter((item) => !!item.itemRef);
@@ -715,15 +721,60 @@ export class InvoiceService {
       dbItems = await this.itemService.getManyByIds(itemRefs);
 
       // make sure all items are valid
-      if (dbItems.length !== itemRefs.length)
-        throw new BadRequestException('Some items are not valid');
+      const invalidItems = itemRefs
+        .map((itemRef) => {
+          const itemInDB = dbItems.find((dbItem) => {
+            return itemRef === dbItem._id.toString();
+          });
+
+          if (!itemInDB) return itemRef;
+        })
+        .filter((item) => item !== undefined);
+
+      if (invalidItems.length > 0) {
+        // incase we are editing, if the item does not exist in db but exists in current invoice, we should not throw an error
+        if (invoiceToEdit) {
+          // for each invalid item, check if it exists in the invoice
+          const checkedInvalidItems = invalidItems.filter((invalidItemRef) => {
+            return !!invoiceToEdit.items.find((invoiceItem) => {
+              return (
+                invoiceItem.itemRef?.toString() === invalidItemRef?.toString()
+              );
+            });
+          });
+
+          if (checkedInvalidItems.length !== invalidItems.length)
+            throw new BadRequestException('Some items are not valid');
+        } else {
+          throw new BadRequestException('Some items are not valid');
+        }
+      }
 
       // override the dto items array to add product fields for later reference
       itemsWithDetails = itemsOnly.map((itemInDto) => {
         const itemDB = dbItems.find((product) => {
           return product._id.toString() === itemInDto.itemRef;
         });
-        if (!itemDB) throw new BadRequestException('Item not found');
+
+        // not found in db, try finding it in the current invoice
+        if (!itemDB) {
+          if (invoiceToEdit) {
+            const itemInInvoice = invoiceToEdit.items.find((invoiceItem) => {
+              return (
+                invoiceItem.itemRef?.toString() ===
+                itemInDto.itemRef?.toString()
+              );
+            });
+            if (itemInInvoice)
+              return {
+                ...itemInDto,
+                name: itemInInvoice.name,
+                cost: itemInInvoice.cost,
+                note: itemInInvoice.note,
+              };
+            else throw new BadRequestException('Item not found');
+          } else throw new BadRequestException('Item not found');
+        }
 
         return {
           ...itemInDto,
@@ -741,15 +792,58 @@ export class InvoiceService {
       dbServices = await this.servicesService.getManyByIds(serviceRefs);
 
       // make sure all services are valid
-      if (dbServices.length !== serviceRefs.length)
+      const invalidServices = serviceRefs
+        .map((serviceRef) => {
+          const serviceInDB = dbServices.find((dbService) => {
+            return serviceRef === dbService._id.toString();
+          });
+          if (!serviceInDB) return serviceRef;
+        })
+        .filter((item) => item !== undefined);
+
+      // incase we are editing, if the service does not exist in db but exists in current invoice, we should not throw an error
+      if (invoiceToEdit) {
+        // for each invalid service, check if it exists in the invoice
+        const checkedInvalidServices = invalidServices.filter(
+          (invalidServiceRef) => {
+            return !!invoiceToEdit.items.find((invoiceItem) => {
+              return (
+                invoiceItem.serviceRef?.toString() ===
+                invalidServiceRef?.toString()
+              );
+            });
+          },
+        );
+
+        if (checkedInvalidServices.length !== invalidServices.length)
+          throw new BadRequestException('Some services are not valid');
+      } else {
         throw new BadRequestException('Some services are not valid');
+      }
 
       // override the dto items array to add service fields for later reference
       servicesWithDetails = servicesOnly.map((serviceInDto) => {
         const serviceDB = dbServices.find(
           (service) => service._id.toString() === serviceInDto.serviceRef,
         );
-        if (!serviceDB) throw new BadRequestException('Service not found');
+
+        if (!serviceDB) {
+          if (invoiceToEdit) {
+            const serviceInInvoice = invoiceToEdit.items.find((invoiceItem) => {
+              return (
+                invoiceItem.serviceRef?.toString() ===
+                serviceInDto.serviceRef?.toString()
+              );
+            });
+
+            if (serviceInInvoice)
+              return {
+                ...serviceInDto,
+                name: serviceInInvoice.name,
+              };
+            else throw new BadRequestException('Service not found');
+          } else throw new BadRequestException('Service not found');
+        }
 
         return {
           ...serviceInDto,
