@@ -824,7 +824,8 @@ export class InvoiceService {
         if (checkedInvalidServices.length !== invalidServices.length)
           throw new BadRequestException('Some services are not valid');
       } else {
-        throw new BadRequestException('Some services are not valid');
+        if (invalidServices.length > 0)
+          throw new BadRequestException('Some services are not valid');
       }
 
       // override the dto items array to add service fields for later reference
