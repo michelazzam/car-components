@@ -11,6 +11,10 @@ export type LoanTransactionType = (typeof transactionTypes)[number];
 
 @Schema({ timestamps: true })
 export class LoansTransactions {
+  // auto-incrementing sequence number
+  @Prop()
+  number: number;
+
   @Prop({ enum: transactionTypes, required: true })
   type: LoanTransactionType;
 

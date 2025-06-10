@@ -1,18 +1,25 @@
 import { Module } from '@nestjs/common';
 import { LoansTransactionsService } from './loans-transactions.service';
 import { LoansTransactionsController } from './loans-transactions.controller';
-import { MongooseModule } from '@nestjs/mongoose';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import {
   LoansTransactions,
   LoansTransactionsSchema,
 } from './loans-transactions.schema';
+import { Connection } from 'mongoose';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
+    MongooseModule.forFeatureAsync([
       {
         name: LoansTransactions.name,
-        schema: LoansTransactionsSchema,
+        useFactory: async (connection: Connection) => {
+          const schema = LoansTransactionsSchema;
+          const AutoIncrement = require('mongoose-sequence')(connection);
+          schema.plugin(AutoIncrement, { inc_field: 'number' });
+          return schema;
+        },
+        inject: [getConnectionToken()],
       },
     ]),
   ],
