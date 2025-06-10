@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -28,9 +29,10 @@ import { CustomerService } from '../customer/customer.service';
 import { ServiceService } from '../service/service.service';
 import { ItemService } from '../item/item.service';
 import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.dto';
+import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 
 @Injectable()
-export class InvoiceService {
+export class InvoiceService implements OnModuleInit {
   constructor(
     @InjectModel(Invoice.name)
     private invoiceModel: Model<IInvoice>,
@@ -41,7 +43,47 @@ export class InvoiceService {
     private readonly customerService: CustomerService,
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
+    private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
+
+  onModuleInit() {
+    this.addItemNoteToOldInvoiceItemsWithNoNote();
+  }
+
+  async addItemNoteToOldInvoiceItemsWithNoNote() {
+    // 1. get all invoices that have items with no note
+    const invoicesWithNoNote = await this.invoiceModel.find({
+      items: {
+        $elemMatch: {
+          note: null,
+        },
+      },
+    });
+
+    console.log(
+      `Found ${invoicesWithNoNote.length} invoices with missing notes`,
+    );
+
+    // 2) patch each invoice in memory
+    for (const invoice of invoicesWithNoNote) {
+      for (const item of invoice.items) {
+        if (!item.note && item.itemRef) {
+          const itemDB = await this.itemService.getOneById(
+            item.itemRef.toString(),
+          );
+          if (itemDB?.note) {
+            await this.invoiceModel.updateOne(
+              { _id: invoice._id, 'items.itemRef': item.itemRef },
+              { $set: { 'items.$.note': itemDB.note } },
+            );
+            console.log(
+              `Patched note on invoice ${invoice._id}, item ${item.itemRef}`,
+            );
+          }
+        }
+      }
+    }
+  }
 
   private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
     const {
@@ -385,7 +427,7 @@ export class InvoiceService {
       items: updatedDto.items,
     });
 
-    await this.doInvoiceEffects(updatedDto);
+    await this.doInvoiceEffects(updatedDto, createdInvoice._id?.toString());
     const createdInvoicePopulated = await this.invoiceModel
       .findById(createdInvoice._id)
       .populate('customer')
@@ -428,7 +470,7 @@ export class InvoiceService {
       items: updatedDto.items,
     });
 
-    await this.doInvoiceEffects(updatedDto);
+    await this.doInvoiceEffects(updatedDto, invoiceId);
 
     const editedInvoice = await this.invoiceModel
       .findById(invoiceId)
@@ -557,6 +599,17 @@ export class InvoiceService {
         date: new Date(),
         totalIncome: customerPaidAmount,
       });
+
+      // save loan transaction
+      return this.loansTransactionsService.saveLoanTransaction({
+        type: 'pay-invoice-loan',
+        amount: customerPaidAmount,
+        loanRemaining: minLoan,
+        supplierId: null,
+        customerId: customer._id?.toString(),
+        expenseId: null,
+        invoiceId: null,
+      });
     }
   }
 
@@ -564,7 +617,10 @@ export class InvoiceService {
     return this.invoiceModel.findOne({ customer: customerId });
   }
 
-  private async doInvoiceEffects(updatedDto: InvoiceDtoWithItemsDetails) {
+  private async doInvoiceEffects(
+    updatedDto: InvoiceDtoWithItemsDetails,
+    invoiceId: string,
+  ) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -576,6 +632,7 @@ export class InvoiceService {
       updatedDto.totalUsd - updatedDto.paidAmountUsd;
     const extraAmountPaid = Math.abs(remainingAmountToBePaid);
 
+    let customerLoanRemaining = 0;
     if (remainingAmountToBePaid > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
@@ -583,6 +640,7 @@ export class InvoiceService {
       if (!customer) throw new BadRequestException('Customer not found');
 
       customer.loan = customer.loan + remainingAmountToBePaid;
+      customerLoanRemaining = customer.loan + remainingAmountToBePaid;
       await customer.save();
 
       // increase total customer loans
@@ -600,6 +658,7 @@ export class InvoiceService {
       if (customer.loan > 0) {
         const minLoan = Math.max(customer.loan - extraAmountPaid, 0);
         customer.loan = minLoan;
+        customerLoanRemaining = minLoan;
         await customer.save();
 
         // decrease total customer loans
@@ -618,6 +677,18 @@ export class InvoiceService {
         true, // do not add to caisse since we are adding it before this step
       );
     }
+
+    if (updatedDto.paidAmountUsd)
+      // save loan transaction
+      await this.loansTransactionsService.saveLoanTransaction({
+        type: 'new-invoice',
+        amount: updatedDto.paidAmountUsd,
+        loanRemaining: customerLoanRemaining,
+        supplierId: null,
+        customerId: updatedDto.customerId,
+        invoiceId: invoiceId,
+        expenseId: null,
+      });
 
     // calc total items cost amount
     const totalProductsCost = updatedDto.items
@@ -703,6 +774,10 @@ export class InvoiceService {
       date: invoice.createdAt,
       totalIncome: -invoice.accounting.paidAmountUsd,
     });
+
+    // delete loan transaction
+    if (invoice.accounting.paidAmountUsd)
+      await this.loansTransactionsService.deleteByInvoiceId(invoiceId);
 
     return invoice;
   }

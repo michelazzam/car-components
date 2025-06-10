@@ -43,9 +43,9 @@ export class InvoiceController {
   @Permissions('Invoices', 'update')
   @Put('pay-customer-invoices')
   async payCustomerInvoices(@Body() dto: PayCustomerInvoicesDto) {
-    await this.invoiceService.payCustomerInvoices(dto);
+    const transaction = await this.invoiceService.payCustomerInvoices(dto);
 
-    return { message: 'Invoices paid successfully' };
+    return { message: 'Invoices paid successfully', data: { transaction } };
   }
 
   @Permissions('Invoices', 'update')

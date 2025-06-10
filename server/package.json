@@ -48,6 +48,7 @@
     "class-validator": "^0.14.1",
     "dayjs": "^1.11.13",
     "mongoose": "^8.13.2",
+    "mongoose-sequence": "^6.0.1",
     "nestjs-real-ip": "^3.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"

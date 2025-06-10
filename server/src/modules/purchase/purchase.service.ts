@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
 import mongoose, { FilterQuery, Model } from 'mongoose';
@@ -10,9 +10,10 @@ import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
+import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 
 @Injectable()
-export class PurchaseService implements OnModuleInit {
+export class PurchaseService {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
@@ -21,34 +22,8 @@ export class PurchaseService implements OnModuleInit {
     private readonly itemService: ItemService,
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
+    private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
-
-  onModuleInit() {
-    this.markPaidPurchasesAsPaid();
-  }
-
-  // for old purchases, do a migration
-  private async markPaidPurchasesAsPaid() {
-    const purchases = await this.purchaseModel.find({
-      isPaid: false,
-    });
-
-    let purchasesCount = 0;
-    for (const purchase of purchases) {
-      const isPaid = purchase.totalAmount <= purchase.amountPaid;
-
-      await this.purchaseModel.updateOne(
-        { _id: purchase._id },
-        {
-          isPaid,
-        },
-      );
-
-      purchasesCount++;
-    }
-
-    console.log(`Marked ${purchasesCount} old purchases as paid`);
-  }
 
   async getAll(dto: GetPurchaseDto) {
     const {
@@ -287,11 +262,13 @@ export class PurchaseService implements OnModuleInit {
 
     // add loan to supplier of not fully paid
     const remainingAmount = dto.totalAmount - dto.amountPaid;
+    let remainingSupplierLoan = 0;
     if (remainingAmount > 0) {
       const supplier = await this.supplierService.getOneById(dto.supplierId);
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       supplier.loan = supplier.loan + remainingAmount;
+      remainingSupplierLoan = supplier.loan + remainingAmount;
       await supplier.save();
 
       // increase total supplier loans
@@ -299,7 +276,6 @@ export class PurchaseService implements OnModuleInit {
         totalSuppliersLoan: supplier.loan,
       });
     }
-
     // if paid more, decrease supplier loan if he has any
     else if (remainingAmount < 0) {
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -310,6 +286,7 @@ export class PurchaseService implements OnModuleInit {
       if (supplier.loan > 0) {
         const minLoan = Math.max(supplier.loan - extraAmountPaid, 0);
         supplier.loan = minLoan;
+        remainingSupplierLoan = minLoan;
         await supplier.save();
 
         // decrease total supplier loans
@@ -322,7 +299,7 @@ export class PurchaseService implements OnModuleInit {
     // save the amount paid as expense
     if (dto.amountPaid > 0) {
       const newExpense = await this.expenseModel.create({
-        supplierId: dto.supplierId,
+        supplier: dto.supplierId,
         amount: dto.amountPaid,
         date: getFormattedDate(new Date()),
         purchases: [purchaseId],
@@ -337,6 +314,17 @@ export class PurchaseService implements OnModuleInit {
           },
         },
       );
+
+      // save loan transaction
+      await this.loansTransactionsService.saveLoanTransaction({
+        type: 'new-purchase',
+        amount: dto.amountPaid,
+        loanRemaining: remainingSupplierLoan,
+        supplierId: null,
+        customerId: null,
+        expenseId: newExpense._id?.toString(),
+        invoiceId: null,
+      });
     }
 
     await this.accountingService.incAccountingNumberFields({
@@ -425,6 +413,9 @@ export class PurchaseService implements OnModuleInit {
           $pull: { expenses: expenseId },
         },
       );
+
+      // delete loan transaction
+      await this.loansTransactionsService.deleteByExpenseId(expenseId);
     }
 
     await this.accountingService.incAccountingNumberFields({
