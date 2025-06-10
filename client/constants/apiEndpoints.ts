@@ -1,4 +1,7 @@
 export const API = {
+  //Money Transactions
+  listLoansTransactions: "/loans-transactions",
+
   // Users
   login: "/users/login", // POST
   listUsers: "/users", // GET

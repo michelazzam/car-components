@@ -194,6 +194,17 @@ export default function useMenuItems() {
       visible: user?.role === "superAmsAdmin",
     },
     {
+      icon: moneyIcon,
+      path: "/admin/loan-transactions",
+      type: "link",
+      active: pathname.startsWith("/admin/loan-transactions"),
+      selected: pathname.startsWith("/admin/loan-transactions"),
+      title: "Loan Transactions",
+      children: [],
+      visible: user?.role === "superAmsAdmin",
+    },
+
+    {
       icon: BillingIcon,
       path: "/admin/ams/billing",
       type: "link",
