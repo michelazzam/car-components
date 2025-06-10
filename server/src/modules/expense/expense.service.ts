@@ -14,6 +14,7 @@ import { ReportService } from '../report/report.service';
 import { SupplierService } from '../supplier/supplier.service';
 import { PurchaseService } from '../purchase/purchase.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 
 @Injectable()
 export class ExpenseService {
@@ -25,6 +26,7 @@ export class ExpenseService {
     private readonly reportService: ReportService,
     private readonly purchaseService: PurchaseService,
     private readonly transactionsService: TransactionsService,
+    private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
 
   async getAll(dto: GetExpensesDto) {
@@ -118,7 +120,7 @@ export class ExpenseService {
       note: dto.note,
     });
 
-    await this.doExpenseEffects(dto, newExpense._id?.toString());
+    return this.doExpenseEffects(dto, newExpense._id?.toString());
   }
 
   async edit(id: string, dto: ExpenseDto) {
@@ -162,6 +164,7 @@ export class ExpenseService {
   private async doExpenseEffects(dto: ExpenseDto, expenseId: string) {
     const actions: string[] = [];
 
+    let transaction: any;
     // senario where expense is paying for purchases
     if (dto.supplierId) {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
@@ -210,6 +213,17 @@ export class ExpenseService {
       }
 
       actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}`);
+
+      // save loan transaction
+      transaction = await this.loansTransactionsService.saveLoanTransaction({
+        type: 'pay-purchase-loan',
+        amount: dto.amount,
+        loanRemaining: minLoan,
+        supplierId: supplier._id?.toString(),
+        customerId: null,
+        expenseId: expenseId,
+        invoiceId: null,
+      });
     }
 
     // update daily report
@@ -234,6 +248,8 @@ export class ExpenseService {
       finalAmount: dto.amount,
       type: 'outcome',
     });
+
+    return transaction;
   }
 
   private async revertExpenseEffects(expenseId: string) {
@@ -308,6 +324,9 @@ export class ExpenseService {
 
         actions.push(`Reverted paying to purchases: ${totalDeducted}`);
       }
+
+      // delete loan transaction
+      await this.loansTransactionsService.deleteByExpenseId(expenseId);
     }
 
     // update daily report

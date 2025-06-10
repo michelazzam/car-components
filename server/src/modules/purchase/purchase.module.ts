@@ -7,6 +7,7 @@ import { AccountingModule } from '../accounting/accounting.module';
 import { SupplierModule } from '../supplier/supplier.module';
 import { ItemModule } from '../item/item.module';
 import { Expense, ExpenseSchema } from '../expense/expense.schema';
+import { LoansTransactionsModule } from '../loans-transactions/loans-transactions.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Expense, ExpenseSchema } from '../expense/expense.schema';
     AccountingModule,
     SupplierModule,
     ItemModule,
+    LoansTransactionsModule,
   ],
   controllers: [PurchaseController],
   providers: [PurchaseService],
