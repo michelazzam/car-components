@@ -29,6 +29,7 @@ import { CustomerService } from '../customer/customer.service';
 import { ServiceService } from '../service/service.service';
 import { ItemService } from '../item/item.service';
 import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.dto';
+import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 
 @Injectable()
 export class InvoiceService implements OnModuleInit {
@@ -42,6 +43,7 @@ export class InvoiceService implements OnModuleInit {
     private readonly customerService: CustomerService,
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
+    private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
 
   onModuleInit() {
@@ -425,7 +427,7 @@ export class InvoiceService implements OnModuleInit {
       items: updatedDto.items,
     });
 
-    await this.doInvoiceEffects(updatedDto);
+    await this.doInvoiceEffects(updatedDto, createdInvoice._id?.toString());
     const createdInvoicePopulated = await this.invoiceModel
       .findById(createdInvoice._id)
       .populate('customer')
@@ -468,7 +470,7 @@ export class InvoiceService implements OnModuleInit {
       items: updatedDto.items,
     });
 
-    await this.doInvoiceEffects(updatedDto);
+    await this.doInvoiceEffects(updatedDto, invoiceId);
 
     const editedInvoice = await this.invoiceModel
       .findById(invoiceId)
@@ -597,6 +599,17 @@ export class InvoiceService implements OnModuleInit {
         date: new Date(),
         totalIncome: customerPaidAmount,
       });
+
+      // save loan transaction
+      return this.loansTransactionsService.saveLoanTransaction({
+        type: 'pay-invoice-loan',
+        amount: customerPaidAmount,
+        loanRemaining: minLoan,
+        supplierId: null,
+        customerId: customer._id?.toString(),
+        expenseId: null,
+        invoiceId: null,
+      });
     }
   }
 
@@ -604,7 +617,10 @@ export class InvoiceService implements OnModuleInit {
     return this.invoiceModel.findOne({ customer: customerId });
   }
 
-  private async doInvoiceEffects(updatedDto: InvoiceDtoWithItemsDetails) {
+  private async doInvoiceEffects(
+    updatedDto: InvoiceDtoWithItemsDetails,
+    invoiceId: string,
+  ) {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -616,6 +632,7 @@ export class InvoiceService implements OnModuleInit {
       updatedDto.totalUsd - updatedDto.paidAmountUsd;
     const extraAmountPaid = Math.abs(remainingAmountToBePaid);
 
+    let customerLoanRemaining = 0;
     if (remainingAmountToBePaid > 0) {
       const customer = await this.customerService.getOneById(
         updatedDto.customerId,
@@ -623,6 +640,7 @@ export class InvoiceService implements OnModuleInit {
       if (!customer) throw new BadRequestException('Customer not found');
 
       customer.loan = customer.loan + remainingAmountToBePaid;
+      customerLoanRemaining = customer.loan + remainingAmountToBePaid;
       await customer.save();
 
       // increase total customer loans
@@ -640,6 +658,7 @@ export class InvoiceService implements OnModuleInit {
       if (customer.loan > 0) {
         const minLoan = Math.max(customer.loan - extraAmountPaid, 0);
         customer.loan = minLoan;
+        customerLoanRemaining = minLoan;
         await customer.save();
 
         // decrease total customer loans
@@ -658,6 +677,18 @@ export class InvoiceService implements OnModuleInit {
         true, // do not add to caisse since we are adding it before this step
       );
     }
+
+    if (updatedDto.paidAmountUsd)
+      // save loan transaction
+      await this.loansTransactionsService.saveLoanTransaction({
+        type: 'new-invoice',
+        amount: updatedDto.paidAmountUsd,
+        loanRemaining: customerLoanRemaining,
+        supplierId: null,
+        customerId: updatedDto.customerId,
+        invoiceId: invoiceId,
+        expenseId: null,
+      });
 
     // calc total items cost amount
     const totalProductsCost = updatedDto.items
@@ -743,6 +774,10 @@ export class InvoiceService implements OnModuleInit {
       date: invoice.createdAt,
       totalIncome: -invoice.accounting.paidAmountUsd,
     });
+
+    // delete loan transaction
+    if (invoice.accounting.paidAmountUsd)
+      await this.loansTransactionsService.deleteByInvoiceId(invoiceId);
 
     return invoice;
   }

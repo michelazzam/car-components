@@ -10,6 +10,7 @@ import { SupplierService } from '../supplier/supplier.service';
 import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
+import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 
 @Injectable()
 export class PurchaseService {
@@ -21,6 +22,7 @@ export class PurchaseService {
     private readonly itemService: ItemService,
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
+    private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -260,11 +262,13 @@ export class PurchaseService {
 
     // add loan to supplier of not fully paid
     const remainingAmount = dto.totalAmount - dto.amountPaid;
+    let remainingSupplierLoan = 0;
     if (remainingAmount > 0) {
       const supplier = await this.supplierService.getOneById(dto.supplierId);
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       supplier.loan = supplier.loan + remainingAmount;
+      remainingSupplierLoan = supplier.loan + remainingAmount;
       await supplier.save();
 
       // increase total supplier loans
@@ -272,7 +276,6 @@ export class PurchaseService {
         totalSuppliersLoan: supplier.loan,
       });
     }
-
     // if paid more, decrease supplier loan if he has any
     else if (remainingAmount < 0) {
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -283,6 +286,7 @@ export class PurchaseService {
       if (supplier.loan > 0) {
         const minLoan = Math.max(supplier.loan - extraAmountPaid, 0);
         supplier.loan = minLoan;
+        remainingSupplierLoan = minLoan;
         await supplier.save();
 
         // decrease total supplier loans
@@ -310,6 +314,17 @@ export class PurchaseService {
           },
         },
       );
+
+      // save loan transaction
+      await this.loansTransactionsService.saveLoanTransaction({
+        type: 'new-purchase',
+        amount: dto.amountPaid,
+        loanRemaining: remainingSupplierLoan,
+        supplierId: null,
+        customerId: null,
+        expenseId: newExpense._id?.toString(),
+        invoiceId: null,
+      });
     }
 
     await this.accountingService.incAccountingNumberFields({
@@ -398,6 +413,9 @@ export class PurchaseService {
           $pull: { expenses: expenseId },
         },
       );
+
+      // delete loan transaction
+      await this.loansTransactionsService.deleteByExpenseId(expenseId);
     }
 
     await this.accountingService.incAccountingNumberFields({

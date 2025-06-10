@@ -29,9 +29,9 @@ export class ExpenseController {
   @Permissions('Expenses', 'create')
   @Post()
   async create(@Body() dto: ExpenseDto) {
-    await this.expenseService.create(dto);
+    const transaction = await this.expenseService.create(dto);
 
-    return { message: 'Expense added successfully' };
+    return { message: 'Expense added successfully', data: { transaction } };
   }
 
   @Permissions('Expenses', 'update')

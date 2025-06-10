@@ -26,6 +26,7 @@ import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { TelegramService } from 'src/lib/telegram.service';
 import { GlobalExceptionFilter } from 'src/middleware/global-exception-filter.middleware';
 import { TransactionsModule } from './transactions/transactions.module';
+import { LoansTransactionsModule } from './loans-transactions/loans-transactions.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     AppTokenModule,
     PaymentMethodsModule,
     TransactionsModule,
+    LoansTransactionsModule,
   ],
   controllers: [],
   providers: [
