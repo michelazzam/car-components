@@ -119,6 +119,15 @@ export class PurchaseService {
     return this.purchaseModel.find({ _id: { $in: ids } });
   }
 
+  async getUnpaidPurchases({ supplierId }: { supplierId: string }) {
+    return this.purchaseModel
+      .find({
+        supplier: supplierId,
+        isPaid: false,
+      })
+      .sort({ createdAt: 1 });
+  }
+
   async create(dto: PurchaseDto) {
     // get products from db and save the name with each one
     const products = await this.itemService.getManyByIds(

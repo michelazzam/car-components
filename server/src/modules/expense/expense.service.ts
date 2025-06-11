@@ -15,6 +15,7 @@ import { SupplierService } from '../supplier/supplier.service';
 import { PurchaseService } from '../purchase/purchase.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
+import { IPurchase } from '../purchase/purchase.schema';
 
 @Injectable()
 export class ExpenseService {
@@ -177,42 +178,59 @@ export class ExpenseService {
       supplier.loan = minLoan;
       await supplier.save();
 
-      // get purchases and loop over them and pay them until amount is 0
-      if (dto.purchasesIds.length > 0) {
-        const purchases = await this.purchaseService.getManyByIds(
+      // get purchases either from dto or from unpaid purchases
+      let unPaidPurchases: IPurchase[] = [];
+
+      if (dto.purchasesIds.length > 0)
+        unPaidPurchases = await this.purchaseService.getManyByIds(
           dto.purchasesIds,
         );
-
-        let remainingAmountPaid = dto.amount;
-
-        for (const purchase of purchases) {
-          if (remainingAmountPaid <= 0) break;
-
-          const purchaseRemainingAmount =
-            purchase.totalAmount - purchase.amountPaid;
-
-          const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
-
-          const amountToPayPurchase = isPurchasePaid
-            ? purchaseRemainingAmount
-            : remainingAmountPaid;
-
-          await this.purchaseService.updatePurchasePayments({
-            purchaseId: purchase._id?.toString(),
-            amountPaid: amountToPayPurchase,
-            isPaid: isPurchasePaid,
-            expenseLinking: {
-              expenseId,
-              action: 'add',
+      else {
+        unPaidPurchases = await this.purchaseService.getUnpaidPurchases({
+          supplierId: dto.supplierId,
+        });
+        // since no purchases ids where provided, we will save the unpaid purchases in the expense object
+        await this.expenseModel.updateOne(
+          { _id: expenseId },
+          {
+            $push: {
+              purchases: {
+                $each: unPaidPurchases.map((p) => p._id.toString()),
+              },
             },
-          });
+          },
+        );
+      }
 
-          actions.push(
-            `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}`,
-          );
+      // loop over them and pay them until remaining amount is 0
+      let remainingAmountPaid = dto.amount;
+      for (const purchase of unPaidPurchases) {
+        if (remainingAmountPaid <= 0) break;
 
-          remainingAmountPaid -= amountToPayPurchase;
-        }
+        const purchaseRemainingAmount =
+          purchase.totalAmount - purchase.amountPaid;
+
+        const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
+
+        const amountToPayPurchase = isPurchasePaid
+          ? purchaseRemainingAmount
+          : remainingAmountPaid;
+
+        await this.purchaseService.updatePurchasePayments({
+          purchaseId: purchase._id?.toString(),
+          amountPaid: amountToPayPurchase,
+          isPaid: isPurchasePaid,
+          expenseLinking: {
+            expenseId,
+            action: 'add',
+          },
+        });
+
+        actions.push(
+          `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}`,
+        );
+
+        remainingAmountPaid -= amountToPayPurchase;
       }
 
       actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}`);
