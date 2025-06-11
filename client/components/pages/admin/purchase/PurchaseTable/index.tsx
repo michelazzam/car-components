@@ -135,7 +135,7 @@ const PurchaseTable = ({
               onClick={() => {
                 setSelectedPurchase(row.original);
               }}
-              data-hs-overlay="#add-expense-modal"
+              data-hs-overlay="#add-expense-from-purchase-modal"
               className="ti ti-btn ti-btn-primary ti-btn-wave rounded-md"
             >
               Pay Now
@@ -251,7 +251,7 @@ const PurchaseTable = ({
       />
       <ViewPurchaseModal purchase={selectedPurchase} />
       <ExpenseModal
-        triggerModalId="add-expense-modal"
+        triggerModalId="add-expense-from-purchase-modal"
         modalTitle="Add Expense"
         purchase={selectedPurchase}
         setPurchase={setSelectedPurchase}

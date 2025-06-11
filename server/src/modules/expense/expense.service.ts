@@ -139,9 +139,12 @@ export class ExpenseService {
     );
     if (!expense) throw new NotFoundException('Expense not found');
 
-    await this.doExpenseEffects(dto, id);
+    const transaction = await this.doExpenseEffects(dto, id);
 
-    return expense;
+    return {
+      transaction,
+      expense,
+    };
   }
 
   async delete(id: string) {

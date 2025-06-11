@@ -23,6 +23,8 @@ import {
   Purchase,
   useListPurchase,
 } from "@/api-hooks/purchase/use-list-purchase";
+import PrintReceiptModal from "../loan-transactions/PrintReceiptModal";
+import { LoanTransaction } from "@/api-hooks/money-transactions/use-list-loans-transactions";
 
 function ExpenseModal({
   expense,
@@ -44,9 +46,11 @@ function ExpenseModal({
   //---------------------------REFS------------------------------
   const expenseFormRef = useRef<HTMLFormElement>(null);
   const cancelFormRef = useRef<HTMLButtonElement>(null);
-
+  const openPrintReceiptModalRef = useRef<HTMLButtonElement>(null);
   //---------------------------STATE--------------------------
   const [keepAdding, setKeepAdding] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<LoanTransaction | null>(null);
 
   //---------------------------FORM---------------------------------
   const { handleSubmit, control, reset, setValue, watch } =
@@ -121,7 +125,9 @@ function ExpenseModal({
   }));
 
   const { mutate: addExpense, isPending: isAdding } = useAddExpense({
-    callBackOnSuccess: () => {
+    callBackOnSuccess: (data) => {
+      console.log("DATA IS : ", data);
+      setSelectedTransaction(data.transaction);
       onSuccess?.({
         amount: amount,
         note: note || "",
@@ -129,6 +135,9 @@ function ExpenseModal({
       reset();
       if (!keepAdding) {
         cancelFormRef.current?.click();
+        if (data.transaction) {
+          openPrintReceiptModalRef.current?.click();
+        }
       }
     },
   });
@@ -141,8 +150,12 @@ function ExpenseModal({
 
   const { mutate: editExpense, isPending: isEditing } = useEditExpense({
     id: expense?._id!,
-    callBackOnSuccess: () => {
+    callBackOnSuccess: (data) => {
+      setSelectedTransaction(data.transaction);
       reset();
+      if (data.transaction) {
+        openPrintReceiptModalRef.current?.click();
+      }
       cancelFormRef.current?.click();
       setSelectedExpense?.(undefined);
     },
@@ -207,116 +220,133 @@ function ExpenseModal({
   const onInvalid = (errors: any) => console.error(errors);
 
   return (
-    <Modal
-      id={triggerModalId}
-      size="md"
-      onClose={() => {
-        setSelectedExpense?.(undefined);
-        setPurchase?.(undefined);
-        reset();
-      }}
-    >
-      <Modal.Header title={modalTitle} id={triggerModalId} />
-      <Modal.Body>
-        <form
-          ref={expenseFormRef}
-          onSubmit={handleSubmit(onSubmit, onInvalid)}
-          className="grid grid-cols-12 gap-x-2 items-center"
-        >
-          <SelectFieldControlled
-            control={control}
-            name="expenseTypeId"
-            label="Expense Type"
-            options={expenseTypeOptions || []}
-            placeholder={"Choose Type"}
-            colSpan={6}
-            creatable={true}
-            handleCreate={handleCreateOption}
-          />
+    <>
+      {" "}
+      <Modal
+        id={triggerModalId}
+        size="md"
+        onClose={() => {
+          setSelectedExpense?.(undefined);
+          setPurchase?.(undefined);
+          reset();
+        }}
+      >
+        <Modal.Header title={modalTitle} id={triggerModalId} />
+        <Modal.Body>
+          <form
+            ref={expenseFormRef}
+            onSubmit={handleSubmit(onSubmit, onInvalid)}
+            className="grid grid-cols-12 gap-x-2 items-center"
+          >
+            <SelectFieldControlled
+              control={control}
+              name="expenseTypeId"
+              label="Expense Type"
+              options={expenseTypeOptions || []}
+              placeholder={"Choose Type"}
+              colSpan={6}
+              creatable={true}
+              handleCreate={handleCreateOption}
+            />
 
-          <NumberFieldControlled
-            control={control}
-            name="amount"
-            label="Total Amount"
-            placeholder="0.00"
-            prefix="$"
-            colSpan={6}
-          />
-          <SelectFieldControlled
-            control={control}
-            disabled={!!purchase}
-            name="supplierId"
-            label="Supplier"
-            options={suppliersOptions || []}
-            placeholder={"Choose Supplier"}
-            colSpan={6}
-            creatable={true}
-            handleCreate={handleCreateOption}
-            onInputChange={(value) => {
-              setSearch(value);
+            <NumberFieldControlled
+              control={control}
+              name="amount"
+              label="Total Amount"
+              placeholder="0.00"
+              prefix="$"
+              colSpan={6}
+            />
+            <SelectFieldControlled
+              control={control}
+              disabled={!!purchase}
+              name="supplierId"
+              label="Supplier"
+              options={suppliersOptions || []}
+              placeholder={"Choose Supplier"}
+              colSpan={6}
+              creatable={true}
+              handleCreate={handleCreateOption}
+              onInputChange={(value) => {
+                setSearch(value);
+              }}
+            />
+            <MultiSelectFieldControlled
+              onSearchChange={(value) => {
+                setPurchaseSearch(value);
+              }}
+              disabled={!supplierId}
+              control={control}
+              name="purchasesIds"
+              treatAsObject
+              label="Purchases"
+              options={purchasesOptions || []}
+              placeholder={"Choose Purchases"}
+              colSpan={6}
+            />
+
+            <DateFieldControlled
+              control={control}
+              name="date"
+              label="Date"
+              placeholder="2012-12-01"
+              formatType="dd-MM-yyyy"
+              colSpan={6}
+            />
+            <TextFieldControlled
+              control={control}
+              name="note"
+              dontCapitalize
+              label="Note"
+              placeholder="note here for later"
+              colSpan={6}
+            />
+          </form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          {!expense && (
+            <Checkbox
+              isChecked={keepAdding}
+              onValueChange={(v) => setKeepAdding(v)}
+              label="Add More"
+            />
+          )}
+          <button
+            ref={cancelFormRef}
+            type="button"
+            className="hs-dropdown-toggle ti-btn ti-btn-secondary"
+            data-hs-overlay={`#${triggerModalId}`}
+          >
+            Cancel
+          </button>
+          <button
+            disabled={isAdding || isEditing}
+            type="button"
+            onClick={() => {
+              expenseFormRef.current?.requestSubmit();
             }}
-          />
-          <MultiSelectFieldControlled
-            onSearchChange={(value) => {
-              setPurchaseSearch(value);
-            }}
-            disabled={!supplierId}
-            control={control}
-            name="purchasesIds"
-            treatAsObject
-            label="Purchases"
-            options={purchasesOptions || []}
-            placeholder={"Choose Purchases"}
-            colSpan={6}
-          />
-
-          <DateFieldControlled
-            control={control}
-            name="date"
-            label="Date"
-            placeholder="2012-12-01"
-            formatType="dd-MM-yyyy"
-            colSpan={6}
-          />
-          <TextFieldControlled
-            control={control}
-            name="note"
-            dontCapitalize
-            label="Note"
-            placeholder="note here for later"
-            colSpan={6}
-          />
-        </form>
-      </Modal.Body>
-
-      <Modal.Footer>
-        {!expense && (
-          <Checkbox
-            isChecked={keepAdding}
-            onValueChange={(v) => setKeepAdding(v)}
-            label="Add More"
-          />
-        )}
-        <button
-          ref={cancelFormRef}
-          type="button"
-          className="hs-dropdown-toggle ti-btn ti-btn-secondary"
-          data-hs-overlay={`#${triggerModalId}`}
-        >
-          Cancel
-        </button>
-        <button
-          disabled={isAdding || isEditing}
-          type="button"
-          onClick={() => {
-            expenseFormRef.current?.requestSubmit();
-          }}
-          className="ti-btn ti-btn-primary-full"
-        >
-          {isAdding || isEditing ? "Submitting..." : "Submit"}
-        </button>
-      </Modal.Footer>
-    </Modal>
+            className="ti-btn ti-btn-primary-full"
+          >
+            {isAdding || isEditing ? "Submitting..." : "Submit"}
+          </button>
+          <button
+            ref={openPrintReceiptModalRef}
+            type="button"
+            className="sr-only"
+            data-hs-overlay={`#print-receipt-expense-modal-${triggerModalId}`}
+          >
+            Print Receipt
+          </button>
+        </Modal.Footer>
+      </Modal>
+      <PrintReceiptModal
+        selectedTransaction={selectedTransaction}
+        setSelectedTransaction={setSelectedTransaction}
+        triggerModalId={`print-receipt-expense-modal-${triggerModalId}`}
+        title="Print Receipt"
+      />
+    </>
   );
 }
 

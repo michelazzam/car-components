@@ -100,7 +100,7 @@ export class LoansTransactionsService {
     expenseId: string | null;
     invoiceId: string | null;
   }) {
-    return this.loansTransactionsModel.create({
+    const transaction = await this.loansTransactionsModel.create({
       type,
       amount,
       loanRemaining,
@@ -109,6 +109,11 @@ export class LoansTransactionsService {
       expense: expenseId,
       invoice: invoiceId,
     });
+
+    return this.loansTransactionsModel
+      .findById(transaction._id)
+      .populate('supplier')
+      .populate('expense');
   }
 
   deleteByExpenseId(expenseId: string) {

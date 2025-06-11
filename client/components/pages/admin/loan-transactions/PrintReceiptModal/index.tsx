@@ -29,7 +29,10 @@ function PrintReceiptModal({
       <Modal.Body>
         <div ref={parentRef}>
           {selectedTransaction && (
-            <PrintReceipt transaction={selectedTransaction} />
+            <PrintReceipt
+              key={selectedTransaction._id}
+              transaction={selectedTransaction}
+            />
           )}
         </div>
       </Modal.Body>

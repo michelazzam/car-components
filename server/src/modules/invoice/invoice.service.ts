@@ -611,7 +611,7 @@ export class InvoiceService implements OnModuleInit {
           expenseId: null,
           invoiceId: null,
         });
-      return transaction.populate('customer');
+      return transaction;
     }
   }
 

@@ -1,18 +1,20 @@
 import { API } from "@/constants/apiEndpoints";
 import { useUpdateData } from "@/api-service/useUpdateData";
 import { AddEditExpenseBodyParam } from "./use_add_expense";
-
+import { LoanTransaction } from "../money-transactions/use-list-loans-transactions";
 const useEditExpense = ({
   id,
   callBackOnSuccess,
 }: {
   id: string;
-  callBackOnSuccess?: () => void;
+  callBackOnSuccess?: (data: { transaction: LoanTransaction }) => void;
 }) => {
   return useUpdateData<AddEditExpenseBodyParam>({
     queryKeysToInvalidate: [["expenses"], ["caisse"]],
     endpoint: API.editExpense(id),
-    callBackOnSuccess: callBackOnSuccess,
+    callBackOnSuccess: (data) => {
+      callBackOnSuccess?.(data as { transaction: LoanTransaction });
+    },
   });
 };
 
