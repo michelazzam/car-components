@@ -12,6 +12,7 @@ import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 import { TransactionsService } from '../transactions/transactions.service';
+import { IItem } from '../item/item.schema';
 
 @Injectable()
 export class PurchaseService {
@@ -168,27 +169,60 @@ export class PurchaseService {
       isPaid,
     });
 
-    await this.doPurchaseEffects(dto, newPurchase._id?.toString());
+    await this.doPurchaseEffects(dto, newPurchase._id?.toString(), {
+      isEditMode: false,
+    });
   }
 
   async edit(purchaseId: string, dto: PurchaseDto) {
-    await this.revertPurchaseEffects(purchaseId);
+    // 1. Revert effects so we get the original items back
+    const currentPurchase = await this.revertPurchaseEffects(purchaseId);
 
-    // get products from db and save the name with each one
-    const products = await this.itemService.getManyByIds(
-      dto.items.map((item) => item.itemId),
+    // 2. Identify which incoming items are truly new
+    const newItemsDto = dto.items.filter(
+      (item) =>
+        !currentPurchase.items.some(
+          (prod) => prod.item?.toString() === item.itemId,
+        ),
     );
 
-    if (products.length !== dto.items.length)
+    // 3. Fetch the corresponding products
+    const productsDB = await this.itemService.getManyByIds(
+      newItemsDto.map((item) => item.itemId),
+    );
+    if (productsDB.length !== newItemsDto.length) {
       throw new BadRequestException('Some items are not valid');
+    }
 
-    // override the dto items array to add the product name field
-    dto.items = products.map((product) => ({
-      ...dto.items.find((item) => item.itemId === product._id?.toString())!,
-      item: product._id,
-      name: product.name,
-      currentItemCost: product.cost,
-    }));
+    // 4. Build a lookup map for fast patching
+    const productsMap = new Map<string, IItem>(
+      productsDB.map((product) => [product._id.toString(), product]),
+    );
+
+    // 5. Walk over every dto.item, patch in the extra fields for new ones, keep old ones untouched
+    dto.items = dto.items.map((item) => {
+      const product = productsMap.get(item.itemId);
+      if (product) {
+        // this was a new item—inject the DB fields
+        return {
+          ...item,
+          item: product._id,
+          name: product.name,
+          currentItemCost: product.cost,
+        };
+      } else {
+        // an old item—find its record in the reverted purchase and keep its original data
+        const existing = currentPurchase.items.find(
+          (prod) => prod.item?.toString() === item.itemId,
+        )!;
+        return {
+          ...item,
+          item: existing.item,
+          name: existing.name!,
+          currentItemCost: existing.currentItemCost!,
+        };
+      }
+    });
 
     const isPaid = dto.totalAmount <= dto.amountPaid;
 
@@ -208,7 +242,7 @@ export class PurchaseService {
       isPaid,
     });
 
-    await this.doPurchaseEffects(dto, purchaseId);
+    await this.doPurchaseEffects(dto, purchaseId, { isEditMode: true });
   }
 
   async delete(purchaseId: string) {
@@ -257,13 +291,24 @@ export class PurchaseService {
     await this.purchaseModel.updateOne({ _id: purchaseId }, updatePayload);
   }
 
-  private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
+  private async doPurchaseEffects(
+    dto: PurchaseDto,
+    purchaseId: string,
+    { isEditMode }: { isEditMode: boolean },
+  ) {
     const actions: string[] = [];
 
     // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemService.getOneById(item.itemId);
-      if (!product) throw new BadRequestException('Product not found');
+      if (!product) {
+        // in edit mode some products might not exist, they might have deleted them
+        if (isEditMode) {
+          continue;
+        } else {
+          throw new BadRequestException('Product not found');
+        }
+      }
 
       const totalQuantityBought = item.quantity + item.quantityFree;
       product.quantity += totalQuantityBought;
@@ -495,5 +540,7 @@ export class PurchaseService {
       finalAmount: purchase.amountPaid,
       type: 'income',
     });
+
+    return purchase;
   }
 }
