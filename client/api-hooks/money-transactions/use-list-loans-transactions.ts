@@ -27,6 +27,11 @@ interface LoanTransactionsResponse {
 }
 export interface LoanTransaction {
   _id: string;
+  type:
+    | "new-invoice"
+    | "pay-invoice-loan"
+    | "new-purchase"
+    | "pay-purchase-loan";
   customer: Customer | null;
   supplier: Supplier | null;
   amount: number;
