@@ -27,6 +27,7 @@ import ExpenseModal from "@/components/pages/admin/expenses/ExpenseModal";
 import { cn } from "@/utils/cn";
 import DeleteRecord from "@/components/admin/DeleteRecord";
 import TableWrapper from "@/shared/Table/TableWrapper";
+import { formatNumber } from "@/lib/helpers/formatNumber";
 
 const PurchaseTable = ({
   selectedSupplier,
@@ -118,7 +119,7 @@ const PurchaseTable = ({
                 remainingAmount >= 0 ? "text-success" : "text-danger"
               )}
             >
-              $ {remainingAmount}
+              $ {formatNumber(remainingAmount)}
             </div>
           </div>
         );
