@@ -64,7 +64,9 @@ export class LoansTransactionsService {
         .skip(pageIndex * pageSize)
         .limit(pageSize)
         .populate('supplier')
-        .populate('customer'),
+        .populate('customer')
+        .populate('expense')
+        .populate('invoice'),
       this.loansTransactionsModel.countDocuments(filter),
     ]);
 

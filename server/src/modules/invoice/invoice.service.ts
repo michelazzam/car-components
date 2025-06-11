@@ -601,15 +601,17 @@ export class InvoiceService implements OnModuleInit {
       });
 
       // save loan transaction
-      return this.loansTransactionsService.saveLoanTransaction({
-        type: 'pay-invoice-loan',
-        amount: customerPaidAmount,
-        loanRemaining: minLoan,
-        supplierId: null,
-        customerId: customer._id?.toString(),
-        expenseId: null,
-        invoiceId: null,
-      });
+      const transaction =
+        await this.loansTransactionsService.saveLoanTransaction({
+          type: 'pay-invoice-loan',
+          amount: customerPaidAmount,
+          loanRemaining: minLoan,
+          supplierId: null,
+          customerId: customer._id?.toString(),
+          expenseId: null,
+          invoiceId: null,
+        });
+      return transaction.populate('customer');
     }
   }
 

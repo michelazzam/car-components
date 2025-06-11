@@ -320,7 +320,7 @@ export class PurchaseService {
         type: 'new-purchase',
         amount: dto.amountPaid,
         loanRemaining: remainingSupplierLoan,
-        supplierId: null,
+        supplierId: dto.supplierId,
         customerId: null,
         expenseId: newExpense._id?.toString(),
         invoiceId: null,
