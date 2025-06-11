@@ -15,6 +15,7 @@ import { SupplierService } from '../supplier/supplier.service';
 import { PurchaseService } from '../purchase/purchase.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
+import { IPurchase } from '../purchase/purchase.schema';
 
 @Injectable()
 export class ExpenseService {
@@ -139,9 +140,12 @@ export class ExpenseService {
     );
     if (!expense) throw new NotFoundException('Expense not found');
 
-    await this.doExpenseEffects(dto, id);
+    const transaction = await this.doExpenseEffects(dto, id);
 
-    return expense;
+    return {
+      transaction,
+      expense,
+    };
   }
 
   async delete(id: string) {
@@ -174,45 +178,62 @@ export class ExpenseService {
       supplier.loan = minLoan;
       await supplier.save();
 
-      // get purchases and loop over them and pay them until amount is 0
-      if (dto.purchasesIds.length > 0) {
-        const purchases = await this.purchaseService.getManyByIds(
+      // get purchases either from dto or from unpaid purchases
+      let unPaidPurchases: IPurchase[] = [];
+
+      if (dto.purchasesIds.length > 0)
+        unPaidPurchases = await this.purchaseService.getManyByIds(
           dto.purchasesIds,
         );
-
-        let remainingAmountPaid = dto.amount;
-
-        for (const purchase of purchases) {
-          if (remainingAmountPaid <= 0) break;
-
-          const purchaseRemainingAmount =
-            purchase.totalAmount - purchase.amountPaid;
-
-          const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
-
-          const amountToPayPurchase = isPurchasePaid
-            ? purchaseRemainingAmount
-            : remainingAmountPaid;
-
-          await this.purchaseService.updatePurchasePayments({
-            purchaseId: purchase._id?.toString(),
-            amountPaid: amountToPayPurchase,
-            isPaid: isPurchasePaid,
-            expenseLinking: {
-              expenseId,
-              action: 'add',
+      else {
+        unPaidPurchases = await this.purchaseService.getUnpaidPurchases({
+          supplierId: dto.supplierId,
+        });
+        // since no purchases ids where provided, we will save the unpaid purchases in the expense object
+        await this.expenseModel.updateOne(
+          { _id: expenseId },
+          {
+            $push: {
+              purchases: {
+                $each: unPaidPurchases.map((p) => p._id.toString()),
+              },
             },
-          });
-
-          actions.push(
-            `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}`,
-          );
-
-          remainingAmountPaid -= amountToPayPurchase;
-        }
+          },
+        );
       }
 
-      actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}`);
+      // loop over them and pay them until remaining amount is 0
+      let remainingAmountPaid = dto.amount;
+      for (const purchase of unPaidPurchases) {
+        if (remainingAmountPaid <= 0) break;
+
+        const purchaseRemainingAmount =
+          purchase.totalAmount - purchase.amountPaid;
+
+        const isPurchasePaid = remainingAmountPaid >= purchaseRemainingAmount;
+
+        const amountToPayPurchase = isPurchasePaid
+          ? purchaseRemainingAmount
+          : remainingAmountPaid;
+
+        await this.purchaseService.updatePurchasePayments({
+          purchaseId: purchase._id?.toString(),
+          amountPaid: amountToPayPurchase,
+          isPaid: isPurchasePaid,
+          expenseLinking: {
+            expenseId,
+            action: 'add',
+          },
+        });
+
+        actions.push(
+          `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}$`,
+        );
+
+        remainingAmountPaid -= amountToPayPurchase;
+      }
+
+      actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}$`);
 
       // save loan transaction
       transaction = await this.loansTransactionsService.saveLoanTransaction({
@@ -240,9 +261,9 @@ export class ExpenseService {
       caisse: -dto.amount, //decrease caisse
     });
 
-    actions.push(`New Expense created of amount ${dto.amount}`);
+    actions.push(`New Expense created of amount ${dto.amount}$`);
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: dto.amount,
       discountAmount: 0,
       finalAmount: dto.amount,
@@ -271,7 +292,7 @@ export class ExpenseService {
         await supplier.save();
 
         actions.push(
-          `Increased supplier ${supplier.name} loan: ${expense.amount}`,
+          `Increased supplier ${supplier.name} loan: ${expense.amount}$`,
         );
       }
 
@@ -318,11 +339,11 @@ export class ExpenseService {
         if (totalDeducted < targetDeduction) {
           // Handle if you cannot deduct full expense.amount
           throw new Error(
-            `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
+            `Could only deduct ${totalDeducted}$, which is less than expense amount ${targetDeduction}`,
           );
         }
 
-        actions.push(`Reverted paying to purchases: ${totalDeducted}`);
+        actions.push(`Reverted paying to purchases: ${totalDeducted}$`);
       }
 
       // delete loan transaction
@@ -342,9 +363,11 @@ export class ExpenseService {
       caisse: expense.amount, // re-add caisse
     });
 
-    actions.push(`Expense ${expense._id} reverted of amount ${expense.amount}`);
+    actions.push(
+      `Expense ${expense._id} reverted of amount ${expense.amount}$`,
+    );
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: expense.amount,
       discountAmount: 0,
       finalAmount: expense.amount,

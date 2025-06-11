@@ -14,6 +14,7 @@ import { CustomerModule } from '../customer/customer.module';
 import { ServiceModule } from '../service/service.module';
 import { ItemModule } from '../item/item.module';
 import { LoansTransactionsModule } from '../loans-transactions/loans-transactions.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LoansTransactionsModule } from '../loans-transactions/loans-transaction
     forwardRef(() => CustomerModule),
     ServiceModule,
     ItemModule,
+    TransactionsModule,
     LoansTransactionsModule,
   ],
   controllers: [InvoiceController],

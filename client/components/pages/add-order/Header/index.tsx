@@ -20,6 +20,8 @@ import InvoiceItemsSwapsModal from "./InvoiceItemsSwapsModal";
 import { AddInvoiceSchema } from "@/lib/apiValidations";
 import { addInvoiceDefaultValues } from "@/pages/add-invoice";
 import { FaPlus } from "react-icons/fa6";
+import { Customer } from "@/api-hooks/customer/use-list-customer";
+import BackBtn from "@/components/common/BackBtn";
 
 function Header({
   search,
@@ -52,12 +54,13 @@ function Header({
 
   const { data: vehicles } = useListVehicles({
     customerId: customerId,
+    pageSize: 100,
     search: vehiclesDebouncedSearch,
   });
 
-  const selectedCustomer = customers?.customers?.find(
-    (option) => option._id === customerId
-  );
+  const selectedCustomer =
+    customers?.customers?.find((option) => option._id === customerId) ||
+    (editingInvoice?.customer as unknown as Customer);
 
   //-------------------------Options--------------------------
   const customerOptions = customers?.customers.map((customer) => {
@@ -69,6 +72,19 @@ function Header({
       tvaNumber: customer.tvaNumber,
     };
   });
+
+  const newCustomerOptions = [
+    ...(customerOptions || []),
+    editingInvoice?.customer
+      ? {
+          label: editingInvoice.customer.name,
+          value: editingInvoice.customer._id || "",
+          phone: editingInvoice.customer.phoneNumber || "",
+          address: editingInvoice.customer.address || "",
+          tvaNumber: editingInvoice.customer.tvaNumber || "",
+        }
+      : null,
+  ].filter((option): option is NonNullable<typeof option> => option !== null);
 
   const vehicleOptions = vehicles?.vehicles.map((vehicle) => {
     return {
@@ -93,6 +109,10 @@ function Header({
   // console.log("VEHICLE OPTIONS ARE : ", vehicleOptions);
   return (
     <div>
+      <div className="mt-3">
+        <BackBtn />
+      </div>
+
       {editingInvoice && (
         <div className="mb-2 py-1 px-2 rounded-md bg-secondary/10 flex justify-between items-center text-secondary ">
           <div className="flex gap-x-2 items-center">
@@ -126,7 +146,7 @@ function Header({
             control={control}
             label="Customer"
             name="customerId"
-            options={customerOptions || []}
+            options={newCustomerOptions || []}
             placeholder={"choose"}
             creatable={false}
             onInputChange={(e) => {

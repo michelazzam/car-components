@@ -47,6 +47,7 @@ function ItemsList({ search }: { search?: string }) {
         isFetchingNextPage={isFetchingNextPage}
         hasNextPage={hasNextPage}
         ref={bottomRef}
+        noMoreText="No more products"
       />
     </div>
   );

@@ -5,8 +5,9 @@ const LoadingAndObservable = forwardRef<
   {
     isFetchingNextPage: boolean;
     hasNextPage: boolean;
+    noMoreText?: string;
   }
->(({ isFetchingNextPage, hasNextPage }, ref) => {
+>(({ isFetchingNextPage, hasNextPage, noMoreText = "No more orders" }, ref) => {
   return (
     <div className="w-full flex items-center justify-center my-10">
       <div ref={ref} className="h-1">
@@ -14,7 +15,7 @@ const LoadingAndObservable = forwardRef<
           ? isFetchingNextPage
             ? "Loading more..."
             : "Scroll to load more"
-          : "No more orders"}
+          : noMoreText}
       </div>
     </div>
   );

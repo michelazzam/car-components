@@ -5,7 +5,6 @@ import InvoiceDetailsForm from "./InvoiceDetailsForm";
 import { useEditPurchase } from "@/api-hooks/purchase/use-edit-purchase";
 import { useAddPurchase } from "@/api-hooks/purchase/use-add-purchase";
 import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
-import ExpenseModal from "../../expenses/ExpenseModal";
 import { useRouter } from "next/router";
 import AllItemsTable from "./AllItemsTable";
 import AddEditSupplierModal from "../../supplier/AddEditSupplierModal";
@@ -19,7 +18,6 @@ const CustomAddPurchaseComponent = () => {
   const {
     formValues,
     editingPurchase,
-    setFieldValue,
     setEditingPurchase,
     reset,
     isFormValid,
@@ -215,13 +213,7 @@ const CustomAddPurchaseComponent = () => {
             {editingPurchase ? "Save Changes" : "Add Purchase"}
           </button>
         </div>
-        <ExpenseModal
-          triggerModalId="add-expense-from-purchase-modal"
-          modalTitle="Add Expense"
-          onSuccess={({ amount }) => {
-            setFieldValue("paymentAmount", amount);
-          }}
-        />
+
         <AddEditSupplierModal triggerModalId="add-supplier-modal" />
       </div>
       {/* Add Purchase */}

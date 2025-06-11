@@ -27,6 +27,7 @@ import ExpenseModal from "@/components/pages/admin/expenses/ExpenseModal";
 import { cn } from "@/utils/cn";
 import DeleteRecord from "@/components/admin/DeleteRecord";
 import TableWrapper from "@/shared/Table/TableWrapper";
+import { formatNumber } from "@/lib/helpers/formatNumber";
 
 const PurchaseTable = ({
   selectedSupplier,
@@ -118,7 +119,7 @@ const PurchaseTable = ({
                 remainingAmount >= 0 ? "text-success" : "text-danger"
               )}
             >
-              $ {remainingAmount}
+              $ {formatNumber(remainingAmount)}
             </div>
           </div>
         );
@@ -135,7 +136,7 @@ const PurchaseTable = ({
               onClick={() => {
                 setSelectedPurchase(row.original);
               }}
-              data-hs-overlay="#add-expense-modal"
+              data-hs-overlay="#add-expense-from-purchase-modal"
               className="ti ti-btn ti-btn-primary ti-btn-wave rounded-md"
             >
               Pay Now
@@ -251,7 +252,7 @@ const PurchaseTable = ({
       />
       <ViewPurchaseModal purchase={selectedPurchase} />
       <ExpenseModal
-        triggerModalId="add-expense-modal"
+        triggerModalId="add-expense-from-purchase-modal"
         modalTitle="Add Expense"
         purchase={selectedPurchase}
         setPurchase={setSelectedPurchase}

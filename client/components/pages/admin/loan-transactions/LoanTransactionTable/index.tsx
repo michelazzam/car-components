@@ -18,6 +18,8 @@ import { useListLoansTransactions } from "@/api-hooks/money-transactions/use-lis
 import { useListSupplier } from "@/api-hooks/supplier/use-list-supplier";
 import { useListCustomers } from "@/api-hooks/customer/use-list-customer";
 import { LoanTransaction } from "@/api-hooks/money-transactions/use-list-loans-transactions";
+import { FaPrint } from "react-icons/fa";
+import PrintReceiptModal from "../PrintReceiptModal";
 const LoanTransactionTable = () => {
   const [search, setSearch] = useState("");
   const [supplierSearch, setSupplierSearch] = useState("");
@@ -34,6 +36,8 @@ const LoanTransactionTable = () => {
     null
   );
   const { pagination, setPagination } = useReactTablePagination();
+  const [selectedLoanTransaction, setSelectedLoanTransaction] =
+    useState<LoanTransaction | null>(null);
 
   //-----------------API Calls--------------------
   const {
@@ -78,6 +82,26 @@ const LoanTransactionTable = () => {
     columnHelper.accessor("createdAt", {
       header: "Date",
       cell: ({ getValue }) => <div>{formatDate(getValue())}</div>,
+    }),
+    columnHelper.accessor("_id", {
+      header: "Actions",
+      cell: ({ row }) => (
+        <div
+          className="flex align-middle gap-2"
+          style={{ display: "flex", justifyContent: "space-around" }}
+        >
+          <button
+            id="print-btn"
+            data-hs-overlay="#print-receipt-modal"
+            className="btn btn-sm btn-primary edit-btn text-orange border border-orange rounded-md p-1 hover:bg-secondary hover:text-white"
+            onClick={() => {
+              setSelectedLoanTransaction(row.original);
+            }}
+          >
+            <FaPrint />
+          </button>
+        </div>
+      ),
     }),
   ];
 
@@ -176,6 +200,12 @@ const LoanTransactionTable = () => {
           </div>
         </div>
       </div>
+      <PrintReceiptModal
+        selectedTransaction={selectedLoanTransaction}
+        setSelectedTransaction={setSelectedLoanTransaction}
+        triggerModalId="print-receipt-modal"
+        title="Print Receipt"
+      />
     </div>
   );
 };

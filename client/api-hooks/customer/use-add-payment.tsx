@@ -1,5 +1,6 @@
 import { useUpdateData } from "@/api-service/useUpdateData";
 import { API } from "@/constants/apiEndpoints";
+import { LoanTransaction } from "../money-transactions/use-list-loans-transactions";
 
 export interface AddPaymentParam {
   customerId: string;
@@ -10,12 +11,14 @@ export interface AddPaymentParam {
 const useAddPayment = ({
   callBackOnSuccess,
 }: {
-  callBackOnSuccess?: () => void;
+  callBackOnSuccess?: (data: { transaction: LoanTransaction }) => void;
 }) => {
   return useUpdateData<AddPaymentParam>({
     queryKeysToInvalidate: [["customers"], ["invoices"]],
     endpoint: API.addPayment,
-    callBackOnSuccess: callBackOnSuccess,
+    callBackOnSuccess: (data) => {
+      callBackOnSuccess?.(data as { transaction: LoanTransaction });
+    },
   });
 };
 

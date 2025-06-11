@@ -30,6 +30,8 @@ import { ServiceService } from '../service/service.service';
 import { ItemService } from '../item/item.service';
 import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.dto';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { formatMoneyField } from 'src/utils/formatMoneyField';
 
 @Injectable()
 export class InvoiceService implements OnModuleInit {
@@ -43,6 +45,7 @@ export class InvoiceService implements OnModuleInit {
     private readonly customerService: CustomerService,
     private readonly accountingService: AccountingService,
     private readonly reportService: ReportService,
+    private readonly transactionsService: TransactionsService,
     private readonly loansTransactionsService: LoansTransactionsService,
   ) {}
 
@@ -510,6 +513,8 @@ export class InvoiceService implements OnModuleInit {
     dto: PayCustomerInvoicesDto,
     doNotAddToCaisse?: boolean,
   ) {
+    const actions: string[] = [];
+
     const { customerId, amount: customerPaidAmount, discount } = dto;
 
     // validate customer exists
@@ -575,6 +580,10 @@ export class InvoiceService implements OnModuleInit {
       );
 
       if (remainingAmountThatCustomerPaidNow <= 0) break;
+
+      actions.push(
+        `Paid invoice ${invoice.number} of amount ${remainingAmountThatCustomerPaidNow}`,
+      );
     }
 
     // effects of paying customer invoices
@@ -601,14 +610,24 @@ export class InvoiceService implements OnModuleInit {
       });
 
       // save loan transaction
-      return this.loansTransactionsService.saveLoanTransaction({
-        type: 'pay-invoice-loan',
-        amount: customerPaidAmount,
-        loanRemaining: minLoan,
-        supplierId: null,
-        customerId: customer._id?.toString(),
-        expenseId: null,
-        invoiceId: null,
+      const transaction =
+        await this.loansTransactionsService.saveLoanTransaction({
+          type: 'pay-invoice-loan',
+          amount: customerPaidAmount,
+          loanRemaining: minLoan,
+          supplierId: null,
+          customerId: customer._id?.toString(),
+          expenseId: null,
+          invoiceId: null,
+        });
+      return transaction;
+
+      await this.transactionsService.saveTransaction({
+        whatHappened: actions.join('.\n\n '),
+        totalAmount: customerPaidAmount,
+        discountAmount: 0,
+        finalAmount: customerPaidAmount,
+        type: 'income',
       });
     }
   }
@@ -621,6 +640,8 @@ export class InvoiceService implements OnModuleInit {
     updatedDto: InvoiceDtoWithItemsDetails,
     invoiceId: string,
   ) {
+    const actions: string[] = [];
+
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
@@ -647,6 +668,12 @@ export class InvoiceService implements OnModuleInit {
       await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: remainingAmountToBePaid,
       });
+
+      actions.push(
+        `Added loan to customer ${customer.name} of amount: ${formatMoneyField(
+          remainingAmountToBePaid,
+        )}`,
+      );
     }
     // if paid more, decrease customer loan if he has any + pay old customer invoices
     else if (extraAmountPaid > 0) {
@@ -675,6 +702,12 @@ export class InvoiceService implements OnModuleInit {
           discount: 0,
         },
         true, // do not add to caisse since we are adding it before this step
+      );
+
+      actions.push(
+        `Removed loan from customer ${customer.name} of amount: ${formatMoneyField(
+          extraAmountPaid,
+        )}`,
       );
     }
 
@@ -707,9 +740,22 @@ export class InvoiceService implements OnModuleInit {
       date: new Date(),
       totalIncome: updatedDto.paidAmountUsd,
     });
+
+    actions.push(
+      `Increased caisse and total income. Amount: $` + updatedDto.paidAmountUsd,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('.\n\n '),
+      totalAmount: updatedDto.paidAmountUsd,
+      discountAmount: 0,
+      finalAmount: updatedDto.paidAmountUsd,
+      type: 'income',
+    });
   }
 
   private async revertInvoiceEffects(invoiceId: string) {
+    const actions: string[] = [];
+
     const invoice = await this.invoiceModel.findById(invoiceId).lean();
     if (!invoice) throw new NotFoundException('Invoice not found');
 
@@ -739,6 +785,12 @@ export class InvoiceService implements OnModuleInit {
       await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: -remainingAmount,
       });
+
+      actions.push(
+        `Removed loan from customer ${customer.name} of amount: ${formatMoneyField(
+          remainingAmount,
+        )}`,
+      );
     } else {
       // revert decreasing customer loan in case when paid he paid more than needed
       const extraAmountPaid = Math.abs(remainingAmount);
@@ -755,6 +807,12 @@ export class InvoiceService implements OnModuleInit {
       await this.accountingService.incAccountingNumberFields({
         totalCustomersLoan: customer.loan,
       });
+
+      actions.push(
+        `Re-added loan to customer ${customer.name} of amount: ${formatMoneyField(
+          extraAmountPaid,
+        )}`,
+      );
     }
 
     // calc total items cost amount
@@ -778,6 +836,18 @@ export class InvoiceService implements OnModuleInit {
     // delete loan transaction
     if (invoice.accounting.paidAmountUsd)
       await this.loansTransactionsService.deleteByInvoiceId(invoiceId);
+
+    actions.push(
+      'Decreased caisse and total income. Amount: $' +
+        invoice.accounting.paidAmountUsd,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('.\n\n '),
+      totalAmount: invoice.accounting.paidAmountUsd,
+      discountAmount: 0,
+      finalAmount: invoice.accounting.paidAmountUsd,
+      type: 'outcome',
+    });
 
     return invoice;
   }

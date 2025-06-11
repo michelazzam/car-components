@@ -9,7 +9,6 @@ import { Item, usePosStore } from "@/shared/store/usePosStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddInvoiceSchema, apiValidations } from "@/lib/apiValidations";
 import { v4 as uuidv4 } from "uuid";
-import BackBtn from "@/components/common/BackBtn";
 
 export const addInvoiceDefaultValues: AddInvoiceSchema = {
   driverName: "",
@@ -317,9 +316,7 @@ const AddInvoice = () => {
   return (
     <Fragment>
       <Seo title="Table list" />
-      <div className="mt-3">
-        <BackBtn />
-      </div>
+
       <div className="grid grid-cols-12 h-calculate-60px  ">
         <FormProvider {...methods}>
           <div className="col-span-9 pt-2 max-h-full overflow-y-auto overflow-x-clip flex flex-col">

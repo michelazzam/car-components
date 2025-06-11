@@ -11,6 +11,8 @@ import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { IItem } from '../item/item.schema';
 
 @Injectable()
 export class PurchaseService {
@@ -23,6 +25,7 @@ export class PurchaseService {
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
     private readonly loansTransactionsService: LoansTransactionsService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -119,6 +122,15 @@ export class PurchaseService {
     return this.purchaseModel.find({ _id: { $in: ids } });
   }
 
+  async getUnpaidPurchases({ supplierId }: { supplierId: string }) {
+    return this.purchaseModel
+      .find({
+        supplier: supplierId,
+        isPaid: false,
+      })
+      .sort({ createdAt: 1 });
+  }
+
   async create(dto: PurchaseDto) {
     // get products from db and save the name with each one
     const products = await this.itemService.getManyByIds(
@@ -157,27 +169,60 @@ export class PurchaseService {
       isPaid,
     });
 
-    await this.doPurchaseEffects(dto, newPurchase._id?.toString());
+    await this.doPurchaseEffects(dto, newPurchase._id?.toString(), {
+      isEditMode: false,
+    });
   }
 
   async edit(purchaseId: string, dto: PurchaseDto) {
-    await this.revertPurchaseEffects(purchaseId);
+    // 1. Revert effects so we get the original items back
+    const currentPurchase = await this.revertPurchaseEffects(purchaseId);
 
-    // get products from db and save the name with each one
-    const products = await this.itemService.getManyByIds(
-      dto.items.map((item) => item.itemId),
+    // 2. Identify which incoming items are truly new
+    const newItemsDto = dto.items.filter(
+      (item) =>
+        !currentPurchase.items.some(
+          (prod) => prod.item?.toString() === item.itemId,
+        ),
     );
 
-    if (products.length !== dto.items.length)
+    // 3. Fetch the corresponding products
+    const productsDB = await this.itemService.getManyByIds(
+      newItemsDto.map((item) => item.itemId),
+    );
+    if (productsDB.length !== newItemsDto.length) {
       throw new BadRequestException('Some items are not valid');
+    }
 
-    // override the dto items array to add the product name field
-    dto.items = products.map((product) => ({
-      ...dto.items.find((item) => item.itemId === product._id?.toString())!,
-      item: product._id,
-      name: product.name,
-      currentItemCost: product.cost,
-    }));
+    // 4. Build a lookup map for fast patching
+    const productsMap = new Map<string, IItem>(
+      productsDB.map((product) => [product._id.toString(), product]),
+    );
+
+    // 5. Walk over every dto.item, patch in the extra fields for new ones, keep old ones untouched
+    dto.items = dto.items.map((item) => {
+      const product = productsMap.get(item.itemId);
+      if (product) {
+        // this was a new item—inject the DB fields
+        return {
+          ...item,
+          item: product._id,
+          name: product.name,
+          currentItemCost: product.cost,
+        };
+      } else {
+        // an old item—find its record in the reverted purchase and keep its original data
+        const existing = currentPurchase.items.find(
+          (prod) => prod.item?.toString() === item.itemId,
+        )!;
+        return {
+          ...item,
+          item: existing.item,
+          name: existing.name!,
+          currentItemCost: existing.currentItemCost!,
+        };
+      }
+    });
 
     const isPaid = dto.totalAmount <= dto.amountPaid;
 
@@ -197,7 +242,7 @@ export class PurchaseService {
       isPaid,
     });
 
-    await this.doPurchaseEffects(dto, purchaseId);
+    await this.doPurchaseEffects(dto, purchaseId, { isEditMode: true });
   }
 
   async delete(purchaseId: string) {
@@ -246,11 +291,24 @@ export class PurchaseService {
     await this.purchaseModel.updateOne({ _id: purchaseId }, updatePayload);
   }
 
-  private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
+  private async doPurchaseEffects(
+    dto: PurchaseDto,
+    purchaseId: string,
+    { isEditMode }: { isEditMode: boolean },
+  ) {
+    const actions: string[] = [];
+
     // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemService.getOneById(item.itemId);
-      if (!product) throw new BadRequestException('Product not found');
+      if (!product) {
+        // in edit mode some products might not exist, they might have deleted them
+        if (isEditMode) {
+          continue;
+        } else {
+          throw new BadRequestException('Product not found');
+        }
+      }
 
       const totalQuantityBought = item.quantity + item.quantityFree;
       product.quantity += totalQuantityBought;
@@ -258,6 +316,12 @@ export class PurchaseService {
       // calc new cost
       product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
       await product.save();
+
+      actions.push(
+        `Purchased ${item.quantity} x ${product.name} for ${formatMoneyField(
+          item.totalPrice,
+        )}$`,
+      );
     }
 
     // add loan to supplier of not fully paid
@@ -275,6 +339,12 @@ export class PurchaseService {
       this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
+
+      actions.push(
+        `Added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
+          remainingAmount,
+        )}$`,
+      );
     }
     // if paid more, decrease supplier loan if he has any
     else if (remainingAmount < 0) {
@@ -294,6 +364,12 @@ export class PurchaseService {
           totalSuppliersLoan: -extraAmountPaid,
         });
       }
+
+      actions.push(
+        `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
+          extraAmountPaid,
+        )}$`,
+      );
     }
 
     // save the amount paid as expense
@@ -320,7 +396,7 @@ export class PurchaseService {
         type: 'new-purchase',
         amount: dto.amountPaid,
         loanRemaining: remainingSupplierLoan,
-        supplierId: null,
+        supplierId: dto.supplierId,
         customerId: null,
         expenseId: newExpense._id?.toString(),
         invoiceId: null,
@@ -333,9 +409,23 @@ export class PurchaseService {
       // increase total expense
       totalExpenses: dto.amountPaid,
     });
+
+    actions.push(
+      'Decreased caisse and increased total expense. Amount: $' +
+        dto.amountPaid,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('.\n\n '),
+      totalAmount: dto.amountPaid,
+      discountAmount: 0,
+      finalAmount: dto.amountPaid,
+      type: 'outcome',
+    });
   }
 
   private async revertPurchaseEffects(purchaseId: string) {
+    const actions: string[] = [];
+
     const purchase = await this.purchaseModel.findById(purchaseId).lean();
     if (!purchase) {
       throw new BadRequestException('Purchase not found');
@@ -356,6 +446,8 @@ export class PurchaseService {
       product.cost = item.currentItemCost;
 
       await product.save();
+
+      actions.push(`Reverted purchase of ${item.quantity} x ${product.name}`);
     }
 
     // Revert supplier loan in case didn't pay all
@@ -375,6 +467,12 @@ export class PurchaseService {
         this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: -supplier.loan,
         });
+
+        actions.push(
+          `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
+            -supplier.loan,
+          )}$`,
+        );
       }
 
       //-> ignore deleted suppliers
@@ -394,6 +492,12 @@ export class PurchaseService {
         this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: supplier.loan,
         });
+
+        actions.push(
+          `Re-added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
+            extraAmountPaid,
+          )}$`,
+        );
       }
 
       //-> ignore deleted suppliers
@@ -424,5 +528,19 @@ export class PurchaseService {
       // decrease total expense
       totalExpenses: -purchase.amountPaid,
     });
+
+    actions.push(
+      'Increased caisse and decreased total expense. Amount: $' +
+        purchase.amountPaid,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('.\n\n '),
+      totalAmount: purchase.amountPaid,
+      discountAmount: 0,
+      finalAmount: purchase.amountPaid,
+      type: 'income',
+    });
+
+    return purchase;
   }
 }

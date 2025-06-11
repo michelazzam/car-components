@@ -27,9 +27,19 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
       <Modal.Body paddingX="!px-0">
         <div ref={printRef} className="bg-white p-8">
           {/* ===== HEADER ===== */}
+
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Invoice</h1>
+            <div>
+              <img
+                src={"/assets/images/brand-logos/logo.jpg"}
+                alt="logo"
+                className="w-32"
+              />
+            </div>
+
             <div className="text-right space-y-1">
+              <h1 className="text-3xl font-bold">Invoice</h1>
+
               <div>
                 <span className="font-semibold">Invoice #:</span>{" "}
                 {purchase.invoiceNumber}

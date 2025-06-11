@@ -37,9 +37,12 @@ export class ExpenseController {
   @Permissions('Expenses', 'update')
   @Put(':id')
   async edit(@Param('id') id: string, @Body() dto: ExpenseDto) {
-    await this.expenseService.edit(id, dto);
+    const { transaction, expense } = await this.expenseService.edit(id, dto);
 
-    return { message: 'Expense updated successfully' };
+    return {
+      message: 'Expense updated successfully',
+      data: { transaction, expense },
+    };
   }
 
   @Roles('admin', 'superAmsAdmin')
