@@ -20,6 +20,8 @@ const moneyIcon = (
   <i className="ri-money-dollar-circle-line side-menu__icon"></i>
 );
 
+const loanIcon = <i className="ri-bank-card-2-line side-menu__icon"></i>;
+
 export default function useMenuItems() {
   const { user } = UseAuth();
 
@@ -194,7 +196,7 @@ export default function useMenuItems() {
       visible: user?.role === "superAmsAdmin",
     },
     {
-      icon: moneyIcon,
+      icon: loanIcon,
       path: "/admin/loan-transactions",
       type: "link",
       active: pathname.startsWith("/admin/loan-transactions"),
