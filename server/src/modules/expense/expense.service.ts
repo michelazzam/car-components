@@ -227,13 +227,13 @@ export class ExpenseService {
         });
 
         actions.push(
-          `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}`,
+          `Paid purchase ${purchase.invoiceNumber} of amount ${purchaseRemainingAmount}$`,
         );
 
         remainingAmountPaid -= amountToPayPurchase;
       }
 
-      actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}`);
+      actions.push(`Paid supplier ${supplier.name} loan: ${dto.amount}$`);
 
       // save loan transaction
       transaction = await this.loansTransactionsService.saveLoanTransaction({
@@ -261,9 +261,9 @@ export class ExpenseService {
       caisse: -dto.amount, //decrease caisse
     });
 
-    actions.push(`New Expense created of amount ${dto.amount}`);
+    actions.push(`New Expense created of amount ${dto.amount}$`);
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: dto.amount,
       discountAmount: 0,
       finalAmount: dto.amount,
@@ -292,7 +292,7 @@ export class ExpenseService {
         await supplier.save();
 
         actions.push(
-          `Increased supplier ${supplier.name} loan: ${expense.amount}`,
+          `Increased supplier ${supplier.name} loan: ${expense.amount}$`,
         );
       }
 
@@ -339,11 +339,11 @@ export class ExpenseService {
         if (totalDeducted < targetDeduction) {
           // Handle if you cannot deduct full expense.amount
           throw new Error(
-            `Could only deduct ${totalDeducted}, which is less than expense amount ${targetDeduction}`,
+            `Could only deduct ${totalDeducted}$, which is less than expense amount ${targetDeduction}`,
           );
         }
 
-        actions.push(`Reverted paying to purchases: ${totalDeducted}`);
+        actions.push(`Reverted paying to purchases: ${totalDeducted}$`);
       }
 
       // delete loan transaction
@@ -363,9 +363,11 @@ export class ExpenseService {
       caisse: expense.amount, // re-add caisse
     });
 
-    actions.push(`Expense ${expense._id} reverted of amount ${expense.amount}`);
+    actions.push(
+      `Expense ${expense._id} reverted of amount ${expense.amount}$`,
+    );
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: expense.amount,
       discountAmount: 0,
       finalAmount: expense.amount,

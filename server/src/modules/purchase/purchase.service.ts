@@ -275,7 +275,7 @@ export class PurchaseService {
       actions.push(
         `Purchased ${item.quantity} x ${product.name} for ${formatMoneyField(
           item.totalPrice,
-        )}`,
+        )}$`,
       );
     }
 
@@ -298,7 +298,7 @@ export class PurchaseService {
       actions.push(
         `Added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
           remainingAmount,
-        )}`,
+        )}$`,
       );
     }
     // if paid more, decrease supplier loan if he has any
@@ -323,7 +323,7 @@ export class PurchaseService {
       actions.push(
         `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
           extraAmountPaid,
-        )}`,
+        )}$`,
       );
     }
 
@@ -370,7 +370,7 @@ export class PurchaseService {
         dto.amountPaid,
     );
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: dto.amountPaid,
       discountAmount: 0,
       finalAmount: dto.amountPaid,
@@ -426,7 +426,7 @@ export class PurchaseService {
         actions.push(
           `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
             -supplier.loan,
-          )}`,
+          )}$`,
         );
       }
 
@@ -451,7 +451,7 @@ export class PurchaseService {
         actions.push(
           `Re-added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
             extraAmountPaid,
-          )}`,
+          )}$`,
         );
       }
 
@@ -489,7 +489,7 @@ export class PurchaseService {
         purchase.amountPaid,
     );
     await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('. '),
+      whatHappened: actions.join('.\n\n '),
       totalAmount: purchase.amountPaid,
       discountAmount: 0,
       finalAmount: purchase.amountPaid,
