@@ -11,6 +11,7 @@ import { ItemService } from '../item/item.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { Expense, IExpense } from '../expense/expense.schema';
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class PurchaseService {
@@ -23,6 +24,7 @@ export class PurchaseService {
     private readonly supplierService: SupplierService,
     private readonly accountingService: AccountingService,
     private readonly loansTransactionsService: LoansTransactionsService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   async getAll(dto: GetPurchaseDto) {
@@ -256,6 +258,8 @@ export class PurchaseService {
   }
 
   private async doPurchaseEffects(dto: PurchaseDto, purchaseId: string) {
+    const actions: string[] = [];
+
     // update product quantity + new product cost
     for (const item of dto.items) {
       const product = await this.itemService.getOneById(item.itemId);
@@ -267,6 +271,12 @@ export class PurchaseService {
       // calc new cost
       product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
       await product.save();
+
+      actions.push(
+        `Purchased ${item.quantity} x ${product.name} for ${formatMoneyField(
+          item.totalPrice,
+        )}`,
+      );
     }
 
     // add loan to supplier of not fully paid
@@ -284,6 +294,12 @@ export class PurchaseService {
       this.accountingService.incAccountingNumberFields({
         totalSuppliersLoan: supplier.loan,
       });
+
+      actions.push(
+        `Added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
+          remainingAmount,
+        )}`,
+      );
     }
     // if paid more, decrease supplier loan if he has any
     else if (remainingAmount < 0) {
@@ -303,6 +319,12 @@ export class PurchaseService {
           totalSuppliersLoan: -extraAmountPaid,
         });
       }
+
+      actions.push(
+        `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
+          extraAmountPaid,
+        )}`,
+      );
     }
 
     // save the amount paid as expense
@@ -342,9 +364,23 @@ export class PurchaseService {
       // increase total expense
       totalExpenses: dto.amountPaid,
     });
+
+    actions.push(
+      'Decreased caisse and increased total expense. Amount: $' +
+        dto.amountPaid,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('. '),
+      totalAmount: dto.amountPaid,
+      discountAmount: 0,
+      finalAmount: dto.amountPaid,
+      type: 'outcome',
+    });
   }
 
   private async revertPurchaseEffects(purchaseId: string) {
+    const actions: string[] = [];
+
     const purchase = await this.purchaseModel.findById(purchaseId).lean();
     if (!purchase) {
       throw new BadRequestException('Purchase not found');
@@ -365,6 +401,8 @@ export class PurchaseService {
       product.cost = item.currentItemCost;
 
       await product.save();
+
+      actions.push(`Reverted purchase of ${item.quantity} x ${product.name}`);
     }
 
     // Revert supplier loan in case didn't pay all
@@ -384,6 +422,12 @@ export class PurchaseService {
         this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: -supplier.loan,
         });
+
+        actions.push(
+          `Removed loan from supplier ${supplier.name} of amount: ${formatMoneyField(
+            -supplier.loan,
+          )}`,
+        );
       }
 
       //-> ignore deleted suppliers
@@ -403,6 +447,12 @@ export class PurchaseService {
         this.accountingService.incAccountingNumberFields({
           totalSuppliersLoan: supplier.loan,
         });
+
+        actions.push(
+          `Re-added loan to supplier ${supplier.name} of amount: ${formatMoneyField(
+            extraAmountPaid,
+          )}`,
+        );
       }
 
       //-> ignore deleted suppliers
@@ -432,6 +482,18 @@ export class PurchaseService {
       caisse: purchase.amountPaid,
       // decrease total expense
       totalExpenses: -purchase.amountPaid,
+    });
+
+    actions.push(
+      'Increased caisse and decreased total expense. Amount: $' +
+        purchase.amountPaid,
+    );
+    await this.transactionsService.saveTransaction({
+      whatHappened: actions.join('. '),
+      totalAmount: purchase.amountPaid,
+      discountAmount: 0,
+      finalAmount: purchase.amountPaid,
+      type: 'income',
     });
   }
 }
