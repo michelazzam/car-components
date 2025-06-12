@@ -19,8 +19,16 @@ async fn shutdown_sidecar(sidecar_state: State<'_, SidecarState>) -> Result<(), 
     Ok(())
 }
 
+#[cfg(target_os = "windows")]
+fn kill_stale_sidecar() {
+    let _ = std::process::Command::new("taskkill")
+        .args(&["/IM", "server.exe", "/F"])
+        .status();
+}
+
 fn main() {
     dotenv().ok();
+    kill_stale_sidecar();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
