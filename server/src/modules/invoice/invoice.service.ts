@@ -591,11 +591,8 @@ export class InvoiceService implements OnModuleInit {
     // effects of paying customer invoices
     if (customerPaidAmount > 0) {
       // Decrease customer loan
-      const minLoan = Math.max(
-        customer.loan - (customerPaidAmount + discount),
-        0,
-      );
-      customer.loan = minLoan;
+      const newLoan = customer.loan - (customerPaidAmount + discount);
+      customer.loan = newLoan;
       await customer.save();
 
       // Update accounting
@@ -616,7 +613,7 @@ export class InvoiceService implements OnModuleInit {
         await this.loansTransactionsService.saveLoanTransaction({
           type: 'pay-invoice-loan',
           amount: customerPaidAmount,
-          loanRemaining: minLoan,
+          loanRemaining: newLoan,
           supplierId: null,
           customerId: customer._id?.toString(),
           expenseId: null,
@@ -705,9 +702,9 @@ export class InvoiceService implements OnModuleInit {
       if (!customer) throw new BadRequestException('Customer not found');
 
       if (customer.loan > 0) {
-        const minLoan = Math.max(customer.loan - extraAmountPaid, 0);
-        customer.loan = minLoan;
-        customerLoanRemaining = minLoan;
+        const newLoan = customer.loan - extraAmountPaid;
+        customer.loan = newLoan;
+        customerLoanRemaining = newLoan;
         await customer.save();
 
         // decrease total customer loans
@@ -799,8 +796,8 @@ export class InvoiceService implements OnModuleInit {
       );
       if (!customer) throw new BadRequestException('Customer not found');
 
-      const minLoan = Math.max(customer.loan - remainingAmount, 0);
-      customer.loan = minLoan;
+      const newLoan = customer.loan - remainingAmount;
+      customer.loan = newLoan;
       await customer.save();
 
       // decrease total customer loans
