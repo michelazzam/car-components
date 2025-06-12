@@ -32,6 +32,7 @@ import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
+import { TelegramService } from 'src/lib/telegram.service';
 
 @Injectable()
 export class InvoiceService implements OnModuleInit {
@@ -47,6 +48,7 @@ export class InvoiceService implements OnModuleInit {
     private readonly reportService: ReportService,
     private readonly transactionsService: TransactionsService,
     private readonly loansTransactionsService: LoansTransactionsService,
+    private readonly telegramService: TelegramService,
   ) {}
 
   onModuleInit() {
@@ -645,7 +647,17 @@ export class InvoiceService implements OnModuleInit {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
-      await this.itemService.updateItemQuantity(item.itemRef, -item.quantity);
+      const updatedItem = await this.itemService.updateItemQuantity(
+        item.itemRef,
+        -item.quantity,
+      );
+
+      // notify owner on telegram if stock is 1
+      if (updatedItem && updatedItem?.quantity <= 1) {
+        const message = `Item ${updatedItem.name} reached stock of ${updatedItem.quantity}.`;
+
+        await this.telegramService.sendTelegramMessage(message, true);
+      }
     }
 
     // save customer loan if did not pay all

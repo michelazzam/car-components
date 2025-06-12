@@ -5,11 +5,11 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-// import { TelegramService } from 'src/lib/telegram.service';
+import { TelegramService } from 'src/lib/telegram.service';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor() {} // private readonly telegramService: TelegramService
+  constructor(private readonly telegramService: TelegramService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -46,16 +46,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = generateDuplicateFieldMessage(exception);
       status = HttpStatus.BAD_REQUEST;
     }
+
     // Handle generic Error instances
     else if (exception instanceof Error) {
       message = exception.message;
     }
 
     // notify us on telegram
-    // const telegramErrorMessage =
-    //   `${request.method} ${request.url}:\n` + message;
+    const telegramErrorMessage =
+      `${request.method} ${request.url}:\n` + message;
 
-    // this.telegramService.sendTelegramMessage(telegramErrorMessage);
+    this.telegramService.sendTelegramMessage(telegramErrorMessage);
 
     response.status(status).json({
       statusCode: status,

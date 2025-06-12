@@ -15,6 +15,8 @@ import { ServiceModule } from '../service/service.module';
 import { ItemModule } from '../item/item.module';
 import { LoansTransactionsModule } from '../loans-transactions/loans-transactions.module';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { TelegramService } from 'src/lib/telegram.service';
+import { EnvConfigService } from 'src/config/env.validation';
 
 @Module({
   imports: [
@@ -37,7 +39,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
     LoansTransactionsModule,
   ],
   controllers: [InvoiceController],
-  providers: [InvoiceService],
+  providers: [InvoiceService, EnvConfigService, TelegramService],
   exports: [InvoiceService],
 })
 export class InvoiceModule {}
