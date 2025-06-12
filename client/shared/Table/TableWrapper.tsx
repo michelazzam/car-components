@@ -12,6 +12,7 @@ function TableWrapper({
   onSearchValueChange,
   withSearch = true,
   select,
+  selects,
 }: {
   children: ReactNode;
   title?: string;
@@ -23,7 +24,16 @@ function TableWrapper({
     value: SelectOption | null;
     onChange: (value: SelectOption | null) => void;
     options: SelectOption[];
+    isClearable?: boolean;
+    placeholder?: string;
   };
+  selects?: {
+    value: SelectOption | null;
+    onChange: (value: SelectOption | null) => void;
+    options: SelectOption[];
+    isClearable?: boolean;
+    placeholder?: string;
+  }[];
 }) {
   return (
     <div className="grid grid-cols-12 gap-6">
@@ -47,11 +57,28 @@ function TableWrapper({
                     onChangeValue={(v) => {
                       select.onChange(v);
                     }}
+                    placeholder={select.placeholder}
                     value={select.value}
                     options={select.options}
+                    isClearable={select.isClearable}
                   />
                 </div>
               )}
+
+              {selects?.map((select) => (
+                <div className="w-[20rem]">
+                  <SelectField
+                    marginBottom="mb-1"
+                    onChangeValue={(v) => {
+                      select.onChange(v);
+                    }}
+                    placeholder={select.placeholder}
+                    value={select.value}
+                    options={select.options}
+                    isClearable={select.isClearable}
+                  />
+                </div>
+              ))}
             </div>
           </div>
           <div className="box-body space-y-3">

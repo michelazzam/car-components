@@ -28,11 +28,15 @@ const Inventory = () => {
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
+  const [sort, setSort] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<"new" | "used" | undefined>(undefined);
 
   const { data, error, isLoading, isFetching } = useListProducts({
     search: debouncedSearch,
     pageIndex: pagination.pageIndex,
     pageSize: pagination.pageSize,
+    sortBy: sort,
+    status: status,
   });
 
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -118,6 +122,46 @@ const Inventory = () => {
         id="inventory-table"
         searchValue={search}
         onSearchValueChange={setSearch}
+        selects={[
+          {
+            isClearable: true,
+            value: null,
+            placeholder: "Sort by",
+            onChange: (v) => {
+              setSort(v?.value as string);
+            },
+            options: [
+              {
+                label: "Name Ascending",
+                value: "nameAsc",
+              },
+              {
+                label: "Name Descending",
+                value: "nameDesc",
+              },
+              {
+                label: "Quantity Ascending",
+                value: "quantityAsc",
+              },
+              {
+                label: "Quantity Descending",
+                value: "quantityDesc",
+              },
+            ],
+          },
+          {
+            isClearable: true,
+            value: null,
+            placeholder: "Status",
+            onChange: (v) => {
+              setStatus(v?.value as "new" | "used");
+            },
+            options: [
+              { label: "New", value: "new" },
+              { label: "Used", value: "used" },
+            ],
+          },
+        ]}
       >
         <div className="overflow-x-auto">
           <ReactTablePaginated
