@@ -620,7 +620,15 @@ export class InvoiceService implements OnModuleInit {
           expenseId: null,
           invoiceId: null,
         });
-      return transaction;
+
+      if (actions.length <= 0) {
+        actions.push(
+          `Paid customer ${customer.name} of amount: ${formatMoneyField(
+            customerPaidAmount,
+          )}`,
+        );
+      }
+      console.log('ACTIONS ARE ', actions);
 
       await this.transactionsService.saveTransaction({
         whatHappened: actions.join('.\n\n '),
@@ -629,6 +637,8 @@ export class InvoiceService implements OnModuleInit {
         finalAmount: customerPaidAmount,
         type: 'income',
       });
+
+      return transaction;
     }
   }
 

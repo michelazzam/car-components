@@ -113,7 +113,9 @@ export class LoansTransactionsService {
     return this.loansTransactionsModel
       .findById(transaction._id)
       .populate('supplier')
-      .populate('expense');
+      .populate('expense')
+      .populate('customer')
+      .populate('invoice');
   }
 
   deleteByExpenseId(expenseId: string) {
