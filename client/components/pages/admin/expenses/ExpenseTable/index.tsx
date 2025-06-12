@@ -332,7 +332,7 @@ const ExpenseTable = ({
       <ExpenseModal
         triggerModalId="add-expense-modal"
         expense={selectedExpense}
-        modalTitle="Edit Expense"
+        modalTitle="Add Expense"
         setSelectedExpense={setSelectedExpense}
       />
 
