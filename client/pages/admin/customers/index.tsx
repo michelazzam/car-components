@@ -192,6 +192,7 @@ const Customers = () => {
       {/* Add Payment Modal */}
       <AddPaymentModal
         triggerModalId="add-payment-modal"
+        setSelectedCustomer={setSelectedCustomer}
         selectedCustomer={selectedCustomer}
         modalTitle="Add payment in USD"
       />
