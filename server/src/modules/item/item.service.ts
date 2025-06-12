@@ -34,6 +34,7 @@ export class ItemService {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
         { note: { $regex: search, $options: 'i' } },
+        { locationInStore: { $regex: search, $options: 'i' } },
       ];
     }
 
