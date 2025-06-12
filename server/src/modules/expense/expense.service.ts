@@ -174,7 +174,7 @@ export class ExpenseService {
       const supplier = await this.supplierervice.getOneById(dto.supplierId);
       if (!supplier) throw new NotFoundException('Supplier not found');
 
-      const minLoan = Math.max(supplier.loan - dto.amount, 0);
+      const minLoan = supplier.loan - dto.amount;
       supplier.loan = minLoan;
       await supplier.save();
 

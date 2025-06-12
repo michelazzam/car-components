@@ -6,12 +6,18 @@ import { fetchApi } from 'src/utils/fetchApi';
 export class TelegramService {
   private readonly telegramApiToken: string;
   private readonly chatId: string;
+  private readonly clientChatId: string;
 
   constructor(private readonly configService: EnvConfigService) {
     this.telegramApiToken = this.configService.get('TELEGRAM_API_TOKEN')!;
     this.chatId = this.configService.get('CHAT_ID')!;
+    this.clientChatId = this.configService.get('CLIENT_CHAT_ID')!;
   }
-  async sendTelegramMessage(message: string): Promise<any> {
+
+  async sendTelegramMessage(
+    message: string,
+    toProdGroup = false,
+  ): Promise<any> {
     if (!message) {
       console.error('Message is required');
       return;
@@ -19,8 +25,10 @@ export class TelegramService {
 
     const url = `https://api.telegram.org/bot${this.telegramApiToken}/sendMessage`;
     const payload = {
-      chat_id: this.chatId,
-      text: message,
+      chat_id: toProdGroup ? this.clientChatId : this.chatId,
+      text: toProdGroup
+        ? message
+        : `Car Components - ${this.configService.get('NODE_ENV')}: ${message}`,
       parse_mode: 'Markdown',
     };
 
@@ -28,6 +36,7 @@ export class TelegramService {
       const response = await fetchApi(url, { method: 'POST', body: payload });
       return response.data;
     } catch (error: any) {
+      console.log(error);
       let message = 'Internal server error';
 
       if (error.response) {

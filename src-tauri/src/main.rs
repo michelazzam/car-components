@@ -41,6 +41,7 @@ fn main() {
                 )
                 .env("TELEGRAM_API_TOKEN", "8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA")
                 .env("CHAT_ID", "-1002683151718")
+                .env("CLIENT_CHAT_ID", "-1002669572928")
                 .args(["--port", "8000"])
                 .spawn()
                 .expect("failed to spawn sidecar");

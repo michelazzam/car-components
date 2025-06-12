@@ -354,7 +354,7 @@ export class PurchaseService {
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       if (supplier.loan > 0) {
-        const minLoan = Math.max(supplier.loan - extraAmountPaid, 0);
+        const minLoan = supplier.loan - extraAmountPaid;
         supplier.loan = minLoan;
         remainingSupplierLoan = minLoan;
         await supplier.save();
@@ -458,7 +458,7 @@ export class PurchaseService {
       );
 
       if (supplier) {
-        const minLoan = Math.max(supplier.loan - remainingAmount, 0);
+        const minLoan = supplier.loan - remainingAmount;
 
         supplier.loan = minLoan;
         await supplier.save();
