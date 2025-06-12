@@ -2,10 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Trim } from 'src/decorators/trim.decorator';
+import { ItemStatus, itemStatuses } from '../item.schema';
 
 export enum PaginationType {
   PAGE = 'paged',
   CURSOR = 'cursor',
+}
+
+enum SortBy {
+  nameAsc = 'nameAsc',
+  nameDesc = 'nameDesc',
+  quantityAsc = 'quantityAsc',
+  quantityDesc = 'quantityDesc',
 }
 
 export class GetItemsDto {
@@ -24,6 +32,18 @@ export class GetItemsDto {
   @Trim()
   search?: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEnum(itemStatuses)
+  status?: ItemStatus;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEnum(SortBy)
+  sortBy?: SortBy;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
   @ApiProperty({ required: false })
   @IsOptional()
   //default page , and it can be cursor
