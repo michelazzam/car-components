@@ -661,7 +661,7 @@ export class InvoiceService implements OnModuleInit {
 
       // notify owner on telegram if stock is 1
       if (updatedItem && updatedItem?.quantity <= 1) {
-        const message = `Item ${updatedItem.name} reached stock of ${updatedItem.quantity}.`;
+        const message = `Item ${updatedItem.name}, ${updatedItem.note}, ${updatedItem.locationInStore} reached stock of ${updatedItem.quantity}.`;
 
         await this.telegramService.sendTelegramMessage(message, true);
       }
