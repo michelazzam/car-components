@@ -18,7 +18,9 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const vatAmount = (subtotal * purchase.vatPercent) / 100;
   const grandTotal = subtotal + vatAmount;
   const balanceDue = grandTotal - purchase.amountPaid;
-
+  const hasAtLeastOneReturnedItem = purchase.items.some(
+    (item) => item.quantityReturned && item.quantityReturned > 0
+  );
   return (
     <Modal id="view-purchase-modal">
       <Modal.Header id="view-purchase-modal" title="Invoice" />
@@ -75,8 +77,11 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
                   <th className="px-4 py-2 border">Product</th>
                   <th className="px-4 py-2 border">Unit Price</th>
                   <th className="px-4 py-2 border">Qty</th>
+                  {hasAtLeastOneReturnedItem && (
+                    <th className="px-4 py-2 border">Returned</th>
+                  )}
                   <th className="px-4 py-2 border">Free</th>
-                  <th className="px-4 py-2 border">Discount</th>
+                  <th className="px-4 py-2 border">Disc</th>
                   <th className="px-4 py-2 border">Total</th>
                 </tr>
               </thead>
@@ -87,7 +92,14 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
                     <td className="px-4 py-2 border">
                       ${item.price.toFixed(2)}
                     </td>
-                    <td className="px-4 py-2 border">{item.quantity}</td>
+                    <td className="px-4 py-2 border">
+                      {item.quantity - (item.quantityReturned || 0)}
+                    </td>
+                    {hasAtLeastOneReturnedItem && (
+                      <td className="px-4 py-2 border">
+                        {item.quantityReturned}
+                      </td>
+                    )}
                     <td className="px-4 py-2 border">{item.quantityFree}</td>
                     <td className="px-4 py-2 border">
                       ${item.discount.toFixed(2)}

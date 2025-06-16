@@ -23,15 +23,17 @@ export type AddPurchaseT = {
   vatLBP: number;
   totalAmount: number;
   amountPaid: number;
-  items: {
-    itemId: string;
-    description: string;
-    price: number;
-    quantity: number;
-    quantityFree: number;
-    discount: number;
-    lotNumber: string;
-    expDate: string;
-    totalPrice: number;
-  }[];
+  items: AddPurchaseItemT[];
+};
+
+export type AddPurchaseItemT = {
+  itemId: string;
+  description: string;
+  price: number;
+  quantity: number;
+  quantityFree: number;
+  discount: number;
+  lotNumber: string;
+  expDate: string;
+  totalPrice: number;
 };

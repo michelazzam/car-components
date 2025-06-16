@@ -17,10 +17,14 @@ function AddPaymentModal({
   triggerModalId,
   modalTitle,
   selectedCustomer,
+  setSelectedCustomer,
 }: {
   triggerModalId: string;
   modalTitle: string;
   selectedCustomer?: Customer;
+  setSelectedCustomer?: React.Dispatch<
+    React.SetStateAction<Customer | undefined>
+  >;
 }) {
   //---------------------------STATE------------------------------
   const [selectedTransaction, setSelectedTransaction] =
@@ -92,7 +96,12 @@ function AddPaymentModal({
         id={triggerModalId}
         size="sm"
         onClose={() => {
-          reset();
+          reset({
+            customerId: "",
+            amount: 0,
+            discount: 0,
+          });
+          setSelectedCustomer?.(undefined);
         }}
       >
         <Modal.Header title={modalTitle} id={triggerModalId} />

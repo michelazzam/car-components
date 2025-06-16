@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 import { Trim } from 'src/decorators/trim.decorator';
 
@@ -47,4 +47,10 @@ export class GetPurchaseDto {
   @ApiProperty({ required: false })
   @IsOptional()
   itemId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^(true|false)$/)
+  onlyReturned?: string;
 }

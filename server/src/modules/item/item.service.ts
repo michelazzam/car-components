@@ -25,6 +25,8 @@ export class ItemService {
       pageSize,
       paginationType = 'paged',
       nextCursor: cursor = null,
+      sortBy,
+      status,
     } = dto;
 
     const filter: FilterQuery<IItem> = {};
@@ -34,7 +36,30 @@ export class ItemService {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
         { note: { $regex: search, $options: 'i' } },
+        { locationInStore: { $regex: search, $options: 'i' } },
       ];
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    let sort: any = { createdAt: -1 };
+    if (sortBy) {
+      switch (sortBy) {
+        case 'nameAsc':
+          sort = { name: 1 };
+          break;
+        case 'nameDesc':
+          sort = { name: -1 };
+          break;
+        case 'quantityAsc':
+          sort = { quantity: 1 };
+          break;
+        case 'quantityDesc':
+          sort = { quantity: -1 };
+          break;
+      }
     }
 
     let items;
@@ -44,7 +69,7 @@ export class ItemService {
       const [pagedItems, totalCount, totalsResult] = await Promise.all([
         this.itemModel
           .find(filter)
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .skip(pageIndex * pageSize)
           .limit(pageSize)
           .populate('supplier', 'name')

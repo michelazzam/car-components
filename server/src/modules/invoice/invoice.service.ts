@@ -32,6 +32,7 @@ import { GetAccountsRecievableDto } from '../report/dto/get-accounts-recievable.
 import { LoansTransactionsService } from '../loans-transactions/loans-transactions.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { formatMoneyField } from 'src/utils/formatMoneyField';
+import { TelegramService } from 'src/lib/telegram.service';
 
 @Injectable()
 export class InvoiceService implements OnModuleInit {
@@ -47,6 +48,7 @@ export class InvoiceService implements OnModuleInit {
     private readonly reportService: ReportService,
     private readonly transactionsService: TransactionsService,
     private readonly loansTransactionsService: LoansTransactionsService,
+    private readonly telegramService: TelegramService,
   ) {}
 
   onModuleInit() {
@@ -589,11 +591,8 @@ export class InvoiceService implements OnModuleInit {
     // effects of paying customer invoices
     if (customerPaidAmount > 0) {
       // Decrease customer loan
-      const minLoan = Math.max(
-        customer.loan - (customerPaidAmount + discount),
-        0,
-      );
-      customer.loan = minLoan;
+      const newLoan = customer.loan - (customerPaidAmount + discount);
+      customer.loan = newLoan;
       await customer.save();
 
       // Update accounting
@@ -614,13 +613,21 @@ export class InvoiceService implements OnModuleInit {
         await this.loansTransactionsService.saveLoanTransaction({
           type: 'pay-invoice-loan',
           amount: customerPaidAmount,
-          loanRemaining: minLoan,
+          loanRemaining: newLoan,
           supplierId: null,
           customerId: customer._id?.toString(),
           expenseId: null,
           invoiceId: null,
         });
-      return transaction;
+
+      if (actions.length <= 0) {
+        actions.push(
+          `Paid customer ${customer.name} of amount: ${formatMoneyField(
+            customerPaidAmount,
+          )}`,
+        );
+      }
+      console.log('ACTIONS ARE ', actions);
 
       await this.transactionsService.saveTransaction({
         whatHappened: actions.join('.\n\n '),
@@ -629,6 +636,8 @@ export class InvoiceService implements OnModuleInit {
         finalAmount: customerPaidAmount,
         type: 'income',
       });
+
+      return transaction;
     }
   }
 
@@ -645,7 +654,17 @@ export class InvoiceService implements OnModuleInit {
     // decrease item quantity
     const items = updatedDto.items.filter((item) => !!item.itemRef);
     for (const item of items) {
-      await this.itemService.updateItemQuantity(item.itemRef, -item.quantity);
+      const updatedItem = await this.itemService.updateItemQuantity(
+        item.itemRef,
+        -item.quantity,
+      );
+
+      // notify owner on telegram if stock is 1
+      if (updatedItem && updatedItem?.quantity <= 1) {
+        const message = `Item ${updatedItem.name}, ${updatedItem.note}, ${updatedItem.locationInStore} reached stock of ${updatedItem.quantity}.`;
+
+        await this.telegramService.sendTelegramMessage(message, true);
+      }
     }
 
     // save customer loan if did not pay all
@@ -683,9 +702,9 @@ export class InvoiceService implements OnModuleInit {
       if (!customer) throw new BadRequestException('Customer not found');
 
       if (customer.loan > 0) {
-        const minLoan = Math.max(customer.loan - extraAmountPaid, 0);
-        customer.loan = minLoan;
-        customerLoanRemaining = minLoan;
+        const newLoan = customer.loan - extraAmountPaid;
+        customer.loan = newLoan;
+        customerLoanRemaining = newLoan;
         await customer.save();
 
         // decrease total customer loans
@@ -777,8 +796,8 @@ export class InvoiceService implements OnModuleInit {
       );
       if (!customer) throw new BadRequestException('Customer not found');
 
-      const minLoan = Math.max(customer.loan - remainingAmount, 0);
-      customer.loan = minLoan;
+      const newLoan = customer.loan - remainingAmount;
+      customer.loan = newLoan;
       await customer.save();
 
       // decrease total customer loans

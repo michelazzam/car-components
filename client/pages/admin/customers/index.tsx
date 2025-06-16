@@ -71,19 +71,17 @@ const Customers = () => {
     columnHelper.accessor("name", {
       header: "Name",
     }),
-
-    columnHelper.accessor("phoneNumber", {
-      header: "Phone Number",
+    columnHelper.accessor("loan", {
+      header: "Loan",
+      cell: ({ getValue }) => <div>{formatNumber(getValue(), 2)}$</div>,
     }),
-
     columnHelper.accessor("vehicles", {
       header: "Total Vehicles",
       cell: ({ getValue }) => <div>{getValue().length}</div>,
     }),
 
-    columnHelper.accessor("loan", {
-      header: "Loan",
-      cell: ({ getValue }) => <div>{formatNumber(getValue(), 2)}$</div>,
+    columnHelper.accessor("phoneNumber", {
+      header: "Phone Number",
     }),
 
     columnHelper.display({
@@ -194,6 +192,7 @@ const Customers = () => {
       {/* Add Payment Modal */}
       <AddPaymentModal
         triggerModalId="add-payment-modal"
+        setSelectedCustomer={setSelectedCustomer}
         selectedCustomer={selectedCustomer}
         modalTitle="Add payment in USD"
       />

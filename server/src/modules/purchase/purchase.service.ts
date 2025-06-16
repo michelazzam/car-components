@@ -37,6 +37,7 @@ export class PurchaseService {
       startDate,
       endDate,
       itemId,
+      onlyReturned,
     } = dto;
 
     const filter: FilterQuery<IPurchase> = { $and: [{ $or: [] }] };
@@ -59,6 +60,11 @@ export class PurchaseService {
     if (supplierId) {
       // @ts-ignore
       filter.$and[0].$or.push({ supplier: supplierId });
+    }
+
+    if (onlyReturned) {
+      // @ts-ignore
+      filter.$and[0].$or.push({ 'items.quantityReturned': { $gt: 0 } });
     }
 
     if (itemId) {
@@ -107,8 +113,25 @@ export class PurchaseService {
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
+    let itemsReturned = [];
+    if (onlyReturned) {
+      // split the purchases into array of items (+the purchase id and invoiceNumber field)
+      itemsReturned = purchases.reduce((acc: any, purchase) => {
+        purchase.items.forEach((item) => {
+          acc.push({
+            purchaseId: purchase._id,
+            purchaseInvoiceNumber: purchase.invoiceNumber,
+            item,
+            items: undefined,
+          });
+        });
+        return acc;
+      }, []);
+    }
+
     return {
       purchases,
+      itemsReturned,
       pagination: {
         pageIndex,
         pageSize,
@@ -310,7 +333,8 @@ export class PurchaseService {
         }
       }
 
-      const totalQuantityBought = item.quantity + item.quantityFree;
+      const totalQuantityBought =
+        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
       product.quantity += totalQuantityBought;
 
       // calc new cost
@@ -354,7 +378,7 @@ export class PurchaseService {
       if (!supplier) throw new BadRequestException('Supplier not found');
 
       if (supplier.loan > 0) {
-        const minLoan = Math.max(supplier.loan - extraAmountPaid, 0);
+        const minLoan = supplier.loan - extraAmountPaid;
         supplier.loan = minLoan;
         remainingSupplierLoan = minLoan;
         await supplier.save();
@@ -439,7 +463,8 @@ export class PurchaseService {
       }
 
       // Revert quantity
-      const totalQuantityBought = item.quantity + item.quantityFree;
+      const totalQuantityBought =
+        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
       product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase
@@ -458,7 +483,7 @@ export class PurchaseService {
       );
 
       if (supplier) {
-        const minLoan = Math.max(supplier.loan - remainingAmount, 0);
+        const minLoan = supplier.loan - remainingAmount;
 
         supplier.loan = minLoan;
         await supplier.save();

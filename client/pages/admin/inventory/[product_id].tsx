@@ -1,4 +1,5 @@
 import { useGetProductById } from "@/api-hooks/products/use-get-product-by-id";
+import BackBtn from "@/components/common/BackBtn";
 import ItemHeader from "@/components/pages/admin/inventory/single-item/ItemHeader";
 import ListInvoice from "@/components/pages/admin/invoices/ListInvoice";
 import ListPurchase from "@/components/pages/admin/purchase/ListPurchase";
@@ -23,6 +24,7 @@ const ProductDetails = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
+      <BackBtn className="mt-3" />
       {item && <ItemHeader item={item} />}
       <div className="flex gap-3 items-center border-b-2 border-gray-300 mb-3">
         <button

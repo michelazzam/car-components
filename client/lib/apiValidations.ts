@@ -152,6 +152,13 @@ const PaymentMethodSchema = z.object({
 export type PaymentMethodSchemaType = z.infer<typeof PaymentMethodSchema>;
 
 //-------------PURCHASE
+const ReturnItemSchema = z.object({
+  quantityReturned: z
+    .number()
+    .min(0, "Quantity returned must be greater than 0"),
+});
+export type ReturnItemSchemaType = z.infer<typeof ReturnItemSchema>;
+
 const AddPurchaseItemSchema = z
   .object({
     itemId: z.string().min(1, { message: "Please select a product" }),
@@ -165,6 +172,7 @@ const AddPurchaseItemSchema = z
     expDate: z.string(),
     totalPrice: z.number(),
     discountType: z.enum(["fixed", "percentage"]),
+    quantityReturned: z.number().optional(),
     supplier: z
       .object({
         value: z.string(),
@@ -438,6 +446,7 @@ export const apiValidations = {
   AddExpenseType: ExpenseTypeSchema,
   AddPurchaseSchema: AddPurchaseSchema,
   AddPurchaseItemSchema,
+  ReturnItemSchema,
   DBBackupPath,
   AddEditSupplier: SupplierSchema,
   EditUserPermissions: EditUserPermissions,

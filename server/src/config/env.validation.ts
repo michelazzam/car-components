@@ -37,6 +37,9 @@ export class EnvironmentVariables {
 
   @IsString()
   CHAT_ID: string;
+
+  @IsString()
+  CLIENT_CHAT_ID: string;
 }
 
 // To be used when we want to get env variables in our Modules

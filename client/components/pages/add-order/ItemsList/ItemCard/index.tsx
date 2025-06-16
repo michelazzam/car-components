@@ -5,7 +5,13 @@ import { cn } from "@/utils/cn";
 import { CSOS } from "@/constants/preferences";
 import Tooltip from "@/components/common/Tooltip";
 
-function ItemCard({ product }: { product: Product }) {
+function ItemCard({
+  product,
+  shouldMakeHeightFit,
+}: {
+  product: Product;
+  shouldMakeHeightFit: boolean;
+}) {
   //----------------Storage----------------------------
   const { cart, addToCart, setQuantity } = usePosStore();
   // const productStock = 99999999;
@@ -48,7 +54,8 @@ function ItemCard({ product }: { product: Product }) {
       disabled={outOfStock && !CSOS}
       onClick={addItemToCart}
       className={cn(
-        "flex flex-col justify-between w-full h-full bg-white py-10 relative rounded-sm border disabled:opacity-80 disabled:cursor-not-allowed",
+        "flex flex-col justify-between w-full bg-white py-10 relative rounded-sm border disabled:opacity-80 disabled:cursor-not-allowed",
+        shouldMakeHeightFit ? "h-fit" : "h-full",
         outOfStock
           ? "border-danger"
           : "hover:border-success/80 shadow-[0_0_4px_0_rgba(0,0,0,0.1)]",

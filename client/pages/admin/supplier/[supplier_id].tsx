@@ -1,4 +1,5 @@
 import { useGetSupplierById } from "@/api-hooks/supplier/use-get-single-supplier-by-id";
+import BackBtn from "@/components/common/BackBtn";
 import ExpenseTable from "@/components/pages/admin/expenses/ExpenseTable";
 import PurchaseTable from "@/components/pages/admin/purchase/PurchaseTable";
 import SupplierHeader from "@/components/pages/admin/supplier/single-supplier/SupplierHeader";
@@ -24,6 +25,7 @@ const SupplierDetails = () => {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
+      <BackBtn className="mt-3" />
       {supplier && <SupplierHeader supplier={supplier} />}
       <div className="flex gap-3 items-center border-b-2 border-gray-300 mb-3">
         <button

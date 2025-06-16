@@ -12,6 +12,7 @@ const useListPurchase = ({
   endDate,
   supplierId,
   enabled = true,
+  onlyReturned,
 }: {
   pageSize?: number;
   pageIndex?: number;
@@ -21,11 +22,21 @@ const useListPurchase = ({
   endDate?: string;
   supplierId?: string;
   enabled?: boolean;
+  onlyReturned?: boolean;
 }) => {
   return useReadData<PurchaseResponse>({
     queryKey: [
       "purchases",
-      { pageSize, pageIndex, search, itemId, startDate, endDate, supplierId },
+      {
+        pageSize,
+        pageIndex,
+        search,
+        itemId,
+        startDate,
+        endDate,
+        supplierId,
+        onlyReturned,
+      },
     ],
     endpoint: API.listPurchase,
     keepPreviousData: true,
@@ -38,6 +49,7 @@ const useListPurchase = ({
       startDate,
       endDate,
       supplierId,
+      onlyReturned,
     },
   });
 };
@@ -68,6 +80,7 @@ export type Purchase = {
       discount: number;
       name: string;
       currentItemCost: number;
+      quantityReturned?: number;
       description: string;
       price: number;
       quantity: number;

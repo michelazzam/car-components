@@ -3,6 +3,7 @@ import ItemCard from "./ItemCard";
 import { useListProductsInfinite } from "@/api-hooks/products/use-list-products";
 import { useInView } from "@/hooks/useInView";
 import LoadingAndObservable from "@/components/common/LoadingAndObservable";
+import { cn } from "@/utils/cn";
 
 function ItemsList({ search }: { search?: string }) {
   const {
@@ -35,20 +36,32 @@ function ItemsList({ search }: { search?: string }) {
 
   return (
     <div className="grid grid-cols-12 gap-x-6 gap-y-2  pr-[1.5rem]  flex-grow overflow-y-auto overflow-x-clip">
-      {products?.map((product) => (
-        <div
-          key={product._id}
-          className="xxl:col-span-3 xl:col-span-4 md:col-span-6 col-span-12"
-        >
-          <ItemCard key={product._id} product={product} />
-        </div>
-      ))}
-      <LoadingAndObservable
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={hasNextPage}
-        ref={bottomRef}
-        noMoreText="No more products"
-      />
+      {products?.map((product) => {
+        const shouldMakeHeightFit = products.length <= 3;
+        return (
+          <div
+            key={product._id}
+            className={cn(
+              "xxl:col-span-3 xl:col-span-4 md:col-span-6 col-span-12 ",
+              shouldMakeHeightFit ? "h-fit" : ""
+            )}
+          >
+            <ItemCard
+              key={product._id}
+              product={product}
+              shouldMakeHeightFit={shouldMakeHeightFit}
+            />
+          </div>
+        );
+      })}
+      <div className="col-span-12">
+        <LoadingAndObservable
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          ref={bottomRef}
+          noMoreText="No more products"
+        />
+      </div>
     </div>
   );
 }

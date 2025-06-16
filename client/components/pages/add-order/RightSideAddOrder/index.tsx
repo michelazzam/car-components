@@ -152,6 +152,10 @@ function RightSideAddOrder({
     if (data.type === "s2") {
       data.taxesUsd = 0;
     }
+
+    const totalAmountWithSwapsDiscount = totalAmount(!isB2C);
+    data.totalUsd = totalAmountWithSwapsDiscount;
+    console.log("TOTAL USD", data.totalUsd);
     if (editingInvoice) {
       editInvoice(data);
     } else {

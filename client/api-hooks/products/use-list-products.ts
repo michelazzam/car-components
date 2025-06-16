@@ -25,16 +25,20 @@ const useListProducts = ({
   pageSize = 10,
   pageIndex = 0,
   search,
+  status,
+  sortBy,
 }: {
   pageSize?: number;
   pageIndex?: number;
   search?: string;
+  status?: "new" | "used";
+  sortBy?: string;
 }) => {
   return useReadData<ProductResponse>({
-    queryKey: ["products", { pageSize, pageIndex, search }],
+    queryKey: ["products", { pageSize, pageIndex, search, sortBy, status }],
     endpoint: API.listProducts,
     keepPreviousData: true,
-    params: { pageSize, pageIndex, search },
+    params: { pageSize, pageIndex, search, sortBy, status },
   });
 };
 
