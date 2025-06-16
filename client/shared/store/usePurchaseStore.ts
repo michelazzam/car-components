@@ -19,6 +19,7 @@ export interface PurchaseItem {
   discount: number;
   discountType: "percentage" | "fixed";
   lotNumber: string;
+  quantityReturned?: number;
   expDate: string;
 }
 
@@ -75,6 +76,7 @@ interface PurchaseFormState {
   // item‐helpers
   addItem: (item: PurchaseItem) => void;
   removeItem: (itemId: string) => void;
+  editQuantityReturned: (itemId: string, quantityReturned: number) => void;
 
   // recompute everything
   recalcTotals: () => void;
@@ -287,6 +289,17 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           },
         }));
         get().recalcTotals();
+      },
+
+      editQuantityReturned: (itemId, quantityReturned) => {
+        set((state) => ({
+          formValues: {
+            ...state.formValues,
+            items: state.formValues.items.map((i) =>
+              i.itemId === itemId ? { ...i, quantityReturned } : i
+            ),
+          },
+        }));
       },
 
       recalcTotals: () => {

@@ -113,6 +113,7 @@ const CustomAddPurchaseComponent = () => {
       items: formValues.items.map((item) => ({
         ...item,
         productId: item.itemId,
+        quantityReturned: item.quantityReturned || 0,
       })),
       paymentAmount: undefined,
       totalPaid: undefined,
@@ -133,6 +134,9 @@ const CustomAddPurchaseComponent = () => {
     if (editingPurchase) {
       editPurchase({
         ...data,
+        items: data.items.map((item) => ({
+          ...item,
+        })),
       });
     } else {
       addPurchase({

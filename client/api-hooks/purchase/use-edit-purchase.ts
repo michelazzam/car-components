@@ -1,5 +1,5 @@
 import { API } from "@/constants/apiEndpoints";
-import { AddPurchaseT } from "./use-add-purchase";
+import { AddPurchaseItemT, AddPurchaseT } from "./use-add-purchase";
 import { useUpdateData } from "@/api-service/useUpdateData";
 
 export const useEditPurchase = ({
@@ -9,9 +9,17 @@ export const useEditPurchase = ({
   id: string;
   callBackOnSuccess?: () => void;
 }) => {
-  return useUpdateData<AddPurchaseT>({
+  return useUpdateData<EditPurchaseT>({
     endpoint: API.editPurchase(id),
     queryKeysToInvalidate: [["purchases"], ["caisse"]],
     callBackOnSuccess,
   });
+};
+
+export type EditPurchaseItemT = AddPurchaseItemT & {
+  quantityReturned: number;
+};
+
+export type EditPurchaseT = AddPurchaseT & {
+  items: EditPurchaseItemT[];
 };
