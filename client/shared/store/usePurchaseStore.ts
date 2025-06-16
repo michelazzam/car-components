@@ -297,10 +297,17 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           formValues: {
             ...state.formValues,
             items: state.formValues.items.map((i) =>
-              i.itemId === itemId ? { ...i, quantityReturned } : i
+              i.itemId === itemId
+                ? {
+                    ...i,
+                    quantityReturned,
+                    totalPrice: i.quantity * (i.quantity - quantityReturned),
+                  }
+                : i
             ),
           },
         }));
+        get().recalcTotals();
       },
 
       recalcTotals: () => {
