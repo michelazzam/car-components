@@ -217,6 +217,7 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
         const mappedItems: PurchaseItem[] = purchase.items.map((i) => ({
           itemId: i.itemId,
           name: i.name,
+          quantityReturned: i.quantityReturned ?? 0,
           description: i.description,
           quantity: i.quantity,
           price: i.price,

@@ -28,6 +28,9 @@ import { cn } from "@/utils/cn";
 import DeleteRecord from "@/components/admin/DeleteRecord";
 import TableWrapper from "@/shared/Table/TableWrapper";
 import { formatNumber } from "@/lib/helpers/formatNumber";
+import Checkbox from "@/components/admin/Fields/Checkbox";
+import { MdOutlineKeyboardReturn } from "react-icons/md";
+import ViewReturnedItemsModal from "./ViewReturnedItemsModal";
 
 const PurchaseTable = ({
   selectedSupplier,
@@ -40,6 +43,7 @@ const PurchaseTable = ({
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearch = useDebounce(searchValue);
 
+  const [showOnlyReturned, setShowOnlyReturned] = useState(false);
   const [selectedSupplierOption, setSelectedSupplierOption] = useState<
     SelectOption | undefined
   >();
@@ -59,6 +63,8 @@ const PurchaseTable = ({
   } = useListPurchase({
     pageSize: pageSize,
     pageIndex: pageIndex,
+    onlyReturned: showOnlyReturned === true ? true : undefined,
+
     search: debouncedSearch,
     supplierId:
       selectedSupplier?._id || (selectedSupplierOption?.value as string),
@@ -73,7 +79,7 @@ const PurchaseTable = ({
   //---------------Create Columns--------------------
   const columnHelper = createColumnHelper<Purchase>();
 
-  const tanstackColumns = [
+  const columns = [
     columnHelper.accessor("invoiceNumber", {
       header: "Invoice Number",
       cell: ({ getValue }) => <div>{getValue()}</div>,
@@ -82,28 +88,46 @@ const PurchaseTable = ({
     columnHelper.accessor("invoiceDate", {
       header: "Invoice Date",
     }),
-    columnHelper.accessor("supplier.name", {
-      header: "Supplier Name",
-      cell: ({ getValue }) => <div>{getValue()}</div>,
-    }),
 
-    columnHelper.accessor("customerConsultant", {
-      header: "Customer Consultant",
-    }),
+    ...(showOnlyReturned
+      ? [
+          columnHelper.accessor("items", {
+            header: "Returned Items",
+            cell: ({ getValue }) => {
+              const items = getValue();
+              const returnedItems = items.filter(
+                (item: any) => item.quantityReturned > 0
+              );
+              return (
+                <div>{returnedItems.map((item) => item.name).join(", ")}</div>
+              );
+            },
+          }),
+        ]
+      : [
+          columnHelper.accessor("supplier.name", {
+            header: "Supplier Name",
+            cell: ({ getValue }) => <div>{getValue()}</div>,
+          }),
 
-    columnHelper.accessor("phoneNumber", {
-      header: "Phone",
-      cell: ({ getValue }) => {
-        const phone = getValue();
+          columnHelper.accessor("customerConsultant", {
+            header: "Customer Consultant",
+          }),
 
-        return <div>{phone && phone.length > 0 ? phone : "---"}</div>;
-      },
-    }),
+          columnHelper.accessor("phoneNumber", {
+            header: "Phone",
+            cell: ({ getValue }) => {
+              const phone = getValue();
 
-    columnHelper.accessor("vatPercent", {
-      header: "VAT",
-      cell: ({ getValue }) => <div>{getValue()}%</div>,
-    }),
+              return <div>{phone && phone.length > 0 ? phone : "---"}</div>;
+            },
+          }),
+
+          columnHelper.accessor("vatPercent", {
+            header: "VAT",
+            cell: ({ getValue }) => <div>{getValue()}%</div>,
+          }),
+        ]),
 
     columnHelper.accessor("totalAmount", {
       header: "Remaining",
@@ -149,40 +173,56 @@ const PurchaseTable = ({
     columnHelper.display({
       id: "actions",
       header: "",
-      cell: ({ row }) => (
-        <div
-          className="flex align-middle gap-2"
-          style={{ display: "flex", justifyContent: "space-around" }}
-        >
-          <button
-            id="view-btn"
-            className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
-            onClick={() => setSelectedPurchase(row.original)}
-            data-hs-overlay="#view-purchase-modal"
+      cell: ({ row }) => {
+        const items = row.original.items;
+        const hasReturnedItems = items.some(
+          (item: any) => item.quantityReturned > 0
+        );
+        return (
+          <div
+            className="flex align-middle gap-2"
+            style={{ display: "flex", justifyContent: "space-around" }}
           >
-            <FaEye />
-          </button>{" "}
-          <Link
-            href={"/admin/purchase/add-edit-purchase"}
-            id="edit-btn"
-            className="btn btn-sm btn-primary text-secondary border-secondary rounded-md p-1 hover:bg-secondary border hover:text-white transition-all"
-            onClick={() => {
-              setEditingPurchase(row.original);
-            }}
-            data-hs-overlay="#edit-purchase-modal"
-          >
-            <FaRegEdit />
-          </Link>
-          <button
-            id="delete-btn"
-            className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"
-            data-hs-overlay="#delete-record-modal"
-            onClick={() => setSelectedPurchase(row.original)}
-          >
-            <FaRegTrashCan />
-          </button>
-        </div>
-      ),
+            {hasReturnedItems && (
+              <button
+                id="view-returned-items"
+                className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
+                onClick={() => setSelectedPurchase(row.original)}
+                data-hs-overlay="#view-returned-items-modal"
+              >
+                <MdOutlineKeyboardReturn />
+              </button>
+            )}
+            <button
+              id="view-btn"
+              className="btn btn-sm btn-primary text-primary border-primary border rounded-md p-1 hover:bg-primary hover:text-white transition-all"
+              onClick={() => setSelectedPurchase(row.original)}
+              data-hs-overlay="#view-purchase-modal"
+            >
+              <FaEye />
+            </button>{" "}
+            <Link
+              href={"/admin/purchase/add-edit-purchase"}
+              id="edit-btn"
+              className="btn btn-sm btn-primary text-secondary border-secondary rounded-md p-1 hover:bg-secondary border hover:text-white transition-all"
+              onClick={() => {
+                setEditingPurchase(row.original);
+              }}
+              data-hs-overlay="#edit-purchase-modal"
+            >
+              <FaRegEdit />
+            </Link>
+            <button
+              id="delete-btn"
+              className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"
+              data-hs-overlay="#delete-record-modal"
+              onClick={() => setSelectedPurchase(row.original)}
+            >
+              <FaRegTrashCan />
+            </button>
+          </div>
+        );
+      },
       meta: {
         sticky: "right",
         stickyClassName:
@@ -225,6 +265,15 @@ const PurchaseTable = ({
                 }}
               />
             )}
+            <div className="">
+              <Checkbox
+                label="Show only purchases with returned items"
+                isChecked={showOnlyReturned}
+                onValueChange={(value) => {
+                  setShowOnlyReturned(value);
+                }}
+              />
+            </div>
           </div>
         </div>
         <div className="box-body">
@@ -234,7 +283,7 @@ const PurchaseTable = ({
               <ReactTablePaginated
                 errorMessage={error?.message}
                 data={purchases || []}
-                columns={tanstackColumns}
+                columns={columns}
                 loading={isLoading}
                 paginating={isFetching}
                 pagination={pagination}
@@ -256,6 +305,12 @@ const PurchaseTable = ({
         modalTitle="Add Expense"
         purchase={selectedPurchase}
         setPurchase={setSelectedPurchase}
+      />
+      <ViewReturnedItemsModal
+        triggerModalId="view-returned-items-modal"
+        modalTitle="Returned Items"
+        purchase={selectedPurchase as Purchase}
+        setSelectedPurchase={setSelectedPurchase}
       />
     </div>
   );
