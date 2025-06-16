@@ -334,7 +334,7 @@ export class PurchaseService {
       }
 
       const totalQuantityBought =
-        item.quantity + item.quantityFree - item.quantityReturned;
+        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
       product.quantity += totalQuantityBought;
 
       // calc new cost
@@ -464,7 +464,7 @@ export class PurchaseService {
 
       // Revert quantity
       const totalQuantityBought =
-        item.quantity + item.quantityFree - item.quantityReturned;
+        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
       product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase
