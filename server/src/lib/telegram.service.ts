@@ -22,11 +22,14 @@ export class TelegramService {
       console.error('Message is required');
       return;
     }
+    const isDev = this.configService.get('NODE_ENV') === 'development';
+    // only take it into consideration if it's not a dev environment
+    const sendToProdGroup = isDev ? false : toProdGroup;
 
     const url = `https://api.telegram.org/bot${this.telegramApiToken}/sendMessage`;
     const payload = {
-      chat_id: toProdGroup ? this.clientChatId : this.chatId,
-      text: toProdGroup
+      chat_id: sendToProdGroup ? this.clientChatId : this.chatId,
+      text: sendToProdGroup
         ? message
         : `Car Components - ${this.configService.get('NODE_ENV')}: ${message}`,
       parse_mode: 'Markdown',

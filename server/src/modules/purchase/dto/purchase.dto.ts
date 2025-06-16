@@ -49,6 +49,13 @@ class PurchaseItem {
     required: false,
   })
   @IsNumber()
+  @IsOptional()
+  quantityReturned: number = 0;
+
+  @ApiProperty({
+    required: false,
+  })
+  @IsNumber()
   discount: number = 0;
 
   @ApiProperty({
