@@ -4,8 +4,6 @@ import PrintInvoice from "./PrintInvoice";
 import ReactToPrint from "react-to-print";
 import { Invoice } from "@/api-hooks/invoices/useListInvoices";
 import Checkbox from "@/components/admin/Fields/Checkbox";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 function PrintInvoiceModal({
   triggerModalId,
@@ -27,55 +25,36 @@ function PrintInvoiceModal({
   const parentRef = useRef<HTMLDivElement>(null);
 
   const downloadPdfDocument = async () => {
+    if (!parentRef.current) return;
     setLoading(true);
-    const container = parentRef.current;
 
-    if (container && printingInvoices && printingInvoices.length > 0) {
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
 
-      const options = {
-        scale: 1, // Increasing scale to boost resolution
-        useCORS: true, // This helps with loading images from external URLs
-        width: container.offsetWidth, // Ensure the canvas has the correct width
+      const opt = {
+        margin: 0,
+        filename:
+          printingInvoices && printingInvoices.length === 1
+            ? `${printingInvoices[0].customer.name}-${printingInvoices[0].number}.pdf`
+            : "invoices.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] },
       };
 
-      // Process each invoice separately
-      for (let i = 0; i < printingInvoices.length; i++) {
-        const invoiceElement = container.children[i]; // Assuming each child corresponds to an invoice
-
-        if (!invoiceElement) continue; // Skip if no element is found
-
-        const canvas = await html2canvas(
-          invoiceElement as HTMLElement,
-          options
-        );
-        const imgData = canvas.toDataURL("image/png");
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-
-        // Add a new page for the next invoice unless it's the last one
-        if (i < printingInvoices.length - 1) {
-          pdf.addPage();
-        }
-      }
-
-      // Save the PDF with dynamic naming based on the content
-      pdf.save(
-        printingInvoices.length > 1
-          ? "invoices.pdf"
-          : `${printingInvoices[0].customer.name}-${printingInvoices[0].number}.pdf`
-      );
+      const worker = html2pdf();
+      await worker.set(opt).from(parentRef.current).save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
   return (
     <Modal id={triggerModalId} size="md" onClose={() => {}}>
       <Modal.Header title={title} id={triggerModalId} />
@@ -157,43 +136,3 @@ function PrintInvoiceModal({
 }
 
 export default PrintInvoiceModal;
-
-// export type PreviewInvoice = {
-//   driverName?: string;
-//   generalNote?: string;
-//   customerNote?: string;
-//   invoiceNumber?: number;
-
-//   discount: {
-//     amount: number;
-//     type: "fixed" | "percentage";
-//   };
-
-//   customer?: CustomerPrev;
-
-//   vehicle?: VehiclePrev;
-//   usdRate?: number;
-//   products?: InvoicePreviewItem[];
-//   services?: InvoicePreviewItem[];
-//   totalPriceLbp: number;
-//   totalPriceUsd: number;
-//   paidAmountUsd: number;
-//   taxesLbp: number;
-// };
-// export type CustomerPrev = {
-//   name: string;
-//   phone?: string;
-//   address?: string;
-//   tvaNumber?: string;
-// };
-// export type VehiclePrev = {
-//   vehicleNb?: string;
-//   model?: string;
-// };
-// export interface InvoicePreviewItem {
-//   type?: string;
-//   name?: string;
-//   quantity?: number;
-//   price?: number;
-//   amount?: number;
-// }
