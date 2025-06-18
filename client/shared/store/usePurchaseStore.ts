@@ -1,6 +1,6 @@
 // src/shared/store/usePurchaseFormStore.ts
 import { Purchase } from "@/api-hooks/purchase/use-list-purchase";
-import { apiValidations } from "@/lib/apiValidations";
+import { apiValidations, ReturnItemSchemaType } from "@/lib/apiValidations";
 import { ZodError } from "zod";
 import create from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -19,7 +19,10 @@ export interface PurchaseItem {
   discount: number;
   discountType: "percentage" | "fixed";
   lotNumber: string;
-  quantityReturned?: number;
+  returns: {
+    quantityReturned: number;
+    returnedAt: string;
+  }[];
   expDate: string;
 }
 
@@ -76,7 +79,7 @@ interface PurchaseFormState {
   // item‐helpers
   addItem: (item: PurchaseItem) => void;
   removeItem: (itemId: string) => void;
-  editQuantityReturned: (itemId: string, quantityReturned: number) => void;
+  editReturnedItems: (itemId: string, returns: ReturnItemSchemaType[]) => void;
 
   // recompute everything
   recalcTotals: () => void;
@@ -217,7 +220,7 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
         const mappedItems: PurchaseItem[] = purchase.items.map((i) => ({
           itemId: i.itemId,
           name: i.name,
-          quantityReturned: i.quantityReturned ?? 0,
+          returns: i.returns,
           description: i.description,
           quantity: i.quantity,
           price: i.price,
@@ -292,7 +295,14 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
         get().recalcTotals();
       },
 
-      editQuantityReturned: (itemId, quantityReturned) => {
+      editReturnedItems: (itemId, returns) => {
+        //here we should update the returns of the item and recalc the total price
+        const item = get().formValues.items.find((i) => i.itemId === itemId);
+        if (!item) return;
+        const totalQuantityReturned = returns.reduce(
+          (sum, ret) => sum + ret.quantityReturned,
+          0
+        );
         set((state) => ({
           formValues: {
             ...state.formValues,
@@ -300,8 +310,9 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
               i.itemId === itemId
                 ? {
                     ...i,
-                    quantityReturned,
-                    totalPrice: i.quantity * (i.quantity - quantityReturned),
+                    returns,
+                    totalPrice:
+                      i.quantity * (i.quantity - totalQuantityReturned),
                   }
                 : i
             ),
