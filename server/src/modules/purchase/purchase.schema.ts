@@ -51,6 +51,7 @@ export class Purchase {
     price: number;
     quantity: number;
     quantityFree: number;
+    quantityReturned: number; //TODO: to be removed after doing the migration
     currentItemCost: number;
     discount: number;
     lotNumber: string;
