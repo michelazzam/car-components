@@ -156,8 +156,13 @@ const ReturnItemSchema = z.object({
   quantityReturned: z
     .number()
     .min(0, "Quantity returned must be greater than 0"),
+  returnedAt: z.string().min(1, "Returned at is required"),
 });
 export type ReturnItemSchemaType = z.infer<typeof ReturnItemSchema>;
+
+const ReturnItemsFormSchema = z.object({
+  returns: z.array(ReturnItemSchema),
+});
 
 const AddPurchaseItemSchema = z
   .object({
@@ -172,7 +177,7 @@ const AddPurchaseItemSchema = z
     expDate: z.string(),
     totalPrice: z.number(),
     discountType: z.enum(["fixed", "percentage"]),
-    quantityReturned: z.number().optional(),
+    returns: z.array(ReturnItemSchema).optional(),
     supplier: z
       .object({
         value: z.string(),
@@ -433,6 +438,7 @@ export const apiValidations = {
   AddEditService: ServiceSchema,
   MakeSchema: MakeSchema,
   AddEditPrinter: PrinterSchema,
+
   AddEditCategory: CategorySchema,
   changePassword: ChangePassword,
   EditOrganization: OrganizationSchema,
@@ -447,6 +453,7 @@ export const apiValidations = {
   AddPurchaseSchema: AddPurchaseSchema,
   AddPurchaseItemSchema,
   ReturnItemSchema,
+  ReturnItemsFormSchema,
   DBBackupPath,
   AddEditSupplier: SupplierSchema,
   EditUserPermissions: EditUserPermissions,
