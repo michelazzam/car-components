@@ -348,9 +348,15 @@ export class PurchaseService {
         item.quantity + item.quantityFree - totalReturns;
       product.quantity += totalQuantityBought;
 
-      // calc new cost
-      product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
-      await product.save();
+      const hasReturnedAllItems =
+        totalReturns === item.quantity + item.quantityFree;
+
+      // calc new cost only if he hasn't returned all items, otherwise it will divide by 0
+      if (!hasReturnedAllItems) {
+        // calc new cost
+        product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
+        await product.save();
+      }
 
       actions.push(
         `Purchased ${item.quantity} x ${product.name} for ${formatMoneyField(
