@@ -113,7 +113,7 @@ const CustomAddPurchaseComponent = () => {
       items: formValues.items.map((item) => ({
         ...item,
         productId: item.itemId,
-        quantityReturned: item.quantityReturned || 0,
+        returns: item.returns || [],
       })),
       paymentAmount: undefined,
       totalPaid: undefined,

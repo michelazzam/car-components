@@ -21,8 +21,20 @@ const ViewReturnedItemsModal = ({
   const printRef = useRef<HTMLDivElement>(null);
   const returnedItems =
     purchase?.items?.filter(
-      (item) => item.quantityReturned && item.quantityReturned > 0
+      (item) => item.returns && item.returns.length > 0
     ) || [];
+
+  const returnedItemsFlattenedAccordingToDate = returnedItems.flatMap(
+    (item) =>
+      item.returns?.map((returnItem) => ({
+        itemName: item.name,
+        itemId: item.itemId,
+        quantityReturned: returnItem.quantityReturned,
+        returnedAt: returnItem.returnedAt,
+        unitPrice: item.price,
+        totalAmount: returnItem.quantityReturned * item.price,
+      })) || []
+  );
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -68,6 +80,9 @@ const ViewReturnedItemsModal = ({
                   <th className="border border-gray-200 px-4 py-2 text-left">
                     Item Name
                   </th>
+                  <th className="border border-gray-200 px-4 py-2 text-center">
+                    Return Date
+                  </th>
                   <th className="border border-gray-200 px-4 py-2 text-right">
                     Quantity Returned
                   </th>
@@ -80,19 +95,25 @@ const ViewReturnedItemsModal = ({
                 </tr>
               </thead>
               <tbody>
-                {returnedItems.map((item) => (
-                  <tr key={item.itemId} className="hover:bg-gray-50">
+                {returnedItemsFlattenedAccordingToDate.map((item, index) => (
+                  <tr
+                    key={`${item.itemId}-${item.returnedAt}-${index}`}
+                    className="hover:bg-gray-50"
+                  >
                     <td className="border border-gray-200 px-4 py-2">
-                      {item.name}
+                      {item.itemName}
+                    </td>
+                    <td className="border border-gray-200 px-4 py-2 text-center">
+                      {new Date(item.returnedAt).toLocaleDateString()}
                     </td>
                     <td className="border border-gray-200 px-4 py-2 text-right">
-                      {item.quantityReturned!}
+                      {item.quantityReturned}
                     </td>
                     <td className="border border-gray-200 px-4 py-2 text-right">
-                      ${formatNumber(item.price)}
+                      ${formatNumber(item.unitPrice)}
                     </td>
                     <td className="border border-gray-200 px-4 py-2 text-right">
-                      ${formatNumber(item.quantityReturned! * item.price)}
+                      ${formatNumber(item.totalAmount)}
                     </td>
                   </tr>
                 ))}
@@ -100,7 +121,7 @@ const ViewReturnedItemsModal = ({
               <tfoot>
                 <tr className="bg-gray-50">
                   <td
-                    colSpan={3}
+                    colSpan={4}
                     className="border border-gray-200 px-4 py-2 text-right font-semibold"
                   >
                     Total Returned Amount:
@@ -108,9 +129,8 @@ const ViewReturnedItemsModal = ({
                   <td className="border border-gray-200 px-4 py-2 text-right font-semibold text-primary">
                     $
                     {formatNumber(
-                      returnedItems.reduce(
-                        (sum, item) =>
-                          sum + item.quantityReturned! * item.price,
+                      returnedItemsFlattenedAccordingToDate.reduce(
+                        (sum, item) => sum + item.totalAmount,
                         0
                       )
                     )}
