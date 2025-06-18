@@ -23,7 +23,7 @@ interface DateFieldProps<TFieldValues extends FieldValues> {
   readOnly?: boolean;
   control: Control<TFieldValues>;
   name: Path<TFieldValues>;
-  label: string;
+  label?: string;
   colSpan?: number;
   withCheckbox?: boolean;
   setIsChecked?: (checked: boolean) => void;
@@ -71,7 +71,7 @@ const DateFieldControlled = <TFieldValues extends FieldValues>({
       <div className={`col-span-${colSpan} `}>
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-700">
-            {withCheckbox && setIsChecked && (
+            {withCheckbox && setIsChecked && label && (
               <input
                 className="form-check-input me-2"
                 type="checkbox"
