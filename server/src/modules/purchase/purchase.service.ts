@@ -33,6 +33,36 @@ export class PurchaseService implements OnModuleInit {
   }
 
   private async migrateQuantityReturned() {
+    const purchasesWithoutReturns = await this.purchaseModel
+      .find({
+        items: {
+          $elemMatch: {
+            $or: [{ returns: { $exists: false } }],
+          },
+        },
+      })
+      .lean();
+
+    // add empty 'returns' array to all items without returns []
+    for (const purchase of purchasesWithoutReturns) {
+      const updatedItems = purchase.items.map((item) => {
+        return {
+          ...item,
+          returns: [],
+        };
+      });
+
+      await this.purchaseModel.updateOne(
+        { _id: purchase._id },
+        { $set: { items: updatedItems } },
+      );
+    }
+
+    if (purchasesWithoutReturns.length > 0)
+      console.log(
+        `Added empty returns array for ${purchasesWithoutReturns.length} purchases`,
+      );
+
     // get all purchases with quantityReturned>0
     // for each item, create a new returns array with object { quantityReturned, returnedAt }
     // returnedAt is the purchase date
@@ -66,7 +96,8 @@ export class PurchaseService implements OnModuleInit {
       );
     }
 
-    console.log(`Migration done for ${purchases.length} purchases`);
+    if (purchases.length > 0)
+      console.log(`Migration done for ${purchases.length} purchases`);
   }
 
   async getAll(dto: GetPurchaseDto) {
