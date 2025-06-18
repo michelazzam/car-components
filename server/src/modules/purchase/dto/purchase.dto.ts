@@ -11,6 +11,22 @@ import {
 } from 'class-validator';
 import { IsValidDateFormat } from 'src/decorators/isValidDateFormat.decorator';
 
+class ReturnedItem {
+  @ApiProperty({
+    required: false,
+  })
+  @IsNumber()
+  quantityReturned: number = 0;
+
+  @ApiProperty({
+    example: '2024-08-01',
+    required: true,
+  })
+  @IsString()
+  @IsValidDateFormat()
+  returnedAt: string;
+}
+
 class PurchaseItem {
   @ApiProperty({
     required: true,
@@ -49,13 +65,6 @@ class PurchaseItem {
     required: false,
   })
   @IsNumber()
-  @IsOptional()
-  quantityReturned: number = 0;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsNumber()
   discount: number = 0;
 
   @ApiProperty({
@@ -77,6 +86,17 @@ class PurchaseItem {
   })
   @IsNumber()
   totalPrice: number;
+
+  @ApiProperty({
+    required: true,
+    type: ReturnedItem,
+    isArray: true,
+  })
+  @IsArray()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ReturnedItem)
+  returns: ReturnedItem[] = [];
 }
 
 export class PurchaseDto {

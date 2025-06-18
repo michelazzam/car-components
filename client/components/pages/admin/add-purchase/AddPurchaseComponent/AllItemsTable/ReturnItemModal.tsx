@@ -1,6 +1,6 @@
 import Modal from "@/shared/Modal";
 import React, { useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AddPurchaseItemSchemaType,
@@ -9,6 +9,8 @@ import {
 } from "@/lib/apiValidations";
 import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import NumberFieldControlled from "@/components/admin/FormControlledFields/NumberFieldControlled";
+import DateFieldControlled from "@/components/admin/FormControlledFields/DateFieldControlled";
+import { FaTrash } from "react-icons/fa";
 
 function ReturnItemModal({
   returnItem,
@@ -28,32 +30,36 @@ function ReturnItemModal({
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
   //---------------------------STORE------------------------------
-  const { editQuantityReturned } = usePurchaseFormStore();
+  const { editReturnedItems } = usePurchaseFormStore();
   //---------------------------API----------------------------------
 
   //---------------------------FORM---------------------------------
   const { handleSubmit, control, reset } = useForm({
-    resolver: zodResolver(apiValidations.ReturnItemSchema),
+    resolver: zodResolver(apiValidations.ReturnItemsFormSchema),
     defaultValues: {
-      quantityReturned: returnItem?.quantityReturned || 0,
+      returns: returnItem?.returns || [],
     },
   });
-
-  const onSubmit = (data: ReturnItemSchemaType) => {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "returns",
+  });
+  const onSubmit = (data: { returns: ReturnItemSchemaType[] }) => {
     console.log("data", returnItem?.itemId);
-    editQuantityReturned(returnItem?.itemId!, data.quantityReturned!);
+    editReturnedItems(returnItem?.itemId!, data.returns);
     setReturnItem(null);
+    reset();
     cancelFormRef.current?.click();
   };
 
   useEffect(() => {
     if (returnItem) {
       reset({
-        quantityReturned: returnItem?.quantityReturned || 0,
+        returns: returnItem?.returns || [],
       });
     } else {
       reset({
-        quantityReturned: 0,
+        returns: [],
       });
     }
   }, [returnItem]);
@@ -62,7 +68,7 @@ function ReturnItemModal({
   return (
     <Modal
       id={triggerModalId}
-      size="xs"
+      size="lg"
       onClose={() => {
         setReturnItem(null);
         reset();
@@ -80,13 +86,46 @@ function ReturnItemModal({
               You are returning quantity of {returnItem?.name}.
             </p>
           </div>
-          <NumberFieldControlled
-            control={control}
-            name="quantityReturned"
-            label="Quantity Returned"
-            placeholder="Quantity Returned"
-            colSpan={12}
-          />
+          {fields.length > 0 && (
+            <div className="col-span-12 grid grid-cols-12 gap-x-2">
+              <p className="col-span-5">Quantity Returned: </p>
+              <p className="col-span-5">Returned At: </p>
+            </div>
+          )}
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="col-span-12 grid grid-cols-12 gap-x-2"
+            >
+              <NumberFieldControlled
+                control={control}
+                name={`returns.${index}.quantityReturned`}
+                placeholder="Quantity Returned"
+                colSpan={5}
+              />
+              <DateFieldControlled
+                formatType="dd-MM-yyyy"
+                control={control}
+                name={`returns.${index}.returnedAt`}
+                placeholder="Returned At"
+                colSpan={5}
+              />
+              <button
+                type="button"
+                className="ti-btn ti-btn-danger col-span-2 !mb-5"
+                onClick={() => remove(index)}
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="ti-btn ti-btn-primary col-span-12 mt-2"
+            onClick={() => append({ quantityReturned: 0, returnedAt: "" })}
+          >
+            Add Return
+          </button>
         </form>
       </Modal.Body>
 

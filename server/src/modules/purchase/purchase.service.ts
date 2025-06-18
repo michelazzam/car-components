@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
 import mongoose, { FilterQuery, Model } from 'mongoose';
@@ -15,7 +15,7 @@ import { TransactionsService } from '../transactions/transactions.service';
 import { IItem } from '../item/item.schema';
 
 @Injectable()
-export class PurchaseService {
+export class PurchaseService implements OnModuleInit {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
@@ -27,6 +27,78 @@ export class PurchaseService {
     private readonly loansTransactionsService: LoansTransactionsService,
     private readonly transactionsService: TransactionsService,
   ) {}
+
+  onModuleInit() {
+    this.migrateQuantityReturned();
+  }
+
+  private async migrateQuantityReturned() {
+    const purchasesWithoutReturns = await this.purchaseModel
+      .find({
+        items: {
+          $elemMatch: {
+            $or: [{ returns: { $exists: false } }],
+          },
+        },
+      })
+      .lean();
+
+    // add empty 'returns' array to all items without returns []
+    for (const purchase of purchasesWithoutReturns) {
+      const updatedItems = purchase.items.map((item) => {
+        return {
+          ...item,
+          returns: [],
+        };
+      });
+
+      await this.purchaseModel.updateOne(
+        { _id: purchase._id },
+        { $set: { items: updatedItems } },
+      );
+    }
+
+    if (purchasesWithoutReturns.length > 0)
+      console.log(
+        `Added empty returns array for ${purchasesWithoutReturns.length} purchases`,
+      );
+
+    // get all purchases with quantityReturned>0
+    // for each item, create a new returns array with object { quantityReturned, returnedAt }
+    // returnedAt is the purchase date
+    const purchases = await this.purchaseModel
+      .find({
+        'items.quantityReturned': { $gt: 0 },
+      })
+      .lean();
+
+    for (const purchase of purchases) {
+      const updatedItems = purchase.items.map((item) => {
+        if (item.quantityReturned > 0) {
+          const returns = [
+            {
+              quantityReturned: item.quantityReturned,
+              returnedAt: purchase.invoiceDate,
+            },
+          ];
+          const { quantityReturned, ...rest } = item;
+          return {
+            ...rest,
+            returns,
+          };
+        }
+        return item;
+      });
+
+      await this.purchaseModel.updateOne(
+        { _id: purchase._id },
+        { $set: { items: updatedItems } },
+      );
+    }
+
+    if (purchases.length > 0)
+      console.log(`Migration done for ${purchases.length} purchases`);
+  }
 
   async getAll(dto: GetPurchaseDto) {
     const {
@@ -64,7 +136,13 @@ export class PurchaseService {
 
     if (onlyReturned) {
       // @ts-ignore
-      filter.$and[0].$or.push({ 'items.quantityReturned': { $gt: 0 } });
+      filter.$and[0].$or.push({
+        items: {
+          $elemMatch: {
+            'returns.quantityReturned': { $gt: 0 },
+          },
+        },
+      });
     }
 
     if (itemId) {
@@ -333,13 +411,24 @@ export class PurchaseService {
         }
       }
 
+      const totalReturns = item.returns.reduce(
+        (acc, ret) => acc + ret.quantityReturned,
+        0,
+      );
+
       const totalQuantityBought =
-        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
+        item.quantity + item.quantityFree - totalReturns;
       product.quantity += totalQuantityBought;
 
-      // calc new cost
-      product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
-      await product.save();
+      const hasReturnedAllItems =
+        totalReturns === item.quantity + item.quantityFree;
+
+      // calc new cost only if he hasn't returned all items, otherwise it will divide by 0
+      if (!hasReturnedAllItems) {
+        // calc new cost
+        product.cost = formatMoneyField(item.totalPrice / totalQuantityBought)!;
+        await product.save();
+      }
 
       actions.push(
         `Purchased ${item.quantity} x ${product.name} for ${formatMoneyField(
@@ -462,9 +551,14 @@ export class PurchaseService {
         continue; //-> ignore deleted products
       }
 
+      const totalReturns = (item.returns || []).reduce(
+        (acc, ret) => acc + ret.quantityReturned,
+        0,
+      );
+
       // Revert quantity
       const totalQuantityBought =
-        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
+        item.quantity + item.quantityFree - totalReturns;
       product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase

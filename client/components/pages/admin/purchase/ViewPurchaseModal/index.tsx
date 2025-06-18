@@ -19,7 +19,7 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const grandTotal = subtotal + vatAmount;
   const balanceDue = grandTotal - purchase.amountPaid;
   const hasAtLeastOneReturnedItem = purchase.items.some(
-    (item) => item.quantityReturned && item.quantityReturned > 0
+    (item) => item.returns && item.returns.length > 0
   );
   return (
     <Modal id="view-purchase-modal">
@@ -93,11 +93,18 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
                       ${item.price.toFixed(2)}
                     </td>
                     <td className="px-4 py-2 border">
-                      {item.quantity - (item.quantityReturned || 0)}
+                      {item.quantity -
+                        (item.returns.reduce(
+                          (acc, ret) => acc + ret.quantityReturned,
+                          0
+                        ) || 0)}
                     </td>
                     {hasAtLeastOneReturnedItem && (
                       <td className="px-4 py-2 border">
-                        {item.quantityReturned}
+                        {item.returns.reduce(
+                          (acc, ret) => acc + ret.quantityReturned,
+                          0
+                        )}
                       </td>
                     )}
                     <td className="px-4 py-2 border">{item.quantityFree}</td>

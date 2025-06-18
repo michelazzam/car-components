@@ -39,7 +39,7 @@ fn main() {
         .setup(|app| {
             let sidecar_command = app.shell().sidecar("server").unwrap();
             let (mut _rx, child) = sidecar_command
-                .env("NODE_ENV", "development")
+                .env("NODE_ENV", "production")
                 .env("PORT", "8000")
                 .env("DATABASE_URL", "mongodb://127.0.0.1:27017")
                 .env("AMS_SERVER_URL", "https://admin.panel.advanced-meta.com")

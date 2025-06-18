@@ -176,7 +176,7 @@ const PurchaseTable = ({
       cell: ({ row }) => {
         const items = row.original.items;
         const hasReturnedItems = items.some(
-          (item: any) => item.quantityReturned > 0
+          (item: any) => item.returns && item.returns.length > 0
         );
         return (
           <div
