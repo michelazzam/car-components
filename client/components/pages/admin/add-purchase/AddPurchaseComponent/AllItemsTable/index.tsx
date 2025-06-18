@@ -34,9 +34,14 @@ function AllItemsTable() {
       header: "Qty Free",
       cell: ({ getValue }) => <div>{getValue()}</div>,
     }),
-    columnHelper.accessor("quantityReturned", {
+    columnHelper.accessor("returns", {
       header: "Qty Returned",
-      cell: ({ getValue }) => <div>{getValue() || 0}</div>,
+      cell: ({ getValue }) => (
+        <div>
+          {getValue()?.reduce((acc, curr) => acc + curr.quantityReturned, 0) ||
+            0}
+        </div>
+      ),
     }),
     columnHelper.accessor("discount", {
       header: "Discount",

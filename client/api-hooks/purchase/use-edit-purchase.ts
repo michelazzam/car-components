@@ -17,7 +17,10 @@ export const useEditPurchase = ({
 };
 
 export type EditPurchaseItemT = AddPurchaseItemT & {
-  quantityReturned: number;
+  returns: {
+    quantityReturned: number;
+    returnedAt: string;
+  }[];
 };
 
 export type EditPurchaseT = AddPurchaseT & {

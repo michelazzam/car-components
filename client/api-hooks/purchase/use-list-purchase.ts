@@ -80,7 +80,10 @@ export type Purchase = {
       discount: number;
       name: string;
       currentItemCost: number;
-      quantityReturned?: number;
+      returns: {
+        quantityReturned: number;
+        returnedAt: string;
+      }[];
       description: string;
       price: number;
       quantity: number;

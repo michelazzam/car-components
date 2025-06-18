@@ -109,6 +109,7 @@ function AddItemForm() {
       discount: data.discount,
       discountType: data.discountType,
       totalPrice: data.totalPrice,
+      returns: data.returns || [],
     });
     reset();
   };
