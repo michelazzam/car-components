@@ -51,12 +51,16 @@ export class Purchase {
     price: number;
     quantity: number;
     quantityFree: number;
-    quantityReturned: number;
     currentItemCost: number;
     discount: number;
     lotNumber: string;
     expDate: string;
     totalPrice: number;
+
+    returns: {
+      quantityReturned: number;
+      returnedAt: string; // YYYY-MM-DD
+    }[];
   }[];
 }
 

@@ -64,7 +64,13 @@ export class PurchaseService {
 
     if (onlyReturned) {
       // @ts-ignore
-      filter.$and[0].$or.push({ 'items.quantityReturned': { $gt: 0 } });
+      filter.$and[0].$or.push({
+        items: {
+          $elemMatch: {
+            'returns.quantityReturned': { $gt: 0 },
+          },
+        },
+      });
     }
 
     if (itemId) {
@@ -333,8 +339,13 @@ export class PurchaseService {
         }
       }
 
+      const totalReturns = item.returns.reduce(
+        (acc, ret) => acc + ret.quantityReturned,
+        0,
+      );
+
       const totalQuantityBought =
-        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
+        item.quantity + item.quantityFree - totalReturns;
       product.quantity += totalQuantityBought;
 
       // calc new cost
@@ -462,9 +473,14 @@ export class PurchaseService {
         continue; //-> ignore deleted products
       }
 
+      const totalReturns = (item.returns || []).reduce(
+        (acc, ret) => acc + ret.quantityReturned,
+        0,
+      );
+
       // Revert quantity
       const totalQuantityBought =
-        item.quantity + item.quantityFree - (item?.quantityReturned || 0);
+        item.quantity + item.quantityFree - totalReturns;
       product.quantity -= totalQuantityBought;
 
       // Revert cost to what it was during purchase
