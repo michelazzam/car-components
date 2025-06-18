@@ -96,10 +96,14 @@ const PurchaseTable = ({
             cell: ({ getValue }) => {
               const items = getValue();
               const returnedItems = items.filter(
-                (item: any) => item.quantityReturned > 0
+                (item: any) => item.returns.length > 0
               );
               return (
-                <div>{returnedItems.map((item) => item.name).join(", ")}</div>
+                <div className="text-center">
+                  {returnedItems.length > 0
+                    ? returnedItems.map((item) => item.name).join(", ")
+                    : "No returned items"}
+                </div>
               );
             },
           }),
