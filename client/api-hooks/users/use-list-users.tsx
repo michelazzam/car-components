@@ -32,6 +32,18 @@ export type Permissions = {
   Accounting: PermissionAction;
   VehicleMakes: PermissionAction;
 };
+export enum PermissionsEnum {
+  Customers = "Customers",
+  Invoices = "Invoices",
+  Inventory = "Inventory",
+  Purchases = "Purchases",
+  Services = "Services",
+  Suppliers = "Suppliers",
+  Organization = "Organization",
+  Expenses = "Expenses",
+  Accounting = "Accounting",
+  VehicleMakes = "VehicleMakes",
+}
 
 export const userRoles = [
   "user",

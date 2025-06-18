@@ -1,5 +1,8 @@
 import UseAuth from "@/api-hooks/useAuth";
 import { useRouter } from "next/router";
+import { canAccess } from "@/shared/utils/permissions";
+import { pagePermissions } from "@/shared/Providers/AuthProvider";
+import { DASHBOARD_ROUTES } from "./dashboardRoutes";
 
 const FoodMenuIcon = <i className="bx bx-food-menu side-menu__icon"></i>;
 const ArchiveIcon = <i className="bx bx-archive side-menu__icon"></i>;
@@ -27,139 +30,142 @@ export default function useMenuItems() {
 
   const router = useRouter();
   const pathname = router.pathname;
-  if (user?.role === "user") {
-    if (pathname !== "/sign-in" && pathname !== "/add-invoice") {
-      router.push("/add-invoice");
-    }
-  }
+  // if (user?.role === "user") {
+  //   if (pathname !== "/sign-in" && pathname !== "/add-invoice") {
+  //     router.push("/add-invoice");
+  //   }
+  // }
 
   return [
     {
       icon: DashboardIcon,
-      path: "/admin/dashboard",
+      path: DASHBOARD_ROUTES.dashboard,
       type: "link",
-      active: pathname.startsWith("/admin/dashboard"),
-      selected: pathname.startsWith("/admin/dashboard"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.dashboard),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.dashboard),
       title: "Dashboard",
       visible: true,
       children: [],
     },
     {
       icon: FoodMenuIcon,
-      path: "/add-invoice",
+      path: DASHBOARD_ROUTES.addInvoice,
       type: "link",
-      active: pathname.startsWith("/add-invoice"),
-      selected: pathname === "/add-invoice",
+      active: pathname.startsWith(DASHBOARD_ROUTES.addInvoice),
+      selected: pathname === DASHBOARD_ROUTES.addInvoice,
       title: "Add Invoice",
       visible: true,
       children: [],
     },
     {
       icon: CustomerIcon,
-      path: "/admin/customers",
+      path: DASHBOARD_ROUTES.customers,
       type: "link",
-      active: pathname.startsWith("/admin/customers"),
-      selected: pathname === "/admin/customers",
+      active: pathname.startsWith(DASHBOARD_ROUTES.customers),
+      selected: pathname === DASHBOARD_ROUTES.customers,
       title: "Customers",
       visible: true,
       children: [],
     },
     {
       icon: SupplierIcon,
-      path: "/admin/supplier",
+      path: DASHBOARD_ROUTES.suppliers,
       type: "link",
-      active: pathname.startsWith("/admin/supplier"),
-      selected: pathname.startsWith("/admin/supplier"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.suppliers),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.suppliers),
       title: "Suppliers",
       children: [],
       visible: true,
     },
     {
       icon: PurchaseIcon,
-      path: "/admin/purchase",
+      path: DASHBOARD_ROUTES.purchases,
       type: "link",
-      active: pathname.startsWith("/admin/purchase"),
-      selected: pathname.startsWith("/admin/purchase"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.purchases),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.purchases),
       title: "Purchases",
       children: [],
       visible: true,
     },
     {
       icon: ArchiveIcon,
-      path: "/admin/expenses",
+      path: DASHBOARD_ROUTES.expenses,
       type: "link",
-      active: pathname.startsWith("/admin/expenses"),
-      selected: pathname.startsWith("/admin/expenses"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.expenses),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.expenses),
       title: "Expenses",
       visible: true,
       children: [],
     },
     {
       icon: InvoiceIcon,
-      path: "/admin/invoices",
+      path: DASHBOARD_ROUTES.invoices,
       type: "link",
-      active: pathname.startsWith("/admin/invoices"),
-      selected: pathname.startsWith("/admin/invoices"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.invoices),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.invoices),
       title: "Invoices",
       visible: true,
       children: [],
     },
     {
       icon: ArchiveIcon,
-      path: "/admin/inventory",
+      path: DASHBOARD_ROUTES.inventory,
       type: "link",
-      active: pathname.startsWith("/admin/inventory"),
-      selected: pathname.startsWith("/admin/inventory"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.inventory),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.inventory),
       title: "Inventory",
       visible: true,
       children: [],
     },
     {
       icon: ServicesIcon,
-      path: "/admin/services",
+      path: DASHBOARD_ROUTES.services,
       type: "link",
-      active: pathname.startsWith("/admin/services"),
-      selected: pathname.startsWith("/admin/services"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.services),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.services),
       title: "Services",
       visible: true,
       children: [],
     },
     {
       icon: CarIcon,
-      path: "/admin/makes",
+      path: DASHBOARD_ROUTES.makes,
       type: "link",
-      active: pathname.startsWith("/admin/makes"),
-      selected: pathname.startsWith("/admin/makes"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.makes),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.makes),
       title: "Car Models",
       visible: true,
       children: [],
     },
     {
       icon: BalanceIcon,
-      path: "/admin/balance",
+      path: DASHBOARD_ROUTES.balance,
       type: "link",
-      active: pathname.startsWith("/admin/balance"),
-      selected: pathname.startsWith("/admin/balance"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.balance),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.balance),
       title: "Balance",
       visible: true,
       children: [],
     },
     {
       icon: UserIcon,
-      path: "/admin/users",
+      path: DASHBOARD_ROUTES.users,
       type: "link",
-      active: pathname.startsWith("/admin/users"),
-      selected: pathname.startsWith("/admin/users"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.users),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.users),
       title: "Users",
-      visible: true,
+      visible:
+        user?.role === "superAmsAdmin" ||
+        user?.role === "admin" ||
+        user?.role === "specialAccess",
       children: [],
     },
     {
       icon: BillingIcon,
-      path: "/admin/payment-methods",
+      path: DASHBOARD_ROUTES.paymentMethods,
       type: "link",
-      active: pathname.startsWith("/admin/payment-methods"),
-      selected: pathname.startsWith("/admin/payment-methods"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.paymentMethods),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.paymentMethods),
       title: "Payment Methods",
       children: [],
       visible: !(user?.role === "user"),
@@ -167,40 +173,40 @@ export default function useMenuItems() {
 
     {
       icon: SettingsIcon,
-      path: "/admin/settings",
+      path: DASHBOARD_ROUTES.settings,
       type: "link",
-      active: pathname.startsWith("/admin/settings"),
-      selected: pathname.startsWith("/admin/settings"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.settings),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.settings),
       title: "Settings",
       visible: true,
       children: [],
     },
     {
       icon: DBBackupIcon,
-      path: "/admin/db-backup",
+      path: DASHBOARD_ROUTES.dbBackup,
       type: "link",
-      active: pathname.startsWith("/admin/db-backup"),
-      selected: pathname.startsWith("/admin/db-backup"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.dbBackup),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.dbBackup),
       title: "DB Backup",
       children: [],
       visible: user?.role === "superAmsAdmin",
     },
     {
       icon: moneyIcon,
-      path: "/admin/transactions",
+      path: DASHBOARD_ROUTES.transactions,
       type: "link",
-      active: pathname.startsWith("/admin/transactions"),
-      selected: pathname.startsWith("/admin/transactions"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.transactions),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.transactions),
       title: "Transactions",
       children: [],
       visible: user?.role === "superAmsAdmin",
     },
     {
       icon: loanIcon,
-      path: "/admin/loan-transactions",
+      path: DASHBOARD_ROUTES.loanTransactions,
       type: "link",
-      active: pathname.startsWith("/admin/loan-transactions"),
-      selected: pathname.startsWith("/admin/loan-transactions"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.loanTransactions),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.loanTransactions),
       title: "Loan Transactions",
       children: [],
       visible: user?.role === "superAmsAdmin",
@@ -208,13 +214,16 @@ export default function useMenuItems() {
 
     {
       icon: BillingIcon,
-      path: "/admin/ams/billing",
+      path: DASHBOARD_ROUTES.billing,
       type: "link",
-      active: pathname.startsWith("/admin/ams/billing"),
-      selected: pathname.startsWith("/admin/ams/billing"),
+      active: pathname.startsWith(DASHBOARD_ROUTES.billing),
+      selected: pathname.startsWith(DASHBOARD_ROUTES.billing),
       title: "Billing",
       children: [],
       visible: !(user?.role === "user"),
     },
-  ].filter((item) => item.visible);
+  ].filter(
+    (item) =>
+      item.visible && canAccess(user?.permissions, pagePermissions, item.path)
+  );
 }
