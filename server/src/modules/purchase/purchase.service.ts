@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPurchase, Purchase } from './purchase.schema';
 import mongoose, { FilterQuery, Model } from 'mongoose';
@@ -15,7 +15,7 @@ import { TransactionsService } from '../transactions/transactions.service';
 import { IItem } from '../item/item.schema';
 
 @Injectable()
-export class PurchaseService {
+export class PurchaseService implements OnModuleInit {
   constructor(
     @InjectModel(Purchase.name)
     private purchaseModel: Model<IPurchase>,
@@ -27,6 +27,47 @@ export class PurchaseService {
     private readonly loansTransactionsService: LoansTransactionsService,
     private readonly transactionsService: TransactionsService,
   ) {}
+
+  onModuleInit() {
+    this.migrateQuantityReturned();
+  }
+
+  private async migrateQuantityReturned() {
+    // get all purchases with quantityReturned>0
+    // for each item, create a new returns array with object { quantityReturned, returnedAt }
+    // returnedAt is the purchase date
+    const purchases = await this.purchaseModel
+      .find({
+        'items.quantityReturned': { $gt: 0 },
+      })
+      .lean();
+
+    for (const purchase of purchases) {
+      const updatedItems = purchase.items.map((item) => {
+        if (item.quantityReturned > 0) {
+          const returns = [
+            {
+              quantityReturned: item.quantityReturned,
+              returnedAt: purchase.invoiceDate,
+            },
+          ];
+          const { quantityReturned, ...rest } = item;
+          return {
+            ...rest,
+            returns,
+          };
+        }
+        return item;
+      });
+
+      await this.purchaseModel.updateOne(
+        { _id: purchase._id },
+        { $set: { items: updatedItems } },
+      );
+    }
+
+    console.log(`Migration done for ${purchases.length} purchases`);
+  }
 
   async getAll(dto: GetPurchaseDto) {
     const {

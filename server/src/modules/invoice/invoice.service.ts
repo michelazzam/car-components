@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -35,7 +34,7 @@ import { formatMoneyField } from 'src/utils/formatMoneyField';
 import { TelegramService } from 'src/lib/telegram.service';
 
 @Injectable()
-export class InvoiceService implements OnModuleInit {
+export class InvoiceService {
   constructor(
     @InjectModel(Invoice.name)
     private invoiceModel: Model<IInvoice>,
@@ -50,45 +49,6 @@ export class InvoiceService implements OnModuleInit {
     private readonly loansTransactionsService: LoansTransactionsService,
     private readonly telegramService: TelegramService,
   ) {}
-
-  onModuleInit() {
-    this.addItemNoteToOldInvoiceItemsWithNoNote();
-  }
-
-  async addItemNoteToOldInvoiceItemsWithNoNote() {
-    // 1. get all invoices that have items with no note
-    const invoicesWithNoNote = await this.invoiceModel.find({
-      items: {
-        $elemMatch: {
-          note: null,
-        },
-      },
-    });
-
-    console.log(
-      `Found ${invoicesWithNoNote.length} invoices with missing notes`,
-    );
-
-    // 2) patch each invoice in memory
-    for (const invoice of invoicesWithNoNote) {
-      for (const item of invoice.items) {
-        if (!item.note && item.itemRef) {
-          const itemDB = await this.itemService.getOneById(
-            item.itemRef.toString(),
-          );
-          if (itemDB?.note) {
-            await this.invoiceModel.updateOne(
-              { _id: invoice._id, 'items.itemRef': item.itemRef },
-              { $set: { 'items.$.note': itemDB.note } },
-            );
-            console.log(
-              `Patched note on invoice ${invoice._id}, item ${item.itemRef}`,
-            );
-          }
-        }
-      }
-    }
-  }
 
   private async getInvoicesData(dto: GetInvoicesDto, user: ReqUserData) {
     const {
