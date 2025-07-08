@@ -15,53 +15,76 @@ export class AppTokenService {
   ) {}
 
   async validateTokenAndSave(dto: ValidateAppTokenDto) {
-    const { token } = dto;
+    try {
+      console.log('Starting token validation');
+      const { token } = dto;
 
-    await this.validateTokenWithServer(token);
+      console.log('Validating token with server...');
+      await this.validateTokenWithServer(token);
+      console.log('Token validated with server successfully');
 
-    // if passed the validation, save the token to the database
-    const existingToken = await this.appTokenModel.findOne();
-    if (existingToken) {
-      await this.appTokenModel.findOneAndUpdate(
-        { _id: existingToken._id },
-        { token, lastValidatedAt: new Date() },
-      );
-    } else
-      await this.appTokenModel.create({ token, lastValidatedAt: new Date() });
+      // if passed the validation, save the token to the database
+      console.log('Checking for existing token...');
+      const existingToken = await this.appTokenModel.findOne();
+
+      console.log('Saving token to database...');
+      if (existingToken) {
+        await this.appTokenModel.findOneAndUpdate(
+          { _id: existingToken._id },
+          { token, lastValidatedAt: new Date() },
+        );
+      } else {
+        await this.appTokenModel.create({ token, lastValidatedAt: new Date() });
+      }
+      console.log('Token saved successfully');
+    } catch (error) {
+      console.error('Error in validateTokenAndSave:', error);
+      if (error instanceof Error) {
+        throw new BadRequestException(
+          error.message || 'Failed to validate token',
+        );
+      } else {
+        throw new BadRequestException('An unexpected error occurred');
+      }
+    }
   }
 
   async isTokenValid() {
-    // find the token from db to check if the app has contacted our server
-    const tokenObj = await this.appTokenModel.findOne();
-    if (!tokenObj) return { isValid: false };
-
-    // check if the lastValidatedAt is less than 20 days ago
-    const isValid =
-      tokenObj!.lastValidatedAt >
-      new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
-
-    if (!isValid) {
-      // if false & there is internet try to validate it again
-      const hasInternet = await this.hasInternetConnection();
-      if (hasInternet) {
-        await this.validateTokenWithServer(tokenObj.token);
-
-        // update the lastValidatedAt field
-        await this.appTokenModel.findOneAndUpdate(
-          { _id: tokenObj._id },
-          { lastValidatedAt: new Date() },
-        );
-
-        return { isValid: true };
-      } else {
-        return {
-          isValid: false,
-          message: 'Please connect to the internet to validate your license.',
-        };
+    try {
+      // find the token from db to check if the app has contacted our server
+      const tokenObj = await this.appTokenModel.findOne();
+      if (!tokenObj) return { isValid: false };
+      // check if the lastValidatedAt is less than 20 days ago
+      const isValid =
+        tokenObj!.lastValidatedAt >
+        new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
+      if (!isValid) {
+        // if false & there is internet try to validate it again
+        const hasInternet = await this.hasInternetConnection();
+        if (hasInternet) {
+          await this.validateTokenWithServer(tokenObj.token);
+          // update the lastValidatedAt field
+          await this.appTokenModel.findOneAndUpdate(
+            { _id: tokenObj._id },
+            { lastValidatedAt: new Date() },
+          );
+          return { isValid: true };
+        } else {
+          return {
+            isValid: false,
+            message: 'Please connect to the internet to validate your license.',
+          };
+        }
       }
-    }
 
-    return { isValid: true };
+      return { isValid: true };
+    } catch (error) {
+      return {
+        isValid: false,
+        message:
+          error.message || 'An error occurred while validating the token.',
+      };
+    }
   }
 
   async getBilling() {
@@ -91,21 +114,27 @@ export class AppTokenService {
 
   private async validateTokenWithServer(token: string) {
     try {
-      const response = await fetchApi(
-        `${this.configService.get('AMS_SERVER_URL')}/projects/validate-token?token=${token}`,
-        {
-          method: 'POST',
-        },
-      );
+      console.log('Making request to AMS server...');
+      const amsUrl = this.configService.get('AMS_SERVER_URL');
+      console.log('AMS URL:', amsUrl);
+
+      const response = await fetchApi(`${amsUrl}/projects/validate-token`, {
+        method: 'POST',
+        body: { token },
+      });
+
+      console.log('Response from AMS server:', response);
 
       if (response.error) {
-        // If fetchApi returns an error in the response, throw it as a BadRequestException
         throw new BadRequestException(response.error);
       }
 
       return response.data;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      console.error('Error in validateTokenWithServer:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to validate token with server',
+      );
     }
   }
 
