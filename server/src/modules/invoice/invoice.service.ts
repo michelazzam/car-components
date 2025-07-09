@@ -619,11 +619,20 @@ export class InvoiceService {
         -item.quantity,
       );
 
-      // notify owner on telegram if stock is 1
-      if (updatedItem && updatedItem?.quantity <= 1) {
-        const message = `Item ${updatedItem.name}, ${updatedItem.note}, ${updatedItem.locationInStore} reached stock of ${updatedItem.quantity}.`;
+      const updatedItemQuantity = (updatedItem?.quantity || 0) - item.quantity;
 
-        await this.telegramService.sendTelegramMessage(message, true);
+      // notify owner on telegram if stock is 1
+      if (updatedItem && updatedItemQuantity <= 1) {
+        const messageParts = [
+          `Item ${updatedItem.name}`,
+          updatedItem?.note?.trim(),
+          updatedItem?.locationInStore?.trim(),
+          `reached stock of ${updatedItemQuantity}`,
+        ]
+          .filter(Boolean)
+          .join(', ');
+
+        await this.telegramService.sendTelegramMessage(messageParts, true);
       }
     }
 

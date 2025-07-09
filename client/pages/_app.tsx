@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
 import LicenseValidatorWrapper from "@/shared/LicenseValidatorWrapper";
+import AuthProvider from "@/shared/Providers/AuthProvider";
 
 const queryClient = new QueryClient();
 
@@ -25,9 +26,11 @@ function MyApp({ Component, pageProps }: any) {
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <Toaster />
       <LicenseValidatorWrapper>
-        <Layout withoutFooter={Component.withoutFooter}>
-          <Component {...pageProps} />
-        </Layout>
+        <AuthProvider>
+          <Layout withoutFooter={Component.withoutFooter}>
+            <Component {...pageProps} />
+          </Layout>
+        </AuthProvider>
       </LicenseValidatorWrapper>
     </QueryClientProvider>
   );

@@ -303,19 +303,26 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
           (sum, ret) => sum + ret.quantityReturned,
           0
         );
+        console.log("totalQuantityReturned", totalQuantityReturned);
         set((state) => ({
           formValues: {
             ...state.formValues,
-            items: state.formValues.items.map((i) =>
-              i.itemId === itemId
+            items: state.formValues.items.map((i) => {
+              const subTotal = (i.quantity - totalQuantityReturned) * i.price;
+              const discount =
+                i.discountType === "percentage"
+                  ? (subTotal * i.discount) / 100
+                  : i.discount;
+              const totalPrice = subTotal - discount;
+
+              return i.itemId === itemId
                 ? {
                     ...i,
                     returns,
-                    totalPrice:
-                      i.quantity * (i.quantity - totalQuantityReturned),
+                    totalPrice,
                   }
-                : i
-            ),
+                : i;
+            }),
           },
         }));
         get().recalcTotals();

@@ -61,6 +61,7 @@ function PrintInvoice({
     customerNote,
     totalPriceUsd,
     invoiceUsdRate,
+    invoiceNumber,
     type,
     swaps,
     paymentMethods,
@@ -70,6 +71,7 @@ function PrintInvoice({
     return {
       customer: invoiceData.customer,
       vehicle: invoiceData.vehicle,
+      invoiceNumber: invoiceData.number,
       createdAt: printingInvoice?.createdAt,
       items: invoiceData.items,
       discount: invoiceData.accounting.discount,
@@ -104,6 +106,7 @@ function PrintInvoice({
             noTax={noTax}
             organization={organization}
             title="Invoice"
+            invoiceNumber={invoiceNumber}
           />
           <PrintInvoiceDetails
             customer={customer}
@@ -144,10 +147,12 @@ function PrintInvoice({
 const PrintHeader = ({
   title,
   organization,
+  invoiceNumber,
   noTax,
 }: {
   title: string;
   organization: OrganizationInfoType;
+  invoiceNumber?: string;
   noTax: boolean;
 }) => (
   <div
@@ -183,7 +188,10 @@ const PrintHeader = ({
     </div>
 
     <div className="col-span-4 flex flex-col items-end">
-      <h3 className="text-5xl font-bold">{title}</h3>
+      <h3 className="text-5xl font-bold">{title} </h3>
+      {invoiceNumber && (
+        <p className="text-lg text-gray-600">#{invoiceNumber}</p>
+      )}
     </div>
   </div>
 );

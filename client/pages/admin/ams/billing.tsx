@@ -201,7 +201,7 @@ const billing = () => {
       {hasPaidAllInvoices && (
         <div className="flex  gap-x-4 justify-center items-center py-4 w-full bg-success/10 rounded-md mb-4 ">
           <i className="bx bx-party text-lg text-success"></i>
-          <p className=" font-semibold text-lg text-success">
+          <p className=" font-semibold text-lg text-green">
             Congratulations! You have paid all your invoices.
           </p>
         </div>
