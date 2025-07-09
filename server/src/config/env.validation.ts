@@ -3,6 +3,7 @@ import { plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -27,6 +28,7 @@ export class EnvironmentVariables {
   DATABASE_URL: string;
 
   @IsString()
+  @IsOptional()
   BACKUP_DATABASE_URL: string;
 
   @IsString()

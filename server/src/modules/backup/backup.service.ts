@@ -3,10 +3,10 @@ import mongoose, { Connection, Model } from 'mongoose';
 import { EnvConfigService } from 'src/config/env.validation';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Backup, IBackup } from './backup.schema';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { UpdateLocalBackupPathDto } from './dto/update-local-backup-path.dto';
 import { execFile } from 'child_process';
 import * as fs from 'fs';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class BackupService {
@@ -50,39 +50,42 @@ export class BackupService {
     const now = new Date();
 
     // Create backup DB connection
-    const backupConnection = await mongoose
-      .createConnection(this.configService.get('BACKUP_DATABASE_URL')!)
-      .asPromise();
+    const backupdbUrl = this.configService.get('BACKUP_DATABASE_URL');
+    if (backupdbUrl) {
+      const backupConnection = await mongoose
+        .createConnection(this.configService.get('BACKUP_DATABASE_URL')!)
+        .asPromise();
 
-    try {
-      const modelNames = this.mainConnection.modelNames();
+      try {
+        const modelNames = this.mainConnection.modelNames();
 
-      for (const name of modelNames) {
-        const localModel = this.mainConnection.model(name);
-        const cloudModel = backupConnection.model(name, localModel.schema);
+        for (const name of modelNames) {
+          const localModel = this.mainConnection.model(name);
+          const cloudModel = backupConnection.model(name, localModel.schema);
 
-        const updatedDocs = await localModel
-          .find({
-            updatedAt: { $gt: lastCloudBackup },
-          })
-          .lean();
+          const updatedDocs = await localModel
+            .find({
+              updatedAt: { $gt: lastCloudBackup },
+            })
+            .lean();
 
-        for (const doc of updatedDocs) {
-          await cloudModel.updateOne(
-            { _id: doc._id },
-            { $set: doc },
-            { upsert: true },
-          );
+          for (const doc of updatedDocs) {
+            await cloudModel.updateOne(
+              { _id: doc._id },
+              { $set: doc },
+              { upsert: true },
+            );
+          }
         }
-      }
 
-      await this.setLastCloudBackupDate(now);
-      console.log('Ran incremental backup');
-    } catch (err) {
-      console.error('Backup failed:', err);
-    } finally {
-      // Always close the connection after use
-      await backupConnection.close();
+        await this.setLastCloudBackupDate(now);
+        console.log('Ran incremental backup');
+      } catch (err) {
+        console.error('Backup failed:', err);
+      } finally {
+        // Always close the connection after use
+        await backupConnection.close();
+      }
     }
   }
 
