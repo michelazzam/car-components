@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { AppToken, IAppToken } from './app-token.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { EnvConfigService } from 'src/config/env.validation';
-import { ValidateAppTokenDto } from './dto/create-app-token.dto';
+import { ValidateAppTokenDto } from './dto/validate-app-token.dto';
 import { fetchApi } from 'src/utils/fetchApi';
 
 @Injectable()
@@ -16,18 +20,13 @@ export class AppTokenService {
 
   async validateTokenAndSave(dto: ValidateAppTokenDto) {
     try {
-      console.log('Starting token validation');
       const { token } = dto;
 
-      console.log('Validating token with server...');
       await this.validateTokenWithServer(token);
-      console.log('Token validated with server successfully');
 
       // if passed the validation, save the token to the database
-      console.log('Checking for existing token...');
       const existingToken = await this.appTokenModel.findOne();
 
-      console.log('Saving token to database...');
       if (existingToken) {
         await this.appTokenModel.findOneAndUpdate(
           { _id: existingToken._id },
@@ -36,15 +35,14 @@ export class AppTokenService {
       } else {
         await this.appTokenModel.create({ token, lastValidatedAt: new Date() });
       }
-      console.log('Token saved successfully');
     } catch (error) {
-      console.error('Error in validateTokenAndSave:', error);
+      console.log(error);
       if (error instanceof Error) {
-        throw new BadRequestException(
+        throw new InternalServerErrorException(
           error.message || 'Failed to validate token',
         );
       } else {
-        throw new BadRequestException('An unexpected error occurred');
+        throw new InternalServerErrorException('An unexpected error occurred');
       }
     }
   }
@@ -54,20 +52,25 @@ export class AppTokenService {
       // find the token from db to check if the app has contacted our server
       const tokenObj = await this.appTokenModel.findOne();
       if (!tokenObj) return { isValid: false };
+
       // check if the lastValidatedAt is less than 20 days ago
       const isValid =
         tokenObj!.lastValidatedAt >
         new Date(Date.now() - 20 * 24 * 60 * 60 * 1000);
+
       if (!isValid) {
         // if false & there is internet try to validate it again
         const hasInternet = await this.hasInternetConnection();
+
         if (hasInternet) {
           await this.validateTokenWithServer(tokenObj.token);
+
           // update the lastValidatedAt field
           await this.appTokenModel.findOneAndUpdate(
             { _id: tokenObj._id },
             { lastValidatedAt: new Date() },
           );
+
           return { isValid: true };
         } else {
           return {
@@ -90,7 +93,7 @@ export class AppTokenService {
   async getBilling() {
     try {
       const tokenObj = await this.appTokenModel.findOne();
-      if (!tokenObj) throw new BadRequestException('Token not found');
+      if (!tokenObj) throw new NotFoundException('Token not found');
 
       const response = await fetchApi(
         `${this.configService.get('AMS_SERVER_URL')}/get-client-invoices`,
@@ -102,37 +105,31 @@ export class AppTokenService {
       );
 
       if (response.error) {
-        // If fetchApi returns an error in the response, throw it as a BadRequestException
-        throw new BadRequestException(response.error);
+        throw new InternalServerErrorException(response.error);
       }
 
       return response.data;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
   private async validateTokenWithServer(token: string) {
     try {
-      console.log('Making request to AMS server...');
       const amsUrl = this.configService.get('AMS_SERVER_URL');
-      console.log('AMS URL:', amsUrl);
 
       const response = await fetchApi(`${amsUrl}/projects/validate-token`, {
         method: 'POST',
         body: { token },
       });
 
-      console.log('Response from AMS server:', response);
-
       if (response.error) {
-        throw new BadRequestException(response.error);
+        throw new InternalServerErrorException(response.error);
       }
 
       return response.data;
     } catch (error) {
-      console.error('Error in validateTokenWithServer:', error);
-      throw new BadRequestException(
+      throw new InternalServerErrorException(
         error.message || 'Failed to validate token with server',
       );
     }

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppTokenService } from './app-token.service';
 import { IsPublic } from '../user/decorators/isPublic.decorator';
 import { ApiTags } from '@nestjs/swagger';
-import { ValidateAppTokenDto } from './dto/create-app-token.dto';
+import { ValidateAppTokenDto } from './dto/validate-app-token.dto';
 
 @IsPublic()
 @ApiTags('App Token')
