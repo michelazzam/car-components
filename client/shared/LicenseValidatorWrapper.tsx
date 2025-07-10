@@ -13,7 +13,9 @@ export default function LicenseValidatorWrapper({
   const router = useRouter();
 
   useEffect(() => {
-    if (data) if (!data.isValid) router.push("/no-license");
+    if (data && !data.isValid) {
+      router.push("/no-license");
+    }
   }, [data]);
 
   if (isLoading) {
