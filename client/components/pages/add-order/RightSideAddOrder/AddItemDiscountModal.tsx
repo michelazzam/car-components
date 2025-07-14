@@ -34,6 +34,17 @@ const AddItemDiscountModal = ({
 
   const [itemCustomPrice, setItemCustomPrice] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isModalOpen && e.key === "Enter") {
+        e.preventDefault();
+        onSave();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen, itemCustomPrice, discount]);
 
   useEffect(() => {
     if (item?.discount) {
@@ -67,9 +78,11 @@ const AddItemDiscountModal = ({
         id={triggerModalId}
         size="md"
         onOpen={() => {
+          setIsModalOpen(true);
           setItemCustomPrice(item?.price || 0);
         }}
         onClose={() => {
+          setIsModalOpen(false);
           setSelected(undefined);
           setDiscount({ amount: 0, type: "fixed" });
           setItemCustomPrice(0);
