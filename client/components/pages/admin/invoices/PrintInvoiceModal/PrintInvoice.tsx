@@ -213,7 +213,6 @@ const PrintInvoiceDetails = ({
   isB2b: boolean;
   paymentMethods?: InvoicePaymentMethodSchemaType[];
 }) => {
-  console.log("CUSTOMER IS ", customer);
   const hasPaymentMethods = paymentMethods && paymentMethods?.length > 0;
   return (
     <div className="grid grid-cols-12 px-4 py-2">
