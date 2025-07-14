@@ -12,6 +12,8 @@
     "tauri:key": "powershell -Command \"$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content -Raw '.\\src-tauri\\~\\.tauri\\myapp.key'; npm run tauri build -- --debug\"",
     "tauri:build-debug": "tauri build --debug",
     "tauri:build": "tauri build",
+    "tauri:build:car-components": "cross-env CUSTOM_ENV=car-components  node scripts/prepare-env.js &&tauri build",
+    "tauri:build:another-customer": "cross-env CUSTOM_ENV=another-customer  node scripts/prepare-env.js &&tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
     "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
@@ -38,6 +40,7 @@
     "@nestjs/cli": "^11.0.7",
     "@tauri-apps/cli": "^2.5.0",
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "pkg": "^5.8.1",
     "ts-node-dev": "^2.0.0"
   },
