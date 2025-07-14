@@ -72,7 +72,7 @@ const PrintHeader = ({
           )}
           {organization?.address}
           <span className="block text-xs mt-2 font-bold">
-            VAT # {organization?.tvaNumber}
+            MOF # {organization?.tvaNumber}
           </span>
         </p>
       </div>

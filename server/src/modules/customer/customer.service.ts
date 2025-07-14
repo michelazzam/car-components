@@ -193,13 +193,42 @@ export class CustomerService {
     const { make, model, number, odometer, unit } = dto;
 
     // update the vehicle
-    await this.vehicleModel.findByIdAndUpdate(vehicleId, {
-      make,
-      model,
-      number,
-      odometer,
-      unit,
-    });
+    const previousVehicle = await this.vehicleModel.findById(vehicleId);
+    if (!previousVehicle) throw new NotFoundException('Vehicle not found');
+
+    const updatedVehicle = await this.vehicleModel.findByIdAndUpdate(
+      vehicleId,
+      {
+        customer: customerId,
+        make,
+        model,
+        number,
+        odometer,
+        unit,
+      },
+    );
+
+    if (!updatedVehicle) throw new NotFoundException('Vehicle not found');
+
+    //only if id has been changed
+    if (previousVehicle.customer.toString() !== customerId) {
+      // remove vehicle from previous customer
+      const previousCustomer = await this.customerModel.findById(
+        previousVehicle.customer,
+      );
+      if (!previousCustomer) throw new NotFoundException('Customer not found');
+
+      previousCustomer.vehicles = previousCustomer.vehicles.filter(
+        (v) => v.toString() !== vehicleId,
+      );
+      await previousCustomer.save();
+
+      //add vehicle to new customer
+      customer.vehicles.push(updatedVehicle._id);
+      await customer.save();
+    }
+
+    return updatedVehicle;
   }
 
   //-----------------------------DELETE VEHICLE-----------------------------

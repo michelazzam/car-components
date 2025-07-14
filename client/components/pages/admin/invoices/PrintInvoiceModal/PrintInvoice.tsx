@@ -180,7 +180,7 @@ const PrintHeader = ({
           {organization?.address}
           {!noTax && (
             <span className="block text-xs mt-2 font-bold">
-              VAT # {organization?.tvaNumber}
+              MOF # {organization?.tvaNumber}
             </span>
           )}
         </p>
@@ -229,9 +229,9 @@ const PrintInvoiceDetails = ({
               Address <span className="font-bold">{customer.address}</span>
             </h4>
           )}
-          {customer?.phone && (
+          {customer?.phoneNumber && (
             <h4 className="text-xs">
-              Phone <span className="font-bold">{customer.phone}</span>
+              Phone <span className="font-bold">{customer.phoneNumber}</span>
             </h4>
           )}
           {customer?.tvaNumber && (

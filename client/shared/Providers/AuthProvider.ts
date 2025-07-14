@@ -88,7 +88,11 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkAccess = (
     requiredPermission: keyof Permissions | undefined
   ): boolean => {
-    if (!isAuthenticated && !pathname?.includes("sign-in")) {
+    if (
+      !isAuthenticated &&
+      !pathname?.includes("sign-in") &&
+      !pathname?.includes("no-license")
+    ) {
       return false;
     }
     if (!requiredPermission) {
@@ -112,7 +116,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !pathname?.includes("/sign-in")) {
+    if (
+      !isLoading &&
+      !isAuthenticated &&
+      !pathname?.includes("/sign-in") &&
+      !pathname?.includes("/no-license")
+    ) {
       console.log("Redirecting to /sign-in due to not authenticated");
       router.push("/sign-in");
       return;
