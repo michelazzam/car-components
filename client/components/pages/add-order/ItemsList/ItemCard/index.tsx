@@ -22,8 +22,8 @@ function ItemCard({
 
   const addItemToCart = () => {
     const isInCart = cart.find(
-      (element) =>
-        element.name === product?.name && element.price === product?.price
+      (element) => element.name === product?.name
+      // && element.price === product?.price
     );
 
     // If product is in the cart and there's stock left, increment quantity
