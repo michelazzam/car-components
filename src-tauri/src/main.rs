@@ -28,8 +28,9 @@ fn kill_stale_sidecar() {
 
 fn main() {
     dotenv().ok();
-    kill_stale_sidecar();
 
+    kill_stale_sidecar();
+    dotenvy::from_filename(".env").ok();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -39,17 +40,20 @@ fn main() {
         .setup(|app| {
             let sidecar_command = app.shell().sidecar("server").unwrap();
             let (mut _rx, child) = sidecar_command
-                .env("NODE_ENV", "production")
-                .env("PORT", "8000")
-                .env("DATABASE_URL", "mongodb://127.0.0.1:27017")
-                .env("AMS_SERVER_URL", "https://admin.panel.advanced-meta.com")
+                .env("NODE_ENV", std::env::var("NODE_ENV").unwrap())
+                .env("PORT", std::env::var("PORT").unwrap())
+                .env("DATABASE_URL", std::env::var("DATABASE_URL").unwrap())
+                .env("AMS_SERVER_URL", std::env::var("AMS_SERVER_URL").unwrap())
                 .env(
                     "BACKUP_DATABASE_URL",
-                    "mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+                    std::env::var("BACKUP_DATABASE_URL").unwrap(),
                 )
-                .env("TELEGRAM_API_TOKEN", "8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA")
-                .env("CHAT_ID", "-1002683151718")
-                .env("CLIENT_CHAT_ID", "-1002669572928")
+                .env(
+                    "TELEGRAM_API_TOKEN",
+                    std::env::var("TELEGRAM_API_TOKEN").unwrap(),
+                )
+                .env("CHAT_ID", std::env::var("CHAT_ID").unwrap())
+                .env("CLIENT_CHAT_ID", std::env::var("CLIENT_CHAT_ID").unwrap())
                 .args(["--port", "8000"])
                 .spawn()
                 .expect("failed to spawn sidecar");

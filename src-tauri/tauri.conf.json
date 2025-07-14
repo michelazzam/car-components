@@ -32,6 +32,7 @@
   "bundle": {
     "createUpdaterArtifacts": true,
     "externalBin": ["bin/server"],
+    "resources": [".env"],
     "active": true,
     "windows": {
       "allowDowngrades": true,
