@@ -6,14 +6,18 @@
   "scripts": {
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run start:dev --prefix server",
+    "dev:car-components": "cross-env CUSTOM_ENV=car-components node scripts/prepare-env.js && concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:another-customer": "cross-env CUSTOM_ENV=another-customer node scripts/prepare-env.js && concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "tauri:dev": "tauri dev",
+    "tauri:dev:car-components": "cross-env CUSTOM_ENV=car-components node scripts/prepare-env.js && node scripts/update-tauri-config.js && tauri dev",
+    "tauri:dev:another-customer": "cross-env CUSTOM_ENV=another-customer node scripts/prepare-env.js && node scripts/update-tauri-config.js && tauri dev",
     "tauri:key": "powershell -Command \"$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content -Raw '.\\src-tauri\\~\\.tauri\\myapp.key'; npm run tauri build -- --debug\"",
     "tauri:build-debug": "tauri build --debug",
     "tauri:build": "tauri build",
-    "tauri:build:car-components": "cross-env CUSTOM_ENV=car-components  node scripts/prepare-env.js &&tauri build",
-    "tauri:build:another-customer": "cross-env CUSTOM_ENV=another-customer  node scripts/prepare-env.js &&tauri build",
+    "tauri:build:car-components": "cross-env CUSTOM_ENV=car-components  node scripts/prepare-env.js && node scripts/update-tauri-config.js && npm run build:client && tauri build",
+    "tauri:build:another-customer": "cross-env CUSTOM_ENV=another-customer  node scripts/prepare-env.js && node scripts/update-tauri-config.js && npm run build:client && tauri build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
     "prod": "concurrently \"npm run server:prod\" \"npm run client:prod\"",
@@ -22,7 +26,8 @@
     "server": "cd server && npm run dev",
     "server:prod": "cd server && npm start",
     "server:pkg": "npm run pkg --prefix server",
-    "tauri:prod": "npm run server:pkg && npm run tauri:build "
+    "tauri:prod": "npm run server:pkg && npm run tauri:build ",
+    "env:show": "node scripts/show-env.js"
   },
   "repository": {
     "type": "git",
