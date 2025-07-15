@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { EnvConfigService } from 'src/config/env.validation';
 import { fetchApi } from 'src/utils/fetchApi';
+import { getProjectConfig } from './projectConfig';
 
 @Injectable()
 export class TelegramService {
@@ -31,7 +32,7 @@ export class TelegramService {
       chat_id: sendToProdGroup ? this.clientChatId : this.chatId,
       text: sendToProdGroup
         ? message
-        : `Car Components - ${this.configService.get('NODE_ENV')}: ${message}`,
+        : `${getProjectConfig().name} - ${this.configService.get('NODE_ENV')}: ${message}`,
       parse_mode: 'Markdown',
     };
 
