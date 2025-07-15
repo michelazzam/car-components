@@ -7,6 +7,9 @@ const nextConfig = {
   swcMinify: true,
   basePath: "",
   assetPrefix: "",
+  env: {
+    CUSTOM_ENV: process.env.CUSTOM_ENV,
+  },
   images: {
     unoptimized: true,
     loader: "imgix",

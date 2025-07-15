@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { canAccess } from "@/shared/utils/permissions";
 import { pagePermissions } from "@/shared/Providers/AuthProvider";
 import { DASHBOARD_ROUTES } from "./dashboardRoutes";
+import { getProjectConfig } from "@/lib/projectConfig";
 
 const FoodMenuIcon = <i className="bx bx-food-menu side-menu__icon"></i>;
 const ArchiveIcon = <i className="bx bx-archive side-menu__icon"></i>;
@@ -35,7 +36,9 @@ export default function useMenuItems() {
   //     router.push("/add-invoice");
   //   }
   // }
-
+  const { settings } = getProjectConfig();
+  const { features } = settings;
+  const { manageCarBrandsModels } = features;
   return [
     {
       icon: DashboardIcon,
@@ -134,7 +137,7 @@ export default function useMenuItems() {
       active: pathname.startsWith(DASHBOARD_ROUTES.makes),
       selected: pathname.startsWith(DASHBOARD_ROUTES.makes),
       title: "Car Models",
-      visible: true,
+      visible: manageCarBrandsModels,
       children: [],
     },
     {
