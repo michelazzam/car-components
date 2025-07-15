@@ -146,6 +146,8 @@ export const API = {
   editPaymentMethod: (id: string) => `/payment-methods/${id}`, //PUT
   deletePaymentMethod: (id: string) => `/payment-methods/${id}`, //DELETE
 
+  // Project Config
+  getProjectConfig: "/app-token/project-config",
   // ams:
   getBilling: "/app-token/billing",
   checkLicense: "/app-token/validate",

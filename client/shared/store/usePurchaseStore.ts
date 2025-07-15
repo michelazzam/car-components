@@ -4,7 +4,8 @@ import { apiValidations, ReturnItemSchemaType } from "@/lib/apiValidations";
 import { ZodError } from "zod";
 import create from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { getProjectConfig } from "@/lib/projectConfig";
+// Note: This store is used outside of React components, so we'll use a fallback
+// The actual config will be loaded when the store is used in React components
 
 //
 // 1) Your unified formValues type
@@ -358,7 +359,7 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
       },
     }),
     {
-      name: getProjectConfig().storage.name, // name of the item in the storage (must be unique)
+      name: "Car Components Purchase Storage", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
     }
   )

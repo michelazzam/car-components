@@ -1,6 +1,4 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
+import { ProjectsConfig } from 'src/config/projects';
 export interface ProjectConfig {
   name: string;
   displayName: string;
@@ -56,72 +54,16 @@ export const getProjectConfig = (): ProjectConfig => {
   }
 
   const customEnv = process.env.CUSTOM_ENV || 'car-components';
-  const configPath = path.resolve(__dirname, '../../../config/projects.json');
-
-  if (!fs.existsSync(configPath)) {
-    console.warn(
-      'Project configuration file not found, using default car-components config',
-    );
-    // Return default config
-    return {
-      name: 'Car Components',
-      displayName: 'Car Components',
-      description: 'Car Components Management System',
-      author: 'Car Components',
-      keywords: 'system, pos, apos, Car Components, Car Components - APOS',
-      productName: 'car-components',
-      identifier: 'com.ams.carcomponents',
-      version: '0.2.0',
-      repository: {
-        url: 'git+https://github.com/michelazzam/Car-Components.git',
-        issues: 'https://github.com/michelazzam/Car-Components/issues',
-        homepage: 'https://github.com/michelazzam/Car-Components#readme',
-      },
-      updater: {
-        endpoints: [
-          'https://github.com/michelazzam/car-components/releases/latest/download/latest.json',
-        ],
-      },
-      storage: {
-        name: 'Car Components Purchase Storage',
-      },
-      settings: {
-        features: {
-          manageCarBrandsModels: true,
-          allowServices: true,
-          showSort: true,
-          allowEditingStock: true,
-        },
-        invoice: {
-          manageCustomerType: true,
-          allowItemDiscountLessThanCost: false,
-          allowChangePrice: true,
-          allowDiscountPerItem: true,
-        },
-        inventory: {
-          showSort: true,
-          allowEditingStock: true,
-          showStockLevels: true,
-          allowBulkOperations: true,
-        },
-        ui: {
-          theme: 'car-theme',
-          primaryColor: '#3B82F6',
-          secondaryColor: '#1E40AF',
-        },
-      },
-    };
-  }
-
+  console.log('CUSTOM ENV', customEnv);
+  console.log('PROCESS.ENV', process.env.CUSTOM_ENV);
   try {
-    const projectsConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const config = projectsConfig[customEnv];
+    const config = ProjectsConfig[customEnv];
 
     if (!config) {
       console.warn(
         `Project config not found for environment: ${customEnv}, falling back to car-components`,
       );
-      cachedConfig = projectsConfig['car-components'] as ProjectConfig;
+      cachedConfig = ProjectsConfig['car-components'] as ProjectConfig;
     } else {
       cachedConfig = config as ProjectConfig;
     }

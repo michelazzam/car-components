@@ -1,8 +1,8 @@
-import { getProjectConfig } from "@/lib/projectConfig";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 export const useCustomEnv = () => {
   const customEnv = process.env.CUSTOM_ENV;
-  const config = getProjectConfig();
+  const config = useProjectConfig();
 
   return {
     isCarComponents: customEnv === "car-components",

@@ -6,8 +6,8 @@
   "scripts": {
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run start:dev --prefix server",
-    "dev:car-components": "cross-env CUSTOM_ENV=car-components node scripts/prepare-env.js && concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:another-customer": "cross-env CUSTOM_ENV=another-customer node scripts/prepare-env.js && concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:car-components": "cross-env CUSTOM_ENV=car-components node scripts/prepare-env.js && concurrently \"cross-env CUSTOM_ENV=car-components npm run dev:server\" \"npm run dev:client\"",
+    "dev:another-customer": "cross-env CUSTOM_ENV=another-customer node scripts/prepare-env.js && concurrently \"cross-env CUSTOM_ENV=another-customer npm run dev:server\" \"npm run dev:client\"",
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "tauri:dev": "tauri dev",

@@ -2,7 +2,7 @@
 import React from "react";
 import Head from "next/head";
 import favicon from "../../../public/assets/images/ams.ico";
-import { getProjectConfig } from "@/lib/projectConfig";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 interface SeoProps {
   title: string;
@@ -12,7 +12,7 @@ interface SeoProps {
 }
 
 const Seo: React.FC<SeoProps> = ({ title, description, author, keywords }) => {
-  const config = getProjectConfig();
+  const config = useProjectConfig();
 
   return (
     <Head>

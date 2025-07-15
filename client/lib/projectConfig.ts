@@ -1,86 +1,134 @@
-import projectsConfig from "../../config/projects.json";
-
-export interface ProjectConfig {
-  name: string;
-  displayName: string;
-  description: string;
-  author: string;
-  keywords: string;
-  productName: string;
-  identifier: string;
-  version: string;
-  repository: {
-    url: string;
-    issues: string;
-    homepage: string;
-  };
-  updater: {
-    endpoints: string[];
-  };
-  storage: {
-    name: string;
-  };
-  settings: {
-    features: {
-      manageCarBrandsModels: boolean;
-      allowServices: boolean;
-      showSort: boolean;
-      allowEditingStock: boolean;
-    };
-    invoice: {
-      manageCustomerType: boolean;
-      allowItemDiscountLessThanCost: boolean;
-      allowChangePrice: boolean;
-      allowDiscountPerItem: boolean;
-    };
-    inventory: {
-      showSort: boolean;
-      allowEditingStock: boolean;
-      showStockLevels: boolean;
-      allowBulkOperations: boolean;
-    };
-    ui: {
-      theme: string;
-      primaryColor: string;
-      secondaryColor: string;
-    };
-  };
-}
-
-export const getProjectConfig = (): ProjectConfig => {
-  const customEnv = process.env.CUSTOM_ENV || "car-components";
-  const config = projectsConfig[customEnv as keyof typeof projectsConfig];
-
-  if (!config) {
-    console.warn(
-      `Project config not found for environment: ${customEnv}, falling back to car-components`
-    );
-    return projectsConfig["car-components"] as ProjectConfig;
-  }
-
-  return config as ProjectConfig;
-};
+import {
+  useGetProjectConfig,
+  ProjectConfig,
+} from "@/api-hooks/useGetProjectConfig";
 
 export const useProjectConfig = () => {
-  const config = getProjectConfig();
+  const { data: config, isLoading, error } = useGetProjectConfig();
+
+  if (isLoading) {
+    return {
+      isLoading: true,
+      error: null,
+      // Return default values while loading
+      name: "Loading...",
+      displayName: "Loading...",
+      description: "",
+      author: "",
+      keywords: "",
+      productName: "",
+      identifier: "",
+      version: "",
+      repository: { url: "", issues: "", homepage: "" },
+      updater: { endpoints: [] },
+      storage: { name: "" },
+      settings: {
+        features: {
+          manageCarBrandsModels: false,
+          allowServices: false,
+          showSort: false,
+          allowEditingStock: false,
+        },
+        invoice: {
+          manageCustomerType: false,
+          allowItemDiscountLessThanCost: false,
+          allowChangePrice: false,
+          allowDiscountPerItem: false,
+        },
+        inventory: {
+          showSort: false,
+          allowEditingStock: false,
+          showStockLevels: false,
+          allowBulkOperations: false,
+        },
+        ui: {
+          theme: "",
+          primaryColor: "",
+          secondaryColor: "",
+        },
+      },
+      // Helper methods
+      isFeatureEnabled: () => false,
+      isInvoiceSettingEnabled: () => false,
+      isInventorySettingEnabled: () => false,
+      getThemeColor: () => "",
+    };
+  }
+
+  if (error || !config) {
+    return {
+      isLoading: false,
+      error,
+      // Return fallback values on error
+      name: "Error Loading Config",
+      displayName: "Error Loading Config",
+      description: "",
+      author: "",
+      keywords: "",
+      productName: "",
+      identifier: "",
+      version: "",
+      repository: { url: "", issues: "", homepage: "" },
+      updater: { endpoints: [] },
+      storage: { name: "" },
+      settings: {
+        features: {
+          manageCarBrandsModels: false,
+          allowServices: false,
+          showSort: false,
+          allowEditingStock: false,
+        },
+        invoice: {
+          manageCustomerType: false,
+          allowItemDiscountLessThanCost: false,
+          allowChangePrice: false,
+          allowDiscountPerItem: false,
+        },
+        inventory: {
+          showSort: false,
+          allowEditingStock: false,
+          showStockLevels: false,
+          allowBulkOperations: false,
+        },
+        ui: {
+          theme: "",
+          primaryColor: "",
+          secondaryColor: "",
+        },
+      },
+      // Helper methods
+      isFeatureEnabled: () => false,
+      isInvoiceSettingEnabled: () => false,
+      isInventorySettingEnabled: () => false,
+      getThemeColor: () => "",
+    };
+  }
 
   return {
     ...config,
+    isLoading: false,
+    error: null,
     // Helper methods
     isFeatureEnabled: (
       feature: keyof ProjectConfig["settings"]["features"]
     ) => {
-      return config.settings.features[feature];
+      return config.settings.features[
+        feature as keyof typeof config.settings.features
+      ];
     },
     isInvoiceSettingEnabled: (
       setting: keyof ProjectConfig["settings"]["invoice"]
     ) => {
-      return config.settings.invoice[setting];
+      return config.settings.invoice[
+        setting as keyof typeof config.settings.invoice
+      ];
     },
     isInventorySettingEnabled: (
       setting: keyof ProjectConfig["settings"]["inventory"]
     ) => {
-      return config.settings.inventory[setting];
+      return config.settings.inventory[
+        setting as keyof typeof config.settings.inventory
+      ];
     },
     getThemeColor: (type: "primary" | "secondary") => {
       return type === "primary"
