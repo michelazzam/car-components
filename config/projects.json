@@ -1,0 +1,58 @@
+{
+  "car-components": {
+    "name": "car-components",
+    "displayName": "Car Components",
+    "version": "1.0.0",
+    "productName": "Car Components",
+    "identifier": "com.car-components.app",
+    "settings": {
+      "features": {
+        "inventory": true,
+        "billing": true,
+        "reports": true,
+        "users": true
+      },
+      "invoice": {
+        "customization": true,
+        "templates": true
+      },
+      "inventory": {
+        "tracking": true,
+        "alerts": true
+      },
+      "ui": {
+        "theme": "light",
+        "primaryColor": "#1976d2",
+        "secondaryColor": "#424242"
+      }
+    }
+  },
+  "another-customer": {
+    "name": "another-customer",
+    "displayName": "Another Customer",
+    "version": "1.0.0",
+    "productName": "Another Customer App",
+    "identifier": "com.another-customer.app",
+    "settings": {
+      "features": {
+        "inventory": true,
+        "billing": true,
+        "reports": true,
+        "users": true
+      },
+      "invoice": {
+        "customization": true,
+        "templates": true
+      },
+      "inventory": {
+        "tracking": true,
+        "alerts": true
+      },
+      "ui": {
+        "theme": "light",
+        "primaryColor": "#2196f3",
+        "secondaryColor": "#757575"
+      }
+    }
+  }
+}

@@ -1,5 +1,7 @@
 const inquirer = require("inquirer");
 const { spawn } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 const projects = [
   { name: "Car Components", value: "car-components" },
@@ -8,20 +10,27 @@ const projects = [
 
 async function buildTauri() {
   try {
-    // First ask for the private key
-    const { privateKey } = await inquirer.prompt([
-      {
-        type: "password",
-        name: "privateKey",
-        message: "Please provide the Tauri updater private key:",
-        validate: (input) => {
-          if (!input) return "Private key is required";
-          return true;
-        },
-      },
-    ]);
+    // Read the private key from the file
+    const keyPath = path.join(
+      __dirname,
+      "..",
+      "src-tauri",
+      "~",
+      ".tauri",
+      "myapp.key"
+    );
+    let privateKey;
 
-    // Then select the project
+    try {
+      privateKey = fs.readFileSync(keyPath, "utf8");
+      console.log("✅ Successfully read Tauri private key from file");
+    } catch (error) {
+      console.error("❌ Error reading Tauri private key file:", error.message);
+      console.error("Make sure the key file exists at:", keyPath);
+      process.exit(1);
+    }
+
+    // Select the project
     const { project } = await inquirer.prompt([
       {
         type: "list",
@@ -33,14 +42,16 @@ async function buildTauri() {
 
     console.log(`\nStarting Tauri build for ${project}...`);
 
-    // Set the private key as an environment variable and run the build
-    process.env.TAURI_SIGNING_PRIVATE_KEY = privateKey;
-
+    // Set both the private key and CUSTOM_ENV as environment variables
     const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
     const child = spawn(npmCmd, ["run", `tauri:build:${project}`], {
       stdio: "inherit",
       shell: true,
-      env: { ...process.env },
+      env: {
+        ...process.env,
+        TAURI_SIGNING_PRIVATE_KEY: privateKey,
+        CUSTOM_ENV: project,
+      },
     });
 
     child.on("error", (error) => {

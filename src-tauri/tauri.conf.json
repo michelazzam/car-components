@@ -1,38 +1,41 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "car-components",
-  "version": "0.2.0",
-  "identifier": "com.ams.carcomponents",
+  "productName": "Another Customer App",
+  "version": "1.0.0",
+  "identifier": "com.another-customer.app",
   "build": {
     "frontendDist": "../client/out",
     "devUrl": "http://localhost:3000",
     "beforeDevCommand": "npm run dev:client"
   },
-
   "app": {
     "windows": [
       {
-        "title": "car-components",
+        "title": "Another Customer App",
         "width": 800,
         "height": 600,
         "resizable": true,
         "fullscreen": false
       }
     ],
-
     "security": {
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["../client/out/**/*"]
+        "scope": [
+          "../client/out/**/*"
+        ]
       }
     }
   },
-
   "bundle": {
     "createUpdaterArtifacts": true,
-    "externalBin": ["bin/server"],
-    "resources": [".env"],
+    "externalBin": [
+      "bin/server"
+    ],
+    "resources": [
+      ".env"
+    ],
     "active": true,
     "windows": {
       "allowDowngrades": true,
@@ -74,11 +77,16 @@
       }
     },
     "fs": {
-      "scope": ["$APPDATA/**", "$HOME/projects/car-components/**"]
+      "scope": [
+        "$APPDATA/**",
+        "$HOME/projects/Another Customer App/**"
+      ]
     },
     "log": {
       "level": "info",
-      "targets": ["File"]
+      "targets": [
+        "File"
+      ]
     }
   }
 }
