@@ -1,12 +1,8 @@
 const inquirer = require("inquirer");
-const { spawn, spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-
-const projects = [
-  { name: "Car Components", value: "car-components" },
-  { name: "Another Customer", value: "another-customer" },
-];
+const projectConfig = require("../config/projects.config");
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -49,22 +45,24 @@ async function buildTauri() {
       process.exit(1);
     }
 
-    // Select the project
+    // Select the project using central config
     const { project } = await inquirer.prompt([
       {
         type: "list",
         name: "project",
         message: "Which project would you like to build?",
-        choices: projects,
+        choices: projectConfig.getProjectNames(),
       },
     ]);
 
-    console.log(`\nStarting Tauri build for ${project}...`);
+    const projectDetails = projectConfig.getProject(project);
+    console.log(`\nStarting Tauri build for ${projectDetails.displayName}...`);
 
     const env = {
       ...process.env,
       TAURI_SIGNING_PRIVATE_KEY: privateKey,
       CUSTOM_ENV: project,
+      ...projectDetails.env, // Inject project-specific environment variables
     };
 
     // Execute build steps in sequence

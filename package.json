@@ -12,7 +12,8 @@
     "build": "concurrently \"npm run build:server\" \"npm run build:client\"",
     "tauri:build": "node scripts/build-tauri.js",
     "tauri:build-debug": "tauri build --debug",
-    "env:show": "node scripts/show-env.js"
+    "env:show": "node scripts/show-env.js",
+    "project:new": "node scripts/setup-project.js"
   },
   "repository": {
     "type": "git",

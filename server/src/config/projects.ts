@@ -47,6 +47,41 @@ export const ProjectsConfig = {
         secondaryColor: '#1E40AF',
       },
     },
+    env: {
+      client: {
+        NEXT_PUBLIC_APP_NAME: 'Car Components',
+        NEXT_PUBLIC_BILLING_TOKEN: 'token_for_car_components',
+        NEXT_PUBLIC_API_URL: 'http://localhost:8000/v1',
+        NEXT_PUBLIC_BILLING_URL:
+          'https://admin.panel.staging.advanced-meta.com',
+        NEXT_PUBLIC_GITHUB_TOKEN:
+          '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',
+        NEXT_PUBLIC_ALLOW_SERVICES: 'true',
+        NEXT_PUBLIC_MANAGE_CAR_BRANDS_MODELS: 'true',
+        NEXT_PUBLIC_ALLOW_EDITING_STOCK: 'true',
+        NEXT_PUBLIC_MANAGE_CUSTOMER_TYPE: 'true',
+        NEXT_PUBLIC_ALLOW_ITEM_DISCOUNT_LESS_THAN_COST: 'false',
+        NEXT_PUBLIC_ALLOW_CHANGE_PRICE: 'true',
+        NEXT_PUBLIC_ALLOW_DISCOUNT_PER_ITEM: 'true',
+        NEXT_PUBLIC_PRIMARY_COLOR: '#3B82F6',
+        NEXT_PUBLIC_SECONDARY_COLOR: '#1E40AF',
+      },
+      tauri: {
+        NODE_ENV: 'development',
+        PORT: '8000',
+        DATABASE_URL: 'mongodb://127.0.0.1:27017',
+        AMS_SERVER_URL: 'https://admin.panel.advanced-meta.com',
+        BACKUP_DATABASE_URL:
+          'mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+        TELEGRAM_API_TOKEN: '8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA',
+        CHAT_ID: '-1002683151718',
+        CLIENT_CHAT_ID: '-1002669572928',
+        TAURI_SIGNING_PRIVATE_KEY:
+          'dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5NWRVcWRpWWJ3NjBsaUJaWUlVdnBWV2NhUzdNRXNzTW9PbjlJOUxxN2tFRUFBQkFBQUFBQUFBQUFBQUlBQUFBQUVvbkhrM0RrN0pWVTQ0aEtSQ3BZSDRFRytnSmcydTFDWndoLy9vcHFJdndiZkZHRitJVnhMSE5jUTh6UDZiRVlkR2JQSzVBSWorTFpxSE9HbkZZZVJ2UzcrTkswYmE4UzNUaS9SNStKazdWSXQrYjBTTHQ2MEhQalQvT2hvaWNYbE43aitmdXZLU2c9Cg==',
+        CLIENT_NAME: 'Car Components',
+        CUSTOM_ENV: 'car-components',
+      },
+    },
   },
   'another-customer': {
     name: 'Another Customer',
@@ -94,6 +129,41 @@ export const ProjectsConfig = {
         theme: 'customer-theme',
         primaryColor: '#10B981',
         secondaryColor: '#059669',
+      },
+    },
+    env: {
+      client: {
+        NEXT_PUBLIC_APP_NAME: 'Another Customer',
+        NEXT_PUBLIC_BILLING_TOKEN: 'token_for_another_customer',
+        NEXT_PUBLIC_API_URL: 'http://localhost:8000/v1',
+        NEXT_PUBLIC_BILLING_URL:
+          'https://admin.panel.staging.advanced-meta.com',
+        NEXT_PUBLIC_GITHUB_TOKEN:
+          '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',
+        NEXT_PUBLIC_ALLOW_SERVICES: 'false',
+        NEXT_PUBLIC_MANAGE_CAR_BRANDS_MODELS: 'false',
+        NEXT_PUBLIC_ALLOW_EDITING_STOCK: 'false',
+        NEXT_PUBLIC_MANAGE_CUSTOMER_TYPE: 'false',
+        NEXT_PUBLIC_ALLOW_ITEM_DISCOUNT_LESS_THAN_COST: 'true',
+        NEXT_PUBLIC_ALLOW_CHANGE_PRICE: 'false',
+        NEXT_PUBLIC_ALLOW_DISCOUNT_PER_ITEM: 'false',
+        NEXT_PUBLIC_PRIMARY_COLOR: '#10B981',
+        NEXT_PUBLIC_SECONDARY_COLOR: '#059669',
+      },
+      tauri: {
+        NODE_ENV: 'development',
+        PORT: '8000',
+        DATABASE_URL: 'mongodb://127.0.0.1:27017',
+        AMS_SERVER_URL: 'https://admin.panel.advanced-meta.com',
+        BACKUP_DATABASE_URL:
+          'mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+        TELEGRAM_API_TOKEN: '8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA',
+        CHAT_ID: '-1002683151718',
+        CLIENT_CHAT_ID: '-1002669572928',
+        TAURI_SIGNING_PRIVATE_KEY:
+          'dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5NWRVcWRpWWJ3NjBsaUJaWUlVdnBWV2NhUzdNRXNzTW9PbjlJOUxxN2tFRUFBQkFBQUFBQUFBQUFBQUlBQUFBQUVvbkhrM0RrN0pWVTQ0aEtSQ3BZSDRFRytnSmcydTFDWndoLy9vcHFJdndiZkZHRitJVnhMSE5jUTh6UDZiRVlkR2JQSzVBSWorTFpxSE9HbkZZZVJ2UzcrTkswYmE4UzNUaS9SNStKazdWSXQrYjBTTHQ2MEhQalQvT2hvaWNYbE43aitmdXZLU2c9Cg==',
+        CLIENT_NAME: 'Another Customer',
+        CUSTOM_ENV: 'another-customer',
       },
     },
   },

@@ -1,11 +1,22 @@
 const inquirer = require("inquirer");
 const { spawn } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
-const projects = [
-  { name: "Car Components", value: "car-components" },
-  { name: "Another Customer", value: "another-customer" },
-];
+// Read and parse the projects.ts file
+const projectsFilePath = path.join(
+  __dirname,
+  "..",
+  "server",
+  "src",
+  "config",
+  "projects.ts"
+);
+const projectsFileContent = fs.readFileSync(projectsFilePath, "utf8");
+const projectsConfigMatch = projectsFileContent.match(
+  /export const ProjectsConfig = ({[\s\S]*});/
+);
+const ProjectsConfig = eval("(" + projectsConfigMatch[1] + ")");
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -28,17 +39,25 @@ function runCommand(command, args, options = {}) {
 
 async function startDevelopment() {
   try {
-    // Select the project
+    // Get project choices from ProjectsConfig
+    const projectChoices = Object.entries(ProjectsConfig).map(
+      ([id, config]) => ({
+        name: config.displayName,
+        value: id,
+      })
+    );
+
     const { project } = await inquirer.prompt([
       {
         type: "list",
         name: "project",
         message: "Which project would you like to run?",
-        choices: projects,
+        choices: projectChoices,
       },
     ]);
 
-    console.log(`\nStarting development for ${project}...`);
+    const projectDetails = ProjectsConfig[project];
+    console.log(`\nStarting development for ${projectDetails.displayName}...`);
 
     const env = {
       ...process.env,
@@ -49,9 +68,7 @@ async function startDevelopment() {
     console.log("📝 Preparing environment...");
     await runCommand("node", ["scripts/prepare-env.js"], { env });
 
-    // Run server and client concurrently
-    console.log("🚀 Starting development servers...");
-
+    // Run client only since server should be started separately
     // Use concurrently from node_modules directly
     const concurrentlyPath = path.join(
       __dirname,
@@ -65,7 +82,7 @@ async function startDevelopment() {
       concurrentlyPath,
       [
         `"cross-env CUSTOM_ENV=${project} npm run dev:server"`,
-        `"npm run dev:client"`,
+        `"npm run dev:client "`,
       ],
       {
         env,
