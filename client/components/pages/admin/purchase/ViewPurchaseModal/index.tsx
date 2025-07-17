@@ -4,6 +4,7 @@ import Modal from "@/shared/Modal";
 import React, { useRef } from "react";
 import { FaPrint } from "react-icons/fa6";
 import ReactToPrint from "react-to-print";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const printRef = useRef<HTMLDivElement>(null);
@@ -21,6 +22,7 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const hasAtLeastOneReturnedItem = purchase.items.some(
     (item) => item.returns && item.returns.length > 0
   );
+  const { logo } = useProjectConfig();
   return (
     <Modal id="view-purchase-modal">
       <Modal.Header id="view-purchase-modal" title="Invoice" />
@@ -32,11 +34,7 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
 
           <div className="flex justify-between items-center mb-8">
             <div>
-              <img
-                src={"/assets/images/brand-logos/logo.jpg"}
-                alt="logo"
-                className="w-32"
-              />
+              <img src={logo} alt="logo" className="w-32" />
             </div>
 
             <div className="text-right space-y-1">

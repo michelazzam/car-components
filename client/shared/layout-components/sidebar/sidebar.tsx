@@ -5,10 +5,11 @@ import Menuloop from "./menuloop";
 
 import useMenuItems from "./useMenuItems";
 import Image from "next/image";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 const Sidebar = () => {
   const MenuItems = useMenuItems();
-
+  const { logo } = useProjectConfig();
   useEffect(() => {
     const mainContent = document.querySelector(".main-content");
     if (window.innerWidth <= 992) {
@@ -128,7 +129,7 @@ const Sidebar = () => {
                 width={30}
                 height={30}
                 alt="car-components-logo"
-                src="/assets/images/brand-logos/logo.jpg"
+                src={logo}
               />
             </Link>
           </div>

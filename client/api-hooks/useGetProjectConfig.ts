@@ -4,6 +4,7 @@ import { API } from "@/constants/apiEndpoints";
 export interface ProjectConfig {
   name: string;
   displayName: string;
+  logo: string;
   description: string;
   author: string;
   keywords: string;

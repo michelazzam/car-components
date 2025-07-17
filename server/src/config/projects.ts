@@ -1,6 +1,7 @@
 export const ProjectsConfig = {
   'car-components': {
     name: 'Car Components',
+    logo: '/assets/images/brand-logos/logo.jpg',
     displayName: 'Car Components',
     description: 'Car Components Management System',
     author: 'Car Components',
@@ -50,6 +51,7 @@ export const ProjectsConfig = {
   'another-customer': {
     name: 'Another Customer',
     displayName: 'Another Customer App',
+    logo: '/assets/images/brand-logos/thermoBox-logo.jpg',
     description: 'Another Customer Management System',
     author: 'Another Customer',
     keywords: 'system, pos, apos, Another Customer, Another Customer - APOS',

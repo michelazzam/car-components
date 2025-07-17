@@ -9,6 +9,7 @@ export const useProjectConfig = () => {
   if (isLoading) {
     return {
       isLoading: true,
+      logo: "",
       error: null,
       // Return default values while loading
       name: "Loading...",
@@ -59,6 +60,7 @@ export const useProjectConfig = () => {
     return {
       isLoading: false,
       error,
+      logo: "",
       // Return fallback values on error
       name: "Error Loading Config",
       displayName: "Error Loading Config",
