@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Another Customer App",
+  "productName": "XYZ Customer App",
   "version": "1.0.0",
-  "identifier": "com.another-customer.app",
+  "identifier": "com.xyz-customer.app",
   "build": {
     "frontendDist": "../client/out",
     "devUrl": "http://localhost:3000",
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "Another Customer App",
+        "title": "XYZ Customer App",
         "width": 800,
         "height": 600,
         "resizable": true,
@@ -79,7 +79,7 @@
     "fs": {
       "scope": [
         "$APPDATA/**",
-        "$HOME/projects/Another Customer App/**"
+        "$HOME/projects/XYZ Customer App/**"
       ]
     },
     "log": {

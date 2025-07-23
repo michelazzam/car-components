@@ -69,7 +69,7 @@ const projects = {
     version: "0.1.0",
     env: {
       NEXT_PUBLIC_APP_NAME: "XYZ CUSTOMER",
-      NEXT_PUBLIC_API_URL: "http://localhost:8000",
+      NEXT_PUBLIC_API_URL: "http://localhost:8000/v1",
       NEXT_PUBLIC_ALLOW_SERVICES: "true",
     },
     features: {

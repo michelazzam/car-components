@@ -167,4 +167,75 @@ export const ProjectsConfig = {
       },
     },
   },
+  'xyz-customer': {
+    name: 'Xyz Customer',
+    logo: '/assets/images/brand-logos/logo_sanaya.png',
+    displayName: 'Xyz Customer',
+    description: 'Xyz Customer Management System',
+    author: 'Xyz Customer',
+    keywords: 'system, pos, apos, Xyz Customer, Xyz Customer - APOS',
+    productName: 'xyz-customer',
+    identifier: 'com.ams.xyzcustomer',
+    version: '0.1.0',
+    repository: {
+      url: 'git+https://github.com/michelazzam/xyz-customer.git',
+      issues: 'https://github.com/michelazzam/xyz-customer/issues',
+      homepage: 'https://github.com/michelazzam/xyz-customer#readme',
+    },
+    updater: {
+      endpoints: [
+        'https://github.com/michelazzam/xyz-customer/releases/latest/download/latest.json',
+      ],
+    },
+    storage: {
+      name: 'Xyz Customer Purchase Storage',
+    },
+    settings: {
+      features: {
+        manageCarBrandsModels: true,
+        allowServices: true,
+        showSort: true,
+        allowEditingStock: true,
+      },
+      invoice: {
+        manageCustomerType: true,
+        allowItemDiscountLessThanCost: false,
+        allowChangePrice: true,
+        allowDiscountPerItem: true,
+      },
+      inventory: {
+        showSort: true,
+        allowEditingStock: true,
+        showStockLevels: true,
+        allowBulkOperations: true,
+      },
+      ui: {
+        theme: 'xyz-customer-theme',
+        primaryColor: '#3B82F6',
+        secondaryColor: '#1E40AF',
+      },
+    },
+    env: {
+      client: {
+        NEXT_PUBLIC_API_URL: 'http://localhost:8000/v1',
+        NEXT_PUBLIC_BILLING_URL:
+          'https://admin.panel.staging.advanced-meta.com',
+      },
+      tauri: {
+        NODE_ENV: 'development',
+        PORT: '8000',
+        DATABASE_URL: 'mongodb://127.0.0.1:27017',
+        AMS_SERVER_URL: 'https://admin.panel.advanced-meta.com',
+        BACKUP_DATABASE_URL:
+          'mongodb+srv://husseinhopehassan:dlM1aPjAoPpfFc12@cluster0.t9khsc5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+        TELEGRAM_API_TOKEN: '8159012563:AAFewyHGGLCAdm8Y-WTNNzxe88j2Pxo43zA',
+        CHAT_ID: '-1002683151718',
+        CLIENT_CHAT_ID: '-1002669572928',
+        TAURI_SIGNING_PRIVATE_KEY:
+          'dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5NWRVcWRpWWJ3NjBsaUJaWUlVdnBWV2NhUzdNRXNzTW9PbjlJOUxxN2tFRUFBQkFBQUFBQUFBQUFBQUlBQUFBQUVvbkhrM0RrN0pWVTQ0aEtSQ3BZSDRFRytnSmcydTFDWndoLy9vcHFJdndiZkZHRitJVnhMSE5jUTh6UDZiRVlkR2JQSzVBSWorTFpxSE9HbkZZZVJ2UzcrTkswYmE4UzNUaS9SNStKazdWSXQrYjBTTHQ2MEhQalQvT2hvaWNYbE43aitmdXZLU2c9Cg==',
+        CLIENT_NAME: 'Xyz Customer',
+        CUSTOM_ENV: 'xyz-customer',
+      },
+    },
+  },
 };

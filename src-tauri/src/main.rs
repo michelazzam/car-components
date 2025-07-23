@@ -48,7 +48,6 @@ fn main() {
                     "BACKUP_DATABASE_URL",
                     std::env::var("BACKUP_DATABASE_URL").unwrap(),
                 )
-                .env("CUSTOM_ENV", std::env::var("CUSTOM_ENV").unwrap())
                 .env(
                     "TELEGRAM_API_TOKEN",
                     std::env::var("TELEGRAM_API_TOKEN").unwrap(),
