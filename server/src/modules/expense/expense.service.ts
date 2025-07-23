@@ -275,103 +275,120 @@ export class ExpenseService {
 
   private async revertExpenseEffects(expenseId: string) {
     const actions: string[] = [];
+    let supplierToRevert: any = null;
+    let supplierOriginalLoan = 0;
 
-    const expense = await this.expenseModel.findById(expenseId).lean();
-    if (!expense) {
-      throw new BadRequestException('Expense not found');
-    }
+    try {
+      const expense = await this.expenseModel.findById(expenseId).lean();
+      if (!expense) {
+        throw new BadRequestException('Expense not found');
+      }
 
-    // Increase supplier loan
-    if (expense.supplier) {
-      const supplier = await this.supplierervice.getOneById(
-        expense.supplier?.toString(),
+      // Increase supplier loan
+      if (expense.supplier) {
+        const supplier = await this.supplierervice.getOneById(
+          expense.supplier?.toString(),
+        );
+
+        if (supplier) {
+          supplierToRevert = supplier;
+          supplierOriginalLoan = supplier.loan;
+          supplier.loan += expense.amount;
+          await supplier.save();
+
+          actions.push(
+            `Increased supplier ${supplier.name} loan: ${expense.amount}$`,
+          );
+        }
+
+        //-> ignore deleted suppliers
+
+        // undo paying purchases until amount is equal to expense amount
+        if (expense.purchases?.length > 0) {
+          const purchases = await this.purchaseService.getManyByIds(
+            expense.purchases?.map((id) => id.toString()),
+          );
+
+          let totalDeducted = 0;
+          const targetDeduction = expense.amount; // total you want to deduct
+
+          for (const purchase of purchases) {
+            if (totalDeducted >= targetDeduction) break;
+
+            const alreadyPaidAmount = purchase.amountPaid;
+
+            // Calculate how much more we need to deduct
+            const remainingToDeduct = targetDeduction - totalDeducted;
+
+            // Deduct only as much as possible without going below zero
+            const deductionAmount = Math.min(
+              alreadyPaidAmount,
+              remainingToDeduct,
+            );
+
+            const isPurchaseFullyUnpaid = deductionAmount > 0;
+
+            await this.purchaseService.updatePurchasePayments({
+              purchaseId: purchase._id?.toString(),
+              amountPaid: -deductionAmount, // negative for deduction
+              isPaid: !isPurchaseFullyUnpaid, // update paid status
+              expenseLinking: {
+                expenseId,
+                action: 'remove',
+              },
+            });
+
+            totalDeducted += deductionAmount;
+          }
+
+          // This check prevents a critical bug where:
+          // 1. Some purchases might have been partially paid by other expenses
+          // 2. Or purchases were modified after this expense was created
+          // 3. If we can't deduct the full expense amount, we must stop and rollback
+          // Otherwise we'd have inconsistent data where supplier loan increased but expense remains
+          if (totalDeducted < targetDeduction) {
+            throw new BadRequestException(
+              `Could only deduct ${totalDeducted}$, which is less than expense amount ${targetDeduction}$`,
+            );
+          }
+
+          actions.push(`Reverted paying to purchases: ${totalDeducted}$`);
+        }
+
+        // delete loan transaction
+        await this.loansTransactionsService.deleteByExpenseId(expenseId);
+      }
+
+      // update daily report
+      await this.reportService.syncDailyReport({
+        date: expense.date,
+        totalExpenses: expense.amount,
+      });
+
+      // update accounting
+      await this.accountingService.incAccountingNumberFields({
+        totalExpenses: -expense.amount, // decrease total expenses
+        totalSuppliersLoan: expense.supplier ? expense.amount : 0, // re-add total suppliers loan
+        caisse: expense.amount, // re-add caisse
+      });
+
+      actions.push(
+        `Expense ${expense._id} reverted of amount ${expense.amount}$`,
       );
-
-      if (supplier) {
-        supplier.loan += expense.amount;
-        await supplier.save();
-
-        actions.push(
-          `Increased supplier ${supplier.name} loan: ${expense.amount}$`,
-        );
+      await this.transactionsService.saveTransaction({
+        whatHappened: actions.join('.\n\n '),
+        totalAmount: expense.amount,
+        discountAmount: 0,
+        finalAmount: expense.amount,
+        type: 'income',
+      });
+    } catch (error) {
+      // If anything fails, revert the supplier loan change
+      if (supplierToRevert && supplierOriginalLoan !== undefined) {
+        supplierToRevert.loan = supplierOriginalLoan;
+        await supplierToRevert.save();
       }
-
-      //-> ignore deleted suppliers
-
-      // undo paying purchases until amount is equal to expense amount
-      if (expense.purchases?.length > 0) {
-        const purchases = await this.purchaseService.getManyByIds(
-          expense.purchases?.map((id) => id.toString()),
-        );
-
-        let totalDeducted = 0;
-        const targetDeduction = expense.amount; // total you want to deduct
-
-        for (const purchase of purchases) {
-          if (totalDeducted >= targetDeduction) break;
-
-          const alreadyPaidAmount = purchase.amountPaid;
-
-          // Calculate how much more we need to deduct
-          const remainingToDeduct = targetDeduction - totalDeducted;
-
-          // Deduct only as much as possible without going below zero
-          const deductionAmount = Math.min(
-            alreadyPaidAmount,
-            remainingToDeduct,
-          );
-
-          const isPurchaseFullyUnpaid = deductionAmount > 0;
-
-          await this.purchaseService.updatePurchasePayments({
-            purchaseId: purchase._id?.toString(),
-            amountPaid: -deductionAmount, // negative for deduction
-            isPaid: !isPurchaseFullyUnpaid, // update paid status
-            expenseLinking: {
-              expenseId,
-              action: 'remove',
-            },
-          });
-
-          totalDeducted += deductionAmount;
-        }
-
-        if (totalDeducted < targetDeduction) {
-          // Handle if you cannot deduct full expense.amount
-          throw new Error(
-            `Could only deduct ${totalDeducted}$, which is less than expense amount ${targetDeduction}`,
-          );
-        }
-
-        actions.push(`Reverted paying to purchases: ${totalDeducted}$`);
-      }
-
-      // delete loan transaction
-      await this.loansTransactionsService.deleteByExpenseId(expenseId);
+      throw error;
     }
-
-    // update daily report
-    await this.reportService.syncDailyReport({
-      date: expense.date,
-      totalExpenses: expense.amount,
-    });
-
-    // update accounting
-    await this.accountingService.incAccountingNumberFields({
-      totalExpenses: -expense.amount, // decrease total expenses
-      totalSuppliersLoan: expense.supplier ? expense.amount : 0, // re-add total suppliers loan
-      caisse: expense.amount, // re-add caisse
-    });
-
-    actions.push(
-      `Expense ${expense._id} reverted of amount ${expense.amount}$`,
-    );
-    await this.transactionsService.saveTransaction({
-      whatHappened: actions.join('.\n\n '),
-      totalAmount: expense.amount,
-      discountAmount: 0,
-      finalAmount: expense.amount,
-      type: 'income',
-    });
   }
 }
