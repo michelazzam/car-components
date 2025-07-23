@@ -219,7 +219,7 @@ const PurchaseTable = ({
             <button
               id="delete-btn"
               className="btn btn-sm btn-danger text-danger border-danger rounded-md p-1 hover:bg-danger border hover:text-white transition-all"
-              data-hs-overlay="#delete-record-modal"
+              data-hs-overlay="#delete-purchase-modal"
               onClick={() => setSelectedPurchase(row.original)}
             >
               <FaRegTrashCan />
@@ -302,6 +302,7 @@ const PurchaseTable = ({
       <DeleteRecord
         endpoint={API.deletePurchase(selectedPurchase?._id || "")}
         queryKeysToInvalidate={[["purchases"]]}
+        id="delete-purchase-modal"
       />
       <ViewPurchaseModal purchase={selectedPurchase} />
       <ExpenseModal

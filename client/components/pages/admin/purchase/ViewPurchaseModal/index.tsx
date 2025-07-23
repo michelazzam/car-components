@@ -9,6 +9,8 @@ import { useProjectConfig } from "@/lib/projectConfig";
 function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const printRef = useRef<HTMLDivElement>(null);
   const { data: orgDetails } = useGetOrganization();
+  const { logo } = useProjectConfig();
+
   if (!purchase) return null;
 
   // calculate sums
@@ -22,7 +24,7 @@ function ViewPurchaseModal({ purchase }: { purchase?: Purchase }) {
   const hasAtLeastOneReturnedItem = purchase.items.some(
     (item) => item.returns && item.returns.length > 0
   );
-  const { logo } = useProjectConfig();
+
   return (
     <Modal id="view-purchase-modal">
       <Modal.Header id="view-purchase-modal" title="Invoice" />
