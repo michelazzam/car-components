@@ -8,16 +8,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Accounting, IAccounting } from './accounting.schema';
 import { Model } from 'mongoose';
 import { UpdateUsdRateDto } from './dto/update-usd-rate.dto';
+import { SupplierService } from '../supplier/supplier.service';
 
 @Injectable()
 export class AccountingService implements OnModuleInit {
   constructor(
     @InjectModel(Accounting.name)
     private accountingModel: Model<IAccounting>,
+    private supplierService: SupplierService,
   ) {}
 
-  onModuleInit() {
-    this.populateAccounting();
+  async onModuleInit() {
+    await this.populateAccounting();
   }
 
   async populateAccounting() {
@@ -28,6 +30,30 @@ export class AccountingService implements OnModuleInit {
     } else {
       console.log('Accounting already exists');
     }
+
+    // Calculate total supplier loans by getting all suppliers and summing their loans
+    //Todo - remove this after the migration is done 23-7-2025
+    const { suppliers } = await this.supplierService.getAll({
+      pageIndex: 0,
+      pageSize: 1000000, // Large number to get all suppliers
+      onlyHasLoan: 'true', // Only get suppliers with loans
+    });
+
+    const totalSuppliersLoan = suppliers.reduce(
+      (total, supplier) => total + supplier.loan,
+      0,
+    );
+
+    // Update the accounting record with the calculated total
+    await this.accountingModel.findOneAndUpdate(
+      {},
+      { $set: { totalSuppliersLoan } },
+      { new: true },
+    );
+
+    console.info(
+      `Total supplier loans calculated and updated: ${totalSuppliersLoan}`,
+    );
   }
 
   async getUsdRate() {
