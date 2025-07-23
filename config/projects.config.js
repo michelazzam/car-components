@@ -6,7 +6,7 @@ const projects = {
     version: "1.0.0",
     env: {
       NEXT_PUBLIC_APP_NAME: "Car Components",
-      NEXT_PUBLIC_API_URL: "http://localhost:3000",
+      NEXT_PUBLIC_API_URL: "http://localhost:8000/v1",
     },
     features: {
       inventory: true,
@@ -27,7 +27,7 @@ const projects = {
     version: "1.0.0",
     env: {
       NEXT_PUBLIC_APP_NAME: "Another Customer",
-      NEXT_PUBLIC_API_URL: "http://localhost:3000",
+      NEXT_PUBLIC_API_URL: "hhttp://localhost:8000/v1",
     },
     features: {
       inventory: true,
@@ -48,7 +48,7 @@ const projects = {
     version: "1.0.0",
     env: {
       NEXT_PUBLIC_APP_NAME: "The Third Customer",
-      NEXT_PUBLIC_API_URL: "http://localhost:3000",
+      NEXT_PUBLIC_API_URL: "http://localhost:8000/v1",
     },
     features: {
       inventory: true,

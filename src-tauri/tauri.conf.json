@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "XYZ Customer App",
+  "productName": "Car Components",
   "version": "1.0.0",
-  "identifier": "com.xyz-customer.app",
+  "identifier": "com.car-components.app",
   "build": {
     "frontendDist": "../client/out",
     "devUrl": "http://localhost:3000",
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "XYZ Customer App",
+        "title": "Car Components",
         "width": 800,
         "height": 600,
         "resizable": true,
@@ -79,7 +79,7 @@
     "fs": {
       "scope": [
         "$APPDATA/**",
-        "$HOME/projects/XYZ Customer App/**"
+        "$HOME/projects/Car Components/**"
       ]
     },
     "log": {
