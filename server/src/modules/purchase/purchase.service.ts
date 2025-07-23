@@ -450,7 +450,7 @@ export class PurchaseService implements OnModuleInit {
 
       // increase total supplier loans
       this.accountingService.incAccountingNumberFields({
-        totalSuppliersLoan: supplier.loan,
+        totalSuppliersLoan: remainingAmount, // here we should add the remaining amount
       });
 
       actions.push(
