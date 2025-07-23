@@ -6,6 +6,7 @@ import { usePurchaseFormStore } from "@/shared/store/usePurchaseStore";
 import React, { useEffect } from "react";
 import { CiCalculator1 } from "react-icons/ci";
 import NumberField from "@/components/admin/Fields/NumberField";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 
 function TotalsCard() {
   //----------------------------------API CALLS--------------------------------------
@@ -16,9 +17,11 @@ function TotalsCard() {
 
   //----------------------------------STORE--------------------------------------
   const {
+    roundTotalPurchaseAmount,
     formValues: {
       totalPaid,
       subTotal,
+      totalWithTax,
       vatLBP,
       paymentAmount,
       tvaPercent,
@@ -47,7 +50,7 @@ function TotalsCard() {
   const supplierAmountDue = Number(
     (supplier?.loan || 0 + subTotal - totalPaid)?.toFixed(2)
   );
-  const totalPurchaseAmount = tvaAmountInDollars + subTotal;
+  // const totalPurchaseAmount = tvaAmountInDollars + subTotal;
   return (
     <div className=" p-4 h-100" style={{ borderRadius: "8px" }}>
       <div className="flex items-center gap-x-4  mb-1">
@@ -65,7 +68,7 @@ function TotalsCard() {
         </div>
 
         <div className="fw-bold text-black col-span-1 ">
-          = ${isNaN(tvaAmountInDollars) ? 0 : tvaAmountInDollars}
+          = ${isNaN(tvaAmountInDollars) ? 0 : tvaAmountInDollars.toFixed(4)}
         </div>
       </div>
 
@@ -136,7 +139,7 @@ function TotalsCard() {
         </div>
         <div className="flex justify-between">
           <span>Total (with TVA) </span>
-          <span className="">${formatNumber(totalPurchaseAmount, 2)}</span>
+          <span className="">${formatNumber(totalWithTax, 2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Paid </span>
@@ -146,9 +149,26 @@ function TotalsCard() {
         </div>
 
         <div className="flex justify-between">
-          <span>Remaining (for this purchase) </span>
+          <div className="flex items-center gap-x-2">
+            <span>Remaining (for this purchase) </span>
+            <button
+              type="button"
+              className="hover:text-success"
+              onClick={() => roundTotalPurchaseAmount("roundUp")}
+            >
+              <FaArrowUp />
+            </button>
+            <button
+              type="button"
+              className="hover:text-danger"
+              onClick={() => roundTotalPurchaseAmount("roundDown")}
+            >
+              <FaArrowDown />
+            </button>
+          </div>
+
           <span className="text-danger fs-20">
-            ${formatNumber(totalPurchaseAmount - totalPaid, 2)}
+            ${formatNumber(totalWithTax - totalPaid, 2)}
           </span>
         </div>
       </div>
