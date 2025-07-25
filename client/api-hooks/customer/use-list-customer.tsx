@@ -2,6 +2,7 @@ import { API } from "@/constants/apiEndpoints";
 import { useReadData } from "../../api-service/useReadData";
 import { Vehicle } from "../vehicles/use_list_vehicles";
 import { Pagination } from "@/components/admin/Pagination";
+import useAuth from "../useAuth";
 
 export interface Customer {
   _id: string;
@@ -34,9 +35,11 @@ const useListCustomers = ({
   search?: string;
   onlyHasLoan?: boolean;
 }) => {
+  const { user } = useAuth();
   return useReadData<CustomerResponse>({
     queryKey: ["customers", { pageSize, pageIndex, search, onlyHasLoan }],
     endpoint: API.listCustomers,
+    enabled: !!user && user.permissions.Customers.read,
     keepPreviousData: true,
     params: { pageSize, pageIndex, search, onlyHasLoan },
   });

@@ -236,13 +236,14 @@ function Header({
           modalTitle="Add Customer"
         />
       )}
-      {user?.permissions.VehicleMakes.read && (
-        <VehicleModal
-          triggerModalId="add-vehicle-modal"
-          modalTitle="Add Vehicle"
-          selectedCustomer={selectedCustomer}
-        />
-      )}
+      {user?.permissions.VehicleMakes.read &&
+        user?.permissions.Customers.read && (
+          <VehicleModal
+            triggerModalId="add-vehicle-modal"
+            modalTitle="Add Vehicle"
+            selectedCustomer={selectedCustomer}
+          />
+        )}
       {user?.permissions.Services.create && (
         <ServiceModal
           triggerModalId="add-services-modal"
