@@ -3,6 +3,7 @@ import { IOrganization, Organization } from './organization.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { getProjectConfig } from 'src/lib/projectConfig';
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -22,7 +23,7 @@ export class OrganizationService implements OnModuleInit {
       console.log('Organization document already exists');
     } else {
       await this.organizationModel.create({
-        name: 'Car Components',
+        name: getProjectConfig().name,
       });
 
       console.log('Organization document created successfully');

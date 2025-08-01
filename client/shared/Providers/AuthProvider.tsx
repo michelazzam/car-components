@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import useAuth from "@/api-hooks/useAuth";
 import {
@@ -9,6 +9,9 @@ import {
 import { usePathname } from "next/navigation";
 import { DASHBOARD_ROUTES } from "../layout-components/sidebar/dashboardRoutes";
 import { getPermission, normalizePath } from "@/shared/utils/permissions";
+import { getAccessToken, clearAccessToken } from "@/utils/auth-storage";
+import { jwtDecode } from "jwt-decode";
+import Spinner from "@/components/common/animations/Spinner";
 
 interface PagePermission {
   permission: keyof Permissions;
@@ -81,9 +84,44 @@ export const extraPagesPermissions: {
 ];
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [showLoading, setShowLoading] = useState(true);
+
+  // Check if token is expired before making any API calls
+  const isTokenValid = () => {
+    const token = getAccessToken();
+    if (!token) return false;
+
+    try {
+      const decoded = jwtDecode(token);
+      if (!decoded || !decoded.exp) return false;
+
+      // Check if token is expired
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        clearAccessToken();
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      clearAccessToken();
+      return false;
+    }
+  };
+
+  const shouldSkipAuth =
+    pathname?.includes("/sign-in") || pathname?.includes("/no-license");
+  const hasValidToken = isTokenValid();
+
+  // Only enable auth check if we have a valid token or we're on a public route
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    // Only show loading on protected routes with valid token
+    setShowLoading(hasValidToken && isLoading);
+  }, [hasValidToken, isLoading]);
 
   const checkAccess = (
     requiredPermission: keyof Permissions | undefined
@@ -116,18 +154,21 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (
-      !isLoading &&
-      !isAuthenticated &&
-      !pathname?.includes("/sign-in") &&
-      !pathname?.includes("/no-license")
-    ) {
-      console.log("Redirecting to /sign-in due to not authenticated");
-      router.push("/sign-in");
-      return;
+    if (!shouldSkipAuth) {
+      if (!hasValidToken) {
+        console.log("Redirecting to /sign-in due to invalid or expired token");
+        router.push("/sign-in");
+        return;
+      }
+
+      if (!isLoading && !isAuthenticated) {
+        console.log("Redirecting to /sign-in due to not authenticated");
+        router.push("/sign-in");
+        return;
+      }
     }
+
     if (!isLoading && isAuthenticated) {
-      //----CHECK IF IM IN REQUIRED PAGES ( with predefined permissions )
       const requiredPermission = pagePermissions.find(
         (p) => normalizePath(p.page) === normalizePath(pathname)
       )?.permission;
@@ -137,7 +178,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push("/");
       }
 
-      //----CHECK IF IM IN EXTRA PAGES
       const extraPage = extraPagesPermissions.find(
         (p) => normalizePath(p.page) === normalizePath(pathname)
       );
@@ -146,7 +186,23 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push("/");
       }
     }
-  }, [isLoading, isAuthenticated, user, pathname, router]);
+  }, [
+    isLoading,
+    isAuthenticated,
+    user,
+    pathname,
+    router,
+    hasValidToken,
+    shouldSkipAuth,
+  ]);
+
+  if (showLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   return children;
 };

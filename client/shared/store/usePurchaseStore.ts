@@ -4,6 +4,8 @@ import { apiValidations, ReturnItemSchemaType } from "@/lib/apiValidations";
 import { ZodError } from "zod";
 import create from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+// Note: This store is used outside of React components, so we'll use a fallback
+// The actual config will be loaded when the store is used in React components
 
 //
 // 1) Your unified formValues type
@@ -61,7 +63,7 @@ interface PurchaseFormState {
   editingPurchase: Purchase | null;
   draftPurchases: DraftPurchase[];
   currentDraftId: string | null;
-
+  roundTotalPurchaseAmount: (type: "roundUp" | "roundDown") => void;
   setCurrentDraftId: (id: string | null) => void;
   upserDraftPurchase: (
     draft: FormValues & { draft_purchase_id?: string; isCurrent?: boolean }
@@ -126,6 +128,19 @@ export const usePurchaseFormStore = create<PurchaseFormState>()(
       errors: {},
       draftPurchases: [],
       currentDraftId: null,
+
+      roundTotalPurchaseAmount: (type: "roundUp" | "roundDown") => {
+        //calculate total
+        get().recalcTotals();
+
+        const { formValues } = get();
+        const totalWithTax = formValues.totalWithTax;
+        const roundedTotal =
+          type === "roundUp"
+            ? Math.ceil(totalWithTax)
+            : Math.floor(totalWithTax);
+        set({ formValues: { ...formValues, totalWithTax: roundedTotal } });
+      },
 
       setCurrentDraftId: (id) => {
         set({ currentDraftId: id });

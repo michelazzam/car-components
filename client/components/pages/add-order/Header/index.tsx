@@ -22,6 +22,7 @@ import { addInvoiceDefaultValues } from "@/pages/add-invoice";
 import { FaPlus } from "react-icons/fa6";
 import { Customer } from "@/api-hooks/customer/use-list-customer";
 import BackBtn from "@/components/common/BackBtn";
+import useAuth from "@/api-hooks/useAuth";
 
 function Header({
   search,
@@ -51,6 +52,7 @@ function Header({
     pageIndex: 0,
     search: debouncedSearch,
   });
+  const { user } = useAuth();
 
   const { data: vehicles } = useListVehicles({
     customerId: customerId,
@@ -228,28 +230,39 @@ function Header({
         }}
       />
       {/* Add Modal */}
-      <CustomerModal
-        triggerModalId="add-customer-modal"
-        modalTitle="Add Customer"
-      />
-      <VehicleModal
-        triggerModalId="add-vehicle-modal"
-        modalTitle="Add Vehicle"
-        selectedCustomer={selectedCustomer}
-      />
-      <ServiceModal
-        triggerModalId="add-services-modal"
-        modalTitle="Add Services"
-      />
-      <InvoicePaymentMethodModal
-        triggerModalId="add-invoice-payment-method-modal"
-        modalTitle="Add Payment Method"
-      />
-      <InvoiceItemsSwapsModal
-        swapsFieldArrayMethods={swapsFieldArrayMethods}
-        triggerModalId="add-invoice-items-swaps-modal"
-        modalTitle="Swap Items"
-      />
+      {user?.permissions.Customers.create && (
+        <CustomerModal
+          triggerModalId="add-customer-modal"
+          modalTitle="Add Customer"
+        />
+      )}
+      {user?.permissions.VehicleMakes.read &&
+        user?.permissions.Customers.read && (
+          <VehicleModal
+            triggerModalId="add-vehicle-modal"
+            modalTitle="Add Vehicle"
+            selectedCustomer={selectedCustomer}
+          />
+        )}
+      {user?.permissions.Services.create && (
+        <ServiceModal
+          triggerModalId="add-services-modal"
+          modalTitle="Add Services"
+        />
+      )}
+      {user?.permissions.Accounting.create && (
+        <InvoicePaymentMethodModal
+          triggerModalId="add-invoice-payment-method-modal"
+          modalTitle="Add Payment Method"
+        />
+      )}
+      {user?.permissions.Invoices.create && (
+        <InvoiceItemsSwapsModal
+          swapsFieldArrayMethods={swapsFieldArrayMethods}
+          triggerModalId="add-invoice-items-swaps-modal"
+          modalTitle="Swap Items"
+        />
+      )}
     </div>
   );
 }

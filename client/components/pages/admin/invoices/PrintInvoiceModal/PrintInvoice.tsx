@@ -17,6 +17,7 @@ import {
 } from "@/api-hooks/restaurant/use-get-organization-info";
 import { InvoicePaymentMethodSchemaType } from "@/lib/apiValidations";
 import { cn } from "@/utils/cn";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 const formatCurrencyInWords = (amount: number) => {
   if (typeof amount !== "number" || isNaN(amount)) return "0.00";
@@ -154,47 +155,46 @@ const PrintHeader = ({
   organization: OrganizationInfoType;
   invoiceNumber?: string;
   noTax: boolean;
-}) => (
-  <div
-    className="
+}) => {
+  const { logo } = useProjectConfig();
+  return (
+    <div
+      className="
   grid grid-cols-10 px-4 py-2 border-b border-gray-200"
-  >
-    <div className="col-span-6 flex items-start gap-x-2">
-      <img
-        src={"/assets/images/brand-logos/logo.jpg"}
-        alt="logo"
-        className="w-32"
-      />
-      <div>
-        <h4 className="text-lg font-semibold">{organization?.name}</h4>
-        <p className="text-sm space-y-1">
-          {organization?.phoneNumber}
-          <br />
+    >
+      <div className="col-span-6 flex items-start gap-x-2">
+        <img src={logo} alt="logo" className="w-32" />
+        <div>
+          <h4 className="text-lg font-semibold">{organization?.name}</h4>
+          <p className="text-sm space-y-1">
+            {organization?.phoneNumber}
+            <br />
 
-          {organization?.email && (
-            <>
-              {organization?.email}
-              <br />
-            </>
-          )}
-          {organization?.address}
-          {!noTax && (
-            <span className="block text-xs mt-2 font-bold">
-              MOF # {organization?.tvaNumber}
-            </span>
-          )}
-        </p>
+            {organization?.email && (
+              <>
+                {organization?.email}
+                <br />
+              </>
+            )}
+            {organization?.address}
+            {!noTax && (
+              <span className="block text-xs mt-2 font-bold">
+                MOF # {organization?.tvaNumber}
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="col-span-4 flex flex-col items-end">
+        <h3 className="text-5xl font-bold">{title} </h3>
+        {invoiceNumber && (
+          <p className="text-lg text-gray-600">#{invoiceNumber}</p>
+        )}
       </div>
     </div>
-
-    <div className="col-span-4 flex flex-col items-end">
-      <h3 className="text-5xl font-bold">{title} </h3>
-      {invoiceNumber && (
-        <p className="text-lg text-gray-600">#{invoiceNumber}</p>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 const PrintInvoiceDetails = ({
   customer,

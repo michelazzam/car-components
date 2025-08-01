@@ -10,13 +10,26 @@ if (!envTarget) {
   process.exit(1);
 }
 
-const src = path.resolve(__dirname, `../src-tauri/.env.${envTarget}`);
-const dest = path.resolve(__dirname, `../src-tauri/.env`);
+// Handle Tauri environment files
+const tauriSrc = path.resolve(__dirname, `../src-tauri/.env.${envTarget}`);
+const tauriDest = path.resolve(__dirname, `../src-tauri/.env`);
 
-if (!fs.existsSync(src)) {
-  console.error(`❌ Environment file ${src} does not exist.`);
+if (!fs.existsSync(tauriSrc)) {
+  console.error(`❌ Tauri environment file ${tauriSrc} does not exist.`);
   process.exit(1);
 }
 
-fs.copyFileSync(src, dest);
-console.log(`✅ Copied ${src} → ${dest}`);
+fs.copyFileSync(tauriSrc, tauriDest);
+console.log(`✅ Copied Tauri ${tauriSrc} → ${tauriDest}`);
+
+// Handle Client environment files
+const clientSrc = path.resolve(__dirname, `../client/.env.${envTarget}`);
+const clientDest = path.resolve(__dirname, `../client/.env`);
+
+if (!fs.existsSync(clientSrc)) {
+  console.error(`❌ Client environment file ${clientSrc} does not exist.`);
+  process.exit(1);
+}
+
+fs.copyFileSync(clientSrc, clientDest);
+console.log(`✅ Copied Client ${clientSrc} → ${clientDest}`);

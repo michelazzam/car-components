@@ -3,6 +3,7 @@ import { AppTokenService } from './app-token.service';
 import { IsPublic } from '../user/decorators/isPublic.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { ValidateAppTokenDto } from './dto/validate-app-token.dto';
+import { getProjectConfig } from 'src/lib/projectConfig';
 
 @IsPublic()
 @ApiTags('App Token')
@@ -24,5 +25,10 @@ export class AppTokenController {
   @Get('billing')
   async getBilling() {
     return await this.appTokenService.getBilling();
+  }
+
+  @Get('project-config')
+  getProjectConfig() {
+    return getProjectConfig();
   }
 }

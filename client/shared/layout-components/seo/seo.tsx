@@ -2,6 +2,7 @@
 import React from "react";
 import Head from "next/head";
 import favicon from "../../../public/assets/images/ams.ico";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 interface SeoProps {
   title: string;
@@ -10,19 +11,18 @@ interface SeoProps {
   keywords?: string;
 }
 
-const Seo: React.FC<SeoProps> = ({
-  title,
-  description = "Car Components",
-  author = "Car Components",
-  keywords = "system, pos, apos, Car Components, Car Components - APOS",
-}) => (
-  <Head>
-    <title>{title}</title>
-    <link rel="icon" href={favicon.src} />
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
-    <meta name="keywords" content={keywords} />
-  </Head>
-);
+const Seo: React.FC<SeoProps> = ({ title, description, author, keywords }) => {
+  const config = useProjectConfig();
+
+  return (
+    <Head>
+      <title>{title}</title>
+      <link rel="icon" href={favicon.src} />
+      <meta name="description" content={description || config.description} />
+      <meta name="author" content={author || config.author} />
+      <meta name="keywords" content={keywords || config.keywords} />
+    </Head>
+  );
+};
 
 export default Seo;

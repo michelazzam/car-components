@@ -338,7 +338,10 @@ const ExpenseTable = ({
 
       <DeleteRecord
         endpoint={API.deleteExpense(selectedExpense?._id || "")}
-        queryKeysToInvalidate={[["expenses"]]}
+        queryKeysToInvalidate={[
+          ["expenses"],
+          ["single-supplier", selectedSupplier?._id],
+        ]}
       />
     </div>
   );

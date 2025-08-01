@@ -4,6 +4,7 @@ import Modal from "@/shared/Modal";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { MdPrint } from "react-icons/md";
+import { useProjectConfig } from "@/lib/projectConfig";
 
 interface ViewReturnedItemsModalProps {
   purchase?: Purchase | null;
@@ -39,7 +40,7 @@ const ViewReturnedItemsModal = ({
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
-
+  const { logo } = useProjectConfig();
   return (
     <Modal
       id={triggerModalId}
@@ -66,11 +67,7 @@ const ViewReturnedItemsModal = ({
               </div>
             </div>
 
-            <img
-              src={"/assets/images/brand-logos/logo.jpg"}
-              alt="logo"
-              className=" w-1/5 object-contain"
-            />
+            <img src={logo} alt="logo" className=" w-1/5 object-contain" />
           </div>
 
           <div className="overflow-x-auto">

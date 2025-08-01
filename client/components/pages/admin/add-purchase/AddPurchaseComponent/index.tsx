@@ -121,7 +121,6 @@ const CustomAddPurchaseComponent = () => {
       tvaPercent: undefined,
       supplier: undefined,
       usdRate: undefined,
-
       amountPaid: formValues.totalPaid,
       totalAmount: formValues.totalWithTax,
       subTotal: formValues.subTotal,

@@ -7,9 +7,11 @@ import { FaRegTrashCan } from "react-icons/fa6";
 export default function DeleteRecord({
   endpoint,
   queryKeysToInvalidate,
+  id = "delete-record-modal",
 }: {
   endpoint: string;
   queryKeysToInvalidate: QueryKey[];
+  id?: string;
 }) {
   const cancelFormRef = useRef<HTMLButtonElement>(null);
 
@@ -26,7 +28,7 @@ export default function DeleteRecord({
   };
 
   return (
-    <Modal id="delete-record-modal" size="xs">
+    <Modal id={id} size="xs">
       <Modal.Header title="Delete Record" id="delete-record-modal" />
       <Modal.Body>
         <div className="flex flex-col items-center justify-center">
@@ -45,7 +47,7 @@ export default function DeleteRecord({
           ref={cancelFormRef}
           onClick={handleClose}
           type="button"
-          data-hs-overlay={`#delete-record-modal`}
+          data-hs-overlay={`#${id}`}
           className="hs-dropdown-toggle ti-btn ti-btn-secondary"
         >
           Cancel

@@ -5,11 +5,11 @@ import { usePosStore } from "@/shared/store/usePosStore";
 const useLogoutUser = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { clearPosStore} = usePosStore();
+  const { clearPosStore } = usePosStore();
   const logout = () => {
+    router.push("/sign-in");
     clearAccessToken();
     queryClient.clear();
-    router.push("/sign-in");
     clearPosStore();
   };
   return logout;
