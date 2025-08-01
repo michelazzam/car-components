@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Car Components",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "identifier": "com.car-components.app",
   "build": {
     "frontendDist": "../client/out",
@@ -22,20 +22,14 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": [
-          "../client/out/**/*"
-        ]
+        "scope": ["../client/out/**/*"]
       }
     }
   },
   "bundle": {
     "createUpdaterArtifacts": true,
-    "externalBin": [
-      "bin/server"
-    ],
-    "resources": [
-      ".env"
-    ],
+    "externalBin": ["bin/server"],
+    "resources": [".env"],
     "active": true,
     "windows": {
       "allowDowngrades": true,
@@ -77,16 +71,11 @@
       }
     },
     "fs": {
-      "scope": [
-        "$APPDATA/**",
-        "$HOME/projects/Car Components/**"
-      ]
+      "scope": ["$APPDATA/**", "$HOME/projects/Car Components/**"]
     },
     "log": {
       "level": "info",
-      "targets": [
-        "File"
-      ]
+      "targets": ["File"]
     }
   }
 }
