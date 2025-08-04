@@ -3,7 +3,10 @@ import { check } from "@tauri-apps/plugin-updater";
 import { ask } from "@tauri-apps/plugin-dialog";
 import PulsingCircle from "@/components/common/animations/PulsingCircle";
 
-async function checkForUpdatesAndUpdate(): Promise<boolean> {
+async function checkForUpdatesAndUpdate(
+  setIsDownloading: (value: boolean) => void,
+  setDownloadProgress: (value: number) => void
+): Promise<boolean> {
   console.log("CHECKING FOR UPDATES");
   const update = await check();
   let downloaded = 0;
@@ -16,6 +19,8 @@ async function checkForUpdatesAndUpdate(): Promise<boolean> {
     );
 
     if (proceed) {
+      setIsDownloading(true);
+      setDownloadProgress(0);
       await update.downloadAndInstall((event) => {
         switch (event.event) {
           case "Started":
@@ -26,9 +31,14 @@ async function checkForUpdatesAndUpdate(): Promise<boolean> {
             break;
           case "Progress":
             downloaded += event.data.chunkLength;
+            const progress = (downloaded / contentLength) * 100;
+            setDownloadProgress(Math.round(progress));
+            setIsDownloading(true);
             console.log(`downloaded ${downloaded} from ${contentLength}`);
             break;
           case "Finished":
+            setDownloadProgress(100);
+            setIsDownloading(false);
             console.log("download finished");
             break;
         }
@@ -54,6 +64,8 @@ function UpdatesButton() {
 
   const [hasUpdates, setHasUpdates] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (!isProduction) return;
@@ -73,27 +85,42 @@ function UpdatesButton() {
   if (!hasUpdates) return null;
 
   return (
-    <div className="flex items-center relative">
-      <button
-        disabled={checking}
-        onClick={() => {
-          setChecking(true);
-          checkForUpdatesAndUpdate()
-            .then(setHasUpdates)
-            .finally(() => setChecking(false));
-        }}
-        className="ti-btn ti-btn-secondary"
-      >
-        {checking
-          ? "Checking..."
-          : hasUpdates
-          ? "A new update is available"
-          : "Check for updates"}
-        <i className="bx bx-download"></i>
-        <div className="absolute top-0 left-0 -translate-x-1/2 translate-y-1/2">
-          <PulsingCircle />
-        </div>
-      </button>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center relative">
+        <button
+          disabled={checking || isDownloading}
+          onClick={() => {
+            setChecking(true);
+            checkForUpdatesAndUpdate(setIsDownloading, setDownloadProgress)
+              .then(setHasUpdates)
+              .finally(() => setChecking(false));
+          }}
+          className="ti-btn ti-btn-secondary flex flex-col "
+        >
+          <div>
+            {" "}
+            {checking && !isDownloading
+              ? "Checking..."
+              : isDownloading
+              ? `Downloading... ${downloadProgress}%`
+              : hasUpdates
+              ? "A new update is available"
+              : "Check for updates"}
+            <i className="bx bx-download"></i>
+            <div className="absolute top-0 left-0 -translate-x-1/2 translate-y-1/2">
+              <PulsingCircle />
+            </div>
+          </div>
+          {isDownloading && (
+            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-secondary transition-all duration-300 ease-in-out"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
