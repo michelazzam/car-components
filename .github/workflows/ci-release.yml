@@ -60,7 +60,7 @@ jobs:
         run: |
           node scripts/prepare-env.js
           node scripts/update-tauri-config.js
-          tauri build
+          npx --yes @tauri-apps/cli build
 
       - name: 🪄 Extract .sig contents
         id: extract_sig
