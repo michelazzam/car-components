@@ -54,7 +54,13 @@ jobs:
       - name: 🏗️ Build Tauri with signing
         env:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: npm run tauri build
+          CUSTOM_ENV: "car-components"
+          NEXT_PUBLIC_APP_NAME: "Car Components"
+          NEXT_PUBLIC_API_URL: "http://localhost:8000/v1"
+        run: |
+          node scripts/prepare-env.js
+          node scripts/update-tauri-config.js
+          tauri build
 
       - name: 🪄 Extract .sig contents
         id: extract_sig
