@@ -1,0 +1,112 @@
+name: 🚀 CI Release
+
+# Trigger on every push to main
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: windows-latest
+    permissions:
+      contents: write    # needed to create releases & upload assets
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 🦀 Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
+          override: true
+
+      - name: 📦 Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix client
+          npm ci --prefix server
+
+      - name: 🏗️ Build server and package
+        run: |
+          cd server
+          npm run build
+          npm run pkg:win
+          cd ..
+
+      - name: 🏗️ Build client
+        run: npm run build:client
+
+      - name: 🔐 Setup Tauri signing
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          New-Item -Path "src-tauri\.tauri" -ItemType Directory -Force
+          Set-Content -Path "src-tauri\.tauri\myapp.key" -Value $env:TAURI_SIGNING_PRIVATE_KEY
+
+      - name: 🏗️ Build Tauri with signing
+        env:
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri build
+
+      - name: 🪄 Extract .sig contents
+        id: extract_sig
+        run: |
+          $SIG_PATH="src-tauri/target/release/bundle/windows/Car Components_${VERSION}_x64-setup.exe.sig"
+          $SIG_CONTENT = Get-Content -Raw $SIG_PATH
+          echo "sig=$SIG_CONTENT" >> $env:GITHUB_OUTPUT
+
+      - name: 📝 Generate latest.json
+        id: gen_manifest
+        run: |
+          $VERSION = node -p "require('./package.json').version"
+          $PUB_DATE = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+          $URL = "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/Car.Components_${VERSION}_x64-setup.exe"
+          
+          $JSON = @{
+            version = $VERSION
+            notes = "Release v${VERSION}"
+            pub_date = $PUB_DATE
+            platforms = @{
+              "windows-x86_64" = @{
+                signature = "${{ steps.extract_sig.outputs.sig }}"
+                url = $URL
+              }
+            }
+          } | ConvertTo-Json -Depth 10
+          
+          Set-Content -Path latest.json -Value $JSON
+          echo "version=$VERSION" >> $env:GITHUB_OUTPUT
+
+      - name: 🏷️ Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.gen_manifest.outputs.version }}
+          release_name: Release v${{ steps.gen_manifest.outputs.version }}
+          body: Automated release for version ${{ steps.gen_manifest.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: 📤 Upload EXE
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src-tauri/target/release/bundle/windows/Car Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
+          asset_name: Car.Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
+          asset_content_type: application/octet-stream
+
+      - name: 📤 Upload latest.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: latest.json
+          asset_name: latest.json
+          asset_content_type: application/json
