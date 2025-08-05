@@ -154,11 +154,15 @@ jobs:
       - name: 🪄 Extract .sig contents
         id: extract_sig
         run: |
-          # First get the version from package.json
-          $VERSION = node -p "require('./package.json').version"
-          # Debug output
-          echo "Looking for signature file with version: $VERSION"
-          $SIG_PATH="src-tauri/target/release/bundle/nsis/Car Components_${VERSION}_x64-setup.exe.sig"
+          # Find the actual generated file version
+          $GENERATED_FILE = Get-ChildItem "src-tauri/target/release/bundle/nsis/Car Components_*_x64-setup.exe.sig" | Select-Object -First 1
+          if (-not $GENERATED_FILE) {
+              echo "❌ No signature file found!"
+              exit 1
+          }
+          $VERSION = [regex]::Match($GENERATED_FILE.Name, 'Car Components_(.+?)_x64-setup\.exe\.sig').Groups[1].Value
+          echo "Found signature file with version: $VERSION"
+          $SIG_PATH = $GENERATED_FILE.FullName
           echo "Full path: $SIG_PATH"
           # List contents of the directory to debug
           if (Test-Path "src-tauri/target/release/bundle/nsis") {
@@ -174,7 +178,7 @@ jobs:
       - name: 📝 Generate latest.json
         id: gen_manifest
         run: |
-          $VERSION = node -p "require('./package.json').version"
+          $VERSION = node -p "require('./src-tauri/tauri.conf.json').package.version"
           $PUB_DATE = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
           $URL = "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/Car.Components_${VERSION}_x64-setup.exe"
           
