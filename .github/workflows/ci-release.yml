@@ -1,5 +1,10 @@
 name: 🚀 CI Release
 
+# This workflow is responsible for:
+# 1. Building and packaging the application for Windows
+# 2. Creating a new GitHub release with the packaged executable
+# 3. Generating and uploading update manifest for auto-updates
+
 # Trigger on every push to main
 on:
   push:
@@ -12,37 +17,46 @@ jobs:
     permissions:
       contents: write    # needed to create releases & upload assets
     steps:
+      # Step 1: Clone the repository
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Setup Node.js environment for building client and server
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
+      # Step 3: Setup Rust for Tauri (desktop app framework)
       - name: 🦀 Setup Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: x86_64-pc-windows-msvc
+          target: x86_64-pc-windows-msvc  # Windows-specific target
           override: true
 
+      # Step 4: Install all project dependencies (root, client, and server)
       - name: 📦 Install dependencies
         run: |
           npm ci
           npm ci --prefix client
           npm ci --prefix server
 
+      # Step 5: Build and package the server application
+      # This step compiles the NestJS server and packages it into a Windows executable
       - name: 🏗️ Build server and package
         run: |
           cd server
           npm run build
-          npm run pkg:win
+          npm run pkg:win  # Creates standalone Windows executable
           cd ..
 
+      # Step 6: Build the Next.js client application
       - name: 🏗️ Build client
         run: npm run build:client
 
+      # Step 7: Setup code signing for the Tauri application
+      # This ensures the Windows app is properly signed for security
       - name: 🔐 Setup Tauri signing
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -51,6 +65,8 @@ jobs:
           New-Item -Path "src-tauri\.tauri" -ItemType Directory -Force
           Set-Content -Path "src-tauri\.tauri\myapp.key" -Value $env:TAURI_SIGNING_PRIVATE_KEY
 
+      # Step 8: Build the final Tauri desktop application
+      # This combines the client, server, and creates a Windows installer
       - name: 🏗️ Build Tauri with signing
         env:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -58,10 +74,12 @@ jobs:
           NEXT_PUBLIC_APP_NAME: "Car Components"
           NEXT_PUBLIC_API_URL: "http://localhost:8000/v1"
         run: |
-          node scripts/prepare-env.js
-          node scripts/update-tauri-config.js
-          npx --yes @tauri-apps/cli build
+          node scripts/prepare-env.js          # Prepare environment variables
+          node scripts/update-tauri-config.js  # Update Tauri configuration
+          npx --yes @tauri-apps/cli build     # Build the final desktop app
 
+      # Step 9: Extract signature for auto-updates
+      # This extracts the signature file generated during the build process
       - name: 🪄 Extract .sig contents
         id: extract_sig
         run: |
@@ -69,6 +87,8 @@ jobs:
           $SIG_CONTENT = Get-Content -Raw $SIG_PATH
           echo "sig=$SIG_CONTENT" >> $env:GITHUB_OUTPUT
 
+      # Step 10: Generate update manifest
+      # Creates latest.json which Tauri uses for auto-updates
       - name: 📝 Generate latest.json
         id: gen_manifest
         run: |
@@ -91,6 +111,8 @@ jobs:
           Set-Content -Path latest.json -Value $JSON
           echo "version=$VERSION" >> $env:GITHUB_OUTPUT
 
+      # Step 11: Create a new GitHub release
+      # This creates a new release on GitHub with the current version
       - name: 🏷️ Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -101,6 +123,8 @@ jobs:
           draft: false
           prerelease: false
 
+      # Step 12: Upload the Windows installer
+      # This uploads the generated installer to the GitHub release
       - name: 📤 Upload EXE
         uses: actions/upload-release-asset@v1
         with:
@@ -109,6 +133,8 @@ jobs:
           asset_name: Car.Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
           asset_content_type: application/octet-stream
 
+      # Step 13: Upload the update manifest
+      # This uploads latest.json which enables auto-updates for users
       - name: 📤 Upload latest.json
         uses: actions/upload-release-asset@v1
         with:
