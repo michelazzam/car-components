@@ -178,7 +178,7 @@ jobs:
       - name: 📝 Generate latest.json
         id: gen_manifest
         run: |
-          $VERSION = node -p "require('./src-tauri/tauri.conf.json').package.version"
+          $VERSION = node -p "require('./src-tauri/tauri.conf.json').version"
           $PUB_DATE = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
           $URL = "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/Car.Components_${VERSION}_x64-setup.exe"
           
