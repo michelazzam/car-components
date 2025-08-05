@@ -154,7 +154,18 @@ jobs:
       - name: 🪄 Extract .sig contents
         id: extract_sig
         run: |
+          # First get the version from package.json
+          $VERSION = node -p "require('./package.json').version"
+          # Debug output
+          echo "Looking for signature file with version: $VERSION"
           $SIG_PATH="src-tauri/target/release/bundle/nsis/Car Components_${VERSION}_x64-setup.exe.sig"
+          echo "Full path: $SIG_PATH"
+          # List contents of the directory to debug
+          if (Test-Path "src-tauri/target/release/bundle/nsis") {
+              Get-ChildItem "src-tauri/target/release/bundle/nsis"
+          } else {
+              echo "Directory src-tauri/target/release/bundle/nsis does not exist"
+          }
           $SIG_CONTENT = Get-Content -Raw $SIG_PATH
           echo "sig=$SIG_CONTENT" >> $env:GITHUB_OUTPUT
 
