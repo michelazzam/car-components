@@ -221,7 +221,7 @@ const Sidebar = () => {
               Designed & Developed by{" "}
               <span className="text-[#FFC433]"> Advanced Meta Solutions</span>
               <br />
-              <span className="text-[#FFC433]"> v1.0.0</span>
+              <span className="text-[#FFC433]"> v2.0.0</span>
             </a>
           </div>
         </div>
