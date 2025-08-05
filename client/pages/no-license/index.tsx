@@ -46,7 +46,7 @@ const NoLicensePage = () => {
         }}
       >
         <div className="flex justify-center authentication authentication-basic items-center h-full text-defaultsize text-defaulttextcolor">
-          <div className="w-[80%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] xxl:w-[30%] ">
+          <div className="w-[80%] sm:w-[70%] md:w-[60%]  lg:w-[50%] xl:w-[40%] xxl:w-[30%] ">
             <div className="box !p-[2rem]">
               <div
                 className="box-body "
