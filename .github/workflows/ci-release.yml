@@ -21,6 +21,18 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
+      # Add this right after the checkout step and before the Node.js setup
+      # Step 1.5: Verify secrets
+      - name: 🔍 Verify required secrets
+        run: |
+          # Check if secrets exist (this won't print the actual values)
+          if ([string]::IsNullOrEmpty("${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}")) {
+            echo "❌ TAURI_SIGNING_PRIVATE_KEY is not set!"
+            exit 1
+          } else {
+            echo "✅ TAURI_SIGNING_PRIVATE_KEY is set"
+          }
+
       # Step 2: Setup Node.js environment for building client and server
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
