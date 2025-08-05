@@ -77,8 +77,12 @@ jobs:
           # Create .tauri directory
           New-Item -Path "src-tauri\.tauri" -ItemType Directory -Force
           
-          # Write the key file
-          Set-Content -Path "src-tauri\.tauri\myapp.key" -Value $env:TAURI_SIGNING_PRIVATE_KEY
+          # Write the key file without any encoding transformation
+          [System.IO.File]::WriteAllText(
+            "$(Get-Location)\src-tauri\.tauri\myapp.key",
+            $env:TAURI_SIGNING_PRIVATE_KEY,
+            [System.Text.Encoding]::UTF8
+          )
           
           # Verify the key file exists and has content
           if (!(Test-Path "src-tauri\.tauri\myapp.key")) {
@@ -86,11 +90,20 @@ jobs:
             exit 1
           }
           
-          $keyContent = Get-Content -Raw "src-tauri\.tauri\myapp.key"
+          # Read the key file without any encoding transformation
+          $keyContent = [System.IO.File]::ReadAllText(
+            "$(Get-Location)\src-tauri\.tauri\myapp.key",
+            [System.Text.Encoding]::UTF8
+          )
+          
           if ([string]::IsNullOrWhiteSpace($keyContent)) {
             echo "❌ Key file is empty!"
             exit 1
           }
+          
+          # Debug key lengths (without revealing content)
+          echo "Original key length: $($env:TAURI_SIGNING_PRIVATE_KEY.Length)"
+          echo "File key length: $($keyContent.Length)"
           
           echo "✅ Key file created and contains content"
           
@@ -115,9 +128,18 @@ jobs:
           echo "✅ TAURI_SIGNING_PRIVATE_KEY environment variable is set"
           
           # Verify key file exists and matches
-          $keyContent = Get-Content -Raw "src-tauri\.tauri\myapp.key"
+          $keyContent = [System.IO.File]::ReadAllText(
+            "$(Get-Location)\src-tauri\.tauri\myapp.key",
+            [System.Text.Encoding]::UTF8
+          )
+          
+          # Debug lengths
+          echo "Build step - Env key length: $($env:TAURI_SIGNING_PRIVATE_KEY.Length)"
+          echo "Build step - File key length: $($keyContent.Length)"
+          
           if ($keyContent -ne $env:TAURI_SIGNING_PRIVATE_KEY) {
             echo "❌ Key file content doesn't match environment variable!"
+            echo "This might be due to line endings or encoding issues."
             exit 1
           }
           echo "✅ Key file content matches environment variable"
