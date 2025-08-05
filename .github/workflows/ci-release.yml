@@ -202,6 +202,8 @@ jobs:
       - name: 🏷️ Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.gen_manifest.outputs.version }}
           release_name: Release v${{ steps.gen_manifest.outputs.version }}
@@ -213,9 +215,11 @@ jobs:
       # This uploads the generated installer to the GitHub release
       - name: 📤 Upload EXE
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: src-tauri/target/release/bundle/windows/Car Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
+          asset_path: src-tauri/target/release/bundle/nsis/Car Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
           asset_name: Car.Components_${{ steps.gen_manifest.outputs.version }}_x64-setup.exe
           asset_content_type: application/octet-stream
 
@@ -223,6 +227,8 @@ jobs:
       # This uploads latest.json which enables auto-updates for users
       - name: 📤 Upload latest.json
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: latest.json
