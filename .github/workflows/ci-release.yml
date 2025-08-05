@@ -21,8 +21,39 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
+      # Step 1.5: Check if release already exists
+      - name: 🔍 Check existing release
+        id: check_release
+        run: |
+          $VERSION = node -p "require('./src-tauri/tauri.conf.json').version"
+          echo "version=$VERSION" >> $env:GITHUB_OUTPUT
+          
+          # Try to fetch the release
+          $response = try {
+            $tag = "v${VERSION}"
+            $url = "https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag"
+            $headers = @{
+              "Accept" = "application/vnd.github.v3+json"
+              "Authorization" = "token ${{ secrets.GITHUB_TOKEN }}"
+            }
+            Invoke-RestMethod -Uri $url -Headers $headers -Method Get
+            "true"
+          } catch {
+            if ($_.Exception.Response.StatusCode -eq 404) {
+              "false"
+            } else {
+              throw
+            }
+          }
+          
+          if ($response -eq "true") {
+            echo "::error::Release v${VERSION} already exists! Please increment the version in src-tauri/tauri.conf.json"
+            exit 1
+          }
+          echo "✅ No existing release found for v${VERSION}"
+
       # Add this right after the checkout step and before the Node.js setup
-      # Step 1.5: Verify secrets
+      # Step 1.6: Verify secrets
       - name: 🔍 Verify required secrets
         run: |
           # Check if secrets exist (this won't print the actual values)

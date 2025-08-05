@@ -2,7 +2,7 @@
   "car-components": {
     "name": "car-components",
     "displayName": "Car Components",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "productName": "Car Components",
     "identifier": "com.car-components.app",
     "settings": {
@@ -30,7 +30,7 @@
   "xyz-customer": {
     "name": "xyz-customer",
     "displayName": "XYZ Customer",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "productName": "XYZ Customer App",
     "identifier": "com.xyz-customer.app",
     "settings": {
