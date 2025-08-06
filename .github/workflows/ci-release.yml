@@ -25,7 +25,8 @@ jobs:
       - name: 🔍 Check existing release
         id: check_release
         run: |
-          $VERSION = node -p "require('./src-tauri/tauri.conf.json').version"
+          # Get version from projects.json for car-components project (our source of truth)
+          $VERSION = node -p "require('./config/projects.json')['car-components'].version"
           echo "version=$VERSION" >> $env:GITHUB_OUTPUT
           
           # Try to fetch the release
@@ -47,7 +48,7 @@ jobs:
           }
           
           if ($response -eq "true") {
-            echo "::error::Release v${VERSION} already exists! Please increment the version in src-tauri/tauri.conf.json"
+            echo "::error::Release v${VERSION} already exists! Please increment the version in config/projects.json for the car-components project"
             exit 1
           }
           echo "✅ No existing release found for v${VERSION}"
