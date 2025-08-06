@@ -68,8 +68,17 @@ async function buildTauri() {
     // Execute build steps in sequence
     try {
       console.log("📝 Preparing environment...");
+      //This command will:
+      //  1- Change the .env of the client and the tauri to the project's .env
       await runCommand("node", ["scripts/prepare-env.js"], { env });
 
+      //This command will:
+      //  1. Update Tauri configuration files with project-specific settings:
+      //     - Update tauri.conf.json (product name, identifier, version, window title)
+      //     - Update Cargo.toml version to match
+      //     - Set up auto-updater endpoints (if specified)
+      //     - Configure filesystem access permissions
+      //     - Validate environment and configuration files
       console.log("⚙️ Updating Tauri config...");
       await runCommand("node", ["scripts/update-tauri-config.js"], { env });
 
