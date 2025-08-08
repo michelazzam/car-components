@@ -118,7 +118,7 @@ function PrintInvoice({
             invoiceUsdRate={invoiceUsdRate || usdRate.usdRate}
             paymentMethods={paymentMethods}
           />
-          {items && <InvoiceTable items={items} />}
+          <div>{items && <InvoiceTable items={items} />}</div>
           <InvoiceSubtotal
             swaps={swaps}
             discount={discount}
