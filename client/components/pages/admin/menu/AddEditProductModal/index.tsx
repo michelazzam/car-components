@@ -169,6 +169,7 @@ function AddEditProductModal({
             // readOnly={product ? true : false}
             label="Quantity"
             name="quantity"
+            readOnly
             colSpan={6}
           />
           <SelectFieldControlled
