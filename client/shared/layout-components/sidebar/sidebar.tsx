@@ -6,10 +6,14 @@ import Menuloop from "./menuloop";
 import useMenuItems from "./useMenuItems";
 import Image from "next/image";
 import { useProjectConfig } from "@/lib/projectConfig";
+import UpdatesButton, { useCheckHasUpdates } from "../header/UpdatesButton";
 
 const Sidebar = () => {
   const MenuItems = useMenuItems();
   const { logo } = useProjectConfig();
+  const { hasUpdates } = useCheckHasUpdates(
+    process.env.NODE_ENV === "production"
+  );
   useEffect(() => {
     const mainContent = document.querySelector(".main-content");
     if (window.innerWidth <= 992) {
@@ -124,14 +128,18 @@ const Sidebar = () => {
       >
         <div className="main-sidebar-header">
           <div className="flex items-center space-x-2">
-            <Link href="/add-invoice">
-              <Image
-                width={30}
-                height={30}
-                alt="car-components-logo"
-                src={logo}
-              />
-            </Link>
+            {hasUpdates ? (
+              <UpdatesButton />
+            ) : (
+              <Link href="/add-invoice">
+                <Image
+                  width={30}
+                  height={30}
+                  alt="car-components-logo"
+                  src={logo}
+                />
+              </Link>
+            )}
           </div>
         </div>
 
@@ -218,10 +226,12 @@ const Sidebar = () => {
               href="https://advanced-meta.com/"
               className="flex items-center justify-center flex-wrap text-center text-gray-50"
             >
-              Designed & Developed by{" "}
-              <span className="text-[#FFC433]"> Advanced Meta Solutions</span>
+              <p>
+                Designed & Developed by{" "}
+                <span className="text-[#FFC433]"> Advanced Meta Solutions</span>
+              </p>
               <br />
-              <span className="text-[#FFC433] "> v3.0.0</span>
+              <p className="text-[#FFC433] "> v3.0.2</p>
             </a>
           </div>
         </div>

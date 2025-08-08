@@ -3,6 +3,31 @@ import { check } from "@tauri-apps/plugin-updater";
 import { ask } from "@tauri-apps/plugin-dialog";
 import PulsingCircle from "@/components/common/animations/PulsingCircle";
 
+export const useCheckHasUpdates = (isProduction: boolean) => {
+  // TODO: remove this----------
+  // return {
+  //   hasUpdates: true,
+  //   checking: true,
+  // };
+  //------------
+  const [hasUpdates, setHasUpdates] = useState(false);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    if (!isProduction) return;
+    setChecking(true);
+    checkForUpdates().then((hasUpdates) => {
+      if (hasUpdates) {
+        setHasUpdates(true);
+      } else {
+        setHasUpdates(false);
+      }
+      setChecking(false);
+    });
+  }, []);
+  return { hasUpdates, checking };
+};
+
 async function checkForUpdatesAndUpdate(
   setIsDownloading: (value: boolean) => void,
   setDownloadProgress: (value: number) => void
@@ -106,7 +131,7 @@ function UpdatesButton() {
               : hasUpdates
               ? "A new update is available"
               : "Check for updates"}
-            <i className="bx bx-download"></i>
+            <i className="bx bx-download mx-2"></i>
             <div className="absolute top-0 left-0 -translate-x-1/2 translate-y-1/2">
               <PulsingCircle />
             </div>

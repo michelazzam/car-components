@@ -2,7 +2,7 @@
   "car-components": {
     "name": "car-components",
     "displayName": "Car Components",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "productName": "Car Components",
     "identifier": "com.car-components.app",
     "settings": {

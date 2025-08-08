@@ -8,7 +8,6 @@ import BackupDBModal from "@/components/pages/navbar/BackupDB";
 import { connect } from "react-redux";
 import { ThemeChanger } from "@/shared/redux/action";
 import store from "@/shared/redux/store";
-import UpdatesButton from "./UpdatesButton";
 import { MdOutlineBackup } from "react-icons/md";
 import { useGetCaisse } from "@/api-hooks/caisse/use-get-caisse";
 import OpenCloseCaisseModal from "@/components/pages/navbar/OpenCloseCaisseModal";
@@ -282,7 +281,7 @@ const Header = ({ local_varaiable, ThemeChanger }: any) => {
                   <span></span>
                 </Link>
               </div>
-              <UpdatesButton />
+              {/* <UpdatesButton /> */}
             </div>
             <div className="header-content-right">
               {canReadCaisse && (
