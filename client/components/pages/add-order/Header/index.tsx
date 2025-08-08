@@ -236,8 +236,8 @@ function Header({
           modalTitle="Add Customer"
         />
       )}
-      {user?.permissions.VehicleMakes.read &&
-        user?.permissions.Customers.read && (
+      {user?.permissions?.VehicleMakes?.read &&
+        user?.permissions?.Customers?.read && (
           <VehicleModal
             triggerModalId="add-vehicle-modal"
             modalTitle="Add Vehicle"

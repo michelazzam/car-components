@@ -98,7 +98,7 @@ const Firebaselogin = () => {
                 Designed & Developed by{" "}
                 <span className="text-[#0076FA] mx-1">
                   <b> Advanced Meta Solutions </b>
-                  v3.0.2
+                  v3.0.3
                 </span>
               </a>
             </div>

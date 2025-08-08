@@ -231,7 +231,7 @@ const Sidebar = () => {
                 <span className="text-[#FFC433]"> Advanced Meta Solutions</span>
               </p>
               <br />
-              <p className="text-[#FFC433] "> v3.0.2</p>
+              <p className="text-[#FFC433] "> v3.0.3</p>
             </a>
           </div>
         </div>
